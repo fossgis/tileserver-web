@@ -1,18 +1,26 @@
 # https://tile.openstreetmap.de/
 
+## Voraussetzungen
+
+Dieses Projekt erfordert NodeJS und NPM. Node und NPM sind sehr einfach zu installieren. Um sicherzustellen, dass sie auf dem Rechner verfügbar sind, führt man den folgenden Befehl aus.
+
+$ npm -v && node -v
+9.6.4
+v18.14.2
+
 ## Installation
 
 Zunächst klont man dieses Repo auf seinen lokalen Rechner und wechselt in das Verzeichnis:
 
 ```
-git clone https://gitlab.fossgis.de/osm-server/tileserver-web.git
-cd tileserver-web
+$ git clone https://gitlab.fossgis.de/osm-server/tileserver-web.git
+$ cd tileserver-web
 ```
 
 Um die Bibliothek zu installieren und einzurichten, ruft man folgenden Befehl aus:
 
 ```
-npm install
+$ npm install
 ```
 
 ## Verwendung
