@@ -1,0 +1,16 @@
+.nav-list {
+    padding-left: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .nav-list li {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: .25rem;
+  }
+  .nav-list li::before {
+    margin-right: .25rem;
+    margin-left: .5rem;
+    content: "->";
+  }

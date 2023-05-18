@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Openstreetmap Tileserver Webpage</title>
+  <link rel="stylesheet" href="scss/styles.scss">
+  <script type="module" src="./js/main.js"></script>
+</head>
+
+<body>
+
+  <header class="container py-4 px-3 mx-auto">
+    <img id="logo">
+    <h1 id="header-h1"></h1>
+  </header>
+
+  <nav class="container py-4 px-3 mx-auto">
+    <div id="nav-info">Auswahlmöglichkeiten</div>
+    <ul id="nav-list" class="nav-list">
+      VITE_NAVIGATION_LIST
+    </ul>
+  </nav>
+
+  <main class="container py-4 px-3 mx-auto">
+    <div id="main-info">
+      <p>Die linke Seite der Karte zeigt den Kartenstile des Standard-Kartenlayers von OpenStreetMap.org, während die rechte Seite 
+        den oben ausgewählten Stil anzeigt. Über
+        das Kontextmenü, welches per Klick mit der rechten Maustaste oder längeren Druck mit dem Finger auf die Karte
+        geöffnet wird, sind Informationen zu entsprechender Kachel abfragbar.
+      </p>
+    </div>
+    <div id="zoomlevel"></div>
+    <div id="hostname"></div>
+    <div id="map" class="map" tabindex="0"></div>
+    <input id="swipe" type="range" style="width: 100%">
+    <div id="main-quellcode"><a href="http://github.com/giggls/openstreetmap-carto-de">OpenStreetMap Carto German</a> Version <span id="main-carto"></span></div>
+    <div id="main-version"><a href="https://github.com/giggls/osml10n">Localization functions for Openstreetmap (osml10n)</a> Version <span id="main-local"></span> </div>
+    <div id="main-stil"><a href="https://wiki.openstreetmap.org/wiki/German_Style">Info zum Stil</a></div>
+  </main>
+
+  <aside class="container py-4 px-3 mx-auto" aria-labelledby="aside-h1">
+    <h1 id="aside-h1"></h1>
+    <div id="adide-info"></div>
+  </aside>
+
+  <footer class="container py-4 px-3 mx-auto">
+    <div>
+      <a href=https://openstreetmap.de/impressum />Impressum</a> | <a
+        href=https://www.fossgis.de/datenschutzerklärung />Datenschutzerklärung</a>
+      <div class=footer-licence>Alle Kartenbilder auf dieser Seite sind auf OpenStreetMap-Daten basierend und
+        stehen unter der <a href=https://openstreetmap.de/faq/#wie-ist-das-mit-der-lizenz>Lizenz</a><br><a
+          href=https://creativecommons.org/licenses/by-sa/2.0 />Creative Commons Attribution Share Alike-Lizenz
+        2.0</a>.
+      </div>
+  </footer>
+
+
+
+
+
+
+  <div class="modal fade" id="modal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 id="modal-title-id" class="modal-title">Modal title</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="modal-body-id-image">Modal image goes here.</p>
+          <p id="modal-body-id-infotext">Modal body text goes here.</p>
+        </div>
+        <div id="modal-footer" class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>

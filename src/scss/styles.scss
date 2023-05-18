@@ -1,0 +1,47 @@
+$body-bg: #DDD;
+$body-color: #111;
+$primary: green;
+$secondary: #3f2017;
+
+// Required
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/maps";
+@import "~bootstrap/scss/mixins";
+@import "~bootstrap/scss/utilities";
+@import "~bootstrap/scss/root";
+@import "~bootstrap/scss/reboot";
+
+@import "~bootstrap/scss/buttons";
+
+@import "~bootstrap/scss/type";
+// @import "~bootstrap/scss/images";
+@import "~bootstrap/scss/containers";
+@import "~bootstrap/scss/grid";
+@import "~bootstrap/scss/transitions";
+@import "~bootstrap/scss/close";
+@import "~bootstrap/scss/modal"; // Requires transitions
+@import "~bootstrap/scss/popover";
+
+// Utilities
+@import "~bootstrap/scss/utilities/api";
+
+//
+// Custom styles
+//
+
+@import "nav-list";
+@import "~ol/ol.css";
+@import '~ol-contextmenu/dist/ol-contextmenu.css';
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  word-wrap: break-word;
+}
+
+#map {
+  width: auto;
+  height: 400px;
+}
