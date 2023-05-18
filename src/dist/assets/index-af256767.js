@@ -6153,7 +6153,7 @@ function open_tile_cb(obj) {
   bootstrapModal.show();
 }
 function gent_tile_url(suffix, zoom, coordinate) {
-  let url = "http://" + sessionStorage.getItem("hostname") + sessionStorage.getItem("folder") + sessionStorage.getItem("tileUrl");
+  let url = "https://" + sessionStorage.getItem("hostname") + sessionStorage.getItem("folder") + sessionStorage.getItem("tileUrl");
   let lonlat = transform(coordinate, "EPSG:3857", "EPSG:4326");
   zoom = sessionStorage.getItem("zoomlevel");
   let x2 = long2tile(lonlat[0], zoom);
