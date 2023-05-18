@@ -52,7 +52,7 @@ export function open_tile_cb(obj) {
 };
 
 function gent_tile_url(suffix, zoom, coordinate) {
-    let url = 'http://' + sessionStorage.getItem('hostname') + sessionStorage.getItem('folder') + sessionStorage.getItem('tileUrl');
+    let url = 'https://' + sessionStorage.getItem('hostname') + sessionStorage.getItem('folder') + sessionStorage.getItem('tileUrl');
 
     let lonlat = transform(coordinate, 'EPSG:3857', 'EPSG:4326')
 
