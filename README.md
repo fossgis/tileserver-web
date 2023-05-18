@@ -4,9 +4,11 @@
 
 Dieses Projekt erfordert NodeJS und NPM. Node und NPM sind sehr einfach zu installieren. Um sicherzustellen, dass sie auf dem Rechner verfügbar sind, führt man den folgenden Befehl aus.
 
+```
 $ npm -v && node -v
 9.6.4
 v18.14.2
+```
 
 ## Installation
 
