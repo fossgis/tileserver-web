@@ -22,9 +22,9 @@ const osm = new TileLayer({
 
 const tileUrl = folder + '{z}/{x}/{y}.png';
 
-sessionStorage.setItem("tileUrl", tileUrl);
-sessionStorage.setItem("hostname", HOSTNAME);
-sessionStorage.setItem("folder", folder);
+sessionStorage.setItem('tileUrl', tileUrl);
+sessionStorage.setItem('hostname', HOSTNAME);
+sessionStorage.setItem('folder', folder);
 
 document.getElementById('logo').src = imgUrl;
 document.getElementById('header-h1').innerHTML = 'Server: ' + HOSTNAME + ', Folder: ' + folder;
