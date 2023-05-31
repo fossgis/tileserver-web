@@ -21054,6 +21054,8 @@ const map = new Map$2({
     projection: "EPSG:3857",
     zoom: 6,
     maxZoom: 20,
+    minZoom: 0,
+    multiWorld: true,
     constrainResolution: true
   })
 });
