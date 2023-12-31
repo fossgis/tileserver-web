@@ -1,6 +1,6 @@
-$body-bg: #DDD;
+$body-bg: #EEE;
 $body-color: #111;
-$primary: green;
+$primary: darkgreen;
 $secondary: #3f2017;
 
 // Required
@@ -45,4 +45,9 @@ body {
 #map {
   width: auto;
   height: 400px;
+}
+
+a {
+  padding: 0.5rem;
+  font-size: large;
 }

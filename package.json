@@ -6,7 +6,7 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "build-for-demo": "vite build --base=/astridx.github.io/tileserver-web/",
+    "build-for-demo": "vite build --base=/astridx.github.io/astridxtileserverdemo.github.io/",
     "serve": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
