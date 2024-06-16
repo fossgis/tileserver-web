@@ -1,3 +1,6 @@
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 (function polyfill() {
   const relList = document.createElement("link").relList;
   if (relList && relList.supports && relList.supports("modulepreload")) {
@@ -19,16 +22,12 @@
   }).observe(document, { childList: true, subtree: true });
   function getFetchOpts(link) {
     const fetchOpts = {};
-    if (link.integrity)
-      fetchOpts.integrity = link.integrity;
-    if (link.referrerPolicy)
-      fetchOpts.referrerPolicy = link.referrerPolicy;
+    if (link.integrity) fetchOpts.integrity = link.integrity;
+    if (link.referrerPolicy) fetchOpts.referrerPolicy = link.referrerPolicy;
     if (link.crossOrigin === "use-credentials")
       fetchOpts.credentials = "include";
-    else if (link.crossOrigin === "anonymous")
-      fetchOpts.credentials = "omit";
-    else
-      fetchOpts.credentials = "same-origin";
+    else if (link.crossOrigin === "anonymous") fetchOpts.credentials = "omit";
+    else fetchOpts.credentials = "same-origin";
     return fetchOpts;
   }
   function processPreload(link) {
@@ -227,7 +226,7 @@ function getLayoutRect(element) {
     height
   };
 }
-function contains(parent, child) {
+function contains$1(parent, child) {
   var rootNode = child.getRootNode && child.getRootNode();
   if (parent.contains(child)) {
     return true;
@@ -383,7 +382,7 @@ function effect$1(_ref2) {
       return;
     }
   }
-  if (!contains(state.elements.popper, arrowElement)) {
+  if (!contains$1(state.elements.popper, arrowElement)) {
     return;
   }
   state.elements.arrow = arrowElement;
@@ -689,7 +688,7 @@ function getClippingParents(element) {
     return [];
   }
   return clippingParents2.filter(function(clippingParent) {
-    return isElement$1(clippingParent) && contains(clippingParent, clipperElement) && getNodeName(clippingParent) !== "body";
+    return isElement$1(clippingParent) && contains$1(clippingParent, clipperElement) && getNodeName(clippingParent) !== "body";
   });
 }
 function getClippingRect(element, boundary, rootBoundary, strategy) {
@@ -910,8 +909,7 @@ function flip(_ref) {
     };
     for (var _i = numberOfChecks; _i > 0; _i--) {
       var _ret = _loop(_i);
-      if (_ret === "break")
-        break;
+      if (_ret === "break") break;
     }
   }
   if (state.placement !== firstFittingPlacement) {
@@ -1435,8 +1433,8 @@ const Popper = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProper
   write
 }, Symbol.toStringTag, { value: "Module" }));
 /*!
-  * Bootstrap v5.3.2 (https://getbootstrap.com/)
-  * Copyright 2011-2023 The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)
+  * Bootstrap v5.3.3 (https://getbootstrap.com/)
+  * Copyright 2011-2024 The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)
   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
   */
 const elementMap = /* @__PURE__ */ new Map();
@@ -1944,7 +1942,7 @@ class Config {
     }
   }
 }
-const VERSION = "5.3.2";
+const VERSION = "5.3.3";
 class BaseComponent extends Config {
   constructor(element, config) {
     super();
@@ -2003,9 +2001,9 @@ const getSelector = (element) => {
     if (hrefAttribute.includes("#") && !hrefAttribute.startsWith("#")) {
       hrefAttribute = `#${hrefAttribute.split("#")[1]}`;
     }
-    selector = hrefAttribute && hrefAttribute !== "#" ? parseSelector(hrefAttribute.trim()) : null;
+    selector = hrefAttribute && hrefAttribute !== "#" ? hrefAttribute.trim() : null;
   }
-  return selector;
+  return selector ? selector.split(",").map((sel) => parseSelector(sel)).join(",") : null;
 };
 const SelectorEngine = {
   find(selector, element = document.documentElement) {
@@ -3815,7 +3813,10 @@ const DefaultAllowlist = {
   br: [],
   col: [],
   code: [],
+  dd: [],
   div: [],
+  dl: [],
+  dt: [],
   em: [],
   hr: [],
   h1: [],
@@ -5335,7 +5336,7 @@ const PROJECTIONS = [
   new EPSG4326Projection("http://www.opengis.net/def/crs/EPSG/0/4326", "neu")
 ];
 let cache$1 = {};
-function get$2(code) {
+function get$3(code) {
   return cache$1[code] || cache$1[code.replace(/urn:(x-)?ogc:def:crs:EPSG:(.*:)?(\w+)$/, "EPSG:$3")] || null;
 }
 function add$2(code, projection) {
@@ -5362,7 +5363,7 @@ function add$1(source, destination, transformFn) {
   }
   transforms[sourceCode][destinationCode] = transformFn;
 }
-function get$1(sourceCode, destinationCode) {
+function get$2(sourceCode, destinationCode) {
   let transform2;
   if (sourceCode in transforms && destinationCode in transforms[sourceCode]) {
     transform2 = transforms[sourceCode][destinationCode];
@@ -5472,7 +5473,7 @@ function createOrUpdateFromFlatCoordinates(flatCoordinates, offset2, end2, strid
 function equals$2(extent1, extent2) {
   return extent1[0] == extent2[0] && extent1[2] == extent2[2] && extent1[1] == extent2[1] && extent1[3] == extent2[3];
 }
-function extend$1(extent1, extent2) {
+function extend$2(extent1, extent2) {
   if (extent2[0] < extent1[0]) {
     extent1[0] = extent2[0];
   }
@@ -5608,7 +5609,7 @@ function getHeight(extent) {
 }
 function getIntersection(extent1, extent2, dest) {
   const intersection = dest ? dest : createEmpty();
-  if (intersects(extent1, extent2)) {
+  if (intersects$1(extent1, extent2)) {
     if (extent1[0] > extent2[0]) {
       intersection[0] = extent1[0];
     } else {
@@ -5643,7 +5644,7 @@ function getTopRight(extent) {
 function getWidth(extent) {
   return extent[2] - extent[0];
 }
-function intersects(extent1, extent2) {
+function intersects$1(extent1, extent2) {
   return extent1[0] <= extent2[2] && extent1[2] >= extent2[0] && extent1[1] <= extent2[3] && extent1[3] >= extent2[1];
 }
 function isEmpty(extent) {
@@ -5694,6 +5695,46 @@ function intersectsSegment(extent, start2, end2) {
     }
   }
   return intersects2;
+}
+function wrapX$2(extent, projection) {
+  const projectionExtent = projection.getExtent();
+  const center = getCenter(extent);
+  if (projection.canWrapX() && (center[0] < projectionExtent[0] || center[0] >= projectionExtent[2])) {
+    const worldWidth = getWidth(projectionExtent);
+    const worldsAway = Math.floor(
+      (center[0] - projectionExtent[0]) / worldWidth
+    );
+    const offset2 = worldsAway * worldWidth;
+    extent[0] -= offset2;
+    extent[2] -= offset2;
+  }
+  return extent;
+}
+function wrapAndSliceX(extent, projection, multiWorld) {
+  if (projection.canWrapX()) {
+    const projectionExtent = projection.getExtent();
+    if (!isFinite(extent[0]) || !isFinite(extent[2])) {
+      return [[projectionExtent[0], extent[1], projectionExtent[2], extent[3]]];
+    }
+    wrapX$2(extent, projection);
+    const worldWidth = getWidth(projectionExtent);
+    if (getWidth(extent) > worldWidth && !multiWorld) {
+      return [[projectionExtent[0], extent[1], projectionExtent[2], extent[3]]];
+    }
+    if (extent[0] < projectionExtent[0]) {
+      return [
+        [extent[0] + worldWidth, extent[1], projectionExtent[2], extent[3]],
+        [projectionExtent[0], extent[1], extent[2], extent[3]]
+      ];
+    }
+    if (extent[2] > projectionExtent[2]) {
+      return [
+        [extent[0], extent[1], projectionExtent[2], extent[3]],
+        [projectionExtent[0], extent[1], extent[2] - worldWidth, extent[3]]
+      ];
+    }
+  }
+  return [extent];
 }
 function clamp(value, min2, max2) {
   return Math.min(Math.max(value, min2), max2);
@@ -5841,7 +5882,7 @@ function warn(...args) {
 }
 let showCoordinateWarning = true;
 function disableCoordinateWarning(disable2) {
-  const hide2 = disable2 === void 0 ? true : disable2;
+  const hide2 = true;
   showCoordinateWarning = !hide2;
 }
 function cloneTransform(input, output) {
@@ -5871,8 +5912,8 @@ function addProjection(projection) {
 function addProjections(projections) {
   projections.forEach(addProjection);
 }
-function get(projectionLike) {
-  return typeof projectionLike === "string" ? get$2(
+function get$1(projectionLike) {
+  return typeof projectionLike === "string" ? get$3(
     /** @type {string} */
     projectionLike
   ) : (
@@ -5881,17 +5922,11 @@ function get(projectionLike) {
   );
 }
 function getPointResolution(projection, resolution, point, units) {
-  projection = get(projection);
+  projection = get$1(projection);
   let pointResolution;
   const getter = projection.getPointResolutionFunc();
   if (getter) {
     pointResolution = getter(resolution, point);
-    if (units && units !== projection.getUnits()) {
-      const metersPerUnit = projection.getMetersPerUnit();
-      if (metersPerUnit) {
-        pointResolution = pointResolution * metersPerUnit / METERS_PER_UNIT$1[units];
-      }
-    }
   } else {
     const projUnits = projection.getUnits();
     if (projUnits == "degrees" && !units || units == "degrees") {
@@ -5899,7 +5934,7 @@ function getPointResolution(projection, resolution, point, units) {
     } else {
       const toEPSG43262 = getTransformFromProjections(
         projection,
-        get("EPSG:4326")
+        get$1("EPSG:4326")
       );
       if (toEPSG43262 === identityTransform && projUnits !== "degrees") {
         pointResolution = resolution * projection.getMetersPerUnit();
@@ -5919,7 +5954,7 @@ function getPointResolution(projection, resolution, point, units) {
         const height = getDistance(vertices.slice(4, 6), vertices.slice(6, 8));
         pointResolution = (width + height) / 2;
       }
-      const metersPerUnit = units ? METERS_PER_UNIT$1[units] : projection.getMetersPerUnit();
+      const metersPerUnit = projection.getMetersPerUnit();
       if (metersPerUnit !== void 0) {
         pointResolution /= metersPerUnit;
       }
@@ -5947,10 +5982,10 @@ function addEquivalentTransforms(projections1, projections2, forwardTransform, i
 }
 function createProjection(projection, defaultCode) {
   if (!projection) {
-    return get(defaultCode);
+    return get$1(defaultCode);
   }
   if (typeof projection === "string") {
-    return get(projection);
+    return get$1(projection);
   }
   return (
     /** @type {Projection} */
@@ -5962,7 +5997,7 @@ function fromLonLat(coordinate, projection) {
   return transform(
     coordinate,
     "EPSG:4326",
-    projection !== void 0 ? projection : "EPSG:3857"
+    "EPSG:3857"
   );
 }
 function equivalent(projection1, projection2) {
@@ -5979,15 +6014,15 @@ function equivalent(projection1, projection2) {
 function getTransformFromProjections(sourceProjection, destinationProjection) {
   const sourceCode = sourceProjection.getCode();
   const destinationCode = destinationProjection.getCode();
-  let transformFunc = get$1(sourceCode, destinationCode);
+  let transformFunc = get$2(sourceCode, destinationCode);
   if (!transformFunc) {
     transformFunc = identityTransform;
   }
   return transformFunc;
 }
 function getTransform(source, destination) {
-  const sourceProjection = get(source);
-  const destinationProjection = get(destination);
+  const sourceProjection = get$1(source);
+  const destinationProjection = get$1(destination);
   return getTransformFromProjections(sourceProjection, destinationProjection);
 }
 function transform(coordinate, source, destination) {
@@ -6064,8 +6099,7 @@ function open_tile_cb(obj) {
       do_fetch(infotext);
     }
   });
-  if (document.getElementById("modal-footer").innerHTML.indexOf("Kachel") != -1)
-    ;
+  if (document.getElementById("modal-footer").innerHTML.indexOf("Kachel") != -1) ;
   else {
     document.getElementById("modal-footer").appendChild(btn_dirty_status);
   }
@@ -6205,7 +6239,7 @@ function linearFindNearest(arr, target, direction) {
   }
   return n - 1;
 }
-function extend(arr, data) {
+function extend$1(arr, data) {
   const extension = Array.isArray(data) ? data : [data];
   const length = extension.length;
   for (let i = 0; i < length; i++) {
@@ -6231,7 +6265,7 @@ function isSorted(arr, func, strict) {
       return true;
     }
     const res = compare(arr[index - 1], currentVal);
-    return !(res > 0 || strict && res === 0);
+    return !(res > 0 || res === 0);
   });
 }
 function TRUE() {
@@ -6257,6 +6291,21 @@ function memoizeOne(fn2) {
     }
     return lastResult;
   };
+}
+function toPromise(getter) {
+  function promiseGetter() {
+    let value;
+    try {
+      value = getter();
+    } catch (err) {
+      return Promise.reject(err);
+    }
+    if (value instanceof Promise) {
+      return value;
+    }
+    return Promise.resolve(value);
+  }
+  return promiseGetter();
 }
 class Target extends Disposable {
   /**
@@ -6740,7 +6789,7 @@ const CollectionEventType = {
    */
   REMOVE: "remove"
 };
-const Property$1 = {
+const Property$2 = {
   LENGTH: "length"
 };
 class CollectionEvent extends BaseEvent {
@@ -6837,7 +6886,7 @@ class Collection extends BaseObject {
    * @api
    */
   getLength() {
-    return this.get(Property$1.LENGTH);
+    return this.get(Property$2.LENGTH);
   }
   /**
    * Insert an element at the provided index.
@@ -6949,7 +6998,7 @@ class Collection extends BaseObject {
    * @private
    */
   updateLength_() {
-    this.set(Property$1.LENGTH, this.array_.length);
+    this.set(Property$2.LENGTH, this.array_.length);
   }
   /**
    * @private
@@ -6964,706 +7013,6 @@ class Collection extends BaseObject {
     }
   }
 }
-const ua = typeof navigator !== "undefined" && typeof navigator.userAgent !== "undefined" ? navigator.userAgent.toLowerCase() : "";
-const FIREFOX = ua.includes("firefox");
-const SAFARI = ua.includes("safari") && !ua.includes("chrom");
-SAFARI && (ua.includes("version/15.4") || /cpu (os|iphone os) 15_4 like mac os x/.test(ua));
-const WEBKIT = ua.includes("webkit") && !ua.includes("edge");
-const MAC = ua.includes("macintosh");
-const DEVICE_PIXEL_RATIO = typeof devicePixelRatio !== "undefined" ? devicePixelRatio : 1;
-const WORKER_OFFSCREEN_CANVAS = typeof WorkerGlobalScope !== "undefined" && typeof OffscreenCanvas !== "undefined" && self instanceof WorkerGlobalScope;
-const IMAGE_DECODE = typeof Image !== "undefined" && Image.prototype.decode;
-const PASSIVE_EVENT_LISTENERS = function() {
-  let passive2 = false;
-  try {
-    const options = Object.defineProperty({}, "passive", {
-      get: function() {
-        passive2 = true;
-      }
-    });
-    window.addEventListener("_", null, options);
-    window.removeEventListener("_", null, options);
-  } catch (error) {
-  }
-  return passive2;
-}();
-function assert(assertion, errorMessage) {
-  if (!assertion) {
-    throw new Error(errorMessage);
-  }
-}
-new Array(6);
-function create() {
-  return [1, 0, 0, 1, 0, 0];
-}
-function apply(transform2, coordinate) {
-  const x2 = coordinate[0];
-  const y2 = coordinate[1];
-  coordinate[0] = transform2[0] * x2 + transform2[2] * y2 + transform2[4];
-  coordinate[1] = transform2[1] * x2 + transform2[3] * y2 + transform2[5];
-  return coordinate;
-}
-function compose(transform2, dx1, dy1, sx, sy, angle, dx2, dy2) {
-  const sin = Math.sin(angle);
-  const cos = Math.cos(angle);
-  transform2[0] = sx * cos;
-  transform2[1] = sy * sin;
-  transform2[2] = -sx * sin;
-  transform2[3] = sy * cos;
-  transform2[4] = dx2 * sx * cos - dy2 * sx * sin + dx1;
-  transform2[5] = dx2 * sy * sin + dy2 * sy * cos + dy1;
-  return transform2;
-}
-function makeInverse(target, source) {
-  const det = determinant(source);
-  assert(det !== 0, "Transformation matrix cannot be inverted");
-  const a2 = source[0];
-  const b2 = source[1];
-  const c = source[2];
-  const d2 = source[3];
-  const e = source[4];
-  const f = source[5];
-  target[0] = d2 / det;
-  target[1] = -b2 / det;
-  target[2] = -c / det;
-  target[3] = a2 / det;
-  target[4] = (c * f - d2 * e) / det;
-  target[5] = -(a2 * f - b2 * e) / det;
-  return target;
-}
-function determinant(mat) {
-  return mat[0] * mat[3] - mat[1] * mat[2];
-}
-let transformStringDiv;
-function toString$1(mat) {
-  const transformString = "matrix(" + mat.join(", ") + ")";
-  if (WORKER_OFFSCREEN_CANVAS) {
-    return transformString;
-  }
-  const node = transformStringDiv || (transformStringDiv = document.createElement("div"));
-  node.style.transform = transformString;
-  return node.style.transform;
-}
-const rgb = {
-  name: "rgb",
-  min: [0, 0, 0],
-  max: [255, 255, 255],
-  channel: ["red", "green", "blue"],
-  alias: ["RGB"]
-};
-var xyz = {
-  name: "xyz",
-  min: [0, 0, 0],
-  channel: ["X", "Y", "Z"],
-  alias: ["XYZ", "ciexyz", "cie1931"]
-};
-xyz.whitepoint = {
-  //1931 2°
-  2: {
-    //incadescent
-    A: [109.85, 100, 35.585],
-    // B:[],
-    C: [98.074, 100, 118.232],
-    D50: [96.422, 100, 82.521],
-    D55: [95.682, 100, 92.149],
-    //daylight
-    D65: [95.045592705167, 100, 108.9057750759878],
-    D75: [94.972, 100, 122.638],
-    //flourescent
-    // F1: [],
-    F2: [99.187, 100, 67.395],
-    // F3: [],
-    // F4: [],
-    // F5: [],
-    // F6:[],
-    F7: [95.044, 100, 108.755],
-    // F8: [],
-    // F9: [],
-    // F10: [],
-    F11: [100.966, 100, 64.37],
-    // F12: [],
-    E: [100, 100, 100]
-  },
-  //1964  10°
-  10: {
-    //incadescent
-    A: [111.144, 100, 35.2],
-    C: [97.285, 100, 116.145],
-    D50: [96.72, 100, 81.427],
-    D55: [95.799, 100, 90.926],
-    //daylight
-    D65: [94.811, 100, 107.304],
-    D75: [94.416, 100, 120.641],
-    //flourescent
-    F2: [103.28, 100, 69.026],
-    F7: [95.792, 100, 107.687],
-    F11: [103.866, 100, 65.627],
-    E: [100, 100, 100]
-  }
-};
-xyz.max = xyz.whitepoint[2].D65;
-xyz.rgb = function(_xyz, white) {
-  white = white || xyz.whitepoint[2].E;
-  var x2 = _xyz[0] / white[0], y2 = _xyz[1] / white[1], z2 = _xyz[2] / white[2], r2, g, b2;
-  r2 = x2 * 3.240969941904521 + y2 * -1.537383177570093 + z2 * -0.498610760293;
-  g = x2 * -0.96924363628087 + y2 * 1.87596750150772 + z2 * 0.041555057407175;
-  b2 = x2 * 0.055630079696993 + y2 * -0.20397695888897 + z2 * 1.056971514242878;
-  r2 = r2 > 31308e-7 ? 1.055 * Math.pow(r2, 1 / 2.4) - 0.055 : r2 = r2 * 12.92;
-  g = g > 31308e-7 ? 1.055 * Math.pow(g, 1 / 2.4) - 0.055 : g = g * 12.92;
-  b2 = b2 > 31308e-7 ? 1.055 * Math.pow(b2, 1 / 2.4) - 0.055 : b2 = b2 * 12.92;
-  r2 = Math.min(Math.max(0, r2), 1);
-  g = Math.min(Math.max(0, g), 1);
-  b2 = Math.min(Math.max(0, b2), 1);
-  return [r2 * 255, g * 255, b2 * 255];
-};
-rgb.xyz = function(rgb2, white) {
-  var r2 = rgb2[0] / 255, g = rgb2[1] / 255, b2 = rgb2[2] / 255;
-  r2 = r2 > 0.04045 ? Math.pow((r2 + 0.055) / 1.055, 2.4) : r2 / 12.92;
-  g = g > 0.04045 ? Math.pow((g + 0.055) / 1.055, 2.4) : g / 12.92;
-  b2 = b2 > 0.04045 ? Math.pow((b2 + 0.055) / 1.055, 2.4) : b2 / 12.92;
-  var x2 = r2 * 0.41239079926595 + g * 0.35758433938387 + b2 * 0.18048078840183;
-  var y2 = r2 * 0.21263900587151 + g * 0.71516867876775 + b2 * 0.072192315360733;
-  var z2 = r2 * 0.019330818715591 + g * 0.11919477979462 + b2 * 0.95053215224966;
-  white = white || xyz.whitepoint[2].E;
-  return [x2 * white[0], y2 * white[1], z2 * white[2]];
-};
-const luv = {
-  name: "luv",
-  //NOTE: luv has no rigidly defined limits
-  //easyrgb fails to get proper coords
-  //boronine states no rigid limits
-  //colorMine refers this ones:
-  min: [0, -134, -140],
-  max: [100, 224, 122],
-  channel: ["lightness", "u", "v"],
-  alias: ["LUV", "cieluv", "cie1976"],
-  xyz: function(arg, i, o) {
-    var _u, _v, l, u, v, x2, y2, z2, xn, yn, zn, un, vn;
-    l = arg[0], u = arg[1], v = arg[2];
-    if (l === 0)
-      return [0, 0, 0];
-    var k2 = 0.0011070564598794539;
-    i = i || "D65";
-    o = o || 2;
-    xn = xyz.whitepoint[o][i][0];
-    yn = xyz.whitepoint[o][i][1];
-    zn = xyz.whitepoint[o][i][2];
-    un = 4 * xn / (xn + 15 * yn + 3 * zn);
-    vn = 9 * yn / (xn + 15 * yn + 3 * zn);
-    _u = u / (13 * l) + un || 0;
-    _v = v / (13 * l) + vn || 0;
-    y2 = l > 8 ? yn * Math.pow((l + 16) / 116, 3) : yn * l * k2;
-    x2 = y2 * 9 * _u / (4 * _v) || 0;
-    z2 = y2 * (12 - 3 * _u - 20 * _v) / (4 * _v) || 0;
-    return [x2, y2, z2];
-  }
-};
-xyz.luv = function(arg, i, o) {
-  var _u, _v, l, u, v, x2, y2, z2, xn, yn, zn, un, vn;
-  var e = 0.008856451679035631;
-  var k2 = 903.2962962962961;
-  i = i || "D65";
-  o = o || 2;
-  xn = xyz.whitepoint[o][i][0];
-  yn = xyz.whitepoint[o][i][1];
-  zn = xyz.whitepoint[o][i][2];
-  un = 4 * xn / (xn + 15 * yn + 3 * zn);
-  vn = 9 * yn / (xn + 15 * yn + 3 * zn);
-  x2 = arg[0], y2 = arg[1], z2 = arg[2];
-  _u = 4 * x2 / (x2 + 15 * y2 + 3 * z2) || 0;
-  _v = 9 * y2 / (x2 + 15 * y2 + 3 * z2) || 0;
-  var yr = y2 / yn;
-  l = yr <= e ? k2 * yr : 116 * Math.pow(yr, 1 / 3) - 16;
-  u = 13 * l * (_u - un);
-  v = 13 * l * (_v - vn);
-  return [l, u, v];
-};
-luv.lchuv = function(luv2) {
-  var l = luv2[0], u = luv2[1], v = luv2[2];
-  var c = Math.sqrt(u * u + v * v);
-  var hr = Math.atan2(v, u);
-  var h = hr * 360 / 2 / Math.PI;
-  if (h < 0) {
-    h += 360;
-  }
-  return [l, c, h];
-};
-xyz.lchuv = function(arg) {
-  return luv.lchuv(xyz.luv(arg));
-};
-function getDefaultExportFromCjs(x2) {
-  return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
-}
-var colorName = {
-  "aliceblue": [240, 248, 255],
-  "antiquewhite": [250, 235, 215],
-  "aqua": [0, 255, 255],
-  "aquamarine": [127, 255, 212],
-  "azure": [240, 255, 255],
-  "beige": [245, 245, 220],
-  "bisque": [255, 228, 196],
-  "black": [0, 0, 0],
-  "blanchedalmond": [255, 235, 205],
-  "blue": [0, 0, 255],
-  "blueviolet": [138, 43, 226],
-  "brown": [165, 42, 42],
-  "burlywood": [222, 184, 135],
-  "cadetblue": [95, 158, 160],
-  "chartreuse": [127, 255, 0],
-  "chocolate": [210, 105, 30],
-  "coral": [255, 127, 80],
-  "cornflowerblue": [100, 149, 237],
-  "cornsilk": [255, 248, 220],
-  "crimson": [220, 20, 60],
-  "cyan": [0, 255, 255],
-  "darkblue": [0, 0, 139],
-  "darkcyan": [0, 139, 139],
-  "darkgoldenrod": [184, 134, 11],
-  "darkgray": [169, 169, 169],
-  "darkgreen": [0, 100, 0],
-  "darkgrey": [169, 169, 169],
-  "darkkhaki": [189, 183, 107],
-  "darkmagenta": [139, 0, 139],
-  "darkolivegreen": [85, 107, 47],
-  "darkorange": [255, 140, 0],
-  "darkorchid": [153, 50, 204],
-  "darkred": [139, 0, 0],
-  "darksalmon": [233, 150, 122],
-  "darkseagreen": [143, 188, 143],
-  "darkslateblue": [72, 61, 139],
-  "darkslategray": [47, 79, 79],
-  "darkslategrey": [47, 79, 79],
-  "darkturquoise": [0, 206, 209],
-  "darkviolet": [148, 0, 211],
-  "deeppink": [255, 20, 147],
-  "deepskyblue": [0, 191, 255],
-  "dimgray": [105, 105, 105],
-  "dimgrey": [105, 105, 105],
-  "dodgerblue": [30, 144, 255],
-  "firebrick": [178, 34, 34],
-  "floralwhite": [255, 250, 240],
-  "forestgreen": [34, 139, 34],
-  "fuchsia": [255, 0, 255],
-  "gainsboro": [220, 220, 220],
-  "ghostwhite": [248, 248, 255],
-  "gold": [255, 215, 0],
-  "goldenrod": [218, 165, 32],
-  "gray": [128, 128, 128],
-  "green": [0, 128, 0],
-  "greenyellow": [173, 255, 47],
-  "grey": [128, 128, 128],
-  "honeydew": [240, 255, 240],
-  "hotpink": [255, 105, 180],
-  "indianred": [205, 92, 92],
-  "indigo": [75, 0, 130],
-  "ivory": [255, 255, 240],
-  "khaki": [240, 230, 140],
-  "lavender": [230, 230, 250],
-  "lavenderblush": [255, 240, 245],
-  "lawngreen": [124, 252, 0],
-  "lemonchiffon": [255, 250, 205],
-  "lightblue": [173, 216, 230],
-  "lightcoral": [240, 128, 128],
-  "lightcyan": [224, 255, 255],
-  "lightgoldenrodyellow": [250, 250, 210],
-  "lightgray": [211, 211, 211],
-  "lightgreen": [144, 238, 144],
-  "lightgrey": [211, 211, 211],
-  "lightpink": [255, 182, 193],
-  "lightsalmon": [255, 160, 122],
-  "lightseagreen": [32, 178, 170],
-  "lightskyblue": [135, 206, 250],
-  "lightslategray": [119, 136, 153],
-  "lightslategrey": [119, 136, 153],
-  "lightsteelblue": [176, 196, 222],
-  "lightyellow": [255, 255, 224],
-  "lime": [0, 255, 0],
-  "limegreen": [50, 205, 50],
-  "linen": [250, 240, 230],
-  "magenta": [255, 0, 255],
-  "maroon": [128, 0, 0],
-  "mediumaquamarine": [102, 205, 170],
-  "mediumblue": [0, 0, 205],
-  "mediumorchid": [186, 85, 211],
-  "mediumpurple": [147, 112, 219],
-  "mediumseagreen": [60, 179, 113],
-  "mediumslateblue": [123, 104, 238],
-  "mediumspringgreen": [0, 250, 154],
-  "mediumturquoise": [72, 209, 204],
-  "mediumvioletred": [199, 21, 133],
-  "midnightblue": [25, 25, 112],
-  "mintcream": [245, 255, 250],
-  "mistyrose": [255, 228, 225],
-  "moccasin": [255, 228, 181],
-  "navajowhite": [255, 222, 173],
-  "navy": [0, 0, 128],
-  "oldlace": [253, 245, 230],
-  "olive": [128, 128, 0],
-  "olivedrab": [107, 142, 35],
-  "orange": [255, 165, 0],
-  "orangered": [255, 69, 0],
-  "orchid": [218, 112, 214],
-  "palegoldenrod": [238, 232, 170],
-  "palegreen": [152, 251, 152],
-  "paleturquoise": [175, 238, 238],
-  "palevioletred": [219, 112, 147],
-  "papayawhip": [255, 239, 213],
-  "peachpuff": [255, 218, 185],
-  "peru": [205, 133, 63],
-  "pink": [255, 192, 203],
-  "plum": [221, 160, 221],
-  "powderblue": [176, 224, 230],
-  "purple": [128, 0, 128],
-  "rebeccapurple": [102, 51, 153],
-  "red": [255, 0, 0],
-  "rosybrown": [188, 143, 143],
-  "royalblue": [65, 105, 225],
-  "saddlebrown": [139, 69, 19],
-  "salmon": [250, 128, 114],
-  "sandybrown": [244, 164, 96],
-  "seagreen": [46, 139, 87],
-  "seashell": [255, 245, 238],
-  "sienna": [160, 82, 45],
-  "silver": [192, 192, 192],
-  "skyblue": [135, 206, 235],
-  "slateblue": [106, 90, 205],
-  "slategray": [112, 128, 144],
-  "slategrey": [112, 128, 144],
-  "snow": [255, 250, 250],
-  "springgreen": [0, 255, 127],
-  "steelblue": [70, 130, 180],
-  "tan": [210, 180, 140],
-  "teal": [0, 128, 128],
-  "thistle": [216, 191, 216],
-  "tomato": [255, 99, 71],
-  "turquoise": [64, 224, 208],
-  "violet": [238, 130, 238],
-  "wheat": [245, 222, 179],
-  "white": [255, 255, 255],
-  "whitesmoke": [245, 245, 245],
-  "yellow": [255, 255, 0],
-  "yellowgreen": [154, 205, 50]
-};
-const names = /* @__PURE__ */ getDefaultExportFromCjs(colorName);
-var baseHues = {
-  red: 0,
-  orange: 60,
-  yellow: 120,
-  green: 180,
-  blue: 240,
-  purple: 300
-};
-function parse(cstr) {
-  var _a, _b;
-  var m, parts = [], alpha = 1, space;
-  if (typeof cstr === "number") {
-    return { space: "rgb", values: [cstr >>> 16, (cstr & 65280) >>> 8, cstr & 255], alpha: 1 };
-  }
-  if (typeof cstr === "number")
-    return { space: "rgb", values: [cstr >>> 16, (cstr & 65280) >>> 8, cstr & 255], alpha: 1 };
-  cstr = String(cstr).toLowerCase();
-  if (names[cstr]) {
-    parts = names[cstr].slice();
-    space = "rgb";
-  } else if (cstr === "transparent") {
-    alpha = 0;
-    space = "rgb";
-    parts = [0, 0, 0];
-  } else if (cstr[0] === "#") {
-    var base = cstr.slice(1);
-    var size = base.length;
-    var isShort = size <= 4;
-    alpha = 1;
-    if (isShort) {
-      parts = [
-        parseInt(base[0] + base[0], 16),
-        parseInt(base[1] + base[1], 16),
-        parseInt(base[2] + base[2], 16)
-      ];
-      if (size === 4) {
-        alpha = parseInt(base[3] + base[3], 16) / 255;
-      }
-    } else {
-      parts = [
-        parseInt(base[0] + base[1], 16),
-        parseInt(base[2] + base[3], 16),
-        parseInt(base[4] + base[5], 16)
-      ];
-      if (size === 8) {
-        alpha = parseInt(base[6] + base[7], 16) / 255;
-      }
-    }
-    if (!parts[0])
-      parts[0] = 0;
-    if (!parts[1])
-      parts[1] = 0;
-    if (!parts[2])
-      parts[2] = 0;
-    space = "rgb";
-  } else if (m = /^((?:rgba?|hs[lvb]a?|hwba?|cmyk?|xy[zy]|gray|lab|lchu?v?|[ly]uv|lms|oklch|oklab|color))\s*\(([^\)]*)\)/.exec(cstr)) {
-    var name = m[1];
-    space = name.replace(/a$/, "");
-    var dims = space === "cmyk" ? 4 : space === "gray" ? 1 : 3;
-    parts = m[2].trim().split(/\s*[,\/]\s*|\s+/);
-    if (space === "color")
-      space = parts.shift();
-    parts = parts.map(function(x2, i) {
-      if (x2[x2.length - 1] === "%") {
-        x2 = parseFloat(x2) / 100;
-        if (i === 3)
-          return x2;
-        if (space === "rgb")
-          return x2 * 255;
-        if (space[0] === "h")
-          return x2 * 100;
-        if (space[0] === "l" && !i)
-          return x2 * 100;
-        if (space === "lab")
-          return x2 * 125;
-        if (space === "lch")
-          return i < 2 ? x2 * 150 : x2 * 360;
-        if (space[0] === "o" && !i)
-          return x2;
-        if (space === "oklab")
-          return x2 * 0.4;
-        if (space === "oklch")
-          return i < 2 ? x2 * 0.4 : x2 * 360;
-        return x2;
-      }
-      if (space[i] === "h" || i === 2 && space[space.length - 1] === "h") {
-        if (baseHues[x2] !== void 0)
-          return baseHues[x2];
-        if (x2.endsWith("deg"))
-          return parseFloat(x2);
-        if (x2.endsWith("turn"))
-          return parseFloat(x2) * 360;
-        if (x2.endsWith("grad"))
-          return parseFloat(x2) * 360 / 400;
-        if (x2.endsWith("rad"))
-          return parseFloat(x2) * 180 / Math.PI;
-      }
-      if (x2 === "none")
-        return 0;
-      return parseFloat(x2);
-    });
-    alpha = parts.length > dims ? parts.pop() : 1;
-  } else if (/[0-9](?:\s|\/|,)/.test(cstr)) {
-    parts = cstr.match(/([0-9]+)/g).map(function(value) {
-      return parseFloat(value);
-    });
-    space = ((_b = (_a = cstr.match(/([a-z])/ig)) == null ? void 0 : _a.join("")) == null ? void 0 : _b.toLowerCase()) || "rgb";
-  }
-  return {
-    space,
-    values: parts,
-    alpha
-  };
-}
-const hsl = {
-  name: "hsl",
-  min: [0, 0, 0],
-  max: [360, 100, 100],
-  channel: ["hue", "saturation", "lightness"],
-  alias: ["HSL"],
-  rgb: function(hsl2) {
-    var h = hsl2[0] / 360, s = hsl2[1] / 100, l = hsl2[2] / 100, t1, t2, t3, rgb2, val, i = 0;
-    if (s === 0)
-      return val = l * 255, [val, val, val];
-    t2 = l < 0.5 ? l * (1 + s) : l + s - l * s;
-    t1 = 2 * l - t2;
-    rgb2 = [0, 0, 0];
-    for (; i < 3; ) {
-      t3 = h + 1 / 3 * -(i - 1);
-      t3 < 0 ? t3++ : t3 > 1 && t3--;
-      val = 6 * t3 < 1 ? t1 + (t2 - t1) * 6 * t3 : 2 * t3 < 1 ? t2 : 3 * t3 < 2 ? t1 + (t2 - t1) * (2 / 3 - t3) * 6 : t1;
-      rgb2[i++] = val * 255;
-    }
-    return rgb2;
-  }
-};
-rgb.hsl = function(rgb2) {
-  var r2 = rgb2[0] / 255, g = rgb2[1] / 255, b2 = rgb2[2] / 255, min2 = Math.min(r2, g, b2), max2 = Math.max(r2, g, b2), delta = max2 - min2, h, s, l;
-  if (max2 === min2) {
-    h = 0;
-  } else if (r2 === max2) {
-    h = (g - b2) / delta;
-  } else if (g === max2) {
-    h = 2 + (b2 - r2) / delta;
-  } else if (b2 === max2) {
-    h = 4 + (r2 - g) / delta;
-  }
-  h = Math.min(h * 60, 360);
-  if (h < 0) {
-    h += 360;
-  }
-  l = (min2 + max2) / 2;
-  if (max2 === min2) {
-    s = 0;
-  } else if (l <= 0.5) {
-    s = delta / (max2 + min2);
-  } else {
-    s = delta / (2 - max2 - min2);
-  }
-  return [h, s * 100, l * 100];
-};
-function rgba(color) {
-  if (Array.isArray(color) && color.raw)
-    color = String.raw(...arguments);
-  if (color instanceof Number)
-    color = +color;
-  var values;
-  var parsed = parse(color);
-  if (!parsed.space)
-    return [];
-  const min2 = parsed.space[0] === "h" ? hsl.min : rgb.min;
-  const max2 = parsed.space[0] === "h" ? hsl.max : rgb.max;
-  values = Array(3);
-  values[0] = Math.min(Math.max(parsed.values[0], min2[0]), max2[0]);
-  values[1] = Math.min(Math.max(parsed.values[1], min2[1]), max2[1]);
-  values[2] = Math.min(Math.max(parsed.values[2], min2[2]), max2[2]);
-  if (parsed.space[0] === "h") {
-    values = hsl.rgb(values);
-  }
-  values.push(Math.min(Math.max(parsed.alpha, 0), 1));
-  return values;
-}
-function asString(color) {
-  if (typeof color === "string") {
-    return color;
-  }
-  return toString(color);
-}
-const MAX_CACHE_SIZE = 1024;
-const cache = {};
-let cacheSize = 0;
-function fromString(s) {
-  if (cache.hasOwnProperty(s)) {
-    return cache[s];
-  }
-  if (cacheSize >= MAX_CACHE_SIZE) {
-    let i = 0;
-    for (const key in cache) {
-      if ((i++ & 3) === 0) {
-        delete cache[key];
-        --cacheSize;
-      }
-    }
-  }
-  const color = rgba(s);
-  if (color.length !== 4) {
-    throw new Error('Failed to parse "' + s + '" as color');
-  }
-  for (const c of color) {
-    if (isNaN(c)) {
-      throw new Error('Failed to parse "' + s + '" as color');
-    }
-  }
-  normalize(color);
-  cache[s] = color;
-  ++cacheSize;
-  return color;
-}
-function asArray(color) {
-  if (Array.isArray(color)) {
-    return color;
-  }
-  return fromString(color);
-}
-function normalize(color) {
-  color[0] = clamp(color[0] + 0.5 | 0, 0, 255);
-  color[1] = clamp(color[1] + 0.5 | 0, 0, 255);
-  color[2] = clamp(color[2] + 0.5 | 0, 0, 255);
-  color[3] = clamp(color[3], 0, 1);
-  return color;
-}
-function toString(color) {
-  let r2 = color[0];
-  if (r2 != (r2 | 0)) {
-    r2 = r2 + 0.5 | 0;
-  }
-  let g = color[1];
-  if (g != (g | 0)) {
-    g = g + 0.5 | 0;
-  }
-  let b2 = color[2];
-  if (b2 != (b2 | 0)) {
-    b2 = b2 + 0.5 | 0;
-  }
-  const a2 = color[3] === void 0 ? 1 : Math.round(color[3] * 100) / 100;
-  return "rgba(" + r2 + "," + g + "," + b2 + "," + a2 + ")";
-}
-class IconImageCache {
-  constructor() {
-    this.cache_ = {};
-    this.cacheSize_ = 0;
-    this.maxCacheSize_ = 32;
-  }
-  /**
-   * FIXME empty description for jsdoc
-   */
-  clear() {
-    this.cache_ = {};
-    this.cacheSize_ = 0;
-  }
-  /**
-   * @return {boolean} Can expire cache.
-   */
-  canExpireCache() {
-    return this.cacheSize_ > this.maxCacheSize_;
-  }
-  /**
-   * FIXME empty description for jsdoc
-   */
-  expire() {
-    if (this.canExpireCache()) {
-      let i = 0;
-      for (const key in this.cache_) {
-        const iconImage = this.cache_[key];
-        if ((i++ & 3) === 0 && !iconImage.hasListener()) {
-          delete this.cache_[key];
-          --this.cacheSize_;
-        }
-      }
-    }
-  }
-  /**
-   * @param {string} src Src.
-   * @param {?string} crossOrigin Cross origin.
-   * @param {import("../color.js").Color} color Color.
-   * @return {import("./IconImage.js").default} Icon image.
-   */
-  get(src, crossOrigin, color) {
-    const key = getKey$1(src, crossOrigin, color);
-    return key in this.cache_ ? this.cache_[key] : null;
-  }
-  /**
-   * @param {string} src Src.
-   * @param {?string} crossOrigin Cross origin.
-   * @param {import("../color.js").Color} color Color.
-   * @param {import("./IconImage.js").default} iconImage Icon image.
-   */
-  set(src, crossOrigin, color, iconImage) {
-    const key = getKey$1(src, crossOrigin, color);
-    this.cache_[key] = iconImage;
-    ++this.cacheSize_;
-  }
-  /**
-   * Set the cache size of the icon cache. Default is `32`. Change this value when
-   * your map uses more than 32 different icon images and you are not caching icon
-   * styles on the application level.
-   * @param {number} maxCacheSize Cache max size.
-   * @api
-   */
-  setSize(maxCacheSize) {
-    this.maxCacheSize_ = maxCacheSize;
-    this.expire();
-  }
-}
-function getKey$1(src, crossOrigin, color) {
-  const colorString = color ? asString(color) : "null";
-  return crossOrigin + ":" + src + ":" + colorString;
-}
-const shared = new IconImageCache();
 const LayerProperty = {
   OPACITY: "opacity",
   VISIBLE: "visible",
@@ -7676,6 +7025,11 @@ const LayerProperty = {
   SOURCE: "source",
   MAP: "map"
 };
+function assert(assertion, errorMessage) {
+  if (!assertion) {
+    throw new Error(errorMessage);
+  }
+}
 class BaseLayer extends BaseObject {
   /**
    * @param {Options} options Layer options.
@@ -8236,7 +7590,7 @@ function createSnapToN(n) {
   );
 }
 function createSnapToZero(tolerance) {
-  const t = tolerance === void 0 ? toRadians(5) : tolerance;
+  const t = toRadians(5);
   return (
     /**
      * @param {number|undefined} rotation Rotation.
@@ -8265,6 +7619,55 @@ function inAndOut(t) {
 }
 function linear(t) {
   return t;
+}
+new Array(6);
+function create() {
+  return [1, 0, 0, 1, 0, 0];
+}
+function apply(transform2, coordinate) {
+  const x2 = coordinate[0];
+  const y2 = coordinate[1];
+  coordinate[0] = transform2[0] * x2 + transform2[2] * y2 + transform2[4];
+  coordinate[1] = transform2[1] * x2 + transform2[3] * y2 + transform2[5];
+  return coordinate;
+}
+function compose(transform2, dx1, dy1, sx, sy, angle, dx2, dy2) {
+  const sin = Math.sin(angle);
+  const cos = Math.cos(angle);
+  transform2[0] = sx * cos;
+  transform2[1] = sy * sin;
+  transform2[2] = -sx * sin;
+  transform2[3] = sy * cos;
+  transform2[4] = dx2 * sx * cos - dy2 * sx * sin + dx1;
+  transform2[5] = dx2 * sy * sin + dy2 * sy * cos + dy1;
+  return transform2;
+}
+function makeInverse(target, source) {
+  const det = determinant(source);
+  assert(det !== 0, "Transformation matrix cannot be inverted");
+  const a2 = source[0];
+  const b2 = source[1];
+  const c = source[2];
+  const d2 = source[3];
+  const e = source[4];
+  const f = source[5];
+  target[0] = d2 / det;
+  target[1] = -b2 / det;
+  target[2] = -c / det;
+  target[3] = a2 / det;
+  target[4] = (c * f - d2 * e) / det;
+  target[5] = -(a2 * f - b2 * e) / det;
+  return target;
+}
+function determinant(mat) {
+  return mat[0] * mat[3] - mat[1] * mat[2];
+}
+const matrixPrecision = [1e6, 1e6, 1e6, 1e6, 2, 2];
+function toString$1(mat) {
+  const transformString = "matrix(" + mat.map(
+    (value, i) => Math.round(value * matrixPrecision[i]) / matrixPrecision[i]
+  ).join(", ") + ")";
+  return transformString;
 }
 function transform2D(flatCoordinates, offset2, end2, stride, transform2, dest) {
   dest = dest ? dest : [];
@@ -8542,12 +7945,12 @@ class Geometry extends BaseObject {
    *     string identifier or a {@link module:ol/proj/Projection~Projection} object.
    * @param {import("../proj.js").ProjectionLike} destination The desired projection.  Can be a
    *     string identifier or a {@link module:ol/proj/Projection~Projection} object.
-   * @return {Geometry} This geometry.  Note that original geometry is
+   * @return {this} This geometry.  Note that original geometry is
    *     modified in place.
    * @api
    */
   transform(source, destination) {
-    const sourceProj = get(source);
+    const sourceProj = get$1(source);
     const transformFn = sourceProj.getUnits() == "tile-pixels" ? function(inCoordinates, outCoordinates, stride) {
       const pixelExtent = sourceProj.getExtent();
       const projectedExtent = sourceProj.getWorldExtent();
@@ -8942,7 +8345,7 @@ function assignClosestPoint(flatCoordinates, offset2, end2, stride, maxDelta, is
       );
     }
   }
-  if (isRing) {
+  {
     assignClosest(
       flatCoordinates,
       end2 - stride,
@@ -9515,10 +8918,6 @@ function getInteriorPointOfArray(flatCoordinates, offset2, ends, stride, flatCen
   if (isNaN(pointX)) {
     pointX = flatCenters[flatCentersOffset];
   }
-  if (dest) {
-    dest.push(pointX, y3, maxSegmentLength);
-    return dest;
-  }
   return [pointX, y3, maxSegmentLength];
 }
 function forEach(flatCoordinates, offset2, end2, stride, callback) {
@@ -9543,7 +8942,7 @@ function intersectsLineString(flatCoordinates, offset2, end2, stride, extent) {
     end2,
     stride
   );
-  if (!intersects(extent, coordinatesExtent)) {
+  if (!intersects$1(extent, coordinatesExtent)) {
     return false;
   }
   if (containsExtent(extent, coordinatesExtent)) {
@@ -9755,7 +9154,7 @@ class Polygon extends SimpleGeometry {
     if (!this.flatCoordinates) {
       this.flatCoordinates = linearRing2.getFlatCoordinates().slice();
     } else {
-      extend(this.flatCoordinates, linearRing2.getFlatCoordinates());
+      extend$1(this.flatCoordinates, linearRing2.getFlatCoordinates());
     }
     this.ends_.push(this.flatCoordinates.length);
     this.changed();
@@ -11568,7 +10967,6 @@ function calculateCenterOn(coordinate, size, position, resolution, rotation) {
   const centerY = rotY * cosAngle + rotX * sinAngle;
   return [centerX, centerY];
 }
-const View$1 = View;
 class Layer extends BaseLayer {
   /**
    * @param {Options<SourceType>} options Layer options.
@@ -11718,7 +11116,7 @@ class Layer extends BaseLayer {
     if (!view && map2) {
       view = map2.getView();
     }
-    if (view instanceof View$1) {
+    if (view instanceof View) {
       frameState = {
         viewState: view.getState(),
         extent: view.calculateExtent()
@@ -11738,7 +11136,7 @@ class Layer extends BaseLayer {
       layerState = this.getLayerState();
     }
     const layerExtent = this.getExtent();
-    return inView(layerState, frameState.viewState) && (!layerExtent || intersects(layerExtent, frameState.extent));
+    return inView(layerState, frameState.viewState) && (!layerExtent || intersects$1(layerExtent, frameState.extent));
   }
   /**
    * Get the attributions of the source of this layer for the given view.
@@ -11759,7 +11157,7 @@ class Layer extends BaseLayer {
     if (!getAttributions) {
       return [];
     }
-    const frameState = view instanceof View$1 ? view.getViewStateAndExtent() : view;
+    const frameState = view instanceof View ? view.getViewStateAndExtent() : view;
     let attributions = getAttributions(frameState);
     if (!Array.isArray(attributions)) {
       attributions = [attributions];
@@ -11787,6 +11185,27 @@ class Layer extends BaseLayer {
    */
   unrender() {
     this.rendered = false;
+  }
+  /** @return {string} Declutter */
+  getDeclutter() {
+    return void 0;
+  }
+  /**
+   * @param {import("../Map.js").FrameState} frameState Frame state.
+   * @param {import("../layer/Layer.js").State} layerState Layer state.
+   */
+  renderDeclutter(frameState, layerState) {
+  }
+  /**
+   * When the renderer follows a layout -> render approach, do the final rendering here.
+   * @param {import('../Map.js').FrameState} frameState Frame state
+   */
+  renderDeferred(frameState) {
+    const layerRenderer = this.getRenderer();
+    if (!layerRenderer) {
+      return;
+    }
+    layerRenderer.renderDeferred(frameState);
   }
   /**
    * For use inside the library only.
@@ -11910,6 +11329,5843 @@ function inView(layerState, viewState) {
   return zoom > layerState.minZoom && zoom <= layerState.maxZoom;
 }
 const Layer$1 = Layer;
+function quickselect(arr, k2, left2, right2, compare) {
+  quickselectStep(arr, k2, left2 || 0, right2 || arr.length - 1, compare || defaultCompare);
+}
+function quickselectStep(arr, k2, left2, right2, compare) {
+  while (right2 > left2) {
+    if (right2 - left2 > 600) {
+      var n = right2 - left2 + 1;
+      var m = k2 - left2 + 1;
+      var z2 = Math.log(n);
+      var s = 0.5 * Math.exp(2 * z2 / 3);
+      var sd = 0.5 * Math.sqrt(z2 * s * (n - s) / n) * (m - n / 2 < 0 ? -1 : 1);
+      var newLeft = Math.max(left2, Math.floor(k2 - m * s / n + sd));
+      var newRight = Math.min(right2, Math.floor(k2 + (n - m) * s / n + sd));
+      quickselectStep(arr, k2, newLeft, newRight, compare);
+    }
+    var t = arr[k2];
+    var i = left2;
+    var j = right2;
+    swap(arr, left2, k2);
+    if (compare(arr[right2], t) > 0) swap(arr, left2, right2);
+    while (i < j) {
+      swap(arr, i, j);
+      i++;
+      j--;
+      while (compare(arr[i], t) < 0) i++;
+      while (compare(arr[j], t) > 0) j--;
+    }
+    if (compare(arr[left2], t) === 0) swap(arr, left2, j);
+    else {
+      j++;
+      swap(arr, j, right2);
+    }
+    if (j <= k2) left2 = j + 1;
+    if (k2 <= j) right2 = j - 1;
+  }
+}
+function swap(arr, i, j) {
+  var tmp = arr[i];
+  arr[i] = arr[j];
+  arr[j] = tmp;
+}
+function defaultCompare(a2, b2) {
+  return a2 < b2 ? -1 : a2 > b2 ? 1 : 0;
+}
+class RBush {
+  constructor(maxEntries = 9) {
+    this._maxEntries = Math.max(4, maxEntries);
+    this._minEntries = Math.max(2, Math.ceil(this._maxEntries * 0.4));
+    this.clear();
+  }
+  all() {
+    return this._all(this.data, []);
+  }
+  search(bbox) {
+    let node = this.data;
+    const result = [];
+    if (!intersects(bbox, node)) return result;
+    const toBBox = this.toBBox;
+    const nodesToSearch = [];
+    while (node) {
+      for (let i = 0; i < node.children.length; i++) {
+        const child = node.children[i];
+        const childBBox = node.leaf ? toBBox(child) : child;
+        if (intersects(bbox, childBBox)) {
+          if (node.leaf) result.push(child);
+          else if (contains(bbox, childBBox)) this._all(child, result);
+          else nodesToSearch.push(child);
+        }
+      }
+      node = nodesToSearch.pop();
+    }
+    return result;
+  }
+  collides(bbox) {
+    let node = this.data;
+    if (!intersects(bbox, node)) return false;
+    const nodesToSearch = [];
+    while (node) {
+      for (let i = 0; i < node.children.length; i++) {
+        const child = node.children[i];
+        const childBBox = node.leaf ? this.toBBox(child) : child;
+        if (intersects(bbox, childBBox)) {
+          if (node.leaf || contains(bbox, childBBox)) return true;
+          nodesToSearch.push(child);
+        }
+      }
+      node = nodesToSearch.pop();
+    }
+    return false;
+  }
+  load(data) {
+    if (!(data && data.length)) return this;
+    if (data.length < this._minEntries) {
+      for (let i = 0; i < data.length; i++) {
+        this.insert(data[i]);
+      }
+      return this;
+    }
+    let node = this._build(data.slice(), 0, data.length - 1, 0);
+    if (!this.data.children.length) {
+      this.data = node;
+    } else if (this.data.height === node.height) {
+      this._splitRoot(this.data, node);
+    } else {
+      if (this.data.height < node.height) {
+        const tmpNode = this.data;
+        this.data = node;
+        node = tmpNode;
+      }
+      this._insert(node, this.data.height - node.height - 1, true);
+    }
+    return this;
+  }
+  insert(item) {
+    if (item) this._insert(item, this.data.height - 1);
+    return this;
+  }
+  clear() {
+    this.data = createNode([]);
+    return this;
+  }
+  remove(item, equalsFn) {
+    if (!item) return this;
+    let node = this.data;
+    const bbox = this.toBBox(item);
+    const path = [];
+    const indexes = [];
+    let i, parent, goingUp;
+    while (node || path.length) {
+      if (!node) {
+        node = path.pop();
+        parent = path[path.length - 1];
+        i = indexes.pop();
+        goingUp = true;
+      }
+      if (node.leaf) {
+        const index = findItem(item, node.children, equalsFn);
+        if (index !== -1) {
+          node.children.splice(index, 1);
+          path.push(node);
+          this._condense(path);
+          return this;
+        }
+      }
+      if (!goingUp && !node.leaf && contains(node, bbox)) {
+        path.push(node);
+        indexes.push(i);
+        i = 0;
+        parent = node;
+        node = node.children[0];
+      } else if (parent) {
+        i++;
+        node = parent.children[i];
+        goingUp = false;
+      } else node = null;
+    }
+    return this;
+  }
+  toBBox(item) {
+    return item;
+  }
+  compareMinX(a2, b2) {
+    return a2.minX - b2.minX;
+  }
+  compareMinY(a2, b2) {
+    return a2.minY - b2.minY;
+  }
+  toJSON() {
+    return this.data;
+  }
+  fromJSON(data) {
+    this.data = data;
+    return this;
+  }
+  _all(node, result) {
+    const nodesToSearch = [];
+    while (node) {
+      if (node.leaf) result.push(...node.children);
+      else nodesToSearch.push(...node.children);
+      node = nodesToSearch.pop();
+    }
+    return result;
+  }
+  _build(items, left2, right2, height) {
+    const N2 = right2 - left2 + 1;
+    let M2 = this._maxEntries;
+    let node;
+    if (N2 <= M2) {
+      node = createNode(items.slice(left2, right2 + 1));
+      calcBBox(node, this.toBBox);
+      return node;
+    }
+    if (!height) {
+      height = Math.ceil(Math.log(N2) / Math.log(M2));
+      M2 = Math.ceil(N2 / Math.pow(M2, height - 1));
+    }
+    node = createNode([]);
+    node.leaf = false;
+    node.height = height;
+    const N22 = Math.ceil(N2 / M2);
+    const N1 = N22 * Math.ceil(Math.sqrt(M2));
+    multiSelect(items, left2, right2, N1, this.compareMinX);
+    for (let i = left2; i <= right2; i += N1) {
+      const right22 = Math.min(i + N1 - 1, right2);
+      multiSelect(items, i, right22, N22, this.compareMinY);
+      for (let j = i; j <= right22; j += N22) {
+        const right3 = Math.min(j + N22 - 1, right22);
+        node.children.push(this._build(items, j, right3, height - 1));
+      }
+    }
+    calcBBox(node, this.toBBox);
+    return node;
+  }
+  _chooseSubtree(bbox, node, level, path) {
+    while (true) {
+      path.push(node);
+      if (node.leaf || path.length - 1 === level) break;
+      let minArea = Infinity;
+      let minEnlargement = Infinity;
+      let targetNode;
+      for (let i = 0; i < node.children.length; i++) {
+        const child = node.children[i];
+        const area = bboxArea(child);
+        const enlargement = enlargedArea(bbox, child) - area;
+        if (enlargement < minEnlargement) {
+          minEnlargement = enlargement;
+          minArea = area < minArea ? area : minArea;
+          targetNode = child;
+        } else if (enlargement === minEnlargement) {
+          if (area < minArea) {
+            minArea = area;
+            targetNode = child;
+          }
+        }
+      }
+      node = targetNode || node.children[0];
+    }
+    return node;
+  }
+  _insert(item, level, isNode) {
+    const bbox = isNode ? item : this.toBBox(item);
+    const insertPath = [];
+    const node = this._chooseSubtree(bbox, this.data, level, insertPath);
+    node.children.push(item);
+    extend(node, bbox);
+    while (level >= 0) {
+      if (insertPath[level].children.length > this._maxEntries) {
+        this._split(insertPath, level);
+        level--;
+      } else break;
+    }
+    this._adjustParentBBoxes(bbox, insertPath, level);
+  }
+  // split overflowed node into two
+  _split(insertPath, level) {
+    const node = insertPath[level];
+    const M2 = node.children.length;
+    const m = this._minEntries;
+    this._chooseSplitAxis(node, m, M2);
+    const splitIndex = this._chooseSplitIndex(node, m, M2);
+    const newNode = createNode(node.children.splice(splitIndex, node.children.length - splitIndex));
+    newNode.height = node.height;
+    newNode.leaf = node.leaf;
+    calcBBox(node, this.toBBox);
+    calcBBox(newNode, this.toBBox);
+    if (level) insertPath[level - 1].children.push(newNode);
+    else this._splitRoot(node, newNode);
+  }
+  _splitRoot(node, newNode) {
+    this.data = createNode([node, newNode]);
+    this.data.height = node.height + 1;
+    this.data.leaf = false;
+    calcBBox(this.data, this.toBBox);
+  }
+  _chooseSplitIndex(node, m, M2) {
+    let index;
+    let minOverlap = Infinity;
+    let minArea = Infinity;
+    for (let i = m; i <= M2 - m; i++) {
+      const bbox1 = distBBox(node, 0, i, this.toBBox);
+      const bbox2 = distBBox(node, i, M2, this.toBBox);
+      const overlap = intersectionArea(bbox1, bbox2);
+      const area = bboxArea(bbox1) + bboxArea(bbox2);
+      if (overlap < minOverlap) {
+        minOverlap = overlap;
+        index = i;
+        minArea = area < minArea ? area : minArea;
+      } else if (overlap === minOverlap) {
+        if (area < minArea) {
+          minArea = area;
+          index = i;
+        }
+      }
+    }
+    return index || M2 - m;
+  }
+  // sorts node children by the best axis for split
+  _chooseSplitAxis(node, m, M2) {
+    const compareMinX = node.leaf ? this.compareMinX : compareNodeMinX;
+    const compareMinY = node.leaf ? this.compareMinY : compareNodeMinY;
+    const xMargin = this._allDistMargin(node, m, M2, compareMinX);
+    const yMargin = this._allDistMargin(node, m, M2, compareMinY);
+    if (xMargin < yMargin) node.children.sort(compareMinX);
+  }
+  // total margin of all possible split distributions where each node is at least m full
+  _allDistMargin(node, m, M2, compare) {
+    node.children.sort(compare);
+    const toBBox = this.toBBox;
+    const leftBBox = distBBox(node, 0, m, toBBox);
+    const rightBBox = distBBox(node, M2 - m, M2, toBBox);
+    let margin = bboxMargin(leftBBox) + bboxMargin(rightBBox);
+    for (let i = m; i < M2 - m; i++) {
+      const child = node.children[i];
+      extend(leftBBox, node.leaf ? toBBox(child) : child);
+      margin += bboxMargin(leftBBox);
+    }
+    for (let i = M2 - m - 1; i >= m; i--) {
+      const child = node.children[i];
+      extend(rightBBox, node.leaf ? toBBox(child) : child);
+      margin += bboxMargin(rightBBox);
+    }
+    return margin;
+  }
+  _adjustParentBBoxes(bbox, path, level) {
+    for (let i = level; i >= 0; i--) {
+      extend(path[i], bbox);
+    }
+  }
+  _condense(path) {
+    for (let i = path.length - 1, siblings; i >= 0; i--) {
+      if (path[i].children.length === 0) {
+        if (i > 0) {
+          siblings = path[i - 1].children;
+          siblings.splice(siblings.indexOf(path[i]), 1);
+        } else this.clear();
+      } else calcBBox(path[i], this.toBBox);
+    }
+  }
+}
+function findItem(item, items, equalsFn) {
+  if (!equalsFn) return items.indexOf(item);
+  for (let i = 0; i < items.length; i++) {
+    if (equalsFn(item, items[i])) return i;
+  }
+  return -1;
+}
+function calcBBox(node, toBBox) {
+  distBBox(node, 0, node.children.length, toBBox, node);
+}
+function distBBox(node, k2, p2, toBBox, destNode) {
+  if (!destNode) destNode = createNode(null);
+  destNode.minX = Infinity;
+  destNode.minY = Infinity;
+  destNode.maxX = -Infinity;
+  destNode.maxY = -Infinity;
+  for (let i = k2; i < p2; i++) {
+    const child = node.children[i];
+    extend(destNode, node.leaf ? toBBox(child) : child);
+  }
+  return destNode;
+}
+function extend(a2, b2) {
+  a2.minX = Math.min(a2.minX, b2.minX);
+  a2.minY = Math.min(a2.minY, b2.minY);
+  a2.maxX = Math.max(a2.maxX, b2.maxX);
+  a2.maxY = Math.max(a2.maxY, b2.maxY);
+  return a2;
+}
+function compareNodeMinX(a2, b2) {
+  return a2.minX - b2.minX;
+}
+function compareNodeMinY(a2, b2) {
+  return a2.minY - b2.minY;
+}
+function bboxArea(a2) {
+  return (a2.maxX - a2.minX) * (a2.maxY - a2.minY);
+}
+function bboxMargin(a2) {
+  return a2.maxX - a2.minX + (a2.maxY - a2.minY);
+}
+function enlargedArea(a2, b2) {
+  return (Math.max(b2.maxX, a2.maxX) - Math.min(b2.minX, a2.minX)) * (Math.max(b2.maxY, a2.maxY) - Math.min(b2.minY, a2.minY));
+}
+function intersectionArea(a2, b2) {
+  const minX = Math.max(a2.minX, b2.minX);
+  const minY = Math.max(a2.minY, b2.minY);
+  const maxX = Math.min(a2.maxX, b2.maxX);
+  const maxY = Math.min(a2.maxY, b2.maxY);
+  return Math.max(0, maxX - minX) * Math.max(0, maxY - minY);
+}
+function contains(a2, b2) {
+  return a2.minX <= b2.minX && a2.minY <= b2.minY && b2.maxX <= a2.maxX && b2.maxY <= a2.maxY;
+}
+function intersects(a2, b2) {
+  return b2.minX <= a2.maxX && b2.minY <= a2.maxY && b2.maxX >= a2.minX && b2.maxY >= a2.minY;
+}
+function createNode(children) {
+  return {
+    children,
+    height: 1,
+    leaf: true,
+    minX: Infinity,
+    minY: Infinity,
+    maxX: -Infinity,
+    maxY: -Infinity
+  };
+}
+function multiSelect(arr, left2, right2, n, compare) {
+  const stack = [left2, right2];
+  while (stack.length) {
+    right2 = stack.pop();
+    left2 = stack.pop();
+    if (right2 - left2 <= n) continue;
+    const mid = left2 + Math.ceil((right2 - left2) / n / 2) * n;
+    quickselect(arr, mid, left2, right2, compare);
+    stack.push(left2, mid, mid, right2);
+  }
+}
+const ImageState = {
+  IDLE: 0,
+  LOADING: 1,
+  LOADED: 2,
+  ERROR: 3,
+  EMPTY: 4
+};
+function hasArea(size) {
+  return size[0] > 0 && size[1] > 0;
+}
+function scale(size, ratio, dest) {
+  if (dest === void 0) {
+    dest = [0, 0];
+  }
+  dest[0] = size[0] * ratio + 0.5 | 0;
+  dest[1] = size[1] * ratio + 0.5 | 0;
+  return dest;
+}
+function toSize(size, dest) {
+  if (Array.isArray(size)) {
+    return size;
+  }
+  if (dest === void 0) {
+    dest = [size, size];
+  } else {
+    dest[0] = size;
+    dest[1] = size;
+  }
+  return dest;
+}
+class ImageStyle {
+  /**
+   * @param {Options} options Options.
+   */
+  constructor(options) {
+    this.opacity_ = options.opacity;
+    this.rotateWithView_ = options.rotateWithView;
+    this.rotation_ = options.rotation;
+    this.scale_ = options.scale;
+    this.scaleArray_ = toSize(options.scale);
+    this.displacement_ = options.displacement;
+    this.declutterMode_ = options.declutterMode;
+  }
+  /**
+   * Clones the style.
+   * @return {ImageStyle} The cloned style.
+   * @api
+   */
+  clone() {
+    const scale2 = this.getScale();
+    return new ImageStyle({
+      opacity: this.getOpacity(),
+      scale: Array.isArray(scale2) ? scale2.slice() : scale2,
+      rotation: this.getRotation(),
+      rotateWithView: this.getRotateWithView(),
+      displacement: this.getDisplacement().slice(),
+      declutterMode: this.getDeclutterMode()
+    });
+  }
+  /**
+   * Get the symbolizer opacity.
+   * @return {number} Opacity.
+   * @api
+   */
+  getOpacity() {
+    return this.opacity_;
+  }
+  /**
+   * Determine whether the symbolizer rotates with the map.
+   * @return {boolean} Rotate with map.
+   * @api
+   */
+  getRotateWithView() {
+    return this.rotateWithView_;
+  }
+  /**
+   * Get the symoblizer rotation.
+   * @return {number} Rotation.
+   * @api
+   */
+  getRotation() {
+    return this.rotation_;
+  }
+  /**
+   * Get the symbolizer scale.
+   * @return {number|import("../size.js").Size} Scale.
+   * @api
+   */
+  getScale() {
+    return this.scale_;
+  }
+  /**
+   * Get the symbolizer scale array.
+   * @return {import("../size.js").Size} Scale array.
+   */
+  getScaleArray() {
+    return this.scaleArray_;
+  }
+  /**
+   * Get the displacement of the shape
+   * @return {Array<number>} Shape's center displacement
+   * @api
+   */
+  getDisplacement() {
+    return this.displacement_;
+  }
+  /**
+   * Get the declutter mode of the shape
+   * @return {import("./Style.js").DeclutterMode} Shape's declutter mode
+   * @api
+   */
+  getDeclutterMode() {
+    return this.declutterMode_;
+  }
+  /**
+   * Get the anchor point in pixels. The anchor determines the center point for the
+   * symbolizer.
+   * @abstract
+   * @return {Array<number>} Anchor.
+   */
+  getAnchor() {
+    return abstract();
+  }
+  /**
+   * Get the image element for the symbolizer.
+   * @abstract
+   * @param {number} pixelRatio Pixel ratio.
+   * @return {import('../DataTile.js').ImageLike} Image element.
+   */
+  getImage(pixelRatio) {
+    return abstract();
+  }
+  /**
+   * @abstract
+   * @return {import('../DataTile.js').ImageLike} Image element.
+   */
+  getHitDetectionImage() {
+    return abstract();
+  }
+  /**
+   * Get the image pixel ratio.
+   * @param {number} pixelRatio Pixel ratio.
+   * @return {number} Pixel ratio.
+   */
+  getPixelRatio(pixelRatio) {
+    return 1;
+  }
+  /**
+   * @abstract
+   * @return {import("../ImageState.js").default} Image state.
+   */
+  getImageState() {
+    return abstract();
+  }
+  /**
+   * @abstract
+   * @return {import("../size.js").Size} Image size.
+   */
+  getImageSize() {
+    return abstract();
+  }
+  /**
+   * Get the origin of the symbolizer.
+   * @abstract
+   * @return {Array<number>} Origin.
+   */
+  getOrigin() {
+    return abstract();
+  }
+  /**
+   * Get the size of the symbolizer (in pixels).
+   * @abstract
+   * @return {import("../size.js").Size} Size.
+   */
+  getSize() {
+    return abstract();
+  }
+  /**
+   * Set the displacement.
+   *
+   * @param {Array<number>} displacement Displacement.
+   * @api
+   */
+  setDisplacement(displacement) {
+    this.displacement_ = displacement;
+  }
+  /**
+   * Set the opacity.
+   *
+   * @param {number} opacity Opacity.
+   * @api
+   */
+  setOpacity(opacity) {
+    this.opacity_ = opacity;
+  }
+  /**
+   * Set whether to rotate the style with the view.
+   *
+   * @param {boolean} rotateWithView Rotate with map.
+   * @api
+   */
+  setRotateWithView(rotateWithView) {
+    this.rotateWithView_ = rotateWithView;
+  }
+  /**
+   * Set the rotation.
+   *
+   * @param {number} rotation Rotation.
+   * @api
+   */
+  setRotation(rotation) {
+    this.rotation_ = rotation;
+  }
+  /**
+   * Set the scale.
+   *
+   * @param {number|import("../size.js").Size} scale Scale.
+   * @api
+   */
+  setScale(scale2) {
+    this.scale_ = scale2;
+    this.scaleArray_ = toSize(scale2);
+  }
+  /**
+   * @abstract
+   * @param {function(import("../events/Event.js").default): void} listener Listener function.
+   */
+  listenImageChange(listener) {
+    abstract();
+  }
+  /**
+   * Load not yet loaded URI.
+   * @abstract
+   */
+  load() {
+    abstract();
+  }
+  /**
+   * @abstract
+   * @param {function(import("../events/Event.js").default): void} listener Listener function.
+   */
+  unlistenImageChange(listener) {
+    abstract();
+  }
+  /**
+   * @return {Promise<void>} `false` or Promise that resolves when the style is ready to use.
+   */
+  ready() {
+    return Promise.resolve();
+  }
+}
+const rgb = {
+  name: "rgb",
+  min: [0, 0, 0],
+  max: [255, 255, 255],
+  channel: ["red", "green", "blue"],
+  alias: ["RGB"]
+};
+var xyz = {
+  name: "xyz",
+  min: [0, 0, 0],
+  channel: ["X", "Y", "Z"],
+  alias: ["XYZ", "ciexyz", "cie1931"]
+};
+xyz.whitepoint = {
+  //1931 2°
+  2: {
+    //incadescent
+    A: [109.85, 100, 35.585],
+    // B:[],
+    C: [98.074, 100, 118.232],
+    D50: [96.422, 100, 82.521],
+    D55: [95.682, 100, 92.149],
+    //daylight
+    D65: [95.045592705167, 100, 108.9057750759878],
+    D75: [94.972, 100, 122.638],
+    //flourescent
+    // F1: [],
+    F2: [99.187, 100, 67.395],
+    // F3: [],
+    // F4: [],
+    // F5: [],
+    // F6:[],
+    F7: [95.044, 100, 108.755],
+    // F8: [],
+    // F9: [],
+    // F10: [],
+    F11: [100.966, 100, 64.37],
+    // F12: [],
+    E: [100, 100, 100]
+  },
+  //1964  10°
+  10: {
+    //incadescent
+    A: [111.144, 100, 35.2],
+    C: [97.285, 100, 116.145],
+    D50: [96.72, 100, 81.427],
+    D55: [95.799, 100, 90.926],
+    //daylight
+    D65: [94.811, 100, 107.304],
+    D75: [94.416, 100, 120.641],
+    //flourescent
+    F2: [103.28, 100, 69.026],
+    F7: [95.792, 100, 107.687],
+    F11: [103.866, 100, 65.627],
+    E: [100, 100, 100]
+  }
+};
+xyz.max = xyz.whitepoint[2].D65;
+xyz.rgb = function(_xyz, white) {
+  white = white || xyz.whitepoint[2].E;
+  var x2 = _xyz[0] / white[0], y2 = _xyz[1] / white[1], z2 = _xyz[2] / white[2], r2, g, b2;
+  r2 = x2 * 3.240969941904521 + y2 * -1.537383177570093 + z2 * -0.498610760293;
+  g = x2 * -0.96924363628087 + y2 * 1.87596750150772 + z2 * 0.041555057407175;
+  b2 = x2 * 0.055630079696993 + y2 * -0.20397695888897 + z2 * 1.056971514242878;
+  r2 = r2 > 31308e-7 ? 1.055 * Math.pow(r2, 1 / 2.4) - 0.055 : r2 = r2 * 12.92;
+  g = g > 31308e-7 ? 1.055 * Math.pow(g, 1 / 2.4) - 0.055 : g = g * 12.92;
+  b2 = b2 > 31308e-7 ? 1.055 * Math.pow(b2, 1 / 2.4) - 0.055 : b2 = b2 * 12.92;
+  r2 = Math.min(Math.max(0, r2), 1);
+  g = Math.min(Math.max(0, g), 1);
+  b2 = Math.min(Math.max(0, b2), 1);
+  return [r2 * 255, g * 255, b2 * 255];
+};
+rgb.xyz = function(rgb2, white) {
+  var r2 = rgb2[0] / 255, g = rgb2[1] / 255, b2 = rgb2[2] / 255;
+  r2 = r2 > 0.04045 ? Math.pow((r2 + 0.055) / 1.055, 2.4) : r2 / 12.92;
+  g = g > 0.04045 ? Math.pow((g + 0.055) / 1.055, 2.4) : g / 12.92;
+  b2 = b2 > 0.04045 ? Math.pow((b2 + 0.055) / 1.055, 2.4) : b2 / 12.92;
+  var x2 = r2 * 0.41239079926595 + g * 0.35758433938387 + b2 * 0.18048078840183;
+  var y2 = r2 * 0.21263900587151 + g * 0.71516867876775 + b2 * 0.072192315360733;
+  var z2 = r2 * 0.019330818715591 + g * 0.11919477979462 + b2 * 0.95053215224966;
+  white = white || xyz.whitepoint[2].E;
+  return [x2 * white[0], y2 * white[1], z2 * white[2]];
+};
+const luv = {
+  name: "luv",
+  //NOTE: luv has no rigidly defined limits
+  //easyrgb fails to get proper coords
+  //boronine states no rigid limits
+  //colorMine refers this ones:
+  min: [0, -134, -140],
+  max: [100, 224, 122],
+  channel: ["lightness", "u", "v"],
+  alias: ["LUV", "cieluv", "cie1976"],
+  xyz: function(arg, i, o) {
+    var _u, _v, l, u, v, x2, y2, z2, xn, yn, zn, un, vn;
+    l = arg[0], u = arg[1], v = arg[2];
+    if (l === 0) return [0, 0, 0];
+    var k2 = 0.0011070564598794539;
+    i = i || "D65";
+    o = o || 2;
+    xn = xyz.whitepoint[o][i][0];
+    yn = xyz.whitepoint[o][i][1];
+    zn = xyz.whitepoint[o][i][2];
+    un = 4 * xn / (xn + 15 * yn + 3 * zn);
+    vn = 9 * yn / (xn + 15 * yn + 3 * zn);
+    _u = u / (13 * l) + un || 0;
+    _v = v / (13 * l) + vn || 0;
+    y2 = l > 8 ? yn * Math.pow((l + 16) / 116, 3) : yn * l * k2;
+    x2 = y2 * 9 * _u / (4 * _v) || 0;
+    z2 = y2 * (12 - 3 * _u - 20 * _v) / (4 * _v) || 0;
+    return [x2, y2, z2];
+  }
+};
+xyz.luv = function(arg, i, o) {
+  var _u, _v, l, u, v, x2, y2, z2, xn, yn, zn, un, vn;
+  var e = 0.008856451679035631;
+  var k2 = 903.2962962962961;
+  i = i || "D65";
+  o = o || 2;
+  xn = xyz.whitepoint[o][i][0];
+  yn = xyz.whitepoint[o][i][1];
+  zn = xyz.whitepoint[o][i][2];
+  un = 4 * xn / (xn + 15 * yn + 3 * zn);
+  vn = 9 * yn / (xn + 15 * yn + 3 * zn);
+  x2 = arg[0], y2 = arg[1], z2 = arg[2];
+  _u = 4 * x2 / (x2 + 15 * y2 + 3 * z2) || 0;
+  _v = 9 * y2 / (x2 + 15 * y2 + 3 * z2) || 0;
+  var yr = y2 / yn;
+  l = yr <= e ? k2 * yr : 116 * Math.pow(yr, 1 / 3) - 16;
+  u = 13 * l * (_u - un);
+  v = 13 * l * (_v - vn);
+  return [l, u, v];
+};
+var lchuv = {
+  name: "lchuv",
+  channel: ["lightness", "chroma", "hue"],
+  alias: ["LCHuv", "cielchuv"],
+  min: [0, 0, 0],
+  max: [100, 100, 360],
+  luv: function(luv2) {
+    var l = luv2[0], c = luv2[1], h = luv2[2], u, v, hr;
+    hr = h / 360 * 2 * Math.PI;
+    u = c * Math.cos(hr);
+    v = c * Math.sin(hr);
+    return [l, u, v];
+  },
+  xyz: function(arg) {
+    return luv.xyz(lchuv.luv(arg));
+  }
+};
+luv.lchuv = function(luv2) {
+  var l = luv2[0], u = luv2[1], v = luv2[2];
+  var c = Math.sqrt(u * u + v * v);
+  var hr = Math.atan2(v, u);
+  var h = hr * 360 / 2 / Math.PI;
+  if (h < 0) {
+    h += 360;
+  }
+  return [l, c, h];
+};
+xyz.lchuv = function(arg) {
+  return luv.lchuv(xyz.luv(arg));
+};
+const names = {
+  aliceblue: [240, 248, 255],
+  antiquewhite: [250, 235, 215],
+  aqua: [0, 255, 255],
+  aquamarine: [127, 255, 212],
+  azure: [240, 255, 255],
+  beige: [245, 245, 220],
+  bisque: [255, 228, 196],
+  black: [0, 0, 0],
+  blanchedalmond: [255, 235, 205],
+  blue: [0, 0, 255],
+  blueviolet: [138, 43, 226],
+  brown: [165, 42, 42],
+  burlywood: [222, 184, 135],
+  cadetblue: [95, 158, 160],
+  chartreuse: [127, 255, 0],
+  chocolate: [210, 105, 30],
+  coral: [255, 127, 80],
+  cornflowerblue: [100, 149, 237],
+  cornsilk: [255, 248, 220],
+  crimson: [220, 20, 60],
+  cyan: [0, 255, 255],
+  darkblue: [0, 0, 139],
+  darkcyan: [0, 139, 139],
+  darkgoldenrod: [184, 134, 11],
+  darkgray: [169, 169, 169],
+  darkgreen: [0, 100, 0],
+  darkgrey: [169, 169, 169],
+  darkkhaki: [189, 183, 107],
+  darkmagenta: [139, 0, 139],
+  darkolivegreen: [85, 107, 47],
+  darkorange: [255, 140, 0],
+  darkorchid: [153, 50, 204],
+  darkred: [139, 0, 0],
+  darksalmon: [233, 150, 122],
+  darkseagreen: [143, 188, 143],
+  darkslateblue: [72, 61, 139],
+  darkslategray: [47, 79, 79],
+  darkslategrey: [47, 79, 79],
+  darkturquoise: [0, 206, 209],
+  darkviolet: [148, 0, 211],
+  deeppink: [255, 20, 147],
+  deepskyblue: [0, 191, 255],
+  dimgray: [105, 105, 105],
+  dimgrey: [105, 105, 105],
+  dodgerblue: [30, 144, 255],
+  firebrick: [178, 34, 34],
+  floralwhite: [255, 250, 240],
+  forestgreen: [34, 139, 34],
+  fuchsia: [255, 0, 255],
+  gainsboro: [220, 220, 220],
+  ghostwhite: [248, 248, 255],
+  gold: [255, 215, 0],
+  goldenrod: [218, 165, 32],
+  gray: [128, 128, 128],
+  green: [0, 128, 0],
+  greenyellow: [173, 255, 47],
+  grey: [128, 128, 128],
+  honeydew: [240, 255, 240],
+  hotpink: [255, 105, 180],
+  indianred: [205, 92, 92],
+  indigo: [75, 0, 130],
+  ivory: [255, 255, 240],
+  khaki: [240, 230, 140],
+  lavender: [230, 230, 250],
+  lavenderblush: [255, 240, 245],
+  lawngreen: [124, 252, 0],
+  lemonchiffon: [255, 250, 205],
+  lightblue: [173, 216, 230],
+  lightcoral: [240, 128, 128],
+  lightcyan: [224, 255, 255],
+  lightgoldenrodyellow: [250, 250, 210],
+  lightgray: [211, 211, 211],
+  lightgreen: [144, 238, 144],
+  lightgrey: [211, 211, 211],
+  lightpink: [255, 182, 193],
+  lightsalmon: [255, 160, 122],
+  lightseagreen: [32, 178, 170],
+  lightskyblue: [135, 206, 250],
+  lightslategray: [119, 136, 153],
+  lightslategrey: [119, 136, 153],
+  lightsteelblue: [176, 196, 222],
+  lightyellow: [255, 255, 224],
+  lime: [0, 255, 0],
+  limegreen: [50, 205, 50],
+  linen: [250, 240, 230],
+  magenta: [255, 0, 255],
+  maroon: [128, 0, 0],
+  mediumaquamarine: [102, 205, 170],
+  mediumblue: [0, 0, 205],
+  mediumorchid: [186, 85, 211],
+  mediumpurple: [147, 112, 219],
+  mediumseagreen: [60, 179, 113],
+  mediumslateblue: [123, 104, 238],
+  mediumspringgreen: [0, 250, 154],
+  mediumturquoise: [72, 209, 204],
+  mediumvioletred: [199, 21, 133],
+  midnightblue: [25, 25, 112],
+  mintcream: [245, 255, 250],
+  mistyrose: [255, 228, 225],
+  moccasin: [255, 228, 181],
+  navajowhite: [255, 222, 173],
+  navy: [0, 0, 128],
+  oldlace: [253, 245, 230],
+  olive: [128, 128, 0],
+  olivedrab: [107, 142, 35],
+  orange: [255, 165, 0],
+  orangered: [255, 69, 0],
+  orchid: [218, 112, 214],
+  palegoldenrod: [238, 232, 170],
+  palegreen: [152, 251, 152],
+  paleturquoise: [175, 238, 238],
+  palevioletred: [219, 112, 147],
+  papayawhip: [255, 239, 213],
+  peachpuff: [255, 218, 185],
+  peru: [205, 133, 63],
+  pink: [255, 192, 203],
+  plum: [221, 160, 221],
+  powderblue: [176, 224, 230],
+  purple: [128, 0, 128],
+  rebeccapurple: [102, 51, 153],
+  red: [255, 0, 0],
+  rosybrown: [188, 143, 143],
+  royalblue: [65, 105, 225],
+  saddlebrown: [139, 69, 19],
+  salmon: [250, 128, 114],
+  sandybrown: [244, 164, 96],
+  seagreen: [46, 139, 87],
+  seashell: [255, 245, 238],
+  sienna: [160, 82, 45],
+  silver: [192, 192, 192],
+  skyblue: [135, 206, 235],
+  slateblue: [106, 90, 205],
+  slategray: [112, 128, 144],
+  slategrey: [112, 128, 144],
+  snow: [255, 250, 250],
+  springgreen: [0, 255, 127],
+  steelblue: [70, 130, 180],
+  tan: [210, 180, 140],
+  teal: [0, 128, 128],
+  thistle: [216, 191, 216],
+  tomato: [255, 99, 71],
+  turquoise: [64, 224, 208],
+  violet: [238, 130, 238],
+  wheat: [245, 222, 179],
+  white: [255, 255, 255],
+  whitesmoke: [245, 245, 245],
+  yellow: [255, 255, 0],
+  yellowgreen: [154, 205, 50]
+};
+var baseHues = {
+  red: 0,
+  orange: 60,
+  yellow: 120,
+  green: 180,
+  blue: 240,
+  purple: 300
+};
+function parse$1(cstr) {
+  var _a, _b;
+  var m, parts = [], alpha = 1, space;
+  if (typeof cstr === "number") {
+    return { space: "rgb", values: [cstr >>> 16, (cstr & 65280) >>> 8, cstr & 255], alpha: 1 };
+  }
+  if (typeof cstr === "number") return { space: "rgb", values: [cstr >>> 16, (cstr & 65280) >>> 8, cstr & 255], alpha: 1 };
+  cstr = String(cstr).toLowerCase();
+  if (names[cstr]) {
+    parts = names[cstr].slice();
+    space = "rgb";
+  } else if (cstr === "transparent") {
+    alpha = 0;
+    space = "rgb";
+    parts = [0, 0, 0];
+  } else if (cstr[0] === "#") {
+    var base = cstr.slice(1);
+    var size = base.length;
+    var isShort = size <= 4;
+    alpha = 1;
+    if (isShort) {
+      parts = [
+        parseInt(base[0] + base[0], 16),
+        parseInt(base[1] + base[1], 16),
+        parseInt(base[2] + base[2], 16)
+      ];
+      if (size === 4) {
+        alpha = parseInt(base[3] + base[3], 16) / 255;
+      }
+    } else {
+      parts = [
+        parseInt(base[0] + base[1], 16),
+        parseInt(base[2] + base[3], 16),
+        parseInt(base[4] + base[5], 16)
+      ];
+      if (size === 8) {
+        alpha = parseInt(base[6] + base[7], 16) / 255;
+      }
+    }
+    if (!parts[0]) parts[0] = 0;
+    if (!parts[1]) parts[1] = 0;
+    if (!parts[2]) parts[2] = 0;
+    space = "rgb";
+  } else if (m = /^((?:rgba?|hs[lvb]a?|hwba?|cmyk?|xy[zy]|gray|lab|lchu?v?|[ly]uv|lms|oklch|oklab|color))\s*\(([^\)]*)\)/.exec(cstr)) {
+    var name = m[1];
+    space = name.replace(/a$/, "");
+    var dims = space === "cmyk" ? 4 : space === "gray" ? 1 : 3;
+    parts = m[2].trim().split(/\s*[,\/]\s*|\s+/);
+    if (space === "color") space = parts.shift();
+    parts = parts.map(function(x2, i) {
+      if (x2[x2.length - 1] === "%") {
+        x2 = parseFloat(x2) / 100;
+        if (i === 3) return x2;
+        if (space === "rgb") return x2 * 255;
+        if (space[0] === "h") return x2 * 100;
+        if (space[0] === "l" && !i) return x2 * 100;
+        if (space === "lab") return x2 * 125;
+        if (space === "lch") return i < 2 ? x2 * 150 : x2 * 360;
+        if (space[0] === "o" && !i) return x2;
+        if (space === "oklab") return x2 * 0.4;
+        if (space === "oklch") return i < 2 ? x2 * 0.4 : x2 * 360;
+        return x2;
+      }
+      if (space[i] === "h" || i === 2 && space[space.length - 1] === "h") {
+        if (baseHues[x2] !== void 0) return baseHues[x2];
+        if (x2.endsWith("deg")) return parseFloat(x2);
+        if (x2.endsWith("turn")) return parseFloat(x2) * 360;
+        if (x2.endsWith("grad")) return parseFloat(x2) * 360 / 400;
+        if (x2.endsWith("rad")) return parseFloat(x2) * 180 / Math.PI;
+      }
+      if (x2 === "none") return 0;
+      return parseFloat(x2);
+    });
+    alpha = parts.length > dims ? parts.pop() : 1;
+  } else if (/[0-9](?:\s|\/|,)/.test(cstr)) {
+    parts = cstr.match(/([0-9]+)/g).map(function(value) {
+      return parseFloat(value);
+    });
+    space = ((_b = (_a = cstr.match(/([a-z])/ig)) == null ? void 0 : _a.join("")) == null ? void 0 : _b.toLowerCase()) || "rgb";
+  }
+  return {
+    space,
+    values: parts,
+    alpha
+  };
+}
+const hsl = {
+  name: "hsl",
+  min: [0, 0, 0],
+  max: [360, 100, 100],
+  channel: ["hue", "saturation", "lightness"],
+  alias: ["HSL"],
+  rgb: function(hsl2) {
+    var h = hsl2[0] / 360, s = hsl2[1] / 100, l = hsl2[2] / 100, t1, t2, t3, rgb2, val, i = 0;
+    if (s === 0) return val = l * 255, [val, val, val];
+    t2 = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    t1 = 2 * l - t2;
+    rgb2 = [0, 0, 0];
+    for (; i < 3; ) {
+      t3 = h + 1 / 3 * -(i - 1);
+      t3 < 0 ? t3++ : t3 > 1 && t3--;
+      val = 6 * t3 < 1 ? t1 + (t2 - t1) * 6 * t3 : 2 * t3 < 1 ? t2 : 3 * t3 < 2 ? t1 + (t2 - t1) * (2 / 3 - t3) * 6 : t1;
+      rgb2[i++] = val * 255;
+    }
+    return rgb2;
+  }
+};
+rgb.hsl = function(rgb2) {
+  var r2 = rgb2[0] / 255, g = rgb2[1] / 255, b2 = rgb2[2] / 255, min2 = Math.min(r2, g, b2), max2 = Math.max(r2, g, b2), delta = max2 - min2, h, s, l;
+  if (max2 === min2) {
+    h = 0;
+  } else if (r2 === max2) {
+    h = (g - b2) / delta;
+  } else if (g === max2) {
+    h = 2 + (b2 - r2) / delta;
+  } else if (b2 === max2) {
+    h = 4 + (r2 - g) / delta;
+  }
+  h = Math.min(h * 60, 360);
+  if (h < 0) {
+    h += 360;
+  }
+  l = (min2 + max2) / 2;
+  if (max2 === min2) {
+    s = 0;
+  } else if (l <= 0.5) {
+    s = delta / (max2 + min2);
+  } else {
+    s = delta / (2 - max2 - min2);
+  }
+  return [h, s * 100, l * 100];
+};
+function rgba(color) {
+  if (Array.isArray(color) && color.raw) color = String.raw(...arguments);
+  if (color instanceof Number) color = +color;
+  var values;
+  var parsed = parse$1(color);
+  if (!parsed.space) return [];
+  const min2 = parsed.space[0] === "h" ? hsl.min : rgb.min;
+  const max2 = parsed.space[0] === "h" ? hsl.max : rgb.max;
+  values = Array(3);
+  values[0] = Math.min(Math.max(parsed.values[0], min2[0]), max2[0]);
+  values[1] = Math.min(Math.max(parsed.values[1], min2[1]), max2[1]);
+  values[2] = Math.min(Math.max(parsed.values[2], min2[2]), max2[2]);
+  if (parsed.space[0] === "h") {
+    values = hsl.rgb(values);
+  }
+  values.push(Math.min(Math.max(parsed.alpha, 0), 1));
+  return values;
+}
+function asString(color) {
+  if (typeof color === "string") {
+    return color;
+  }
+  return toString(color);
+}
+const MAX_CACHE_SIZE = 1024;
+const cache = {};
+let cacheSize = 0;
+function withAlpha(color) {
+  if (color.length === 4) {
+    return color;
+  }
+  const output = color.slice();
+  output[3] = 1;
+  return output;
+}
+function rgbaToLcha(color) {
+  const output = xyz.lchuv(rgb.xyz(color));
+  output[3] = color[3];
+  return output;
+}
+function lchaToRgba(color) {
+  const output = xyz.rgb(lchuv.xyz(color));
+  output[3] = color[3];
+  return output;
+}
+function fromString(s) {
+  if (cache.hasOwnProperty(s)) {
+    return cache[s];
+  }
+  if (cacheSize >= MAX_CACHE_SIZE) {
+    let i = 0;
+    for (const key in cache) {
+      if ((i++ & 3) === 0) {
+        delete cache[key];
+        --cacheSize;
+      }
+    }
+  }
+  const color = rgba(s);
+  if (color.length !== 4) {
+    throw new Error('Failed to parse "' + s + '" as color');
+  }
+  for (const c of color) {
+    if (isNaN(c)) {
+      throw new Error('Failed to parse "' + s + '" as color');
+    }
+  }
+  normalize(color);
+  cache[s] = color;
+  ++cacheSize;
+  return color;
+}
+function asArray(color) {
+  if (Array.isArray(color)) {
+    return color;
+  }
+  return fromString(color);
+}
+function normalize(color) {
+  color[0] = clamp(color[0] + 0.5 | 0, 0, 255);
+  color[1] = clamp(color[1] + 0.5 | 0, 0, 255);
+  color[2] = clamp(color[2] + 0.5 | 0, 0, 255);
+  color[3] = clamp(color[3], 0, 1);
+  return color;
+}
+function toString(color) {
+  let r2 = color[0];
+  if (r2 != (r2 | 0)) {
+    r2 = r2 + 0.5 | 0;
+  }
+  let g = color[1];
+  if (g != (g | 0)) {
+    g = g + 0.5 | 0;
+  }
+  let b2 = color[2];
+  if (b2 != (b2 | 0)) {
+    b2 = b2 + 0.5 | 0;
+  }
+  const a2 = color[3] === void 0 ? 1 : Math.round(color[3] * 1e3) / 1e3;
+  return "rgba(" + r2 + "," + g + "," + b2 + "," + a2 + ")";
+}
+function isStringColor(s) {
+  try {
+    fromString(s);
+    return true;
+  } catch (_2) {
+    return false;
+  }
+}
+const ua = typeof navigator !== "undefined" && typeof navigator.userAgent !== "undefined" ? navigator.userAgent.toLowerCase() : "";
+const FIREFOX = ua.includes("firefox");
+const SAFARI = ua.includes("safari") && !ua.includes("chrom");
+SAFARI && (ua.includes("version/15.4") || /cpu (os|iphone os) 15_4 like mac os x/.test(ua));
+const WEBKIT = ua.includes("webkit") && !ua.includes("edge");
+const MAC = ua.includes("macintosh");
+const DEVICE_PIXEL_RATIO = typeof devicePixelRatio !== "undefined" ? devicePixelRatio : 1;
+const WORKER_OFFSCREEN_CANVAS = typeof WorkerGlobalScope !== "undefined" && typeof OffscreenCanvas !== "undefined" && self instanceof WorkerGlobalScope;
+const IMAGE_DECODE = typeof Image !== "undefined" && Image.prototype.decode;
+const PASSIVE_EVENT_LISTENERS = function() {
+  let passive2 = false;
+  try {
+    const options = Object.defineProperty({}, "passive", {
+      get: function() {
+        passive2 = true;
+      }
+    });
+    window.addEventListener("_", null, options);
+    window.removeEventListener("_", null, options);
+  } catch (error) {
+  }
+  return passive2;
+}();
+function createCanvasContext2D(width, height, canvasPool2, settings) {
+  let canvas;
+  if (canvasPool2 && canvasPool2.length) {
+    canvas = /** @type {HTMLCanvasElement} */
+    canvasPool2.shift();
+  } else if (WORKER_OFFSCREEN_CANVAS) {
+    canvas = new OffscreenCanvas(width || 300, height || 300);
+  } else {
+    canvas = document.createElement("canvas");
+  }
+  if (width) {
+    canvas.width = width;
+  }
+  if (height) {
+    canvas.height = height;
+  }
+  return (
+    /** @type {CanvasRenderingContext2D} */
+    canvas.getContext("2d", settings)
+  );
+}
+let sharedCanvasContext;
+function getSharedCanvasContext2D() {
+  if (!sharedCanvasContext) {
+    sharedCanvasContext = createCanvasContext2D(1, 1);
+  }
+  return sharedCanvasContext;
+}
+function releaseCanvas(context) {
+  const canvas = context.canvas;
+  canvas.width = 1;
+  canvas.height = 1;
+  context.clearRect(0, 0, 1, 1);
+}
+function replaceNode(newNode, oldNode) {
+  const parent = oldNode.parentNode;
+  if (parent) {
+    parent.replaceChild(newNode, oldNode);
+  }
+}
+function removeNode(node) {
+  return node && node.parentNode ? node.parentNode.removeChild(node) : null;
+}
+function removeChildren(node) {
+  while (node.lastChild) {
+    node.removeChild(node.lastChild);
+  }
+}
+function replaceChildren(node, children) {
+  const oldChildren = node.childNodes;
+  for (let i = 0; true; ++i) {
+    const oldChild = oldChildren[i];
+    const newChild = children[i];
+    if (!oldChild && !newChild) {
+      break;
+    }
+    if (oldChild === newChild) {
+      continue;
+    }
+    if (!oldChild) {
+      node.appendChild(newChild);
+      continue;
+    }
+    if (!newChild) {
+      node.removeChild(oldChild);
+      --i;
+      continue;
+    }
+    node.insertBefore(newChild, oldChild);
+  }
+}
+function listenImage(image, loadHandler, errorHandler) {
+  const img = (
+    /** @type {HTMLImageElement} */
+    image
+  );
+  let listening = true;
+  let decoding = false;
+  let loaded = false;
+  const listenerKeys = [
+    listenOnce(img, EventType.LOAD, function() {
+      loaded = true;
+      if (!decoding) {
+        loadHandler();
+      }
+    })
+  ];
+  if (img.src && IMAGE_DECODE) {
+    decoding = true;
+    img.decode().then(function() {
+      if (listening) {
+        loadHandler();
+      }
+    }).catch(function(error) {
+      if (listening) {
+        if (loaded) {
+          loadHandler();
+        } else {
+          errorHandler();
+        }
+      }
+    });
+  } else {
+    listenerKeys.push(listenOnce(img, EventType.ERROR, errorHandler));
+  }
+  return function unlisten() {
+    listening = false;
+    listenerKeys.forEach(unlistenByKey);
+  };
+}
+function load(image, src) {
+  return new Promise((resolve, reject) => {
+    function handleLoad() {
+      unlisten();
+      resolve(image);
+    }
+    function handleError() {
+      unlisten();
+      reject(new Error("Image load error"));
+    }
+    function unlisten() {
+      image.removeEventListener("load", handleLoad);
+      image.removeEventListener("error", handleError);
+    }
+    image.addEventListener("load", handleLoad);
+    image.addEventListener("error", handleError);
+  });
+}
+function decodeFallback(image, src) {
+  if (src) {
+    image.src = src;
+  }
+  return image.src && IMAGE_DECODE ? new Promise(
+    (resolve, reject) => image.decode().then(() => resolve(image)).catch(
+      (e) => image.complete && image.width ? resolve(image) : reject(e)
+    )
+  ) : load(image);
+}
+class IconImageCache {
+  constructor() {
+    this.cache_ = {};
+    this.patternCache_ = {};
+    this.cacheSize_ = 0;
+    this.maxCacheSize_ = 32;
+  }
+  /**
+   * FIXME empty description for jsdoc
+   */
+  clear() {
+    this.cache_ = {};
+    this.patternCache_ = {};
+    this.cacheSize_ = 0;
+  }
+  /**
+   * @return {boolean} Can expire cache.
+   */
+  canExpireCache() {
+    return this.cacheSize_ > this.maxCacheSize_;
+  }
+  /**
+   * FIXME empty description for jsdoc
+   */
+  expire() {
+    if (this.canExpireCache()) {
+      let i = 0;
+      for (const key in this.cache_) {
+        const iconImage = this.cache_[key];
+        if ((i++ & 3) === 0 && !iconImage.hasListener()) {
+          delete this.cache_[key];
+          delete this.patternCache_[key];
+          --this.cacheSize_;
+        }
+      }
+    }
+  }
+  /**
+   * @param {string} src Src.
+   * @param {?string} crossOrigin Cross origin.
+   * @param {import("../color.js").Color|string|null} color Color.
+   * @return {import("./IconImage.js").default} Icon image.
+   */
+  get(src, crossOrigin, color) {
+    const key = getCacheKey(src, crossOrigin, color);
+    return key in this.cache_ ? this.cache_[key] : null;
+  }
+  /**
+   * @param {string} src Src.
+   * @param {?string} crossOrigin Cross origin.
+   * @param {import("../color.js").Color|string|null} color Color.
+   * @return {CanvasPattern} Icon image.
+   */
+  getPattern(src, crossOrigin, color) {
+    const key = getCacheKey(src, crossOrigin, color);
+    return key in this.patternCache_ ? this.patternCache_[key] : null;
+  }
+  /**
+   * @param {string} src Src.
+   * @param {?string} crossOrigin Cross origin.
+   * @param {import("../color.js").Color|string|null} color Color.
+   * @param {import("./IconImage.js").default|null} iconImage Icon image.
+   * @param {boolean} [pattern] Also cache a `'repeat'` pattern with this `iconImage`.
+   */
+  set(src, crossOrigin, color, iconImage, pattern) {
+    const key = getCacheKey(src, crossOrigin, color);
+    const update = key in this.cache_;
+    this.cache_[key] = iconImage;
+    if (pattern) {
+      if (iconImage.getImageState() === ImageState.IDLE) {
+        iconImage.load();
+      }
+      if (iconImage.getImageState() === ImageState.LOADING) {
+        iconImage.ready().then(() => {
+          this.patternCache_[key] = getSharedCanvasContext2D().createPattern(
+            iconImage.getImage(1),
+            "repeat"
+          );
+        });
+      } else {
+        this.patternCache_[key] = getSharedCanvasContext2D().createPattern(
+          iconImage.getImage(1),
+          "repeat"
+        );
+      }
+    }
+    if (!update) {
+      ++this.cacheSize_;
+    }
+  }
+  /**
+   * Set the cache size of the icon cache. Default is `32`. Change this value when
+   * your map uses more than 32 different icon images and you are not caching icon
+   * styles on the application level.
+   * @param {number} maxCacheSize Cache max size.
+   * @api
+   */
+  setSize(maxCacheSize) {
+    this.maxCacheSize_ = maxCacheSize;
+    this.expire();
+  }
+}
+function getCacheKey(src, crossOrigin, color) {
+  const colorString = color ? asArray(color) : "null";
+  return crossOrigin + ":" + src + ":" + colorString;
+}
+const shared = new IconImageCache();
+let taintedTestContext = null;
+class IconImage extends Target {
+  /**
+   * @param {HTMLImageElement|HTMLCanvasElement|ImageBitmap|null} image Image.
+   * @param {string|undefined} src Src.
+   * @param {?string} crossOrigin Cross origin.
+   * @param {import("../ImageState.js").default|undefined} imageState Image state.
+   * @param {import("../color.js").Color|string|null} color Color.
+   */
+  constructor(image, src, crossOrigin, imageState, color) {
+    super();
+    this.hitDetectionImage_ = null;
+    this.image_ = image;
+    this.crossOrigin_ = crossOrigin;
+    this.canvas_ = {};
+    this.color_ = color;
+    this.imageState_ = imageState === void 0 ? ImageState.IDLE : imageState;
+    this.size_ = image && image.width && image.height ? [image.width, image.height] : null;
+    this.src_ = src;
+    this.tainted_;
+    this.ready_ = null;
+  }
+  /**
+   * @private
+   */
+  initializeImage_() {
+    this.image_ = new Image();
+    if (this.crossOrigin_ !== null) {
+      this.image_.crossOrigin = this.crossOrigin_;
+    }
+  }
+  /**
+   * @private
+   * @return {boolean} The image canvas is tainted.
+   */
+  isTainted_() {
+    if (this.tainted_ === void 0 && this.imageState_ === ImageState.LOADED) {
+      if (!taintedTestContext) {
+        taintedTestContext = createCanvasContext2D(1, 1, void 0, {
+          willReadFrequently: true
+        });
+      }
+      taintedTestContext.drawImage(this.image_, 0, 0);
+      try {
+        taintedTestContext.getImageData(0, 0, 1, 1);
+        this.tainted_ = false;
+      } catch (e) {
+        taintedTestContext = null;
+        this.tainted_ = true;
+      }
+    }
+    return this.tainted_ === true;
+  }
+  /**
+   * @private
+   */
+  dispatchChangeEvent_() {
+    this.dispatchEvent(EventType.CHANGE);
+  }
+  /**
+   * @private
+   */
+  handleImageError_() {
+    this.imageState_ = ImageState.ERROR;
+    this.dispatchChangeEvent_();
+  }
+  /**
+   * @private
+   */
+  handleImageLoad_() {
+    this.imageState_ = ImageState.LOADED;
+    this.size_ = [this.image_.width, this.image_.height];
+    this.dispatchChangeEvent_();
+  }
+  /**
+   * @param {number} pixelRatio Pixel ratio.
+   * @return {HTMLImageElement|HTMLCanvasElement|ImageBitmap} Image or Canvas element or image bitmap.
+   */
+  getImage(pixelRatio) {
+    if (!this.image_) {
+      this.initializeImage_();
+    }
+    this.replaceColor_(pixelRatio);
+    return this.canvas_[pixelRatio] ? this.canvas_[pixelRatio] : this.image_;
+  }
+  /**
+   * @param {number} pixelRatio Pixel ratio.
+   * @return {number} Image or Canvas element.
+   */
+  getPixelRatio(pixelRatio) {
+    this.replaceColor_(pixelRatio);
+    return this.canvas_[pixelRatio] ? pixelRatio : 1;
+  }
+  /**
+   * @return {import("../ImageState.js").default} Image state.
+   */
+  getImageState() {
+    return this.imageState_;
+  }
+  /**
+   * @return {HTMLImageElement|HTMLCanvasElement|ImageBitmap} Image element.
+   */
+  getHitDetectionImage() {
+    if (!this.image_) {
+      this.initializeImage_();
+    }
+    if (!this.hitDetectionImage_) {
+      if (this.isTainted_()) {
+        const width = this.size_[0];
+        const height = this.size_[1];
+        const context = createCanvasContext2D(width, height);
+        context.fillRect(0, 0, width, height);
+        this.hitDetectionImage_ = context.canvas;
+      } else {
+        this.hitDetectionImage_ = this.image_;
+      }
+    }
+    return this.hitDetectionImage_;
+  }
+  /**
+   * Get the size of the icon (in pixels).
+   * @return {import("../size.js").Size} Image size.
+   */
+  getSize() {
+    return this.size_;
+  }
+  /**
+   * @return {string|undefined} Image src.
+   */
+  getSrc() {
+    return this.src_;
+  }
+  /**
+   * Load not yet loaded URI.
+   */
+  load() {
+    if (this.imageState_ !== ImageState.IDLE) {
+      return;
+    }
+    if (!this.image_) {
+      this.initializeImage_();
+    }
+    this.imageState_ = ImageState.LOADING;
+    try {
+      if (this.src_ !== void 0) {
+        this.image_.src = this.src_;
+      }
+    } catch (e) {
+      this.handleImageError_();
+    }
+    if (this.image_ instanceof HTMLImageElement) {
+      decodeFallback(this.image_, this.src_).then((image) => {
+        this.image_ = image;
+        this.handleImageLoad_();
+      }).catch(this.handleImageError_.bind(this));
+    }
+  }
+  /**
+   * @param {number} pixelRatio Pixel ratio.
+   * @private
+   */
+  replaceColor_(pixelRatio) {
+    if (!this.color_ || this.canvas_[pixelRatio] || this.imageState_ !== ImageState.LOADED) {
+      return;
+    }
+    const image = this.image_;
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.ceil(image.width * pixelRatio);
+    canvas.height = Math.ceil(image.height * pixelRatio);
+    const ctx = canvas.getContext("2d");
+    ctx.scale(pixelRatio, pixelRatio);
+    ctx.drawImage(image, 0, 0);
+    ctx.globalCompositeOperation = "multiply";
+    ctx.fillStyle = asString(this.color_);
+    ctx.fillRect(0, 0, canvas.width / pixelRatio, canvas.height / pixelRatio);
+    ctx.globalCompositeOperation = "destination-in";
+    ctx.drawImage(image, 0, 0);
+    this.canvas_[pixelRatio] = canvas;
+  }
+  /**
+   * @return {Promise<void>} Promise that resolves when the image is loaded.
+   */
+  ready() {
+    if (!this.ready_) {
+      this.ready_ = new Promise((resolve) => {
+        if (this.imageState_ === ImageState.LOADED || this.imageState_ === ImageState.ERROR) {
+          resolve();
+        } else {
+          this.addEventListener(EventType.CHANGE, function onChange() {
+            if (this.imageState_ === ImageState.LOADED || this.imageState_ === ImageState.ERROR) {
+              this.removeEventListener(EventType.CHANGE, onChange);
+              resolve();
+            }
+          });
+        }
+      });
+    }
+    return this.ready_;
+  }
+}
+function get(image, cacheKey, crossOrigin, imageState, color, pattern) {
+  let iconImage = cacheKey === void 0 ? void 0 : shared.get(cacheKey, crossOrigin, color);
+  if (!iconImage) {
+    iconImage = new IconImage(
+      image,
+      image && "src" in image ? image.src || void 0 : cacheKey,
+      crossOrigin,
+      imageState,
+      color
+    );
+    shared.set(cacheKey, crossOrigin, color, iconImage, pattern);
+  }
+  if (pattern && iconImage && !shared.getPattern(cacheKey, crossOrigin, color)) {
+    shared.set(cacheKey, crossOrigin, color, iconImage, pattern);
+  }
+  return iconImage;
+}
+function asColorLike(color) {
+  if (!color) {
+    return null;
+  }
+  if (Array.isArray(color)) {
+    return toString(color);
+  }
+  if (typeof color === "object" && "src" in color) {
+    return asCanvasPattern(color);
+  }
+  return color;
+}
+function asCanvasPattern(pattern) {
+  if (!pattern.offset || !pattern.size) {
+    return shared.getPattern(pattern.src, "anonymous", pattern.color);
+  }
+  const cacheKey = pattern.src + ":" + pattern.offset;
+  const canvasPattern = shared.getPattern(
+    cacheKey,
+    void 0,
+    pattern.color
+  );
+  if (canvasPattern) {
+    return canvasPattern;
+  }
+  const iconImage = shared.get(pattern.src, "anonymous", null);
+  if (iconImage.getImageState() !== ImageState.LOADED) {
+    return null;
+  }
+  const patternCanvasContext = createCanvasContext2D(
+    pattern.size[0],
+    pattern.size[1]
+  );
+  patternCanvasContext.drawImage(
+    iconImage.getImage(1),
+    pattern.offset[0],
+    pattern.offset[1],
+    pattern.size[0],
+    pattern.size[1],
+    0,
+    0,
+    pattern.size[0],
+    pattern.size[1]
+  );
+  get(
+    patternCanvasContext.canvas,
+    cacheKey,
+    void 0,
+    ImageState.LOADED,
+    pattern.color,
+    true
+  );
+  return shared.getPattern(cacheKey, void 0, pattern.color);
+}
+const CLASS_HIDDEN = "ol-hidden";
+const CLASS_UNSELECTABLE = "ol-unselectable";
+const CLASS_CONTROL = "ol-control";
+const CLASS_COLLAPSED = "ol-collapsed";
+const defaultFillStyle = "#000";
+const defaultLineCap = "round";
+const defaultLineJoin = "round";
+const defaultMiterLimit = 10;
+const defaultStrokeStyle = "#000";
+const defaultLineWidth = 1;
+const checkedFonts = new BaseObject();
+class RegularShape extends ImageStyle {
+  /**
+   * @param {Options} options Options.
+   */
+  constructor(options) {
+    super({
+      opacity: 1,
+      rotateWithView: options.rotateWithView !== void 0 ? options.rotateWithView : false,
+      rotation: options.rotation !== void 0 ? options.rotation : 0,
+      scale: options.scale !== void 0 ? options.scale : 1,
+      displacement: options.displacement !== void 0 ? options.displacement : [0, 0],
+      declutterMode: options.declutterMode
+    });
+    this.canvases_;
+    this.hitDetectionCanvas_ = null;
+    this.fill_ = options.fill !== void 0 ? options.fill : null;
+    this.origin_ = [0, 0];
+    this.points_ = options.points;
+    this.radius_ = options.radius;
+    this.radius2_ = options.radius2;
+    this.angle_ = options.angle !== void 0 ? options.angle : 0;
+    this.stroke_ = options.stroke !== void 0 ? options.stroke : null;
+    this.size_;
+    this.renderOptions_;
+    this.imageState_ = this.fill_ && this.fill_.loading() ? ImageState.LOADING : ImageState.LOADED;
+    if (this.imageState_ === ImageState.LOADING) {
+      this.ready().then(() => this.imageState_ = ImageState.LOADED);
+    }
+    this.render();
+  }
+  /**
+   * Clones the style.
+   * @return {RegularShape} The cloned style.
+   * @api
+   */
+  clone() {
+    const scale2 = this.getScale();
+    const style = new RegularShape({
+      fill: this.getFill() ? this.getFill().clone() : void 0,
+      points: this.getPoints(),
+      radius: this.getRadius(),
+      radius2: this.getRadius2(),
+      angle: this.getAngle(),
+      stroke: this.getStroke() ? this.getStroke().clone() : void 0,
+      rotation: this.getRotation(),
+      rotateWithView: this.getRotateWithView(),
+      scale: Array.isArray(scale2) ? scale2.slice() : scale2,
+      displacement: this.getDisplacement().slice(),
+      declutterMode: this.getDeclutterMode()
+    });
+    style.setOpacity(this.getOpacity());
+    return style;
+  }
+  /**
+   * Get the anchor point in pixels. The anchor determines the center point for the
+   * symbolizer.
+   * @return {Array<number>} Anchor.
+   * @api
+   */
+  getAnchor() {
+    const size = this.size_;
+    const displacement = this.getDisplacement();
+    const scale2 = this.getScaleArray();
+    return [
+      size[0] / 2 - displacement[0] / scale2[0],
+      size[1] / 2 + displacement[1] / scale2[1]
+    ];
+  }
+  /**
+   * Get the angle used in generating the shape.
+   * @return {number} Shape's rotation in radians.
+   * @api
+   */
+  getAngle() {
+    return this.angle_;
+  }
+  /**
+   * Get the fill style for the shape.
+   * @return {import("./Fill.js").default|null} Fill style.
+   * @api
+   */
+  getFill() {
+    return this.fill_;
+  }
+  /**
+   * Set the fill style.
+   * @param {import("./Fill.js").default|null} fill Fill style.
+   * @api
+   */
+  setFill(fill) {
+    this.fill_ = fill;
+    this.render();
+  }
+  /**
+   * @return {HTMLCanvasElement} Image element.
+   */
+  getHitDetectionImage() {
+    if (!this.hitDetectionCanvas_) {
+      this.hitDetectionCanvas_ = this.createHitDetectionCanvas_(
+        this.renderOptions_
+      );
+    }
+    return this.hitDetectionCanvas_;
+  }
+  /**
+   * Get the image icon.
+   * @param {number} pixelRatio Pixel ratio.
+   * @return {HTMLCanvasElement} Image or Canvas element.
+   * @api
+   */
+  getImage(pixelRatio) {
+    let image = this.canvases_[pixelRatio];
+    if (!image) {
+      const renderOptions = this.renderOptions_;
+      const context = createCanvasContext2D(
+        renderOptions.size * pixelRatio,
+        renderOptions.size * pixelRatio
+      );
+      this.draw_(renderOptions, context, pixelRatio);
+      image = context.canvas;
+      this.canvases_[pixelRatio] = image;
+    }
+    return image;
+  }
+  /**
+   * Get the image pixel ratio.
+   * @param {number} pixelRatio Pixel ratio.
+   * @return {number} Pixel ratio.
+   */
+  getPixelRatio(pixelRatio) {
+    return pixelRatio;
+  }
+  /**
+   * @return {import("../size.js").Size} Image size.
+   */
+  getImageSize() {
+    return this.size_;
+  }
+  /**
+   * @return {import("../ImageState.js").default} Image state.
+   */
+  getImageState() {
+    return this.imageState_;
+  }
+  /**
+   * Get the origin of the symbolizer.
+   * @return {Array<number>} Origin.
+   * @api
+   */
+  getOrigin() {
+    return this.origin_;
+  }
+  /**
+   * Get the number of points for generating the shape.
+   * @return {number} Number of points for stars and regular polygons.
+   * @api
+   */
+  getPoints() {
+    return this.points_;
+  }
+  /**
+   * Get the (primary) radius for the shape.
+   * @return {number} Radius.
+   * @api
+   */
+  getRadius() {
+    return this.radius_;
+  }
+  /**
+   * Get the secondary radius for the shape.
+   * @return {number|undefined} Radius2.
+   * @api
+   */
+  getRadius2() {
+    return this.radius2_;
+  }
+  /**
+   * Get the size of the symbolizer (in pixels).
+   * @return {import("../size.js").Size} Size.
+   * @api
+   */
+  getSize() {
+    return this.size_;
+  }
+  /**
+   * Get the stroke style for the shape.
+   * @return {import("./Stroke.js").default|null} Stroke style.
+   * @api
+   */
+  getStroke() {
+    return this.stroke_;
+  }
+  /**
+   * Set the stroke style.
+   * @param {import("./Stroke.js").default|null} stroke Stroke style.
+   * @api
+   */
+  setStroke(stroke) {
+    this.stroke_ = stroke;
+    this.render();
+  }
+  /**
+   * @param {function(import("../events/Event.js").default): void} listener Listener function.
+   */
+  listenImageChange(listener) {
+  }
+  /**
+   * Load not yet loaded URI.
+   */
+  load() {
+  }
+  /**
+   * @param {function(import("../events/Event.js").default): void} listener Listener function.
+   */
+  unlistenImageChange(listener) {
+  }
+  /**
+   * Calculate additional canvas size needed for the miter.
+   * @param {string} lineJoin Line join
+   * @param {number} strokeWidth Stroke width
+   * @param {number} miterLimit Miter limit
+   * @return {number} Additional canvas size needed
+   * @private
+   */
+  calculateLineJoinSize_(lineJoin, strokeWidth, miterLimit) {
+    if (strokeWidth === 0 || this.points_ === Infinity || lineJoin !== "bevel" && lineJoin !== "miter") {
+      return strokeWidth;
+    }
+    let r1 = this.radius_;
+    let r2 = this.radius2_ === void 0 ? r1 : this.radius2_;
+    if (r1 < r2) {
+      const tmp = r1;
+      r1 = r2;
+      r2 = tmp;
+    }
+    const points = this.radius2_ === void 0 ? this.points_ : this.points_ * 2;
+    const alpha = 2 * Math.PI / points;
+    const a2 = r2 * Math.sin(alpha);
+    const b2 = Math.sqrt(r2 * r2 - a2 * a2);
+    const d2 = r1 - b2;
+    const e = Math.sqrt(a2 * a2 + d2 * d2);
+    const miterRatio = e / a2;
+    if (lineJoin === "miter" && miterRatio <= miterLimit) {
+      return miterRatio * strokeWidth;
+    }
+    const k2 = strokeWidth / 2 / miterRatio;
+    const l = strokeWidth / 2 * (d2 / e);
+    const maxr = Math.sqrt((r1 + k2) * (r1 + k2) + l * l);
+    const bevelAdd = maxr - r1;
+    if (this.radius2_ === void 0 || lineJoin === "bevel") {
+      return bevelAdd * 2;
+    }
+    const aa = r1 * Math.sin(alpha);
+    const bb = Math.sqrt(r1 * r1 - aa * aa);
+    const dd = r2 - bb;
+    const ee = Math.sqrt(aa * aa + dd * dd);
+    const innerMiterRatio = ee / aa;
+    if (innerMiterRatio <= miterLimit) {
+      const innerLength = innerMiterRatio * strokeWidth / 2 - r2 - r1;
+      return 2 * Math.max(bevelAdd, innerLength);
+    }
+    return bevelAdd * 2;
+  }
+  /**
+   * @return {RenderOptions}  The render options
+   * @protected
+   */
+  createRenderOptions() {
+    let lineCap = defaultLineCap;
+    let lineJoin = defaultLineJoin;
+    let miterLimit = 0;
+    let lineDash = null;
+    let lineDashOffset = 0;
+    let strokeStyle;
+    let strokeWidth = 0;
+    if (this.stroke_) {
+      strokeStyle = asColorLike(this.stroke_.getColor() ?? defaultStrokeStyle);
+      strokeWidth = this.stroke_.getWidth() ?? defaultLineWidth;
+      lineDash = this.stroke_.getLineDash();
+      lineDashOffset = this.stroke_.getLineDashOffset() ?? 0;
+      lineJoin = this.stroke_.getLineJoin() ?? defaultLineJoin;
+      lineCap = this.stroke_.getLineCap() ?? defaultLineCap;
+      miterLimit = this.stroke_.getMiterLimit() ?? defaultMiterLimit;
+    }
+    const add2 = this.calculateLineJoinSize_(lineJoin, strokeWidth, miterLimit);
+    const maxRadius = Math.max(this.radius_, this.radius2_ || 0);
+    const size = Math.ceil(2 * maxRadius + add2);
+    return {
+      strokeStyle,
+      strokeWidth,
+      size,
+      lineCap,
+      lineDash,
+      lineDashOffset,
+      lineJoin,
+      miterLimit
+    };
+  }
+  /**
+   * @protected
+   */
+  render() {
+    this.renderOptions_ = this.createRenderOptions();
+    const size = this.renderOptions_.size;
+    this.canvases_ = {};
+    this.hitDetectionCanvas_ = null;
+    this.size_ = [size, size];
+  }
+  /**
+   * @private
+   * @param {RenderOptions} renderOptions Render options.
+   * @param {CanvasRenderingContext2D} context The rendering context.
+   * @param {number} pixelRatio The pixel ratio.
+   */
+  draw_(renderOptions, context, pixelRatio) {
+    context.scale(pixelRatio, pixelRatio);
+    context.translate(renderOptions.size / 2, renderOptions.size / 2);
+    this.createPath_(context);
+    if (this.fill_) {
+      let color = this.fill_.getColor();
+      if (color === null) {
+        color = defaultFillStyle;
+      }
+      context.fillStyle = asColorLike(color);
+      context.fill();
+    }
+    if (renderOptions.strokeStyle) {
+      context.strokeStyle = renderOptions.strokeStyle;
+      context.lineWidth = renderOptions.strokeWidth;
+      if (renderOptions.lineDash) {
+        context.setLineDash(renderOptions.lineDash);
+        context.lineDashOffset = renderOptions.lineDashOffset;
+      }
+      context.lineCap = renderOptions.lineCap;
+      context.lineJoin = renderOptions.lineJoin;
+      context.miterLimit = renderOptions.miterLimit;
+      context.stroke();
+    }
+  }
+  /**
+   * @private
+   * @param {RenderOptions} renderOptions Render options.
+   * @return {HTMLCanvasElement} Canvas containing the icon
+   */
+  createHitDetectionCanvas_(renderOptions) {
+    let context;
+    if (this.fill_) {
+      let color = this.fill_.getColor();
+      let opacity = 0;
+      if (typeof color === "string") {
+        color = asArray(color);
+      }
+      if (color === null) {
+        opacity = 1;
+      } else if (Array.isArray(color)) {
+        opacity = color.length === 4 ? color[3] : 1;
+      }
+      if (opacity === 0) {
+        context = createCanvasContext2D(renderOptions.size, renderOptions.size);
+        this.drawHitDetectionCanvas_(renderOptions, context);
+      }
+    }
+    return context ? context.canvas : this.getImage(1);
+  }
+  /**
+   * @private
+   * @param {CanvasRenderingContext2D} context The context to draw in.
+   */
+  createPath_(context) {
+    let points = this.points_;
+    const radius = this.radius_;
+    if (points === Infinity) {
+      context.arc(0, 0, radius, 0, 2 * Math.PI);
+    } else {
+      const radius2 = this.radius2_ === void 0 ? radius : this.radius2_;
+      if (this.radius2_ !== void 0) {
+        points *= 2;
+      }
+      const startAngle = this.angle_ - Math.PI / 2;
+      const step = 2 * Math.PI / points;
+      for (let i = 0; i < points; i++) {
+        const angle0 = startAngle + i * step;
+        const radiusC = i % 2 === 0 ? radius : radius2;
+        context.lineTo(radiusC * Math.cos(angle0), radiusC * Math.sin(angle0));
+      }
+      context.closePath();
+    }
+  }
+  /**
+   * @private
+   * @param {RenderOptions} renderOptions Render options.
+   * @param {CanvasRenderingContext2D} context The context.
+   */
+  drawHitDetectionCanvas_(renderOptions, context) {
+    context.translate(renderOptions.size / 2, renderOptions.size / 2);
+    this.createPath_(context);
+    context.fillStyle = defaultFillStyle;
+    context.fill();
+    if (renderOptions.strokeStyle) {
+      context.strokeStyle = renderOptions.strokeStyle;
+      context.lineWidth = renderOptions.strokeWidth;
+      if (renderOptions.lineDash) {
+        context.setLineDash(renderOptions.lineDash);
+        context.lineDashOffset = renderOptions.lineDashOffset;
+      }
+      context.lineJoin = renderOptions.lineJoin;
+      context.miterLimit = renderOptions.miterLimit;
+      context.stroke();
+    }
+  }
+  ready() {
+    return this.fill_ ? this.fill_.ready() : Promise.resolve();
+  }
+}
+class CircleStyle extends RegularShape {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    options = options ? options : { radius: 5 };
+    super({
+      points: Infinity,
+      fill: options.fill,
+      radius: options.radius,
+      stroke: options.stroke,
+      scale: options.scale !== void 0 ? options.scale : 1,
+      rotation: options.rotation !== void 0 ? options.rotation : 0,
+      rotateWithView: options.rotateWithView !== void 0 ? options.rotateWithView : false,
+      displacement: options.displacement !== void 0 ? options.displacement : [0, 0],
+      declutterMode: options.declutterMode
+    });
+  }
+  /**
+   * Clones the style.
+   * @return {CircleStyle} The cloned style.
+   * @api
+   */
+  clone() {
+    const scale2 = this.getScale();
+    const style = new CircleStyle({
+      fill: this.getFill() ? this.getFill().clone() : void 0,
+      stroke: this.getStroke() ? this.getStroke().clone() : void 0,
+      radius: this.getRadius(),
+      scale: Array.isArray(scale2) ? scale2.slice() : scale2,
+      rotation: this.getRotation(),
+      rotateWithView: this.getRotateWithView(),
+      displacement: this.getDisplacement().slice(),
+      declutterMode: this.getDeclutterMode()
+    });
+    style.setOpacity(this.getOpacity());
+    return style;
+  }
+  /**
+   * Set the circle radius.
+   *
+   * @param {number} radius Circle radius.
+   * @api
+   */
+  setRadius(radius) {
+    this.radius_ = radius;
+    this.render();
+  }
+}
+class Fill {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    options = options || {};
+    this.patternImage_ = null;
+    this.color_ = null;
+    if (options.color !== void 0) {
+      this.setColor(options.color);
+    }
+  }
+  /**
+   * Clones the style. The color is not cloned if it is an {@link module:ol/colorlike~ColorLike}.
+   * @return {Fill} The cloned style.
+   * @api
+   */
+  clone() {
+    const color = this.getColor();
+    return new Fill({
+      color: Array.isArray(color) ? color.slice() : color || void 0
+    });
+  }
+  /**
+   * Get the fill color.
+   * @return {import("../color.js").Color|import("../colorlike.js").ColorLike|import('../colorlike.js').PatternDescriptor|null} Color.
+   * @api
+   */
+  getColor() {
+    return this.color_;
+  }
+  /**
+   * Set the color.
+   *
+   * @param {import("../color.js").Color|import("../colorlike.js").ColorLike|import('../colorlike.js').PatternDescriptor|null} color Color.
+   * @api
+   */
+  setColor(color) {
+    if (color !== null && typeof color === "object" && "src" in color) {
+      const patternImage = get(
+        null,
+        color.src,
+        "anonymous",
+        void 0,
+        color.offset ? null : color.color ? color.color : null,
+        !(color.offset && color.size)
+      );
+      patternImage.ready().then(() => {
+        this.patternImage_ = null;
+      });
+      if (patternImage.getImageState() === ImageState.IDLE) {
+        patternImage.load();
+      }
+      if (patternImage.getImageState() === ImageState.LOADING) {
+        this.patternImage_ = patternImage;
+      }
+    }
+    this.color_ = color;
+  }
+  /**
+   * @return {boolean} The fill style is loading an image pattern.
+   */
+  loading() {
+    return !!this.patternImage_;
+  }
+  /**
+   * @return {Promise<void>} `false` or a promise that resolves when the style is ready to use.
+   */
+  ready() {
+    return this.patternImage_ ? this.patternImage_.ready() : Promise.resolve();
+  }
+}
+class Stroke {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    options = options || {};
+    this.color_ = options.color !== void 0 ? options.color : null;
+    this.lineCap_ = options.lineCap;
+    this.lineDash_ = options.lineDash !== void 0 ? options.lineDash : null;
+    this.lineDashOffset_ = options.lineDashOffset;
+    this.lineJoin_ = options.lineJoin;
+    this.miterLimit_ = options.miterLimit;
+    this.width_ = options.width;
+  }
+  /**
+   * Clones the style.
+   * @return {Stroke} The cloned style.
+   * @api
+   */
+  clone() {
+    const color = this.getColor();
+    return new Stroke({
+      color: Array.isArray(color) ? color.slice() : color || void 0,
+      lineCap: this.getLineCap(),
+      lineDash: this.getLineDash() ? this.getLineDash().slice() : void 0,
+      lineDashOffset: this.getLineDashOffset(),
+      lineJoin: this.getLineJoin(),
+      miterLimit: this.getMiterLimit(),
+      width: this.getWidth()
+    });
+  }
+  /**
+   * Get the stroke color.
+   * @return {import("../color.js").Color|import("../colorlike.js").ColorLike} Color.
+   * @api
+   */
+  getColor() {
+    return this.color_;
+  }
+  /**
+   * Get the line cap type for the stroke.
+   * @return {CanvasLineCap|undefined} Line cap.
+   * @api
+   */
+  getLineCap() {
+    return this.lineCap_;
+  }
+  /**
+   * Get the line dash style for the stroke.
+   * @return {Array<number>|null} Line dash.
+   * @api
+   */
+  getLineDash() {
+    return this.lineDash_;
+  }
+  /**
+   * Get the line dash offset for the stroke.
+   * @return {number|undefined} Line dash offset.
+   * @api
+   */
+  getLineDashOffset() {
+    return this.lineDashOffset_;
+  }
+  /**
+   * Get the line join type for the stroke.
+   * @return {CanvasLineJoin|undefined} Line join.
+   * @api
+   */
+  getLineJoin() {
+    return this.lineJoin_;
+  }
+  /**
+   * Get the miter limit for the stroke.
+   * @return {number|undefined} Miter limit.
+   * @api
+   */
+  getMiterLimit() {
+    return this.miterLimit_;
+  }
+  /**
+   * Get the stroke width.
+   * @return {number|undefined} Width.
+   * @api
+   */
+  getWidth() {
+    return this.width_;
+  }
+  /**
+   * Set the color.
+   *
+   * @param {import("../color.js").Color|import("../colorlike.js").ColorLike} color Color.
+   * @api
+   */
+  setColor(color) {
+    this.color_ = color;
+  }
+  /**
+   * Set the line cap.
+   *
+   * @param {CanvasLineCap|undefined} lineCap Line cap.
+   * @api
+   */
+  setLineCap(lineCap) {
+    this.lineCap_ = lineCap;
+  }
+  /**
+   * Set the line dash.
+   *
+   * @param {Array<number>|null} lineDash Line dash.
+   * @api
+   */
+  setLineDash(lineDash) {
+    this.lineDash_ = lineDash;
+  }
+  /**
+   * Set the line dash offset.
+   *
+   * @param {number|undefined} lineDashOffset Line dash offset.
+   * @api
+   */
+  setLineDashOffset(lineDashOffset) {
+    this.lineDashOffset_ = lineDashOffset;
+  }
+  /**
+   * Set the line join.
+   *
+   * @param {CanvasLineJoin|undefined} lineJoin Line join.
+   * @api
+   */
+  setLineJoin(lineJoin) {
+    this.lineJoin_ = lineJoin;
+  }
+  /**
+   * Set the miter limit.
+   *
+   * @param {number|undefined} miterLimit Miter limit.
+   * @api
+   */
+  setMiterLimit(miterLimit) {
+    this.miterLimit_ = miterLimit;
+  }
+  /**
+   * Set the width.
+   *
+   * @param {number|undefined} width Width.
+   * @api
+   */
+  setWidth(width) {
+    this.width_ = width;
+  }
+}
+class Style {
+  /**
+   * @param {Options} [options] Style options.
+   */
+  constructor(options) {
+    options = options || {};
+    this.geometry_ = null;
+    this.geometryFunction_ = defaultGeometryFunction;
+    if (options.geometry !== void 0) {
+      this.setGeometry(options.geometry);
+    }
+    this.fill_ = options.fill !== void 0 ? options.fill : null;
+    this.image_ = options.image !== void 0 ? options.image : null;
+    this.renderer_ = options.renderer !== void 0 ? options.renderer : null;
+    this.hitDetectionRenderer_ = options.hitDetectionRenderer !== void 0 ? options.hitDetectionRenderer : null;
+    this.stroke_ = options.stroke !== void 0 ? options.stroke : null;
+    this.text_ = options.text !== void 0 ? options.text : null;
+    this.zIndex_ = options.zIndex;
+  }
+  /**
+   * Clones the style.
+   * @return {Style} The cloned style.
+   * @api
+   */
+  clone() {
+    let geometry = this.getGeometry();
+    if (geometry && typeof geometry === "object") {
+      geometry = /** @type {import("../geom/Geometry.js").default} */
+      geometry.clone();
+    }
+    return new Style({
+      geometry: geometry ?? void 0,
+      fill: this.getFill() ? this.getFill().clone() : void 0,
+      image: this.getImage() ? this.getImage().clone() : void 0,
+      renderer: this.getRenderer() ?? void 0,
+      stroke: this.getStroke() ? this.getStroke().clone() : void 0,
+      text: this.getText() ? this.getText().clone() : void 0,
+      zIndex: this.getZIndex()
+    });
+  }
+  /**
+   * Get the custom renderer function that was configured with
+   * {@link #setRenderer} or the `renderer` constructor option.
+   * @return {RenderFunction|null} Custom renderer function.
+   * @api
+   */
+  getRenderer() {
+    return this.renderer_;
+  }
+  /**
+   * Sets a custom renderer function for this style. When set, `fill`, `stroke`
+   * and `image` options of the style will be ignored.
+   * @param {RenderFunction|null} renderer Custom renderer function.
+   * @api
+   */
+  setRenderer(renderer) {
+    this.renderer_ = renderer;
+  }
+  /**
+   * Sets a custom renderer function for this style used
+   * in hit detection.
+   * @param {RenderFunction|null} renderer Custom renderer function.
+   * @api
+   */
+  setHitDetectionRenderer(renderer) {
+    this.hitDetectionRenderer_ = renderer;
+  }
+  /**
+   * Get the custom renderer function that was configured with
+   * {@link #setHitDetectionRenderer} or the `hitDetectionRenderer` constructor option.
+   * @return {RenderFunction|null} Custom renderer function.
+   * @api
+   */
+  getHitDetectionRenderer() {
+    return this.hitDetectionRenderer_;
+  }
+  /**
+   * Get the geometry to be rendered.
+   * @return {string|import("../geom/Geometry.js").default|GeometryFunction|null}
+   * Feature property or geometry or function that returns the geometry that will
+   * be rendered with this style.
+   * @api
+   */
+  getGeometry() {
+    return this.geometry_;
+  }
+  /**
+   * Get the function used to generate a geometry for rendering.
+   * @return {!GeometryFunction} Function that is called with a feature
+   * and returns the geometry to render instead of the feature's geometry.
+   * @api
+   */
+  getGeometryFunction() {
+    return this.geometryFunction_;
+  }
+  /**
+   * Get the fill style.
+   * @return {import("./Fill.js").default|null} Fill style.
+   * @api
+   */
+  getFill() {
+    return this.fill_;
+  }
+  /**
+   * Set the fill style.
+   * @param {import("./Fill.js").default|null} fill Fill style.
+   * @api
+   */
+  setFill(fill) {
+    this.fill_ = fill;
+  }
+  /**
+   * Get the image style.
+   * @return {import("./Image.js").default|null} Image style.
+   * @api
+   */
+  getImage() {
+    return this.image_;
+  }
+  /**
+   * Set the image style.
+   * @param {import("./Image.js").default} image Image style.
+   * @api
+   */
+  setImage(image) {
+    this.image_ = image;
+  }
+  /**
+   * Get the stroke style.
+   * @return {import("./Stroke.js").default|null} Stroke style.
+   * @api
+   */
+  getStroke() {
+    return this.stroke_;
+  }
+  /**
+   * Set the stroke style.
+   * @param {import("./Stroke.js").default|null} stroke Stroke style.
+   * @api
+   */
+  setStroke(stroke) {
+    this.stroke_ = stroke;
+  }
+  /**
+   * Get the text style.
+   * @return {import("./Text.js").default|null} Text style.
+   * @api
+   */
+  getText() {
+    return this.text_;
+  }
+  /**
+   * Set the text style.
+   * @param {import("./Text.js").default} text Text style.
+   * @api
+   */
+  setText(text) {
+    this.text_ = text;
+  }
+  /**
+   * Get the z-index for the style.
+   * @return {number|undefined} ZIndex.
+   * @api
+   */
+  getZIndex() {
+    return this.zIndex_;
+  }
+  /**
+   * Set a geometry that is rendered instead of the feature's geometry.
+   *
+   * @param {string|import("../geom/Geometry.js").default|GeometryFunction} geometry
+   *     Feature property or geometry or function returning a geometry to render
+   *     for this style.
+   * @api
+   */
+  setGeometry(geometry) {
+    if (typeof geometry === "function") {
+      this.geometryFunction_ = geometry;
+    } else if (typeof geometry === "string") {
+      this.geometryFunction_ = function(feature) {
+        return (
+          /** @type {import("../geom/Geometry.js").default} */
+          feature.get(geometry)
+        );
+      };
+    } else if (!geometry) {
+      this.geometryFunction_ = defaultGeometryFunction;
+    } else if (geometry !== void 0) {
+      this.geometryFunction_ = function() {
+        return (
+          /** @type {import("../geom/Geometry.js").default} */
+          geometry
+        );
+      };
+    }
+    this.geometry_ = geometry;
+  }
+  /**
+   * Set the z-index.
+   *
+   * @param {number|undefined} zIndex ZIndex.
+   * @api
+   */
+  setZIndex(zIndex) {
+    this.zIndex_ = zIndex;
+  }
+}
+function toFunction(obj) {
+  let styleFunction;
+  if (typeof obj === "function") {
+    styleFunction = obj;
+  } else {
+    let styles;
+    if (Array.isArray(obj)) {
+      styles = obj;
+    } else {
+      assert(
+        typeof /** @type {?} */
+        obj.getZIndex === "function",
+        "Expected an `Style` or an array of `Style`"
+      );
+      const style = (
+        /** @type {Style} */
+        obj
+      );
+      styles = [style];
+    }
+    styleFunction = function() {
+      return styles;
+    };
+  }
+  return styleFunction;
+}
+let defaultStyles = null;
+function createDefaultStyle(feature, resolution) {
+  if (!defaultStyles) {
+    const fill = new Fill({
+      color: "rgba(255,255,255,0.4)"
+    });
+    const stroke = new Stroke({
+      color: "#3399CC",
+      width: 1.25
+    });
+    defaultStyles = [
+      new Style({
+        image: new CircleStyle({
+          fill,
+          stroke,
+          radius: 5
+        }),
+        fill,
+        stroke
+      })
+    ];
+  }
+  return defaultStyles;
+}
+function defaultGeometryFunction(feature) {
+  return feature.getGeometry();
+}
+const Style$1 = Style;
+function calculateScale(width, height, wantedWidth, wantedHeight) {
+  if (wantedWidth !== void 0 && wantedHeight !== void 0) {
+    return [wantedWidth / width, wantedHeight / height];
+  }
+  if (wantedWidth !== void 0) {
+    return wantedWidth / width;
+  }
+  if (wantedHeight !== void 0) {
+    return wantedHeight / height;
+  }
+  return 1;
+}
+class Icon extends ImageStyle {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    options = options || {};
+    const opacity = options.opacity !== void 0 ? options.opacity : 1;
+    const rotation = options.rotation !== void 0 ? options.rotation : 0;
+    const scale2 = options.scale !== void 0 ? options.scale : 1;
+    const rotateWithView = options.rotateWithView !== void 0 ? options.rotateWithView : false;
+    super({
+      opacity,
+      rotation,
+      scale: scale2,
+      displacement: options.displacement !== void 0 ? options.displacement : [0, 0],
+      rotateWithView,
+      declutterMode: options.declutterMode
+    });
+    this.anchor_ = options.anchor !== void 0 ? options.anchor : [0.5, 0.5];
+    this.normalizedAnchor_ = null;
+    this.anchorOrigin_ = options.anchorOrigin !== void 0 ? options.anchorOrigin : "top-left";
+    this.anchorXUnits_ = options.anchorXUnits !== void 0 ? options.anchorXUnits : "fraction";
+    this.anchorYUnits_ = options.anchorYUnits !== void 0 ? options.anchorYUnits : "fraction";
+    this.crossOrigin_ = options.crossOrigin !== void 0 ? options.crossOrigin : null;
+    const image = options.img !== void 0 ? options.img : null;
+    let cacheKey = options.src;
+    assert(
+      !(cacheKey !== void 0 && image),
+      "`image` and `src` cannot be provided at the same time"
+    );
+    if ((cacheKey === void 0 || cacheKey.length === 0) && image) {
+      cacheKey = /** @type {HTMLImageElement} */
+      image.src || getUid(image);
+    }
+    assert(
+      cacheKey !== void 0 && cacheKey.length > 0,
+      "A defined and non-empty `src` or `image` must be provided"
+    );
+    assert(
+      !((options.width !== void 0 || options.height !== void 0) && options.scale !== void 0),
+      "`width` or `height` cannot be provided together with `scale`"
+    );
+    let imageState;
+    if (options.src !== void 0) {
+      imageState = ImageState.IDLE;
+    } else if (image !== void 0) {
+      if ("complete" in image) {
+        if (image.complete) {
+          imageState = image.src ? ImageState.LOADED : ImageState.IDLE;
+        } else {
+          imageState = ImageState.LOADING;
+        }
+      } else {
+        imageState = ImageState.LOADED;
+      }
+    }
+    this.color_ = options.color !== void 0 ? asArray(options.color) : null;
+    this.iconImage_ = get(
+      image,
+      /** @type {string} */
+      cacheKey,
+      this.crossOrigin_,
+      imageState,
+      this.color_
+    );
+    this.offset_ = options.offset !== void 0 ? options.offset : [0, 0];
+    this.offsetOrigin_ = options.offsetOrigin !== void 0 ? options.offsetOrigin : "top-left";
+    this.origin_ = null;
+    this.size_ = options.size !== void 0 ? options.size : null;
+    if (options.width !== void 0 || options.height !== void 0) {
+      let width, height;
+      if (options.size) {
+        [width, height] = options.size;
+      } else {
+        const image2 = this.getImage(1);
+        if (image2.width && image2.height) {
+          width = image2.width;
+          height = image2.height;
+        } else if (image2 instanceof HTMLImageElement) {
+          this.initialOptions_ = options;
+          const onload = () => {
+            this.unlistenImageChange(onload);
+            if (!this.initialOptions_) {
+              return;
+            }
+            const imageSize = this.iconImage_.getSize();
+            this.setScale(
+              calculateScale(
+                imageSize[0],
+                imageSize[1],
+                options.width,
+                options.height
+              )
+            );
+          };
+          this.listenImageChange(onload);
+          return;
+        }
+      }
+      if (width !== void 0) {
+        this.setScale(
+          calculateScale(width, height, options.width, options.height)
+        );
+      }
+    }
+  }
+  /**
+   * Clones the style. The underlying Image/HTMLCanvasElement is not cloned.
+   * @return {Icon} The cloned style.
+   * @api
+   */
+  clone() {
+    let scale2, width, height;
+    if (this.initialOptions_) {
+      width = this.initialOptions_.width;
+      height = this.initialOptions_.height;
+    } else {
+      scale2 = this.getScale();
+      scale2 = Array.isArray(scale2) ? scale2.slice() : scale2;
+    }
+    return new Icon({
+      anchor: this.anchor_.slice(),
+      anchorOrigin: this.anchorOrigin_,
+      anchorXUnits: this.anchorXUnits_,
+      anchorYUnits: this.anchorYUnits_,
+      color: this.color_ && this.color_.slice ? this.color_.slice() : this.color_ || void 0,
+      crossOrigin: this.crossOrigin_,
+      offset: this.offset_.slice(),
+      offsetOrigin: this.offsetOrigin_,
+      opacity: this.getOpacity(),
+      rotateWithView: this.getRotateWithView(),
+      rotation: this.getRotation(),
+      scale: scale2,
+      width,
+      height,
+      size: this.size_ !== null ? this.size_.slice() : void 0,
+      src: this.getSrc(),
+      displacement: this.getDisplacement().slice(),
+      declutterMode: this.getDeclutterMode()
+    });
+  }
+  /**
+   * Get the anchor point in pixels. The anchor determines the center point for the
+   * symbolizer.
+   * @return {Array<number>} Anchor.
+   * @api
+   */
+  getAnchor() {
+    let anchor = this.normalizedAnchor_;
+    if (!anchor) {
+      anchor = this.anchor_;
+      const size = this.getSize();
+      if (this.anchorXUnits_ == "fraction" || this.anchorYUnits_ == "fraction") {
+        if (!size) {
+          return null;
+        }
+        anchor = this.anchor_.slice();
+        if (this.anchorXUnits_ == "fraction") {
+          anchor[0] *= size[0];
+        }
+        if (this.anchorYUnits_ == "fraction") {
+          anchor[1] *= size[1];
+        }
+      }
+      if (this.anchorOrigin_ != "top-left") {
+        if (!size) {
+          return null;
+        }
+        if (anchor === this.anchor_) {
+          anchor = this.anchor_.slice();
+        }
+        if (this.anchorOrigin_ == "top-right" || this.anchorOrigin_ == "bottom-right") {
+          anchor[0] = -anchor[0] + size[0];
+        }
+        if (this.anchorOrigin_ == "bottom-left" || this.anchorOrigin_ == "bottom-right") {
+          anchor[1] = -anchor[1] + size[1];
+        }
+      }
+      this.normalizedAnchor_ = anchor;
+    }
+    const displacement = this.getDisplacement();
+    const scale2 = this.getScaleArray();
+    return [
+      anchor[0] - displacement[0] / scale2[0],
+      anchor[1] + displacement[1] / scale2[1]
+    ];
+  }
+  /**
+   * Set the anchor point. The anchor determines the center point for the
+   * symbolizer.
+   *
+   * @param {Array<number>} anchor Anchor.
+   * @api
+   */
+  setAnchor(anchor) {
+    this.anchor_ = anchor;
+    this.normalizedAnchor_ = null;
+  }
+  /**
+   * Get the icon color.
+   * @return {import("../color.js").Color} Color.
+   * @api
+   */
+  getColor() {
+    return this.color_;
+  }
+  /**
+   * Get the image icon.
+   * @param {number} pixelRatio Pixel ratio.
+   * @return {HTMLImageElement|HTMLCanvasElement|ImageBitmap} Image or Canvas element. If the Icon
+   * style was configured with `src` or with a not let loaded `img`, an `ImageBitmap` will be returned.
+   * @api
+   */
+  getImage(pixelRatio) {
+    return this.iconImage_.getImage(pixelRatio);
+  }
+  /**
+   * Get the pixel ratio.
+   * @param {number} pixelRatio Pixel ratio.
+   * @return {number} The pixel ratio of the image.
+   * @api
+   */
+  getPixelRatio(pixelRatio) {
+    return this.iconImage_.getPixelRatio(pixelRatio);
+  }
+  /**
+   * @return {import("../size.js").Size} Image size.
+   */
+  getImageSize() {
+    return this.iconImage_.getSize();
+  }
+  /**
+   * @return {import("../ImageState.js").default} Image state.
+   */
+  getImageState() {
+    return this.iconImage_.getImageState();
+  }
+  /**
+   * @return {HTMLImageElement|HTMLCanvasElement|ImageBitmap} Image element.
+   */
+  getHitDetectionImage() {
+    return this.iconImage_.getHitDetectionImage();
+  }
+  /**
+   * Get the origin of the symbolizer.
+   * @return {Array<number>} Origin.
+   * @api
+   */
+  getOrigin() {
+    if (this.origin_) {
+      return this.origin_;
+    }
+    let offset2 = this.offset_;
+    if (this.offsetOrigin_ != "top-left") {
+      const size = this.getSize();
+      const iconImageSize = this.iconImage_.getSize();
+      if (!size || !iconImageSize) {
+        return null;
+      }
+      offset2 = offset2.slice();
+      if (this.offsetOrigin_ == "top-right" || this.offsetOrigin_ == "bottom-right") {
+        offset2[0] = iconImageSize[0] - size[0] - offset2[0];
+      }
+      if (this.offsetOrigin_ == "bottom-left" || this.offsetOrigin_ == "bottom-right") {
+        offset2[1] = iconImageSize[1] - size[1] - offset2[1];
+      }
+    }
+    this.origin_ = offset2;
+    return this.origin_;
+  }
+  /**
+   * Get the image URL.
+   * @return {string|undefined} Image src.
+   * @api
+   */
+  getSrc() {
+    return this.iconImage_.getSrc();
+  }
+  /**
+   * Get the size of the icon (in pixels).
+   * @return {import("../size.js").Size} Image size.
+   * @api
+   */
+  getSize() {
+    return !this.size_ ? this.iconImage_.getSize() : this.size_;
+  }
+  /**
+   * Get the width of the icon (in pixels). Will return undefined when the icon image is not yet loaded.
+   * @return {number} Icon width (in pixels).
+   * @api
+   */
+  getWidth() {
+    const scale2 = this.getScaleArray();
+    if (this.size_) {
+      return this.size_[0] * scale2[0];
+    }
+    if (this.iconImage_.getImageState() == ImageState.LOADED) {
+      return this.iconImage_.getSize()[0] * scale2[0];
+    }
+    return void 0;
+  }
+  /**
+   * Get the height of the icon (in pixels). Will return undefined when the icon image is not yet loaded.
+   * @return {number} Icon height (in pixels).
+   * @api
+   */
+  getHeight() {
+    const scale2 = this.getScaleArray();
+    if (this.size_) {
+      return this.size_[1] * scale2[1];
+    }
+    if (this.iconImage_.getImageState() == ImageState.LOADED) {
+      return this.iconImage_.getSize()[1] * scale2[1];
+    }
+    return void 0;
+  }
+  /**
+   * Set the scale.
+   *
+   * @param {number|import("../size.js").Size} scale Scale.
+   * @api
+   */
+  setScale(scale2) {
+    delete this.initialOptions_;
+    super.setScale(scale2);
+  }
+  /**
+   * @param {function(import("../events/Event.js").default): void} listener Listener function.
+   */
+  listenImageChange(listener) {
+    this.iconImage_.addEventListener(EventType.CHANGE, listener);
+  }
+  /**
+   * Load not yet loaded URI.
+   * When rendering a feature with an icon style, the vector renderer will
+   * automatically call this method. However, you might want to call this
+   * method yourself for preloading or other purposes.
+   * @api
+   */
+  load() {
+    this.iconImage_.load();
+  }
+  /**
+   * @param {function(import("../events/Event.js").default): void} listener Listener function.
+   */
+  unlistenImageChange(listener) {
+    this.iconImage_.removeEventListener(EventType.CHANGE, listener);
+  }
+  ready() {
+    return this.iconImage_.ready();
+  }
+}
+const DEFAULT_FILL_COLOR = "#333";
+class Text {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    options = options || {};
+    this.font_ = options.font;
+    this.rotation_ = options.rotation;
+    this.rotateWithView_ = options.rotateWithView;
+    this.scale_ = options.scale;
+    this.scaleArray_ = toSize(options.scale !== void 0 ? options.scale : 1);
+    this.text_ = options.text;
+    this.textAlign_ = options.textAlign;
+    this.justify_ = options.justify;
+    this.repeat_ = options.repeat;
+    this.textBaseline_ = options.textBaseline;
+    this.fill_ = options.fill !== void 0 ? options.fill : new Fill({ color: DEFAULT_FILL_COLOR });
+    this.maxAngle_ = options.maxAngle !== void 0 ? options.maxAngle : Math.PI / 4;
+    this.placement_ = options.placement !== void 0 ? options.placement : "point";
+    this.overflow_ = !!options.overflow;
+    this.stroke_ = options.stroke !== void 0 ? options.stroke : null;
+    this.offsetX_ = options.offsetX !== void 0 ? options.offsetX : 0;
+    this.offsetY_ = options.offsetY !== void 0 ? options.offsetY : 0;
+    this.backgroundFill_ = options.backgroundFill ? options.backgroundFill : null;
+    this.backgroundStroke_ = options.backgroundStroke ? options.backgroundStroke : null;
+    this.padding_ = options.padding === void 0 ? null : options.padding;
+    this.declutterMode_ = options.declutterMode;
+  }
+  /**
+   * Clones the style.
+   * @return {Text} The cloned style.
+   * @api
+   */
+  clone() {
+    const scale2 = this.getScale();
+    return new Text({
+      font: this.getFont(),
+      placement: this.getPlacement(),
+      repeat: this.getRepeat(),
+      maxAngle: this.getMaxAngle(),
+      overflow: this.getOverflow(),
+      rotation: this.getRotation(),
+      rotateWithView: this.getRotateWithView(),
+      scale: Array.isArray(scale2) ? scale2.slice() : scale2,
+      text: this.getText(),
+      textAlign: this.getTextAlign(),
+      justify: this.getJustify(),
+      textBaseline: this.getTextBaseline(),
+      fill: this.getFill() ? this.getFill().clone() : void 0,
+      stroke: this.getStroke() ? this.getStroke().clone() : void 0,
+      offsetX: this.getOffsetX(),
+      offsetY: this.getOffsetY(),
+      backgroundFill: this.getBackgroundFill() ? this.getBackgroundFill().clone() : void 0,
+      backgroundStroke: this.getBackgroundStroke() ? this.getBackgroundStroke().clone() : void 0,
+      padding: this.getPadding() || void 0,
+      declutterMode: this.getDeclutterMode()
+    });
+  }
+  /**
+   * Get the `overflow` configuration.
+   * @return {boolean} Let text overflow the length of the path they follow.
+   * @api
+   */
+  getOverflow() {
+    return this.overflow_;
+  }
+  /**
+   * Get the font name.
+   * @return {string|undefined} Font.
+   * @api
+   */
+  getFont() {
+    return this.font_;
+  }
+  /**
+   * Get the maximum angle between adjacent characters.
+   * @return {number} Angle in radians.
+   * @api
+   */
+  getMaxAngle() {
+    return this.maxAngle_;
+  }
+  /**
+   * Get the label placement.
+   * @return {TextPlacement} Text placement.
+   * @api
+   */
+  getPlacement() {
+    return this.placement_;
+  }
+  /**
+   * Get the repeat interval of the text.
+   * @return {number|undefined} Repeat interval in pixels.
+   * @api
+   */
+  getRepeat() {
+    return this.repeat_;
+  }
+  /**
+   * Get the x-offset for the text.
+   * @return {number} Horizontal text offset.
+   * @api
+   */
+  getOffsetX() {
+    return this.offsetX_;
+  }
+  /**
+   * Get the y-offset for the text.
+   * @return {number} Vertical text offset.
+   * @api
+   */
+  getOffsetY() {
+    return this.offsetY_;
+  }
+  /**
+   * Get the fill style for the text.
+   * @return {import("./Fill.js").default|null} Fill style.
+   * @api
+   */
+  getFill() {
+    return this.fill_;
+  }
+  /**
+   * Determine whether the text rotates with the map.
+   * @return {boolean|undefined} Rotate with map.
+   * @api
+   */
+  getRotateWithView() {
+    return this.rotateWithView_;
+  }
+  /**
+   * Get the text rotation.
+   * @return {number|undefined} Rotation.
+   * @api
+   */
+  getRotation() {
+    return this.rotation_;
+  }
+  /**
+   * Get the text scale.
+   * @return {number|import("../size.js").Size|undefined} Scale.
+   * @api
+   */
+  getScale() {
+    return this.scale_;
+  }
+  /**
+   * Get the symbolizer scale array.
+   * @return {import("../size.js").Size} Scale array.
+   */
+  getScaleArray() {
+    return this.scaleArray_;
+  }
+  /**
+   * Get the stroke style for the text.
+   * @return {import("./Stroke.js").default|null} Stroke style.
+   * @api
+   */
+  getStroke() {
+    return this.stroke_;
+  }
+  /**
+   * Get the text to be rendered.
+   * @return {string|Array<string>|undefined} Text.
+   * @api
+   */
+  getText() {
+    return this.text_;
+  }
+  /**
+   * Get the text alignment.
+   * @return {CanvasTextAlign|undefined} Text align.
+   * @api
+   */
+  getTextAlign() {
+    return this.textAlign_;
+  }
+  /**
+   * Get the justification.
+   * @return {TextJustify|undefined} Justification.
+   * @api
+   */
+  getJustify() {
+    return this.justify_;
+  }
+  /**
+   * Get the text baseline.
+   * @return {CanvasTextBaseline|undefined} Text baseline.
+   * @api
+   */
+  getTextBaseline() {
+    return this.textBaseline_;
+  }
+  /**
+   * Get the background fill style for the text.
+   * @return {import("./Fill.js").default|null} Fill style.
+   * @api
+   */
+  getBackgroundFill() {
+    return this.backgroundFill_;
+  }
+  /**
+   * Get the background stroke style for the text.
+   * @return {import("./Stroke.js").default|null} Stroke style.
+   * @api
+   */
+  getBackgroundStroke() {
+    return this.backgroundStroke_;
+  }
+  /**
+   * Get the padding for the text.
+   * @return {Array<number>|null} Padding.
+   * @api
+   */
+  getPadding() {
+    return this.padding_;
+  }
+  /**
+   * Get the declutter mode of the shape
+   * @return {import("./Style.js").DeclutterMode} Shape's declutter mode
+   * @api
+   */
+  getDeclutterMode() {
+    return this.declutterMode_;
+  }
+  /**
+   * Set the `overflow` property.
+   *
+   * @param {boolean} overflow Let text overflow the path that it follows.
+   * @api
+   */
+  setOverflow(overflow) {
+    this.overflow_ = overflow;
+  }
+  /**
+   * Set the font.
+   *
+   * @param {string|undefined} font Font.
+   * @api
+   */
+  setFont(font) {
+    this.font_ = font;
+  }
+  /**
+   * Set the maximum angle between adjacent characters.
+   *
+   * @param {number} maxAngle Angle in radians.
+   * @api
+   */
+  setMaxAngle(maxAngle) {
+    this.maxAngle_ = maxAngle;
+  }
+  /**
+   * Set the x offset.
+   *
+   * @param {number} offsetX Horizontal text offset.
+   * @api
+   */
+  setOffsetX(offsetX) {
+    this.offsetX_ = offsetX;
+  }
+  /**
+   * Set the y offset.
+   *
+   * @param {number} offsetY Vertical text offset.
+   * @api
+   */
+  setOffsetY(offsetY) {
+    this.offsetY_ = offsetY;
+  }
+  /**
+   * Set the text placement.
+   *
+   * @param {TextPlacement} placement Placement.
+   * @api
+   */
+  setPlacement(placement) {
+    this.placement_ = placement;
+  }
+  /**
+   * Set the repeat interval of the text.
+   * @param {number|undefined} [repeat] Repeat interval in pixels.
+   * @api
+   */
+  setRepeat(repeat) {
+    this.repeat_ = repeat;
+  }
+  /**
+   * Set whether to rotate the text with the view.
+   *
+   * @param {boolean} rotateWithView Rotate with map.
+   * @api
+   */
+  setRotateWithView(rotateWithView) {
+    this.rotateWithView_ = rotateWithView;
+  }
+  /**
+   * Set the fill.
+   *
+   * @param {import("./Fill.js").default|null} fill Fill style.
+   * @api
+   */
+  setFill(fill) {
+    this.fill_ = fill;
+  }
+  /**
+   * Set the rotation.
+   *
+   * @param {number|undefined} rotation Rotation.
+   * @api
+   */
+  setRotation(rotation) {
+    this.rotation_ = rotation;
+  }
+  /**
+   * Set the scale.
+   *
+   * @param {number|import("../size.js").Size|undefined} scale Scale.
+   * @api
+   */
+  setScale(scale2) {
+    this.scale_ = scale2;
+    this.scaleArray_ = toSize(scale2 !== void 0 ? scale2 : 1);
+  }
+  /**
+   * Set the stroke.
+   *
+   * @param {import("./Stroke.js").default|null} stroke Stroke style.
+   * @api
+   */
+  setStroke(stroke) {
+    this.stroke_ = stroke;
+  }
+  /**
+   * Set the text.
+   *
+   * @param {string|Array<string>|undefined} text Text.
+   * @api
+   */
+  setText(text) {
+    this.text_ = text;
+  }
+  /**
+   * Set the text alignment.
+   *
+   * @param {CanvasTextAlign|undefined} textAlign Text align.
+   * @api
+   */
+  setTextAlign(textAlign) {
+    this.textAlign_ = textAlign;
+  }
+  /**
+   * Set the justification.
+   *
+   * @param {TextJustify|undefined} justify Justification.
+   * @api
+   */
+  setJustify(justify) {
+    this.justify_ = justify;
+  }
+  /**
+   * Set the text baseline.
+   *
+   * @param {CanvasTextBaseline|undefined} textBaseline Text baseline.
+   * @api
+   */
+  setTextBaseline(textBaseline) {
+    this.textBaseline_ = textBaseline;
+  }
+  /**
+   * Set the background fill.
+   *
+   * @param {import("./Fill.js").default|null} fill Fill style.
+   * @api
+   */
+  setBackgroundFill(fill) {
+    this.backgroundFill_ = fill;
+  }
+  /**
+   * Set the background stroke.
+   *
+   * @param {import("./Stroke.js").default|null} stroke Stroke style.
+   * @api
+   */
+  setBackgroundStroke(stroke) {
+    this.backgroundStroke_ = stroke;
+  }
+  /**
+   * Set the padding (`[top, right, bottom, left]`).
+   *
+   * @param {Array<number>|null} padding Padding.
+   * @api
+   */
+  setPadding(padding) {
+    this.padding_ = padding;
+  }
+}
+let numTypes = 0;
+const NoneType = 0;
+const BooleanType = 1 << numTypes++;
+const NumberType = 1 << numTypes++;
+const StringType = 1 << numTypes++;
+const ColorType = 1 << numTypes++;
+const NumberArrayType = 1 << numTypes++;
+const SizeType = 1 << numTypes++;
+const AnyType = Math.pow(2, numTypes) - 1;
+const typeNames = {
+  [BooleanType]: "boolean",
+  [NumberType]: "number",
+  [StringType]: "string",
+  [ColorType]: "color",
+  [NumberArrayType]: "number[]",
+  [SizeType]: "size"
+};
+const namedTypes = Object.keys(typeNames).map(Number).sort(ascending);
+function typeName(type) {
+  const names2 = [];
+  for (const namedType of namedTypes) {
+    if (includesType(type, namedType)) {
+      names2.push(typeNames[namedType]);
+    }
+  }
+  if (names2.length === 0) {
+    return "untyped";
+  }
+  if (names2.length < 3) {
+    return names2.join(" or ");
+  }
+  return names2.slice(0, -1).join(", ") + ", or " + names2[names2.length - 1];
+}
+function includesType(broad, specific) {
+  return (broad & specific) === specific;
+}
+function overlapsType(oneType, otherType) {
+  return !!(oneType & otherType);
+}
+function isType(type, expected) {
+  return type === expected;
+}
+class LiteralExpression {
+  /**
+   * @param {number} type The value type.
+   * @param {LiteralValue} value The literal value.
+   */
+  constructor(type, value) {
+    this.type = type;
+    this.value = value;
+  }
+}
+class CallExpression {
+  /**
+   * @param {number} type The return type.
+   * @param {string} operator The operator.
+   * @param {...Expression} args The arguments.
+   */
+  constructor(type, operator, ...args) {
+    this.type = type;
+    this.operator = operator;
+    this.args = args;
+  }
+}
+function newParsingContext() {
+  return {
+    variables: /* @__PURE__ */ new Set(),
+    properties: /* @__PURE__ */ new Set(),
+    featureId: false,
+    geometryType: false,
+    style: {}
+  };
+}
+function getTypeFromHint(typeHint) {
+  switch (typeHint) {
+    case "string":
+      return StringType;
+    case "color":
+      return ColorType;
+    case "number":
+      return NumberType;
+    case "boolean":
+      return BooleanType;
+    case "number[]":
+      return NumberArrayType;
+    default:
+      throw new Error(`Unrecognized type hint: ${typeHint}`);
+  }
+}
+function parse(encoded, context, typeHint) {
+  switch (typeof encoded) {
+    case "boolean": {
+      return new LiteralExpression(BooleanType, encoded);
+    }
+    case "number": {
+      return new LiteralExpression(
+        typeHint === SizeType ? SizeType : NumberType,
+        encoded
+      );
+    }
+    case "string": {
+      let type2 = StringType;
+      if (isStringColor(encoded)) {
+        type2 |= ColorType;
+      }
+      if (!isType(type2 & typeHint, NoneType)) {
+        type2 &= typeHint;
+      }
+      return new LiteralExpression(type2, encoded);
+    }
+  }
+  if (!Array.isArray(encoded)) {
+    throw new Error("Expression must be an array or a primitive value");
+  }
+  if (encoded.length === 0) {
+    throw new Error("Empty expression");
+  }
+  if (typeof encoded[0] === "string") {
+    return parseCallExpression(encoded, context, typeHint);
+  }
+  for (const item of encoded) {
+    if (typeof item !== "number") {
+      throw new Error("Expected an array of numbers");
+    }
+  }
+  let type = NumberArrayType;
+  if (encoded.length === 2) {
+    type |= SizeType;
+  } else if (encoded.length === 3 || encoded.length === 4) {
+    type |= ColorType;
+  }
+  if (typeHint) {
+    type &= typeHint;
+  }
+  return new LiteralExpression(type, encoded);
+}
+const Ops = {
+  Get: "get",
+  Var: "var",
+  Concat: "concat",
+  GeometryType: "geometry-type",
+  Any: "any",
+  All: "all",
+  Not: "!",
+  Resolution: "resolution",
+  Zoom: "zoom",
+  Time: "time",
+  Equal: "==",
+  NotEqual: "!=",
+  GreaterThan: ">",
+  GreaterThanOrEqualTo: ">=",
+  LessThan: "<",
+  LessThanOrEqualTo: "<=",
+  Multiply: "*",
+  Divide: "/",
+  Add: "+",
+  Subtract: "-",
+  Clamp: "clamp",
+  Mod: "%",
+  Pow: "^",
+  Abs: "abs",
+  Floor: "floor",
+  Ceil: "ceil",
+  Round: "round",
+  Sin: "sin",
+  Cos: "cos",
+  Atan: "atan",
+  Sqrt: "sqrt",
+  Match: "match",
+  Between: "between",
+  Interpolate: "interpolate",
+  Coalesce: "coalesce",
+  Case: "case",
+  In: "in",
+  Number: "number",
+  String: "string",
+  Array: "array",
+  Color: "color",
+  Id: "id",
+  Band: "band",
+  Palette: "palette",
+  ToString: "to-string"
+};
+const parsers = {
+  [Ops.Get]: createParser(
+    ([_2, typeHint]) => {
+      if (typeHint !== void 0) {
+        return getTypeFromHint(
+          /** @type {string} */
+          /** @type {LiteralExpression} */
+          typeHint.value
+        );
+      }
+      return AnyType;
+    },
+    withArgsCount(1, 2),
+    withGetArgs
+  ),
+  [Ops.Var]: createParser(
+    ([firstArg]) => firstArg.type,
+    withArgsCount(1, 1),
+    withVarArgs
+  ),
+  [Ops.Id]: createParser(NumberType | StringType, withNoArgs, usesFeatureId),
+  [Ops.Concat]: createParser(
+    StringType,
+    withArgsCount(2, Infinity),
+    parseArgsOfType(AnyType)
+  ),
+  [Ops.GeometryType]: createParser(StringType, withNoArgs, usesGeometryType),
+  [Ops.Resolution]: createParser(NumberType, withNoArgs),
+  [Ops.Zoom]: createParser(NumberType, withNoArgs),
+  [Ops.Time]: createParser(NumberType, withNoArgs),
+  [Ops.Any]: createParser(
+    BooleanType,
+    withArgsCount(2, Infinity),
+    parseArgsOfType(BooleanType)
+  ),
+  [Ops.All]: createParser(
+    BooleanType,
+    withArgsCount(2, Infinity),
+    parseArgsOfType(BooleanType)
+  ),
+  [Ops.Not]: createParser(
+    BooleanType,
+    withArgsCount(1, 1),
+    parseArgsOfType(BooleanType)
+  ),
+  [Ops.Equal]: createParser(
+    BooleanType,
+    withArgsCount(2, 2),
+    parseArgsOfType(AnyType),
+    narrowArgsType
+  ),
+  [Ops.NotEqual]: createParser(
+    BooleanType,
+    withArgsCount(2, 2),
+    parseArgsOfType(AnyType),
+    narrowArgsType
+  ),
+  [Ops.GreaterThan]: createParser(
+    BooleanType,
+    withArgsCount(2, 2),
+    parseArgsOfType(AnyType),
+    narrowArgsType
+  ),
+  [Ops.GreaterThanOrEqualTo]: createParser(
+    BooleanType,
+    withArgsCount(2, 2),
+    parseArgsOfType(AnyType),
+    narrowArgsType
+  ),
+  [Ops.LessThan]: createParser(
+    BooleanType,
+    withArgsCount(2, 2),
+    parseArgsOfType(AnyType),
+    narrowArgsType
+  ),
+  [Ops.LessThanOrEqualTo]: createParser(
+    BooleanType,
+    withArgsCount(2, 2),
+    parseArgsOfType(AnyType),
+    narrowArgsType
+  ),
+  [Ops.Multiply]: createParser(
+    (parsedArgs) => {
+      let outputType = NumberType | ColorType;
+      for (let i = 0; i < parsedArgs.length; i++) {
+        outputType &= parsedArgs[i].type;
+      }
+      return outputType;
+    },
+    withArgsCount(2, Infinity),
+    parseArgsOfType(NumberType | ColorType),
+    narrowArgsType
+  ),
+  [Ops.Coalesce]: createParser(
+    (parsedArgs) => {
+      let type = AnyType;
+      for (let i = 1; i < parsedArgs.length; i += 2) {
+        type &= parsedArgs[i].type;
+      }
+      type &= parsedArgs[parsedArgs.length - 1].type;
+      return type;
+    },
+    withArgsCount(2, Infinity),
+    parseArgsOfType(AnyType),
+    narrowArgsType
+  ),
+  [Ops.Divide]: createParser(
+    NumberType,
+    withArgsCount(2, 2),
+    parseArgsOfType(NumberType)
+  ),
+  [Ops.Add]: createParser(
+    NumberType,
+    withArgsCount(2, Infinity),
+    parseArgsOfType(NumberType)
+  ),
+  [Ops.Subtract]: createParser(
+    NumberType,
+    withArgsCount(2, 2),
+    parseArgsOfType(NumberType)
+  ),
+  [Ops.Clamp]: createParser(
+    NumberType,
+    withArgsCount(3, 3),
+    parseArgsOfType(NumberType)
+  ),
+  [Ops.Mod]: createParser(
+    NumberType,
+    withArgsCount(2, 2),
+    parseArgsOfType(NumberType)
+  ),
+  [Ops.Pow]: createParser(
+    NumberType,
+    withArgsCount(2, 2),
+    parseArgsOfType(NumberType)
+  ),
+  [Ops.Abs]: createParser(
+    NumberType,
+    withArgsCount(1, 1),
+    parseArgsOfType(NumberType)
+  ),
+  [Ops.Floor]: createParser(
+    NumberType,
+    withArgsCount(1, 1),
+    parseArgsOfType(NumberType)
+  ),
+  [Ops.Ceil]: createParser(
+    NumberType,
+    withArgsCount(1, 1),
+    parseArgsOfType(NumberType)
+  ),
+  [Ops.Round]: createParser(
+    NumberType,
+    withArgsCount(1, 1),
+    parseArgsOfType(NumberType)
+  ),
+  [Ops.Sin]: createParser(
+    NumberType,
+    withArgsCount(1, 1),
+    parseArgsOfType(NumberType)
+  ),
+  [Ops.Cos]: createParser(
+    NumberType,
+    withArgsCount(1, 1),
+    parseArgsOfType(NumberType)
+  ),
+  [Ops.Atan]: createParser(
+    NumberType,
+    withArgsCount(1, 2),
+    parseArgsOfType(NumberType)
+  ),
+  [Ops.Sqrt]: createParser(
+    NumberType,
+    withArgsCount(1, 1),
+    parseArgsOfType(NumberType)
+  ),
+  [Ops.Match]: createParser(
+    (parsedArgs) => {
+      let type = AnyType;
+      for (let i = 2; i < parsedArgs.length; i += 2) {
+        type &= parsedArgs[i].type;
+      }
+      type &= parsedArgs[parsedArgs.length - 1].type;
+      return type;
+    },
+    withArgsCount(4, Infinity),
+    withEvenArgs,
+    parseMatchArgs
+  ),
+  [Ops.Between]: createParser(
+    BooleanType,
+    withArgsCount(3, 3),
+    parseArgsOfType(NumberType)
+  ),
+  [Ops.Interpolate]: createParser(
+    (parsedArgs) => {
+      let type = ColorType | NumberType;
+      for (let i = 3; i < parsedArgs.length; i += 2) {
+        type &= parsedArgs[i].type;
+      }
+      return type;
+    },
+    withArgsCount(6, Infinity),
+    withEvenArgs,
+    parseInterpolateArgs
+  ),
+  [Ops.Case]: createParser(
+    (parsedArgs) => {
+      let type = AnyType;
+      for (let i = 1; i < parsedArgs.length; i += 2) {
+        type &= parsedArgs[i].type;
+      }
+      type &= parsedArgs[parsedArgs.length - 1].type;
+      return type;
+    },
+    withArgsCount(3, Infinity),
+    withOddArgs,
+    parseCaseArgs
+  ),
+  [Ops.In]: createParser(BooleanType, withArgsCount(2, 2), parseInArgs),
+  [Ops.Number]: createParser(
+    NumberType,
+    withArgsCount(1, Infinity),
+    parseArgsOfType(AnyType)
+  ),
+  [Ops.String]: createParser(
+    StringType,
+    withArgsCount(1, Infinity),
+    parseArgsOfType(AnyType)
+  ),
+  [Ops.Array]: createParser(
+    (parsedArgs) => {
+      return parsedArgs.length === 2 ? NumberArrayType | SizeType : parsedArgs.length === 3 || parsedArgs.length === 4 ? NumberArrayType | ColorType : NumberArrayType;
+    },
+    withArgsCount(1, Infinity),
+    parseArgsOfType(NumberType)
+  ),
+  [Ops.Color]: createParser(
+    ColorType,
+    withArgsCount(1, 4),
+    parseArgsOfType(NumberType)
+  ),
+  [Ops.Band]: createParser(
+    NumberType,
+    withArgsCount(1, 3),
+    parseArgsOfType(NumberType)
+  ),
+  [Ops.Palette]: createParser(ColorType, withArgsCount(2, 2), parsePaletteArgs),
+  [Ops.ToString]: createParser(
+    StringType,
+    withArgsCount(1, 1),
+    parseArgsOfType(BooleanType | NumberType | StringType | ColorType)
+  )
+};
+function withGetArgs(encoded, context) {
+  const arg = parse(encoded[1], context);
+  if (!(arg instanceof LiteralExpression)) {
+    throw new Error("Expected a literal argument for get operation");
+  }
+  if (typeof arg.value !== "string") {
+    throw new Error("Expected a string argument for get operation");
+  }
+  context.properties.add(arg.value);
+  if (encoded.length === 3) {
+    const hint = parse(encoded[2], context);
+    return [arg, hint];
+  }
+  return [arg];
+}
+function withVarArgs(encoded, context, parsedArgs, typeHint) {
+  const varName = encoded[1];
+  if (typeof varName !== "string") {
+    throw new Error("Expected a string argument for var operation");
+  }
+  context.variables.add(varName);
+  if (!("variables" in context.style) || context.style.variables[varName] === void 0) {
+    return [new LiteralExpression(AnyType, varName)];
+  }
+  const initialValue = context.style.variables[varName];
+  const arg = (
+    /** @type {LiteralExpression} */
+    parse(initialValue, context)
+  );
+  arg.value = varName;
+  if (typeHint && !overlapsType(typeHint, arg.type)) {
+    throw new Error(
+      `The variable ${varName} has type ${typeName(
+        arg.type
+      )} but the following type was expected: ${typeName(typeHint)}`
+    );
+  }
+  return [arg];
+}
+function usesFeatureId(encoded, context) {
+  context.featureId = true;
+}
+function usesGeometryType(encoded, context) {
+  context.geometryType = true;
+}
+function withNoArgs(encoded, context) {
+  const operation = encoded[0];
+  if (encoded.length !== 1) {
+    throw new Error(`Expected no arguments for ${operation} operation`);
+  }
+  return [];
+}
+function withArgsCount(minArgs, maxArgs) {
+  return function(encoded, context) {
+    const operation = encoded[0];
+    const argCount = encoded.length - 1;
+    if (minArgs === maxArgs) {
+      if (argCount !== minArgs) {
+        const plural = minArgs === 1 ? "" : "s";
+        throw new Error(
+          `Expected ${minArgs} argument${plural} for ${operation}, got ${argCount}`
+        );
+      }
+    } else if (argCount < minArgs || argCount > maxArgs) {
+      const range = maxArgs === Infinity ? `${minArgs} or more` : `${minArgs} to ${maxArgs}`;
+      throw new Error(
+        `Expected ${range} arguments for ${operation}, got ${argCount}`
+      );
+    }
+  };
+}
+function parseArgsOfType(argType) {
+  return function(encoded, context) {
+    const operation = encoded[0];
+    const argCount = encoded.length - 1;
+    const args = new Array(argCount);
+    for (let i = 0; i < argCount; ++i) {
+      const expression = parse(encoded[i + 1], context);
+      if (!overlapsType(argType, expression.type)) {
+        const gotType = typeName(argType);
+        const expectedType = typeName(expression.type);
+        throw new Error(
+          `Unexpected type for argument ${i} of ${operation} operation, got ${gotType} but expected ${expectedType}`
+        );
+      }
+      expression.type &= argType;
+      args[i] = expression;
+    }
+    return args;
+  };
+}
+function narrowArgsType(encoded, context, parsedArgs) {
+  const operation = encoded[0];
+  const argCount = encoded.length - 1;
+  let sameType = AnyType;
+  for (let i = 0; i < parsedArgs.length; ++i) {
+    sameType &= parsedArgs[i].type;
+  }
+  if (sameType === NoneType) {
+    throw new Error(
+      `No common type could be found for arguments of ${operation} operation`
+    );
+  }
+  const args = new Array(argCount);
+  for (let i = 0; i < argCount; ++i) {
+    args[i] = parse(encoded[i + 1], context, sameType);
+  }
+  return args;
+}
+function withOddArgs(encoded, context) {
+  const operation = encoded[0];
+  const argCount = encoded.length - 1;
+  if (argCount % 2 === 0) {
+    throw new Error(
+      `An odd amount of arguments was expected for operation ${operation}, got ${JSON.stringify(
+        argCount
+      )} instead`
+    );
+  }
+}
+function withEvenArgs(encoded, context) {
+  const operation = encoded[0];
+  const argCount = encoded.length - 1;
+  if (argCount % 2 === 1) {
+    throw new Error(
+      `An even amount of arguments was expected for operation ${operation}, got ${JSON.stringify(
+        argCount
+      )} instead`
+    );
+  }
+}
+function parseMatchArgs(encoded, context, parsedArgs, typeHint) {
+  const argsCount = encoded.length - 1;
+  const input = parse(encoded[1], context);
+  let inputType = input.type;
+  const fallback = parse(encoded[encoded.length - 1], context);
+  let outputType = typeHint !== void 0 ? typeHint & fallback.type : fallback.type;
+  const args = new Array(argsCount - 2);
+  for (let i = 0; i < argsCount - 2; i += 2) {
+    const match = parse(encoded[i + 2], context);
+    const output = parse(encoded[i + 3], context);
+    inputType &= match.type;
+    outputType &= output.type;
+    args[i] = match;
+    args[i + 1] = output;
+  }
+  const expectedInputType = StringType | NumberType | BooleanType;
+  if (!overlapsType(expectedInputType, inputType)) {
+    throw new Error(
+      `Expected an input of type ${typeName(
+        expectedInputType
+      )} for the interpolate operation, got ${typeName(inputType)} instead`
+    );
+  }
+  inputType &= expectedInputType;
+  if (isType(outputType, NoneType)) {
+    throw new Error(
+      `Could not find a common output type for the following match operation: ` + JSON.stringify(encoded)
+    );
+  }
+  for (let i = 0; i < argsCount - 2; i += 2) {
+    const match = parse(encoded[i + 2], context, inputType);
+    const output = parse(encoded[i + 3], context, outputType);
+    args[i] = match;
+    args[i + 1] = output;
+  }
+  return [
+    parse(encoded[1], context, inputType),
+    ...args,
+    parse(encoded[encoded.length - 1], context, outputType)
+  ];
+}
+function parseInterpolateArgs(encoded, context, parsedArgs, typeHint) {
+  const interpolationType = encoded[1];
+  let interpolation;
+  switch (interpolationType[0]) {
+    case "linear":
+      interpolation = 1;
+      break;
+    case "exponential":
+      interpolation = interpolationType[1];
+      if (typeof interpolation !== "number") {
+        throw new Error(
+          `Expected a number base for exponential interpolation, got ${JSON.stringify(interpolation)} instead`
+        );
+      }
+      break;
+    default:
+      interpolation = null;
+  }
+  if (!interpolation) {
+    throw new Error(
+      `Invalid interpolation type: ${JSON.stringify(interpolationType)}`
+    );
+  }
+  interpolation = parse(interpolation, context);
+  let input = parse(encoded[2], context);
+  if (!overlapsType(NumberType, input.type)) {
+    throw new Error(
+      `Expected an input of type number for the interpolate operation, got ${typeName(input.type)} instead`
+    );
+  }
+  input = parse(encoded[2], context, NumberType);
+  const args = new Array(encoded.length - 3);
+  for (let i = 0; i < args.length; i += 2) {
+    let stop = parse(encoded[i + 3], context);
+    if (!overlapsType(NumberType, stop.type)) {
+      throw new Error(
+        `Expected all stop input values in the interpolate operation to be of type number, got ${typeName(stop.type)} at position ${i + 2} instead`
+      );
+    }
+    let output = parse(encoded[i + 4], context);
+    if (!overlapsType(NumberType | ColorType, output.type)) {
+      throw new Error(
+        `Expected all stop output values in the interpolate operation to be a number or color, got ${typeName(output.type)} at position ${i + 3} instead`
+      );
+    }
+    stop = parse(encoded[i + 3], context, NumberType);
+    output = parse(encoded[i + 4], context, NumberType | ColorType);
+    args[i] = stop;
+    args[i + 1] = output;
+  }
+  return [interpolation, input, ...args];
+}
+function parseCaseArgs(encoded, context, parsedArgs, typeHint) {
+  const fallback = parse(encoded[encoded.length - 1], context, typeHint);
+  let outputType = typeHint !== void 0 ? typeHint & fallback.type : fallback.type;
+  const args = new Array(encoded.length - 1);
+  for (let i = 0; i < args.length - 1; i += 2) {
+    const condition = parse(encoded[i + 1], context);
+    const output = parse(encoded[i + 2], context, typeHint);
+    if (!overlapsType(BooleanType, condition.type)) {
+      throw new Error(
+        `Expected all conditions in the case operation to be of type boolean, got ${typeName(condition.type)} at position ${i} instead`
+      );
+    }
+    outputType &= output.type;
+    args[i] = condition;
+    args[i + 1] = output;
+  }
+  if (isType(outputType, NoneType)) {
+    throw new Error(
+      `Could not find a common output type for the following case operation: ` + JSON.stringify(encoded)
+    );
+  }
+  for (let i = 0; i < args.length - 1; i += 2) {
+    args[i + 1] = parse(encoded[i + 2], context, outputType);
+  }
+  args[args.length - 1] = parse(
+    encoded[encoded.length - 1],
+    context,
+    outputType
+  );
+  return args;
+}
+function parseInArgs(encoded, context) {
+  let haystack = (
+    /** @type {any} */
+    encoded[2]
+  );
+  if (!Array.isArray(haystack)) {
+    throw new Error(
+      `The "in" operator was provided a literal value which was not an array as second argument.`
+    );
+  }
+  if (typeof haystack[0] === "string") {
+    if (haystack[0] !== "literal") {
+      throw new Error(
+        `For the "in" operator, a string array should be wrapped in a "literal" operator to disambiguate from expressions.`
+      );
+    }
+    if (!Array.isArray(haystack[1])) {
+      throw new Error(
+        `The "in" operator was provided a literal value which was not an array as second argument.`
+      );
+    }
+    haystack = haystack[1];
+  }
+  let needleType = StringType | NumberType;
+  const args = new Array(haystack.length);
+  for (let i = 0; i < args.length; i++) {
+    const arg = parse(haystack[i], context);
+    needleType &= arg.type;
+    args[i] = arg;
+  }
+  if (isType(needleType, NoneType)) {
+    throw new Error(
+      `Could not find a common type for the following in operation: ` + JSON.stringify(encoded)
+    );
+  }
+  const needle = parse(encoded[1], context, needleType);
+  return [needle, ...args];
+}
+function parsePaletteArgs(encoded, context) {
+  const index = parse(encoded[1], context, NumberType);
+  if (index.type !== NumberType) {
+    throw new Error(
+      `The first argument of palette must be an number, got ${typeName(
+        index.type
+      )} instead`
+    );
+  }
+  const colors = encoded[2];
+  if (!Array.isArray(colors)) {
+    throw new Error("The second argument of palette must be an array");
+  }
+  const parsedColors = new Array(colors.length);
+  for (let i = 0; i < parsedColors.length; i++) {
+    const color = parse(colors[i], context, ColorType);
+    if (!(color instanceof LiteralExpression)) {
+      throw new Error(
+        `The palette color at index ${i} must be a literal value`
+      );
+    }
+    if (!overlapsType(color.type, ColorType)) {
+      throw new Error(
+        `The palette color at index ${i} should be of type color, got ${typeName(
+          color.type
+        )} instead`
+      );
+    }
+    parsedColors[i] = color;
+  }
+  return [index, ...parsedColors];
+}
+function createParser(returnType, ...argValidators) {
+  return function(encoded, context, typeHint) {
+    const operator = encoded[0];
+    let parsedArgs = [];
+    for (let i = 0; i < argValidators.length; i++) {
+      parsedArgs = argValidators[i](encoded, context, parsedArgs, typeHint) || parsedArgs;
+    }
+    let actualType = typeof returnType === "function" ? returnType(parsedArgs) : returnType;
+    if (typeHint !== void 0) {
+      if (!overlapsType(actualType, typeHint)) {
+        throw new Error(
+          `The following expression was expected to return ${typeName(
+            typeHint
+          )}, but returns ${typeName(actualType)} instead: ${JSON.stringify(
+            encoded
+          )}`
+        );
+      }
+      actualType &= typeHint;
+    }
+    if (actualType === NoneType) {
+      throw new Error(
+        `No matching type was found for the following expression: ${JSON.stringify(
+          encoded
+        )}`
+      );
+    }
+    return new CallExpression(actualType, operator, ...parsedArgs);
+  };
+}
+function parseCallExpression(encoded, context, typeHint) {
+  const operator = encoded[0];
+  const parser = parsers[operator];
+  if (!parser) {
+    throw new Error(`Unknown operator: ${operator}`);
+  }
+  return parser(encoded, context, typeHint);
+}
+function computeGeometryType(geometry) {
+  if (!geometry) {
+    return "";
+  }
+  const type = geometry.getType();
+  switch (type) {
+    case "Point":
+    case "LineString":
+    case "Polygon":
+      return type;
+    case "MultiPoint":
+    case "MultiLineString":
+    case "MultiPolygon":
+      return (
+        /** @type {'Point'|'LineString'|'Polygon'} */
+        type.substring(5)
+      );
+    case "Circle":
+      return "Polygon";
+    case "GeometryCollection":
+      return computeGeometryType(
+        /** @type {import("../geom/GeometryCollection.js").default} */
+        geometry.getGeometries()[0]
+      );
+    default:
+      return "";
+  }
+}
+function newEvaluationContext() {
+  return {
+    variables: {},
+    properties: {},
+    resolution: NaN,
+    featureId: null,
+    geometryType: ""
+  };
+}
+function buildExpression(encoded, type, context) {
+  const expression = parse(encoded, context);
+  if (!overlapsType(type, expression.type)) {
+    const expected = typeName(type);
+    const actual = typeName(expression.type);
+    throw new Error(
+      `Expected expression to be of type ${expected}, got ${actual}`
+    );
+  }
+  return compileExpression(expression);
+}
+function compileExpression(expression, context) {
+  if (expression instanceof LiteralExpression) {
+    if (expression.type === ColorType && typeof expression.value === "string") {
+      const colorValue = fromString(expression.value);
+      return function() {
+        return colorValue;
+      };
+    }
+    return function() {
+      return expression.value;
+    };
+  }
+  const operator = expression.operator;
+  switch (operator) {
+    case Ops.Number:
+    case Ops.String:
+    case Ops.Coalesce: {
+      return compileAssertionExpression(expression);
+    }
+    case Ops.Get:
+    case Ops.Var: {
+      return compileAccessorExpression(expression);
+    }
+    case Ops.Id: {
+      return (context2) => context2.featureId;
+    }
+    case Ops.GeometryType: {
+      return (context2) => context2.geometryType;
+    }
+    case Ops.Concat: {
+      const args = expression.args.map((e) => compileExpression(e));
+      return (context2) => "".concat(...args.map((arg) => arg(context2).toString()));
+    }
+    case Ops.Resolution: {
+      return (context2) => context2.resolution;
+    }
+    case Ops.Any:
+    case Ops.All:
+    case Ops.Between:
+    case Ops.In:
+    case Ops.Not: {
+      return compileLogicalExpression(expression);
+    }
+    case Ops.Equal:
+    case Ops.NotEqual:
+    case Ops.LessThan:
+    case Ops.LessThanOrEqualTo:
+    case Ops.GreaterThan:
+    case Ops.GreaterThanOrEqualTo: {
+      return compileComparisonExpression(expression);
+    }
+    case Ops.Multiply:
+    case Ops.Divide:
+    case Ops.Add:
+    case Ops.Subtract:
+    case Ops.Clamp:
+    case Ops.Mod:
+    case Ops.Pow:
+    case Ops.Abs:
+    case Ops.Floor:
+    case Ops.Ceil:
+    case Ops.Round:
+    case Ops.Sin:
+    case Ops.Cos:
+    case Ops.Atan:
+    case Ops.Sqrt: {
+      return compileNumericExpression(expression);
+    }
+    case Ops.Case: {
+      return compileCaseExpression(expression);
+    }
+    case Ops.Match: {
+      return compileMatchExpression(expression);
+    }
+    case Ops.Interpolate: {
+      return compileInterpolateExpression(expression);
+    }
+    case Ops.ToString: {
+      return compileConvertExpression(expression);
+    }
+    default: {
+      throw new Error(`Unsupported operator ${operator}`);
+    }
+  }
+}
+function compileAssertionExpression(expression, context) {
+  const type = expression.operator;
+  const length = expression.args.length;
+  const args = new Array(length);
+  for (let i = 0; i < length; ++i) {
+    args[i] = compileExpression(expression.args[i]);
+  }
+  switch (type) {
+    case Ops.Coalesce: {
+      return (context2) => {
+        for (let i = 0; i < length; ++i) {
+          const value = args[i](context2);
+          if (typeof value !== "undefined" && value !== null) {
+            return value;
+          }
+        }
+        throw new Error("Expected one of the values to be non-null");
+      };
+    }
+    case Ops.Number:
+    case Ops.String: {
+      return (context2) => {
+        for (let i = 0; i < length; ++i) {
+          const value = args[i](context2);
+          if (typeof value === type) {
+            return value;
+          }
+        }
+        throw new Error(`Expected one of the values to be a ${type}`);
+      };
+    }
+    default: {
+      throw new Error(`Unsupported assertion operator ${type}`);
+    }
+  }
+}
+function compileAccessorExpression(expression, context) {
+  const nameExpression = (
+    /** @type {LiteralExpression} */
+    expression.args[0]
+  );
+  const name = (
+    /** @type {string} */
+    nameExpression.value
+  );
+  switch (expression.operator) {
+    case Ops.Get: {
+      return (context2) => context2.properties[name];
+    }
+    case Ops.Var: {
+      return (context2) => context2.variables[name];
+    }
+    default: {
+      throw new Error(`Unsupported accessor operator ${expression.operator}`);
+    }
+  }
+}
+function compileComparisonExpression(expression, context) {
+  const op = expression.operator;
+  const left2 = compileExpression(expression.args[0]);
+  const right2 = compileExpression(expression.args[1]);
+  switch (op) {
+    case Ops.Equal: {
+      return (context2) => left2(context2) === right2(context2);
+    }
+    case Ops.NotEqual: {
+      return (context2) => left2(context2) !== right2(context2);
+    }
+    case Ops.LessThan: {
+      return (context2) => left2(context2) < right2(context2);
+    }
+    case Ops.LessThanOrEqualTo: {
+      return (context2) => left2(context2) <= right2(context2);
+    }
+    case Ops.GreaterThan: {
+      return (context2) => left2(context2) > right2(context2);
+    }
+    case Ops.GreaterThanOrEqualTo: {
+      return (context2) => left2(context2) >= right2(context2);
+    }
+    default: {
+      throw new Error(`Unsupported comparison operator ${op}`);
+    }
+  }
+}
+function compileLogicalExpression(expression, context) {
+  const op = expression.operator;
+  const length = expression.args.length;
+  const args = new Array(length);
+  for (let i = 0; i < length; ++i) {
+    args[i] = compileExpression(expression.args[i]);
+  }
+  switch (op) {
+    case Ops.Any: {
+      return (context2) => {
+        for (let i = 0; i < length; ++i) {
+          if (args[i](context2)) {
+            return true;
+          }
+        }
+        return false;
+      };
+    }
+    case Ops.All: {
+      return (context2) => {
+        for (let i = 0; i < length; ++i) {
+          if (!args[i](context2)) {
+            return false;
+          }
+        }
+        return true;
+      };
+    }
+    case Ops.Between: {
+      return (context2) => {
+        const value = args[0](context2);
+        const min2 = args[1](context2);
+        const max2 = args[2](context2);
+        return value >= min2 && value <= max2;
+      };
+    }
+    case Ops.In: {
+      return (context2) => {
+        const value = args[0](context2);
+        for (let i = 1; i < length; ++i) {
+          if (value === args[i](context2)) {
+            return true;
+          }
+        }
+        return false;
+      };
+    }
+    case Ops.Not: {
+      return (context2) => !args[0](context2);
+    }
+    default: {
+      throw new Error(`Unsupported logical operator ${op}`);
+    }
+  }
+}
+function compileNumericExpression(expression, context) {
+  const op = expression.operator;
+  const length = expression.args.length;
+  const args = new Array(length);
+  for (let i = 0; i < length; ++i) {
+    args[i] = compileExpression(expression.args[i]);
+  }
+  switch (op) {
+    case Ops.Multiply: {
+      return (context2) => {
+        let value = 1;
+        for (let i = 0; i < length; ++i) {
+          value *= args[i](context2);
+        }
+        return value;
+      };
+    }
+    case Ops.Divide: {
+      return (context2) => args[0](context2) / args[1](context2);
+    }
+    case Ops.Add: {
+      return (context2) => {
+        let value = 0;
+        for (let i = 0; i < length; ++i) {
+          value += args[i](context2);
+        }
+        return value;
+      };
+    }
+    case Ops.Subtract: {
+      return (context2) => args[0](context2) - args[1](context2);
+    }
+    case Ops.Clamp: {
+      return (context2) => {
+        const value = args[0](context2);
+        const min2 = args[1](context2);
+        if (value < min2) {
+          return min2;
+        }
+        const max2 = args[2](context2);
+        if (value > max2) {
+          return max2;
+        }
+        return value;
+      };
+    }
+    case Ops.Mod: {
+      return (context2) => args[0](context2) % args[1](context2);
+    }
+    case Ops.Pow: {
+      return (context2) => Math.pow(args[0](context2), args[1](context2));
+    }
+    case Ops.Abs: {
+      return (context2) => Math.abs(args[0](context2));
+    }
+    case Ops.Floor: {
+      return (context2) => Math.floor(args[0](context2));
+    }
+    case Ops.Ceil: {
+      return (context2) => Math.ceil(args[0](context2));
+    }
+    case Ops.Round: {
+      return (context2) => Math.round(args[0](context2));
+    }
+    case Ops.Sin: {
+      return (context2) => Math.sin(args[0](context2));
+    }
+    case Ops.Cos: {
+      return (context2) => Math.cos(args[0](context2));
+    }
+    case Ops.Atan: {
+      if (length === 2) {
+        return (context2) => Math.atan2(args[0](context2), args[1](context2));
+      }
+      return (context2) => Math.atan(args[0](context2));
+    }
+    case Ops.Sqrt: {
+      return (context2) => Math.sqrt(args[0](context2));
+    }
+    default: {
+      throw new Error(`Unsupported numeric operator ${op}`);
+    }
+  }
+}
+function compileCaseExpression(expression, context) {
+  const length = expression.args.length;
+  const args = new Array(length);
+  for (let i = 0; i < length; ++i) {
+    args[i] = compileExpression(expression.args[i]);
+  }
+  return (context2) => {
+    for (let i = 0; i < length - 1; i += 2) {
+      const condition = args[i](context2);
+      if (condition) {
+        return args[i + 1](context2);
+      }
+    }
+    return args[length - 1](context2);
+  };
+}
+function compileMatchExpression(expression, context) {
+  const length = expression.args.length;
+  const args = new Array(length);
+  for (let i = 0; i < length; ++i) {
+    args[i] = compileExpression(expression.args[i]);
+  }
+  return (context2) => {
+    const value = args[0](context2);
+    for (let i = 1; i < length; i += 2) {
+      if (value === args[i](context2)) {
+        return args[i + 1](context2);
+      }
+    }
+    return args[length - 1](context2);
+  };
+}
+function compileInterpolateExpression(expression, context) {
+  const length = expression.args.length;
+  const args = new Array(length);
+  for (let i = 0; i < length; ++i) {
+    args[i] = compileExpression(expression.args[i]);
+  }
+  return (context2) => {
+    const base = args[0](context2);
+    const value = args[1](context2);
+    let previousInput;
+    let previousOutput;
+    for (let i = 2; i < length; i += 2) {
+      const input = args[i](context2);
+      let output = args[i + 1](context2);
+      const isColor = Array.isArray(output);
+      if (isColor) {
+        output = withAlpha(output);
+      }
+      if (input >= value) {
+        if (i === 2) {
+          return output;
+        }
+        if (isColor) {
+          return interpolateColor(
+            base,
+            value,
+            previousInput,
+            previousOutput,
+            input,
+            output
+          );
+        }
+        return interpolateNumber(
+          base,
+          value,
+          previousInput,
+          previousOutput,
+          input,
+          output
+        );
+      }
+      previousInput = input;
+      previousOutput = output;
+    }
+    return previousOutput;
+  };
+}
+function compileConvertExpression(expression, context) {
+  const op = expression.operator;
+  const length = expression.args.length;
+  const args = new Array(length);
+  for (let i = 0; i < length; ++i) {
+    args[i] = compileExpression(expression.args[i]);
+  }
+  switch (op) {
+    case Ops.ToString: {
+      return (context2) => {
+        const value = args[0](context2);
+        if (expression.args[0].type === ColorType) {
+          return toString(value);
+        }
+        return value.toString();
+      };
+    }
+    default: {
+      throw new Error(`Unsupported convert operator ${op}`);
+    }
+  }
+}
+function interpolateNumber(base, value, input1, output1, input2, output2) {
+  const delta = input2 - input1;
+  if (delta === 0) {
+    return output1;
+  }
+  const along = value - input1;
+  const factor = base === 1 ? along / delta : (Math.pow(base, along) - 1) / (Math.pow(base, delta) - 1);
+  return output1 + factor * (output2 - output1);
+}
+function interpolateColor(base, value, input1, rgba1, input2, rgba2) {
+  const delta = input2 - input1;
+  if (delta === 0) {
+    return rgba1;
+  }
+  const lcha1 = rgbaToLcha(rgba1);
+  const lcha2 = rgbaToLcha(rgba2);
+  let deltaHue = lcha2[2] - lcha1[2];
+  if (deltaHue > 180) {
+    deltaHue -= 360;
+  } else if (deltaHue < -180) {
+    deltaHue += 360;
+  }
+  const lcha = [
+    interpolateNumber(base, value, input1, lcha1[0], input2, lcha2[0]),
+    interpolateNumber(base, value, input1, lcha1[1], input2, lcha2[1]),
+    lcha1[2] + interpolateNumber(base, value, input1, 0, input2, deltaHue),
+    interpolateNumber(base, value, input1, rgba1[3], input2, rgba2[3])
+  ];
+  return normalize(lchaToRgba(lcha));
+}
+function always$1(context) {
+  return true;
+}
+function rulesToStyleFunction(rules) {
+  const parsingContext = newParsingContext();
+  const evaluator = buildRuleSet(rules, parsingContext);
+  const evaluationContext = newEvaluationContext();
+  return function(feature, resolution) {
+    evaluationContext.properties = feature.getPropertiesInternal();
+    evaluationContext.resolution = resolution;
+    if (parsingContext.featureId) {
+      const id = feature.getId();
+      if (id !== void 0) {
+        evaluationContext.featureId = id;
+      } else {
+        evaluationContext.featureId = null;
+      }
+    }
+    if (parsingContext.geometryType) {
+      evaluationContext.geometryType = computeGeometryType(
+        feature.getGeometry()
+      );
+    }
+    return evaluator(evaluationContext);
+  };
+}
+function flatStylesToStyleFunction(flatStyles) {
+  const parsingContext = newParsingContext();
+  const length = flatStyles.length;
+  const evaluators = new Array(length);
+  for (let i = 0; i < length; ++i) {
+    evaluators[i] = buildStyle(flatStyles[i], parsingContext);
+  }
+  const evaluationContext = newEvaluationContext();
+  const styles = new Array(length);
+  return function(feature, resolution) {
+    evaluationContext.properties = feature.getPropertiesInternal();
+    evaluationContext.resolution = resolution;
+    if (parsingContext.featureId) {
+      const id = feature.getId();
+      if (id !== void 0) {
+        evaluationContext.featureId = id;
+      } else {
+        evaluationContext.featureId = null;
+      }
+    }
+    let nonNullCount = 0;
+    for (let i = 0; i < length; ++i) {
+      const style = evaluators[i](evaluationContext);
+      if (style) {
+        styles[nonNullCount] = style;
+        nonNullCount += 1;
+      }
+    }
+    styles.length = nonNullCount;
+    return styles;
+  };
+}
+function buildRuleSet(rules, context) {
+  const length = rules.length;
+  const compiledRules = new Array(length);
+  for (let i = 0; i < length; ++i) {
+    const rule = rules[i];
+    const filter = "filter" in rule ? buildExpression(rule.filter, BooleanType, context) : always$1;
+    let styles;
+    if (Array.isArray(rule.style)) {
+      const styleLength = rule.style.length;
+      styles = new Array(styleLength);
+      for (let j = 0; j < styleLength; ++j) {
+        styles[j] = buildStyle(rule.style[j], context);
+      }
+    } else {
+      styles = [buildStyle(rule.style, context)];
+    }
+    compiledRules[i] = { filter, styles };
+  }
+  return function(context2) {
+    const styles = [];
+    let someMatched = false;
+    for (let i = 0; i < length; ++i) {
+      const filterEvaluator = compiledRules[i].filter;
+      if (!filterEvaluator(context2)) {
+        continue;
+      }
+      if (rules[i].else && someMatched) {
+        continue;
+      }
+      someMatched = true;
+      for (const styleEvaluator of compiledRules[i].styles) {
+        const style = styleEvaluator(context2);
+        if (!style) {
+          continue;
+        }
+        styles.push(style);
+      }
+    }
+    return styles;
+  };
+}
+function buildStyle(flatStyle, context) {
+  const evaluateFill = buildFill(flatStyle, "", context);
+  const evaluateStroke = buildStroke(flatStyle, "", context);
+  const evaluateText = buildText(flatStyle, context);
+  const evaluateImage = buildImage(flatStyle, context);
+  const evaluateZIndex = numberEvaluator(flatStyle, "z-index", context);
+  if (!evaluateFill && !evaluateStroke && !evaluateText && !evaluateImage && !isEmpty$1(flatStyle)) {
+    throw new Error(
+      "No fill, stroke, point, or text symbolizer properties in style: " + JSON.stringify(flatStyle)
+    );
+  }
+  const style = new Style$1();
+  return function(context2) {
+    let empty = true;
+    if (evaluateFill) {
+      const fill = evaluateFill(context2);
+      if (fill) {
+        empty = false;
+      }
+      style.setFill(fill);
+    }
+    if (evaluateStroke) {
+      const stroke = evaluateStroke(context2);
+      if (stroke) {
+        empty = false;
+      }
+      style.setStroke(stroke);
+    }
+    if (evaluateText) {
+      const text = evaluateText(context2);
+      if (text) {
+        empty = false;
+      }
+      style.setText(text);
+    }
+    if (evaluateImage) {
+      const image = evaluateImage(context2);
+      if (image) {
+        empty = false;
+      }
+      style.setImage(image);
+    }
+    if (evaluateZIndex) {
+      style.setZIndex(evaluateZIndex(context2));
+    }
+    if (empty) {
+      return null;
+    }
+    return style;
+  };
+}
+function buildFill(flatStyle, prefix, context) {
+  let evaluateColor;
+  if (prefix + "fill-pattern-src" in flatStyle) {
+    evaluateColor = patternEvaluator(flatStyle, prefix + "fill-", context);
+  } else {
+    evaluateColor = colorLikeEvaluator(
+      flatStyle,
+      prefix + "fill-color",
+      context
+    );
+  }
+  if (!evaluateColor) {
+    return null;
+  }
+  const fill = new Fill();
+  return function(context2) {
+    const color = evaluateColor(context2);
+    if (color === "none") {
+      return null;
+    }
+    fill.setColor(color);
+    return fill;
+  };
+}
+function buildStroke(flatStyle, prefix, context) {
+  const evaluateWidth = numberEvaluator(
+    flatStyle,
+    prefix + "stroke-width",
+    context
+  );
+  const evaluateColor = colorLikeEvaluator(
+    flatStyle,
+    prefix + "stroke-color",
+    context
+  );
+  if (!evaluateWidth && !evaluateColor) {
+    return null;
+  }
+  const evaluateLineCap = stringEvaluator(
+    flatStyle,
+    prefix + "stroke-line-cap",
+    context
+  );
+  const evaluateLineJoin = stringEvaluator(
+    flatStyle,
+    prefix + "stroke-line-join",
+    context
+  );
+  const evaluateLineDash = numberArrayEvaluator(
+    flatStyle,
+    prefix + "stroke-line-dash",
+    context
+  );
+  const evaluateLineDashOffset = numberEvaluator(
+    flatStyle,
+    prefix + "stroke-line-dash-offset",
+    context
+  );
+  const evaluateMiterLimit = numberEvaluator(
+    flatStyle,
+    prefix + "stroke-miter-limit",
+    context
+  );
+  const stroke = new Stroke();
+  return function(context2) {
+    if (evaluateColor) {
+      const color = evaluateColor(context2);
+      if (color === "none") {
+        return null;
+      }
+      stroke.setColor(color);
+    }
+    if (evaluateWidth) {
+      stroke.setWidth(evaluateWidth(context2));
+    }
+    if (evaluateLineCap) {
+      const lineCap = evaluateLineCap(context2);
+      if (lineCap !== "butt" && lineCap !== "round" && lineCap !== "square") {
+        throw new Error("Expected butt, round, or square line cap");
+      }
+      stroke.setLineCap(lineCap);
+    }
+    if (evaluateLineJoin) {
+      const lineJoin = evaluateLineJoin(context2);
+      if (lineJoin !== "bevel" && lineJoin !== "round" && lineJoin !== "miter") {
+        throw new Error("Expected bevel, round, or miter line join");
+      }
+      stroke.setLineJoin(lineJoin);
+    }
+    if (evaluateLineDash) {
+      stroke.setLineDash(evaluateLineDash(context2));
+    }
+    if (evaluateLineDashOffset) {
+      stroke.setLineDashOffset(evaluateLineDashOffset(context2));
+    }
+    if (evaluateMiterLimit) {
+      stroke.setMiterLimit(evaluateMiterLimit(context2));
+    }
+    return stroke;
+  };
+}
+function buildText(flatStyle, context) {
+  const prefix = "text-";
+  const evaluateValue = stringEvaluator(flatStyle, prefix + "value", context);
+  if (!evaluateValue) {
+    return null;
+  }
+  const evaluateFill = buildFill(flatStyle, prefix, context);
+  const evaluateBackgroundFill = buildFill(
+    flatStyle,
+    prefix + "background-",
+    context
+  );
+  const evaluateStroke = buildStroke(flatStyle, prefix, context);
+  const evaluateBackgroundStroke = buildStroke(
+    flatStyle,
+    prefix + "background-",
+    context
+  );
+  const evaluateFont = stringEvaluator(flatStyle, prefix + "font", context);
+  const evaluateMaxAngle = numberEvaluator(
+    flatStyle,
+    prefix + "max-angle",
+    context
+  );
+  const evaluateOffsetX = numberEvaluator(
+    flatStyle,
+    prefix + "offset-x",
+    context
+  );
+  const evaluateOffsetY = numberEvaluator(
+    flatStyle,
+    prefix + "offset-y",
+    context
+  );
+  const evaluateOverflow = booleanEvaluator(
+    flatStyle,
+    prefix + "overflow",
+    context
+  );
+  const evaluatePlacement = stringEvaluator(
+    flatStyle,
+    prefix + "placement",
+    context
+  );
+  const evaluateRepeat = numberEvaluator(flatStyle, prefix + "repeat", context);
+  const evaluateScale = sizeLikeEvaluator(flatStyle, prefix + "scale", context);
+  const evaluateRotateWithView = booleanEvaluator(
+    flatStyle,
+    prefix + "rotate-with-view",
+    context
+  );
+  const evaluateRotation = numberEvaluator(
+    flatStyle,
+    prefix + "rotation",
+    context
+  );
+  const evaluateAlign = stringEvaluator(flatStyle, prefix + "align", context);
+  const evaluateJustify = stringEvaluator(
+    flatStyle,
+    prefix + "justify",
+    context
+  );
+  const evaluateBaseline = stringEvaluator(
+    flatStyle,
+    prefix + "baseline",
+    context
+  );
+  const evaluatePadding = numberArrayEvaluator(
+    flatStyle,
+    prefix + "padding",
+    context
+  );
+  const declutterMode = optionalDeclutterMode(
+    flatStyle,
+    prefix + "declutter-mode"
+  );
+  const text = new Text({ declutterMode });
+  return function(context2) {
+    text.setText(evaluateValue(context2));
+    if (evaluateFill) {
+      text.setFill(evaluateFill(context2));
+    }
+    if (evaluateBackgroundFill) {
+      text.setBackgroundFill(evaluateBackgroundFill(context2));
+    }
+    if (evaluateStroke) {
+      text.setStroke(evaluateStroke(context2));
+    }
+    if (evaluateBackgroundStroke) {
+      text.setBackgroundStroke(evaluateBackgroundStroke(context2));
+    }
+    if (evaluateFont) {
+      text.setFont(evaluateFont(context2));
+    }
+    if (evaluateMaxAngle) {
+      text.setMaxAngle(evaluateMaxAngle(context2));
+    }
+    if (evaluateOffsetX) {
+      text.setOffsetX(evaluateOffsetX(context2));
+    }
+    if (evaluateOffsetY) {
+      text.setOffsetY(evaluateOffsetY(context2));
+    }
+    if (evaluateOverflow) {
+      text.setOverflow(evaluateOverflow(context2));
+    }
+    if (evaluatePlacement) {
+      const placement = evaluatePlacement(context2);
+      if (placement !== "point" && placement !== "line") {
+        throw new Error("Expected point or line for text-placement");
+      }
+      text.setPlacement(placement);
+    }
+    if (evaluateRepeat) {
+      text.setRepeat(evaluateRepeat(context2));
+    }
+    if (evaluateScale) {
+      text.setScale(evaluateScale(context2));
+    }
+    if (evaluateRotateWithView) {
+      text.setRotateWithView(evaluateRotateWithView(context2));
+    }
+    if (evaluateRotation) {
+      text.setRotation(evaluateRotation(context2));
+    }
+    if (evaluateAlign) {
+      const textAlign = evaluateAlign(context2);
+      if (textAlign !== "left" && textAlign !== "center" && textAlign !== "right" && textAlign !== "end" && textAlign !== "start") {
+        throw new Error(
+          "Expected left, right, center, start, or end for text-align"
+        );
+      }
+      text.setTextAlign(textAlign);
+    }
+    if (evaluateJustify) {
+      const justify = evaluateJustify(context2);
+      if (justify !== "left" && justify !== "right" && justify !== "center") {
+        throw new Error("Expected left, right, or center for text-justify");
+      }
+      text.setJustify(justify);
+    }
+    if (evaluateBaseline) {
+      const textBaseline = evaluateBaseline(context2);
+      if (textBaseline !== "bottom" && textBaseline !== "top" && textBaseline !== "middle" && textBaseline !== "alphabetic" && textBaseline !== "hanging") {
+        throw new Error(
+          "Expected bottom, top, middle, alphabetic, or hanging for text-baseline"
+        );
+      }
+      text.setTextBaseline(textBaseline);
+    }
+    if (evaluatePadding) {
+      text.setPadding(evaluatePadding(context2));
+    }
+    return text;
+  };
+}
+function buildImage(flatStyle, context) {
+  if ("icon-src" in flatStyle) {
+    return buildIcon(flatStyle, context);
+  }
+  if ("shape-points" in flatStyle) {
+    return buildShape(flatStyle, context);
+  }
+  if ("circle-radius" in flatStyle) {
+    return buildCircle(flatStyle, context);
+  }
+  return null;
+}
+function buildIcon(flatStyle, context) {
+  const prefix = "icon-";
+  const srcName = prefix + "src";
+  const src = requireString(flatStyle[srcName], srcName);
+  const evaluateAnchor = coordinateEvaluator(
+    flatStyle,
+    prefix + "anchor",
+    context
+  );
+  const evaluateScale = sizeLikeEvaluator(flatStyle, prefix + "scale", context);
+  const evaluateOpacity = numberEvaluator(
+    flatStyle,
+    prefix + "opacity",
+    context
+  );
+  const evaluateDisplacement = coordinateEvaluator(
+    flatStyle,
+    prefix + "displacement",
+    context
+  );
+  const evaluateRotation = numberEvaluator(
+    flatStyle,
+    prefix + "rotation",
+    context
+  );
+  const evaluateRotateWithView = booleanEvaluator(
+    flatStyle,
+    prefix + "rotate-with-view",
+    context
+  );
+  const anchorOrigin = optionalIconOrigin(flatStyle, prefix + "anchor-origin");
+  const anchorXUnits = optionalIconAnchorUnits(
+    flatStyle,
+    prefix + "anchor-x-units"
+  );
+  const anchorYUnits = optionalIconAnchorUnits(
+    flatStyle,
+    prefix + "anchor-y-units"
+  );
+  const color = optionalColorLike(flatStyle, prefix + "color");
+  const crossOrigin = optionalString(flatStyle, prefix + "cross-origin");
+  const offset2 = optionalNumberArray(flatStyle, prefix + "offset");
+  const offsetOrigin = optionalIconOrigin(flatStyle, prefix + "offset-origin");
+  const width = optionalNumber(flatStyle, prefix + "width");
+  const height = optionalNumber(flatStyle, prefix + "height");
+  const size = optionalSize(flatStyle, prefix + "size");
+  const declutterMode = optionalDeclutterMode(
+    flatStyle,
+    prefix + "declutter-mode"
+  );
+  const icon = new Icon({
+    src,
+    anchorOrigin,
+    anchorXUnits,
+    anchorYUnits,
+    color,
+    crossOrigin,
+    offset: offset2,
+    offsetOrigin,
+    height,
+    width,
+    size,
+    declutterMode
+  });
+  return function(context2) {
+    if (evaluateOpacity) {
+      icon.setOpacity(evaluateOpacity(context2));
+    }
+    if (evaluateDisplacement) {
+      icon.setDisplacement(evaluateDisplacement(context2));
+    }
+    if (evaluateRotation) {
+      icon.setRotation(evaluateRotation(context2));
+    }
+    if (evaluateRotateWithView) {
+      icon.setRotateWithView(evaluateRotateWithView(context2));
+    }
+    if (evaluateScale) {
+      icon.setScale(evaluateScale(context2));
+    }
+    if (evaluateAnchor) {
+      icon.setAnchor(evaluateAnchor(context2));
+    }
+    return icon;
+  };
+}
+function buildShape(flatStyle, context) {
+  const prefix = "shape-";
+  const pointsName = prefix + "points";
+  const radiusName = prefix + "radius";
+  const points = requireNumber(flatStyle[pointsName], pointsName);
+  const radius = requireNumber(flatStyle[radiusName], radiusName);
+  const evaluateFill = buildFill(flatStyle, prefix, context);
+  const evaluateStroke = buildStroke(flatStyle, prefix, context);
+  const evaluateScale = sizeLikeEvaluator(flatStyle, prefix + "scale", context);
+  const evaluateDisplacement = coordinateEvaluator(
+    flatStyle,
+    prefix + "displacement",
+    context
+  );
+  const evaluateRotation = numberEvaluator(
+    flatStyle,
+    prefix + "rotation",
+    context
+  );
+  const evaluateRotateWithView = booleanEvaluator(
+    flatStyle,
+    prefix + "rotate-with-view",
+    context
+  );
+  const radius2 = optionalNumber(flatStyle, prefix + "radius2");
+  const angle = optionalNumber(flatStyle, prefix + "angle");
+  const declutterMode = optionalDeclutterMode(
+    flatStyle,
+    prefix + "declutter-mode"
+  );
+  const shape = new RegularShape({
+    points,
+    radius,
+    radius2,
+    angle,
+    declutterMode
+  });
+  return function(context2) {
+    if (evaluateFill) {
+      shape.setFill(evaluateFill(context2));
+    }
+    if (evaluateStroke) {
+      shape.setStroke(evaluateStroke(context2));
+    }
+    if (evaluateDisplacement) {
+      shape.setDisplacement(evaluateDisplacement(context2));
+    }
+    if (evaluateRotation) {
+      shape.setRotation(evaluateRotation(context2));
+    }
+    if (evaluateRotateWithView) {
+      shape.setRotateWithView(evaluateRotateWithView(context2));
+    }
+    if (evaluateScale) {
+      shape.setScale(evaluateScale(context2));
+    }
+    return shape;
+  };
+}
+function buildCircle(flatStyle, context) {
+  const prefix = "circle-";
+  const evaluateFill = buildFill(flatStyle, prefix, context);
+  const evaluateStroke = buildStroke(flatStyle, prefix, context);
+  const evaluateRadius = numberEvaluator(flatStyle, prefix + "radius", context);
+  const evaluateScale = sizeLikeEvaluator(flatStyle, prefix + "scale", context);
+  const evaluateDisplacement = coordinateEvaluator(
+    flatStyle,
+    prefix + "displacement",
+    context
+  );
+  const evaluateRotation = numberEvaluator(
+    flatStyle,
+    prefix + "rotation",
+    context
+  );
+  const evaluateRotateWithView = booleanEvaluator(
+    flatStyle,
+    prefix + "rotate-with-view",
+    context
+  );
+  const declutterMode = optionalDeclutterMode(
+    flatStyle,
+    prefix + "declutter-mode"
+  );
+  const circle = new CircleStyle({
+    radius: 5,
+    // this is arbitrary, but required - the evaluated radius is used below
+    declutterMode
+  });
+  return function(context2) {
+    if (evaluateRadius) {
+      circle.setRadius(evaluateRadius(context2));
+    }
+    if (evaluateFill) {
+      circle.setFill(evaluateFill(context2));
+    }
+    if (evaluateStroke) {
+      circle.setStroke(evaluateStroke(context2));
+    }
+    if (evaluateDisplacement) {
+      circle.setDisplacement(evaluateDisplacement(context2));
+    }
+    if (evaluateRotation) {
+      circle.setRotation(evaluateRotation(context2));
+    }
+    if (evaluateRotateWithView) {
+      circle.setRotateWithView(evaluateRotateWithView(context2));
+    }
+    if (evaluateScale) {
+      circle.setScale(evaluateScale(context2));
+    }
+    return circle;
+  };
+}
+function numberEvaluator(flatStyle, name, context) {
+  if (!(name in flatStyle)) {
+    return void 0;
+  }
+  const evaluator = buildExpression(flatStyle[name], NumberType, context);
+  return function(context2) {
+    return requireNumber(evaluator(context2), name);
+  };
+}
+function stringEvaluator(flatStyle, name, context) {
+  if (!(name in flatStyle)) {
+    return null;
+  }
+  const evaluator = buildExpression(flatStyle[name], StringType, context);
+  return function(context2) {
+    return requireString(evaluator(context2), name);
+  };
+}
+function patternEvaluator(flatStyle, prefix, context) {
+  const srcEvaluator = stringEvaluator(
+    flatStyle,
+    prefix + "pattern-src",
+    context
+  );
+  const offsetEvaluator = sizeEvaluator(
+    flatStyle,
+    prefix + "pattern-offset",
+    context
+  );
+  const patternSizeEvaluator = sizeEvaluator(
+    flatStyle,
+    prefix + "pattern-size",
+    context
+  );
+  const colorEvaluator = colorLikeEvaluator(
+    flatStyle,
+    prefix + "color",
+    context
+  );
+  return function(context2) {
+    return {
+      src: srcEvaluator(context2),
+      offset: offsetEvaluator && offsetEvaluator(context2),
+      size: patternSizeEvaluator && patternSizeEvaluator(context2),
+      color: colorEvaluator && colorEvaluator(context2)
+    };
+  };
+}
+function booleanEvaluator(flatStyle, name, context) {
+  if (!(name in flatStyle)) {
+    return null;
+  }
+  const evaluator = buildExpression(flatStyle[name], BooleanType, context);
+  return function(context2) {
+    const value = evaluator(context2);
+    if (typeof value !== "boolean") {
+      throw new Error(`Expected a boolean for ${name}`);
+    }
+    return value;
+  };
+}
+function colorLikeEvaluator(flatStyle, name, context) {
+  if (!(name in flatStyle)) {
+    return null;
+  }
+  const evaluator = buildExpression(
+    flatStyle[name],
+    ColorType | StringType,
+    context
+  );
+  return function(context2) {
+    return requireColorLike(evaluator(context2), name);
+  };
+}
+function numberArrayEvaluator(flatStyle, name, context) {
+  if (!(name in flatStyle)) {
+    return null;
+  }
+  const evaluator = buildExpression(flatStyle[name], NumberArrayType, context);
+  return function(context2) {
+    return requireNumberArray(evaluator(context2), name);
+  };
+}
+function coordinateEvaluator(flatStyle, name, context) {
+  if (!(name in flatStyle)) {
+    return null;
+  }
+  const evaluator = buildExpression(flatStyle[name], NumberArrayType, context);
+  return function(context2) {
+    const array = requireNumberArray(evaluator(context2), name);
+    if (array.length !== 2) {
+      throw new Error(`Expected two numbers for ${name}`);
+    }
+    return array;
+  };
+}
+function sizeEvaluator(flatStyle, name, context) {
+  if (!(name in flatStyle)) {
+    return null;
+  }
+  const evaluator = buildExpression(flatStyle[name], NumberArrayType, context);
+  return function(context2) {
+    return requireSize(evaluator(context2), name);
+  };
+}
+function sizeLikeEvaluator(flatStyle, name, context) {
+  if (!(name in flatStyle)) {
+    return null;
+  }
+  const evaluator = buildExpression(
+    flatStyle[name],
+    NumberArrayType | NumberType,
+    context
+  );
+  return function(context2) {
+    return requireSizeLike(evaluator(context2), name);
+  };
+}
+function optionalNumber(flatStyle, property) {
+  const value = flatStyle[property];
+  if (value === void 0) {
+    return void 0;
+  }
+  if (typeof value !== "number") {
+    throw new Error(`Expected a number for ${property}`);
+  }
+  return value;
+}
+function optionalSize(flatStyle, property) {
+  const encoded = flatStyle[property];
+  if (encoded === void 0) {
+    return void 0;
+  }
+  if (typeof encoded === "number") {
+    return toSize(encoded);
+  }
+  if (!Array.isArray(encoded)) {
+    throw new Error(`Expected a number or size array for ${property}`);
+  }
+  if (encoded.length !== 2 || typeof encoded[0] !== "number" || typeof encoded[1] !== "number") {
+    throw new Error(`Expected a number or size array for ${property}`);
+  }
+  return encoded;
+}
+function optionalString(flatStyle, property) {
+  const encoded = flatStyle[property];
+  if (encoded === void 0) {
+    return void 0;
+  }
+  if (typeof encoded !== "string") {
+    throw new Error(`Expected a string for ${property}`);
+  }
+  return encoded;
+}
+function optionalIconOrigin(flatStyle, property) {
+  const encoded = flatStyle[property];
+  if (encoded === void 0) {
+    return void 0;
+  }
+  if (encoded !== "bottom-left" && encoded !== "bottom-right" && encoded !== "top-left" && encoded !== "top-right") {
+    throw new Error(
+      `Expected bottom-left, bottom-right, top-left, or top-right for ${property}`
+    );
+  }
+  return encoded;
+}
+function optionalIconAnchorUnits(flatStyle, property) {
+  const encoded = flatStyle[property];
+  if (encoded === void 0) {
+    return void 0;
+  }
+  if (encoded !== "pixels" && encoded !== "fraction") {
+    throw new Error(`Expected pixels or fraction for ${property}`);
+  }
+  return encoded;
+}
+function optionalNumberArray(flatStyle, property) {
+  const encoded = flatStyle[property];
+  if (encoded === void 0) {
+    return void 0;
+  }
+  return requireNumberArray(encoded, property);
+}
+function optionalDeclutterMode(flatStyle, property) {
+  const encoded = flatStyle[property];
+  if (encoded === void 0) {
+    return void 0;
+  }
+  if (typeof encoded !== "string") {
+    throw new Error(`Expected a string for ${property}`);
+  }
+  if (encoded !== "declutter" && encoded !== "obstacle" && encoded !== "none") {
+    throw new Error(`Expected declutter, obstacle, or none for ${property}`);
+  }
+  return encoded;
+}
+function optionalColorLike(flatStyle, property) {
+  const encoded = flatStyle[property];
+  if (encoded === void 0) {
+    return void 0;
+  }
+  return requireColorLike(encoded, property);
+}
+function requireNumberArray(value, property) {
+  if (!Array.isArray(value)) {
+    throw new Error(`Expected an array for ${property}`);
+  }
+  const length = value.length;
+  for (let i = 0; i < length; ++i) {
+    if (typeof value[i] !== "number") {
+      throw new Error(`Expected an array of numbers for ${property}`);
+    }
+  }
+  return value;
+}
+function requireString(value, property) {
+  if (typeof value !== "string") {
+    throw new Error(`Expected a string for ${property}`);
+  }
+  return value;
+}
+function requireNumber(value, property) {
+  if (typeof value !== "number") {
+    throw new Error(`Expected a number for ${property}`);
+  }
+  return value;
+}
+function requireColorLike(value, property) {
+  if (typeof value === "string") {
+    return value;
+  }
+  const array = requireNumberArray(value, property);
+  const length = array.length;
+  if (length < 3 || length > 4) {
+    throw new Error(`Expected a color with 3 or 4 values for ${property}`);
+  }
+  return array;
+}
+function requireSize(value, property) {
+  const size = requireNumberArray(value, property);
+  if (size.length !== 2) {
+    throw new Error(`Expected an array of two numbers for ${property}`);
+  }
+  return size;
+}
+function requireSizeLike(value, property) {
+  if (typeof value === "number") {
+    return value;
+  }
+  return requireSize(value, property);
+}
+const Property$1 = {
+  RENDER_ORDER: "renderOrder"
+};
+class BaseVectorLayer extends Layer$1 {
+  /**
+   * @param {Options<VectorSourceType>} [options] Options.
+   */
+  constructor(options) {
+    options = options ? options : {};
+    const baseOptions = Object.assign({}, options);
+    delete baseOptions.style;
+    delete baseOptions.renderBuffer;
+    delete baseOptions.updateWhileAnimating;
+    delete baseOptions.updateWhileInteracting;
+    super(baseOptions);
+    this.declutter_ = options.declutter ? String(options.declutter) : void 0;
+    this.renderBuffer_ = options.renderBuffer !== void 0 ? options.renderBuffer : 100;
+    this.style_ = null;
+    this.styleFunction_ = void 0;
+    this.setStyle(options.style);
+    this.updateWhileAnimating_ = options.updateWhileAnimating !== void 0 ? options.updateWhileAnimating : false;
+    this.updateWhileInteracting_ = options.updateWhileInteracting !== void 0 ? options.updateWhileInteracting : false;
+  }
+  /**
+   * @return {string} Declutter group.
+   */
+  getDeclutter() {
+    return this.declutter_;
+  }
+  /**
+   * Get the topmost feature that intersects the given pixel on the viewport. Returns a promise
+   * that resolves with an array of features. The array will either contain the topmost feature
+   * when a hit was detected, or it will be empty.
+   *
+   * The hit detection algorithm used for this method is optimized for performance, but is less
+   * accurate than the one used in [map.getFeaturesAtPixel()]{@link import("../Map.js").default#getFeaturesAtPixel}.
+   * Text is not considered, and icons are only represented by their bounding box instead of the exact
+   * image.
+   *
+   * @param {import("../pixel.js").Pixel} pixel Pixel.
+   * @return {Promise<Array<import("../Feature").FeatureLike>>} Promise that resolves with an array of features.
+   * @api
+   */
+  getFeatures(pixel) {
+    return super.getFeatures(pixel);
+  }
+  /**
+   * @return {number|undefined} Render buffer.
+   */
+  getRenderBuffer() {
+    return this.renderBuffer_;
+  }
+  /**
+   * @return {function(import("../Feature.js").default, import("../Feature.js").default): number|null|undefined} Render
+   *     order.
+   */
+  getRenderOrder() {
+    return (
+      /** @type {import("../render.js").OrderFunction|null|undefined} */
+      this.get(Property$1.RENDER_ORDER)
+    );
+  }
+  /**
+   * Get the style for features.  This returns whatever was passed to the `style`
+   * option at construction or to the `setStyle` method.
+   * @return {import("../style/Style.js").StyleLike|import("../style/flat.js").FlatStyleLike|null|undefined} Layer style.
+   * @api
+   */
+  getStyle() {
+    return this.style_;
+  }
+  /**
+   * Get the style function.
+   * @return {import("../style/Style.js").StyleFunction|undefined} Layer style function.
+   * @api
+   */
+  getStyleFunction() {
+    return this.styleFunction_;
+  }
+  /**
+   * @return {boolean} Whether the rendered layer should be updated while
+   *     animating.
+   */
+  getUpdateWhileAnimating() {
+    return this.updateWhileAnimating_;
+  }
+  /**
+   * @return {boolean} Whether the rendered layer should be updated while
+   *     interacting.
+   */
+  getUpdateWhileInteracting() {
+    return this.updateWhileInteracting_;
+  }
+  /**
+   * Render declutter items for this layer
+   * @param {import("../Map.js").FrameState} frameState Frame state.
+   * @param {import("../layer/Layer.js").State} layerState Layer state.
+   */
+  renderDeclutter(frameState, layerState) {
+    const declutterGroup = this.getDeclutter();
+    if (declutterGroup in frameState.declutter === false) {
+      frameState.declutter[declutterGroup] = new RBush(9);
+    }
+    this.getRenderer().renderDeclutter(frameState, layerState);
+  }
+  /**
+   * @param {import("../render.js").OrderFunction|null|undefined} renderOrder
+   *     Render order.
+   */
+  setRenderOrder(renderOrder) {
+    this.set(Property$1.RENDER_ORDER, renderOrder);
+  }
+  /**
+   * Set the style for features.  This can be a single style object, an array
+   * of styles, or a function that takes a feature and resolution and returns
+   * an array of styles. If set to `null`, the layer has no style (a `null` style),
+   * so only features that have their own styles will be rendered in the layer. Call
+   * `setStyle()` without arguments to reset to the default style. See
+   * [the ol/style/Style module]{@link module:ol/style/Style~Style} for information on the default style.
+   *
+   * If your layer has a static style, you can use [flat style]{@link module:ol/style/flat~FlatStyle} object
+   * literals instead of using the `Style` and symbolizer constructors (`Fill`, `Stroke`, etc.):
+   * ```js
+   * vectorLayer.setStyle({
+   *   "fill-color": "yellow",
+   *   "stroke-color": "black",
+   *   "stroke-width": 4
+   * })
+   * ```
+   *
+   * @param {import("../style/Style.js").StyleLike|import("../style/flat.js").FlatStyleLike|null} [style] Layer style.
+   * @api
+   */
+  setStyle(style) {
+    this.style_ = style === void 0 ? createDefaultStyle : style;
+    const styleLike = toStyleLike(style);
+    this.styleFunction_ = style === null ? void 0 : toFunction(styleLike);
+    this.changed();
+  }
+}
+function toStyleLike(style) {
+  if (style === void 0) {
+    return createDefaultStyle;
+  }
+  if (!style) {
+    return null;
+  }
+  if (typeof style === "function") {
+    return style;
+  }
+  if (style instanceof Style$1) {
+    return style;
+  }
+  if (!Array.isArray(style)) {
+    return flatStylesToStyleFunction([style]);
+  }
+  if (style.length === 0) {
+    return [];
+  }
+  const length = style.length;
+  const first = style[0];
+  if (first instanceof Style$1) {
+    const styles = new Array(length);
+    for (let i = 0; i < length; ++i) {
+      const candidate = style[i];
+      if (!(candidate instanceof Style$1)) {
+        throw new Error("Expected a list of style instances");
+      }
+      styles[i] = candidate;
+    }
+    return styles;
+  }
+  if ("style" in first) {
+    const rules = new Array(length);
+    for (let i = 0; i < length; ++i) {
+      const candidate = style[i];
+      if (!("style" in candidate)) {
+        throw new Error("Expected a list of rules with a style property");
+      }
+      rules[i] = candidate;
+    }
+    return rulesToStyleFunction(rules);
+  }
+  const flatStyles = (
+    /** @type {Array<import("../style/flat.js").FlatStyle>} */
+    style
+  );
+  return flatStylesToStyleFunction(flatStyles);
+}
 class MapRenderer extends Disposable {
   /**
    * @param {import("../Map.js").default} map Map.
@@ -12064,11 +17320,6 @@ class MapRenderer extends Disposable {
   }
   /**
    * @param {import("../Map.js").FrameState} frameState Frame state.
-   */
-  flushDeclutterItems(frameState) {
-  }
-  /**
-   * @param {import("../Map.js").FrameState} frameState Frame state.
    * @protected
    */
   scheduleExpireIconCache(frameState) {
@@ -12095,75 +17346,6 @@ class RenderEvent extends BaseEvent {
     this.context = context;
   }
 }
-const CLASS_HIDDEN = "ol-hidden";
-const CLASS_UNSELECTABLE = "ol-unselectable";
-const CLASS_CONTROL = "ol-control";
-const CLASS_COLLAPSED = "ol-collapsed";
-function createCanvasContext2D(width, height, canvasPool2, settings) {
-  let canvas;
-  if (canvasPool2 && canvasPool2.length) {
-    canvas = /** @type {HTMLCanvasElement} */
-    canvasPool2.shift();
-  } else if (WORKER_OFFSCREEN_CANVAS) {
-    canvas = new OffscreenCanvas(width || 300, height || 300);
-  } else {
-    canvas = document.createElement("canvas");
-  }
-  if (width) {
-    canvas.width = width;
-  }
-  if (height) {
-    canvas.height = height;
-  }
-  return (
-    /** @type {CanvasRenderingContext2D} */
-    canvas.getContext("2d", settings)
-  );
-}
-function releaseCanvas(context) {
-  const canvas = context.canvas;
-  canvas.width = 1;
-  canvas.height = 1;
-  context.clearRect(0, 0, 1, 1);
-}
-function replaceNode(newNode, oldNode) {
-  const parent = oldNode.parentNode;
-  if (parent) {
-    parent.replaceChild(newNode, oldNode);
-  }
-}
-function removeNode(node) {
-  return node && node.parentNode ? node.parentNode.removeChild(node) : null;
-}
-function removeChildren(node) {
-  while (node.lastChild) {
-    node.removeChild(node.lastChild);
-  }
-}
-function replaceChildren(node, children) {
-  const oldChildren = node.childNodes;
-  for (let i = 0; true; ++i) {
-    const oldChild = oldChildren[i];
-    const newChild = children[i];
-    if (!oldChild && !newChild) {
-      break;
-    }
-    if (oldChild === newChild) {
-      continue;
-    }
-    if (!oldChild) {
-      node.appendChild(newChild);
-      continue;
-    }
-    if (!newChild) {
-      node.removeChild(oldChild);
-      --i;
-      continue;
-    }
-    node.insertBefore(newChild, oldChild);
-  }
-}
-const checkedFonts = new BaseObject();
 class CompositeMapRenderer extends MapRenderer {
   /**
    * @param {import("../Map.js").default} map Map.
@@ -12186,7 +17368,6 @@ class CompositeMapRenderer extends MapRenderer {
     container.insertBefore(this.element_, container.firstChild || null);
     this.children_ = [];
     this.renderedVisible_ = true;
-    this.declutterLayers_ = [];
   }
   /**
    * @param {import("../render/EventType.js").default} type Event type.
@@ -12221,10 +17402,15 @@ class CompositeMapRenderer extends MapRenderer {
     const layerStatesArray = frameState.layerStatesArray.sort(function(a2, b2) {
       return a2.zIndex - b2.zIndex;
     });
+    const declutter = layerStatesArray.some(
+      (layerState) => layerState.layer instanceof BaseVectorLayer && layerState.layer.getDeclutter()
+    );
+    if (declutter) {
+      frameState.declutter = {};
+    }
     const viewState = frameState.viewState;
     this.children_.length = 0;
-    const declutterLayers = this.declutterLayers_;
-    declutterLayers.length = 0;
+    const renderedLayerStates = [];
     let previousElement = null;
     for (let i = 0, ii = layerStatesArray.length; i < ii; ++i) {
       const layerState = layerStatesArray[i];
@@ -12243,14 +17429,9 @@ class CompositeMapRenderer extends MapRenderer {
         this.children_.push(element);
         previousElement = element;
       }
-      if ("getDeclutter" in layer) {
-        declutterLayers.push(
-          /** @type {import("../layer/BaseVector.js").default} */
-          layer
-        );
-      }
+      renderedLayerStates.push(layerState);
     }
-    this.flushDeclutterItems(frameState);
+    this.declutter(frameState, renderedLayerStates);
     replaceChildren(this.element_, this.children_);
     this.dispatchRenderEvent(RenderEventType.POSTCOMPOSE, frameState);
     if (!this.renderedVisible_) {
@@ -12261,18 +17442,27 @@ class CompositeMapRenderer extends MapRenderer {
   }
   /**
    * @param {import("../Map.js").FrameState} frameState Frame state.
+   * @param {Array<import('../layer/Layer.js').State>} layerStates Layers.
    */
-  flushDeclutterItems(frameState) {
-    const layers = this.declutterLayers_;
-    for (let i = layers.length - 1; i >= 0; --i) {
-      layers[i].renderDeclutter(frameState);
+  declutter(frameState, layerStates) {
+    if (!frameState.declutter) {
+      return;
     }
-    layers.length = 0;
+    for (let i = layerStates.length - 1; i >= 0; --i) {
+      const layerState = layerStates[i];
+      const layer = layerState.layer;
+      if (layer.getDeclutter()) {
+        layer.renderDeclutter(frameState, layerState);
+      }
+    }
+    layerStates.forEach(
+      (layerState) => layerState.layer.renderDeferred(frameState)
+    );
   }
 }
 class GroupEvent extends BaseEvent {
   /**
-   * @param {EventType} type The event type.
+   * @param {GroupEventType} type The event type.
    * @param {BaseLayer} layer The layer.
    */
   constructor(type, layer) {
@@ -12332,7 +17522,12 @@ class LayerGroup extends BaseLayer {
     const layers = this.getLayers();
     this.layersListenerKeys_.push(
       listen(layers, CollectionEventType.ADD, this.handleLayersAdd_, this),
-      listen(layers, CollectionEventType.REMOVE, this.handleLayersRemove_, this)
+      listen(
+        layers,
+        CollectionEventType.REMOVE,
+        this.handleLayersRemove_,
+        this
+      )
     );
     for (const id in this.listenerKeys_) {
       this.listenerKeys_[id].forEach(unlistenByKey);
@@ -13424,7 +18619,7 @@ class Attribution extends Control {
    * @private
    * @param {?import("../Map.js").FrameState} frameState Frame state.
    */
-  updateElement_(frameState) {
+  async updateElement_(frameState) {
     if (!frameState) {
       if (this.renderedVisible_) {
         this.element.style.display = "none";
@@ -13432,7 +18627,11 @@ class Attribution extends Control {
       }
       return;
     }
-    const attributions = this.collectSourceAttributions_(frameState);
+    const attributions = await Promise.all(
+      this.collectSourceAttributions_(frameState).map(
+        (attribution) => toPromise(() => attribution)
+      )
+    );
     const visible = attributions.length > 0;
     if (this.renderedVisible_ != visible) {
       this.element.style.display = visible ? "" : "none";
@@ -13526,7 +18725,6 @@ class Attribution extends Control {
     this.updateElement_(mapEvent.frameState);
   }
 }
-const Attribution$1 = Attribution;
 class Rotate extends Control {
   /**
    * @param {Options} [options] Rotate options.
@@ -13633,7 +18831,6 @@ class Rotate extends Control {
     this.rotation_ = rotation;
   }
 }
-const Rotate$1 = Rotate;
 class Zoom extends Control {
   /**
    * @param {Options} [options] Zoom options.
@@ -13720,21 +18917,20 @@ class Zoom extends Control {
     }
   }
 }
-const Zoom$1 = Zoom;
 function defaults$1(options) {
   options = options ? options : {};
   const controls = new Collection();
   const zoomControl = options.zoom !== void 0 ? options.zoom : true;
   if (zoomControl) {
-    controls.push(new Zoom$1(options.zoomOptions));
+    controls.push(new Zoom(options.zoomOptions));
   }
   const rotateControl = options.rotate !== void 0 ? options.rotate : true;
   if (rotateControl) {
-    controls.push(new Rotate$1(options.rotateOptions));
+    controls.push(new Rotate(options.rotateOptions));
   }
   const attributionControl = options.attribution !== void 0 ? options.attribution : true;
   if (attributionControl) {
-    controls.push(new Attribution$1(options.attributionOptions));
+    controls.push(new Attribution(options.attributionOptions));
   }
   return controls;
 }
@@ -13866,7 +19062,6 @@ class DoubleClickZoom extends Interaction {
     return !stopEvent;
   }
 }
-const DoubleClickZoom$1 = DoubleClickZoom;
 class PointerInteraction extends Interaction {
   /**
    * @param {Options} [options] Options.
@@ -14200,7 +19395,6 @@ class DragPan extends PointerInteraction {
     return false;
   }
 }
-const DragPan$1 = DragPan;
 class DragRotate extends PointerInteraction {
   /**
    * @param {Options} [options] Options.
@@ -14333,6 +19527,9 @@ class RenderBox extends Disposable {
    * Creates or updates the cached geometry.
    */
   createOrUpdateGeometry() {
+    if (!this.map_) {
+      return;
+    }
     const startPixel = this.startPixel_;
     const endPixel = this.endPixel_;
     const pixels = [
@@ -14443,6 +19640,9 @@ class DragBox extends PointerInteraction {
    * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
    */
   handleDragEvent(mapBrowserEvent) {
+    if (!this.startPixel_) {
+      return;
+    }
     this.box_.setPixels(this.startPixel_, mapBrowserEvent.pixel);
     this.dispatchEvent(
       new DragBoxEvent(
@@ -14458,6 +19658,9 @@ class DragBox extends PointerInteraction {
    * @return {boolean} If the event was consumed.
    */
   handleUpEvent(mapBrowserEvent) {
+    if (!this.startPixel_) {
+      return false;
+    }
     this.box_.setMap(null);
     const completeBox = this.boxEndCondition_(
       mapBrowserEvent,
@@ -14503,6 +19706,24 @@ class DragBox extends PointerInteraction {
    */
   onBoxEnd(event) {
   }
+  /**
+   * Activate or deactivate the interaction.
+   * @param {boolean} active Active.
+   * @observable
+   * @api
+   */
+  setActive(active) {
+    if (!active) {
+      this.box_.setMap(null);
+      if (this.startPixel_) {
+        this.dispatchEvent(
+          new DragBoxEvent(DragBoxEventType.BOXCANCEL, this.startPixel_, null)
+        );
+        this.startPixel_ = null;
+      }
+    }
+    super.setActive(active);
+  }
 }
 class DragZoom extends DragBox {
   /**
@@ -14543,7 +19764,6 @@ class DragZoom extends DragBox {
     });
   }
 }
-const DragZoom$1 = DragZoom;
 const Key = {
   LEFT: "ArrowLeft",
   UP: "ArrowUp",
@@ -14643,7 +19863,6 @@ class KeyboardZoom extends Interaction {
     return !stopEvent;
   }
 }
-const KeyboardZoom$1 = KeyboardZoom;
 class Kinetic {
   /**
    * @param {number} decay Rate of decay (must be negative).
@@ -14864,7 +20083,6 @@ class MouseWheelZoom extends Interaction {
     }
   }
 }
-const MouseWheelZoom$1 = MouseWheelZoom;
 class PinchRotate extends PointerInteraction {
   /**
    * @param {Options} [options] Options.
@@ -15033,7 +20251,6 @@ class PinchZoom extends PointerInteraction {
     return false;
   }
 }
-const PinchZoom$1 = PinchZoom;
 function defaults(options) {
   options = options ? options : {};
   const interactions = new Collection();
@@ -15045,7 +20262,7 @@ function defaults(options) {
   const doubleClickZoom = options.doubleClickZoom !== void 0 ? options.doubleClickZoom : true;
   if (doubleClickZoom) {
     interactions.push(
-      new DoubleClickZoom$1({
+      new DoubleClickZoom({
         delta: options.zoomDelta,
         duration: options.zoomDuration
       })
@@ -15054,7 +20271,7 @@ function defaults(options) {
   const dragPan = options.dragPan !== void 0 ? options.dragPan : true;
   if (dragPan) {
     interactions.push(
-      new DragPan$1({
+      new DragPan({
         onFocusOnly: options.onFocusOnly,
         kinetic
       })
@@ -15067,7 +20284,7 @@ function defaults(options) {
   const pinchZoom = options.pinchZoom !== void 0 ? options.pinchZoom : true;
   if (pinchZoom) {
     interactions.push(
-      new PinchZoom$1({
+      new PinchZoom({
         duration: options.zoomDuration
       })
     );
@@ -15076,7 +20293,7 @@ function defaults(options) {
   if (keyboard) {
     interactions.push(new KeyboardPan());
     interactions.push(
-      new KeyboardZoom$1({
+      new KeyboardZoom({
         delta: options.zoomDelta,
         duration: options.zoomDuration
       })
@@ -15085,7 +20302,7 @@ function defaults(options) {
   const mouseWheelZoom = options.mouseWheelZoom !== void 0 ? options.mouseWheelZoom : true;
   if (mouseWheelZoom) {
     interactions.push(
-      new MouseWheelZoom$1({
+      new MouseWheelZoom({
         onFocusOnly: options.onFocusOnly,
         duration: options.zoomDuration
       })
@@ -15094,35 +20311,12 @@ function defaults(options) {
   const shiftDragZoom = options.shiftDragZoom !== void 0 ? options.shiftDragZoom : true;
   if (shiftDragZoom) {
     interactions.push(
-      new DragZoom$1({
+      new DragZoom({
         duration: options.zoomDuration
       })
     );
   }
   return interactions;
-}
-function hasArea(size) {
-  return size[0] > 0 && size[1] > 0;
-}
-function scale(size, ratio, dest) {
-  if (dest === void 0) {
-    dest = [0, 0];
-  }
-  dest[0] = size[0] * ratio + 0.5 | 0;
-  dest[1] = size[1] * ratio + 0.5 | 0;
-  return dest;
-}
-function toSize(size, dest) {
-  if (Array.isArray(size)) {
-    return size;
-  }
-  if (dest === void 0) {
-    dest = [size, size];
-  } else {
-    dest[0] = size;
-    dest[1] = size;
-  }
-  return dest;
 }
 function removeLayerMapProperty(layer) {
   if (layer instanceof Layer$1) {
@@ -15221,9 +20415,9 @@ let Map$1 = class Map2 extends BaseObject {
     this.addChangeListener(MapProperty.TARGET, this.handleTargetChanged_);
     this.setProperties(optionsInternal.values);
     const map2 = this;
-    if (options.view && !(options.view instanceof View$1)) {
+    if (options.view && !(options.view instanceof View)) {
       options.view.then(function(viewOptions) {
-        map2.setView(new View$1(viewOptions));
+        map2.setView(new View(viewOptions));
       });
     }
     this.controls.addEventListener(
@@ -15592,7 +20786,7 @@ let Map$1 = class Map2 extends BaseObject {
    * Note that the index treats string and numeric identifiers as the same. So
    * `map.getOverlayById(2)` will return an overlay with id `'2'` or `2`.
    * @param {string|number} id Overlay identifier.
-   * @return {import("./Overlay.js").default} Overlay.
+   * @return {import("./Overlay.js").default|null} Overlay.
    * @api
    */
   getOverlayById(id) {
@@ -16093,20 +21287,6 @@ let Map$1 = class Map2 extends BaseObject {
     }
   }
   /**
-   * This method is meant to be called in a layer's `prerender` listener. It causes all collected
-   * declutter items to be decluttered and rendered on the map immediately. This is useful for
-   * layers that need to appear entirely above the decluttered items of layers lower in the layer
-   * stack.
-   * @api
-   */
-  flushDeclutterItems() {
-    const frameState = this.frameState_;
-    if (!frameState) {
-      return;
-    }
-    this.renderer_.flushDeclutterItems(frameState);
-  }
-  /**
    * Remove the given control from the map.
    * @param {import("./control/Control.js").default} control Control.
    * @return {import("./control/Control.js").default|undefined} The removed control (or undefined
@@ -16171,7 +21351,7 @@ let Map$1 = class Map2 extends BaseObject {
       frameState = {
         animate: false,
         coordinateToPixelTransform: this.coordinateToPixelTransform_,
-        declutterTree: null,
+        declutter: null,
         extent: getForViewAndSize(
           viewState.center,
           viewState.resolution,
@@ -16282,14 +21462,14 @@ let Map$1 = class Map2 extends BaseObject {
    * @api
    */
   setView(view) {
-    if (!view || view instanceof View$1) {
+    if (!view || view instanceof View) {
       this.set(MapProperty.VIEW, view);
       return;
     }
-    this.set(MapProperty.VIEW, new View$1());
+    this.set(MapProperty.VIEW, new View());
     const map2 = this;
     view.then(function(viewOptions) {
-      map2.setView(new View$1(viewOptions));
+      map2.setView(new View(viewOptions));
     });
   }
   /**
@@ -16349,7 +21529,7 @@ function createOptionsInternal(options) {
   });
   values[MapProperty.LAYERGROUP] = layerGroup;
   values[MapProperty.TARGET] = options.target;
-  values[MapProperty.VIEW] = options.view instanceof View$1 ? options.view : new View$1();
+  values[MapProperty.VIEW] = options.view instanceof View ? options.view : new View();
   let controls;
   if (options.controls !== void 0) {
     if (Array.isArray(options.controls)) {
@@ -16399,7 +21579,6 @@ function createOptionsInternal(options) {
     values
   };
 }
-const Map$2 = Map$1;
 class Tile extends Target {
   /**
    * @param {import("./tilecoord.js").TileCoord} tileCoord Tile coordinate.
@@ -16566,52 +21745,6 @@ class Tile extends Target {
       this.transitionStarts_[id] = -1;
     }
   }
-}
-const ImageState = {
-  IDLE: 0,
-  LOADING: 1,
-  LOADED: 2,
-  ERROR: 3,
-  EMPTY: 4
-};
-function listenImage(image, loadHandler, errorHandler) {
-  const img = (
-    /** @type {HTMLImageElement} */
-    image
-  );
-  let listening = true;
-  let decoding = false;
-  let loaded = false;
-  const listenerKeys = [
-    listenOnce(img, EventType.LOAD, function() {
-      loaded = true;
-      if (!decoding) {
-        loadHandler();
-      }
-    })
-  ];
-  if (img.src && IMAGE_DECODE) {
-    decoding = true;
-    img.decode().then(function() {
-      if (listening) {
-        loadHandler();
-      }
-    }).catch(function(error) {
-      if (listening) {
-        if (loaded) {
-          loadHandler();
-        } else {
-          errorHandler();
-        }
-      }
-    });
-  } else {
-    listenerKeys.push(listenOnce(img, EventType.ERROR, errorHandler));
-  }
-  return function unlisten() {
-    listening = false;
-    listenerKeys.forEach(unlistenByKey);
-  };
 }
 class ImageTile extends Tile {
   /**
@@ -16914,7 +22047,7 @@ class Triangulation {
     }
     if (!needsSubdivision && this.maxSourceExtent_) {
       if (isFinite(sourceQuadExtent[0]) && isFinite(sourceQuadExtent[1]) && isFinite(sourceQuadExtent[2]) && isFinite(sourceQuadExtent[3])) {
-        if (!intersects(sourceQuadExtent, this.maxSourceExtent_)) {
+        if (!intersects$1(sourceQuadExtent, this.maxSourceExtent_)) {
           return;
         }
       }
@@ -17124,7 +22257,7 @@ function calculateSourceExtentResolution(sourceProj, targetProj, targetExtent, t
   }
   return sourceResolution;
 }
-function render(width, height, pixelRatio, sourceResolution, sourceExtent, targetResolution, targetExtent, triangulation, sources, gutter, renderEdges, interpolate, drawSingle) {
+function render(width, height, pixelRatio, sourceResolution, sourceExtent, targetResolution, targetExtent, triangulation, sources, gutter, renderEdges, interpolate, drawSingle, clipExtent) {
   const context = createCanvasContext2D(
     Math.round(pixelRatio * width),
     Math.round(pixelRatio * height),
@@ -17143,38 +22276,62 @@ function render(width, height, pixelRatio, sourceResolution, sourceExtent, targe
   context.globalCompositeOperation = "lighter";
   const sourceDataExtent = createEmpty();
   sources.forEach(function(src, i, arr) {
-    extend$1(sourceDataExtent, src.extent);
+    extend$2(sourceDataExtent, src.extent);
   });
   let stitchContext;
-  if (!drawSingle || sources.length !== 1 || gutter !== 0) {
-    const canvasWidthInUnits = getWidth(sourceDataExtent);
-    const canvasHeightInUnits = getHeight(sourceDataExtent);
+  const stitchScale = pixelRatio / sourceResolution;
+  const inverseScale = (interpolate ? 1 : 1 + Math.pow(2, -24)) / stitchScale;
+  {
     stitchContext = createCanvasContext2D(
-      Math.round(pixelRatio * canvasWidthInUnits / sourceResolution),
-      Math.round(pixelRatio * canvasHeightInUnits / sourceResolution),
+      Math.round(getWidth(sourceDataExtent) * stitchScale),
+      Math.round(getHeight(sourceDataExtent) * stitchScale),
       canvasPool
     );
     if (!interpolate) {
       stitchContext.imageSmoothingEnabled = false;
     }
-    const stitchScale = pixelRatio / sourceResolution;
+    if (sourceExtent && clipExtent) {
+      const xPos = (sourceExtent[0] - sourceDataExtent[0]) * stitchScale;
+      const yPos = -(sourceExtent[3] - sourceDataExtent[3]) * stitchScale;
+      const width2 = getWidth(sourceExtent) * stitchScale;
+      const height2 = getHeight(sourceExtent) * stitchScale;
+      stitchContext.rect(xPos, yPos, width2, height2);
+      stitchContext.clip();
+    }
     sources.forEach(function(src, i, arr) {
-      const xPos = src.extent[0] - sourceDataExtent[0];
-      const yPos = -(src.extent[3] - sourceDataExtent[3]);
-      const srcWidth = getWidth(src.extent);
-      const srcHeight = getHeight(src.extent);
       if (src.image.width > 0 && src.image.height > 0) {
+        if (src.clipExtent) {
+          stitchContext.save();
+          const xPos2 = (src.clipExtent[0] - sourceDataExtent[0]) * stitchScale;
+          const yPos2 = -(src.clipExtent[3] - sourceDataExtent[3]) * stitchScale;
+          const width2 = getWidth(src.clipExtent) * stitchScale;
+          const height2 = getHeight(src.clipExtent) * stitchScale;
+          stitchContext.rect(
+            interpolate ? xPos2 : Math.round(xPos2),
+            interpolate ? yPos2 : Math.round(yPos2),
+            interpolate ? width2 : Math.round(xPos2 + width2) - Math.round(xPos2),
+            interpolate ? height2 : Math.round(yPos2 + height2) - Math.round(yPos2)
+          );
+          stitchContext.clip();
+        }
+        const xPos = (src.extent[0] - sourceDataExtent[0]) * stitchScale;
+        const yPos = -(src.extent[3] - sourceDataExtent[3]) * stitchScale;
+        const srcWidth = getWidth(src.extent) * stitchScale;
+        const srcHeight = getHeight(src.extent) * stitchScale;
         stitchContext.drawImage(
           src.image,
           gutter,
           gutter,
           src.image.width - 2 * gutter,
           src.image.height - 2 * gutter,
-          xPos * stitchScale,
-          yPos * stitchScale,
-          srcWidth * stitchScale,
-          srcHeight * stitchScale
+          interpolate ? xPos : Math.round(xPos),
+          interpolate ? yPos : Math.round(yPos),
+          interpolate ? srcWidth : Math.round(xPos + srcWidth) - Math.round(xPos),
+          interpolate ? srcHeight : Math.round(yPos + srcHeight) - Math.round(yPos)
         );
+        if (src.clipExtent) {
+          stitchContext.restore();
+        }
       }
     });
   }
@@ -17256,10 +22413,7 @@ function render(width, height, pixelRatio, sourceResolution, sourceExtent, targe
     let image;
     if (stitchContext) {
       image = stitchContext.canvas;
-      context.scale(
-        sourceResolution / pixelRatio,
-        -sourceResolution / pixelRatio
-      );
+      context.scale(inverseScale, -inverseScale);
     } else {
       const source2 = sources[0];
       const extent = source2.extent;
@@ -17328,6 +22482,7 @@ class ReprojTile extends Tile {
     this.sourceTiles_ = [];
     this.sourcesListenerKeys_ = null;
     this.sourceZ_ = 0;
+    this.clipExtent_ = sourceProj.canWrapX() ? sourceProj.getExtent() : void 0;
     const targetExtent = targetTileGrid.getTileCoordExtent(
       this.wrappedTileCoord_
     );
@@ -17393,18 +22548,35 @@ class ReprojTile extends Tile {
     if (!getArea(sourceExtent)) {
       this.state = TileState.EMPTY;
     } else {
-      const sourceRange = sourceTileGrid.getTileRangeForExtentAndZ(
-        sourceExtent,
-        this.sourceZ_
+      let worldWidth = 0;
+      let worldsAway = 0;
+      if (sourceProj.canWrapX()) {
+        worldWidth = getWidth(sourceProjExtent);
+        worldsAway = Math.floor(
+          (sourceExtent[0] - sourceProjExtent[0]) / worldWidth
+        );
+      }
+      const sourceExtents = wrapAndSliceX(
+        sourceExtent.slice(),
+        sourceProj,
+        true
       );
-      for (let srcX = sourceRange.minX; srcX <= sourceRange.maxX; srcX++) {
-        for (let srcY = sourceRange.minY; srcY <= sourceRange.maxY; srcY++) {
-          const tile = getTileFunction(this.sourceZ_, srcX, srcY, pixelRatio);
-          if (tile) {
-            this.sourceTiles_.push(tile);
+      sourceExtents.forEach((extent) => {
+        const sourceRange = sourceTileGrid.getTileRangeForExtentAndZ(
+          extent,
+          this.sourceZ_
+        );
+        for (let srcX = sourceRange.minX; srcX <= sourceRange.maxX; srcX++) {
+          for (let srcY = sourceRange.minY; srcY <= sourceRange.maxY; srcY++) {
+            const tile = getTileFunction(this.sourceZ_, srcX, srcY, pixelRatio);
+            if (tile) {
+              const offset2 = worldsAway * worldWidth;
+              this.sourceTiles_.push({ tile, offset: offset2 });
+            }
           }
         }
-      }
+        ++worldsAway;
+      });
       if (this.sourceTiles_.length === 0) {
         this.state = TileState.EMPTY;
       }
@@ -17422,10 +22594,21 @@ class ReprojTile extends Tile {
    */
   reproject_() {
     const sources = [];
-    this.sourceTiles_.forEach((tile) => {
+    this.sourceTiles_.forEach((source) => {
+      var _a;
+      const tile = source.tile;
       if (tile && tile.getState() == TileState.LOADED) {
+        const extent = this.sourceTileGrid_.getTileCoordExtent(tile.tileCoord);
+        extent[0] += source.offset;
+        extent[2] += source.offset;
+        const clipExtent = (_a = this.clipExtent_) == null ? void 0 : _a.slice();
+        if (clipExtent) {
+          clipExtent[0] += source.offset;
+          clipExtent[2] += source.offset;
+        }
         sources.push({
-          extent: this.sourceTileGrid_.getTileCoordExtent(tile.tileCoord),
+          extent,
+          clipExtent,
           image: tile.getImage()
         });
       }
@@ -17472,7 +22655,7 @@ class ReprojTile extends Tile {
       this.changed();
       let leftToLoad = 0;
       this.sourcesListenerKeys_ = [];
-      this.sourceTiles_.forEach((tile) => {
+      this.sourceTiles_.forEach(({ tile }) => {
         const state = tile.getState();
         if (state == TileState.IDLE || state == TileState.LOADING) {
           leftToLoad++;
@@ -17498,7 +22681,7 @@ class ReprojTile extends Tile {
       if (leftToLoad === 0) {
         setTimeout(this.reproject_.bind(this), 0);
       } else {
-        this.sourceTiles_.forEach(function(tile, i, arr) {
+        this.sourceTiles_.forEach(function({ tile }, i, arr) {
           const state = tile.getState();
           if (state == TileState.IDLE) {
             tile.load();
@@ -17857,7 +23040,7 @@ class Source extends BaseObject {
    */
   constructor(options) {
     super();
-    this.projection = get(options.projection);
+    this.projection = get$1(options.projection);
     this.attributions_ = adaptAttributions(options.attributions);
     this.attributionsCollapsible_ = options.attributionsCollapsible !== void 0 ? options.attributionsCollapsible : true;
     this.loading = false;
@@ -18083,8 +23266,7 @@ class TileGrid {
          * @param {number} b Second resolution
          * @return {number} Comparison result
          */
-        (a2, b2) => b2 - a2,
-        true
+        (a2, b2) => b2 - a2
       ),
       "`resolutions` must be sorted in descending order"
     );
@@ -18557,7 +23739,6 @@ class TileGrid {
     this.fullTileRanges_ = fullTileRanges;
   }
 }
-const TileGrid$1 = TileGrid;
 function getForProjection(projection) {
   let tileGrid = projection.getDefaultTileGrid();
   if (!tileGrid) {
@@ -18583,7 +23764,7 @@ function wrapX(tileGrid, tileCoord, projection) {
 function createForExtent(extent, maxZoom, tileSize, corner) {
   corner = corner !== void 0 ? corner : "top-left";
   const resolutions = resolutionsFromExtent(extent, maxZoom, tileSize);
-  return new TileGrid$1({
+  return new TileGrid({
     extent,
     origin: getCorner(extent, corner),
     resolutions,
@@ -18592,7 +23773,7 @@ function createForExtent(extent, maxZoom, tileSize, corner) {
 }
 function createXYZ(options) {
   const xyzOptions = options || {};
-  const extent = xyzOptions.extent || get("EPSG:3857").getExtent();
+  const extent = xyzOptions.extent || get$1("EPSG:3857").getExtent();
   const gridOptions = {
     extent,
     minZoom: xyzOptions.minZoom,
@@ -18604,7 +23785,7 @@ function createXYZ(options) {
       xyzOptions.maxResolution
     )
   };
-  return new TileGrid$1(gridOptions);
+  return new TileGrid(gridOptions);
 }
 function resolutionsFromExtent(extent, maxZoom, tileSize, maxResolution) {
   maxZoom = maxZoom !== void 0 ? maxZoom : DEFAULT_MAX_ZOOM;
@@ -18624,7 +23805,7 @@ function createForProjection(projection, maxZoom, tileSize, corner) {
   return createForExtent(extent, maxZoom, tileSize, corner);
 }
 function extentFromProjection(projection) {
-  projection = get(projection);
+  projection = get$1(projection);
   let extent = projection.getExtent();
   if (!extent) {
     const half = 180 * METERS_PER_UNIT$1.degrees / projection.getMetersPerUnit();
@@ -19399,7 +24580,7 @@ class TileImage extends UrlTile {
    * @api
    */
   setTileGridForProjection(projection, tilegrid) {
-    const proj = get(projection);
+    const proj = get$1(projection);
     if (proj) {
       const projKey = getUid(proj);
       if (!(projKey in this.tileGridForProjection)) {
@@ -19584,7 +24765,6 @@ class LayerRenderer extends Observable {
     this.ready = true;
     this.boundHandleImageChange_ = this.handleImageChange_.bind(this);
     this.layer_ = layer;
-    this.declutterExecutorGroup = null;
   }
   /**
    * Asynchronous layer level hit detection.
@@ -19723,11 +24903,108 @@ class LayerRenderer extends Observable {
     }
   }
   /**
+   * @param {import("../Map.js").FrameState} frameState Frame state.
+   */
+  renderDeferred(frameState) {
+  }
+  /**
    * Clean up.
    */
   disposeInternal() {
     delete this.layer_;
     super.disposeInternal();
+  }
+}
+class ZIndexContext {
+  constructor() {
+    /**
+     * @private
+     * @param {...*} args Args.
+     * @return {ZIndexContext} This.
+     */
+    __publicField(this, "pushMethodArgs_", (...args) => {
+      this.instructions_[this.zIndex + this.offset_].push(args);
+      return this;
+    });
+    this.instructions_ = [];
+    this.zIndex = 0;
+    this.offset_ = 0;
+    this.context_ = /** @type {ZIndexContextProxy} */
+    new Proxy(getSharedCanvasContext2D(), {
+      get: (target, property) => {
+        if (typeof /** @type {*} */
+        getSharedCanvasContext2D()[property] !== "function") {
+          return void 0;
+        }
+        if (!this.instructions_[this.zIndex + this.offset_]) {
+          this.instructions_[this.zIndex + this.offset_] = [];
+        }
+        this.instructions_[this.zIndex + this.offset_].push(property);
+        return this.pushMethodArgs_;
+      },
+      set: (target, property, value) => {
+        if (!this.instructions_[this.zIndex + this.offset_]) {
+          this.instructions_[this.zIndex + this.offset_] = [];
+        }
+        this.instructions_[this.zIndex + this.offset_].push(property, value);
+        return true;
+      }
+    });
+  }
+  /**
+   * Push a function that renders to the context directly.
+   * @param {function(CanvasRenderingContext2D): void} render Function.
+   */
+  pushFunction(render2) {
+    this.instructions_[this.zIndex + this.offset_].push(render2);
+  }
+  /**
+   * Get a proxy for CanvasRenderingContext2D which does not support getting state
+   * (e.g. `context.globalAlpha`, which will return `undefined`). To set state, if it relies on a
+   * previous state (e.g. `context.globalAlpha = context.globalAlpha / 2`), set a function,
+   * e.g. `context.globalAlpha = (context) => context.globalAlpha / 2`.
+   * @return {ZIndexContextProxy} Context.
+   */
+  getContext() {
+    return this.context_;
+  }
+  /**
+   * @param {CanvasRenderingContext2D} context Context.
+   */
+  draw(context) {
+    this.instructions_.forEach((instructionsAtIndex) => {
+      for (let i = 0, ii = instructionsAtIndex.length; i < ii; ++i) {
+        const property = instructionsAtIndex[i];
+        if (typeof property === "function") {
+          property(context);
+          continue;
+        }
+        const instructionAtIndex = instructionsAtIndex[++i];
+        if (typeof /** @type {*} */
+        context[property] === "function") {
+          context[property](...instructionAtIndex);
+        } else {
+          if (typeof instructionAtIndex === "function") {
+            context[property] = instructionAtIndex(context);
+            continue;
+          }
+          context[property] = instructionAtIndex;
+        }
+      }
+    });
+  }
+  clear() {
+    this.instructions_.length = 0;
+    this.zIndex = 0;
+    this.offset_ = 0;
+  }
+  /**
+   * Offsets the zIndex by the highest current zIndex. Useful for rendering multiple worlds or tiles, to
+   * avoid conflicting context.clip() or context.save()/restore() calls.
+   */
+  offset() {
+    this.offset_ = this.instructions_.length;
+    this.zIndex = 0;
   }
 }
 let pixelContext = null;
@@ -19748,6 +25025,7 @@ class CanvasLayerRenderer extends LayerRenderer {
     this.pixelTransform = create();
     this.inversePixelTransform = create();
     this.context = null;
+    this.deferredContext_ = null;
     this.containerReused = false;
     this.pixelContext_ = null;
     this.frameState = null;
@@ -19864,6 +25142,44 @@ class CanvasLayerRenderer extends LayerRenderer {
     context.clip();
   }
   /**
+   * @param {import("../../Map.js").FrameState} frameState Frame state.
+   * @param {HTMLElement} target Target that may be used to render content to.
+   * @protected
+   */
+  prepareContainer(frameState, target) {
+    const extent = frameState.extent;
+    const resolution = frameState.viewState.resolution;
+    const rotation = frameState.viewState.rotation;
+    const pixelRatio = frameState.pixelRatio;
+    const width = Math.round(getWidth(extent) / resolution * pixelRatio);
+    const height = Math.round(getHeight(extent) / resolution * pixelRatio);
+    compose(
+      this.pixelTransform,
+      frameState.size[0] / 2,
+      frameState.size[1] / 2,
+      1 / pixelRatio,
+      1 / pixelRatio,
+      rotation,
+      -width / 2,
+      -height / 2
+    );
+    makeInverse(this.inversePixelTransform, this.pixelTransform);
+    const canvasTransform = toString$1(this.pixelTransform);
+    this.useContainer(target, canvasTransform, this.getBackground(frameState));
+    if (!this.containerReused) {
+      const canvas = this.context.canvas;
+      if (canvas.width != width || canvas.height != height) {
+        canvas.width = width;
+        canvas.height = height;
+      } else {
+        this.context.clearRect(0, 0, width, height);
+      }
+      if (canvasTransform !== canvas.style.transform) {
+        canvas.style.transform = canvasTransform;
+      }
+    }
+  }
+  /**
    * @param {import("../../render/EventType.js").default} type Event type.
    * @param {CanvasRenderingContext2D} context Context.
    * @param {import("../../Map.js").FrameState} frameState Frame state.
@@ -19888,6 +25204,9 @@ class CanvasLayerRenderer extends LayerRenderer {
    */
   preRender(context, frameState) {
     this.frameState = frameState;
+    if (frameState.declutter) {
+      return;
+    }
     this.dispatchRenderEvent_(RenderEventType.PRERENDER, context, frameState);
   }
   /**
@@ -19896,7 +25215,49 @@ class CanvasLayerRenderer extends LayerRenderer {
    * @protected
    */
   postRender(context, frameState) {
+    if (frameState.declutter) {
+      return;
+    }
     this.dispatchRenderEvent_(RenderEventType.POSTRENDER, context, frameState);
+  }
+  /**
+   * @param {import("../../Map.js").FrameState} frameState Frame state.
+   */
+  renderDeferredInternal(frameState) {
+  }
+  /**
+   * @param {import("../../Map.js").FrameState} frameState Frame state.
+   * @return {import('../../render/canvas/ZIndexContext.js').ZIndexContextProxy} Context.
+   */
+  getRenderContext(frameState) {
+    if (frameState.declutter && !this.deferredContext_) {
+      this.deferredContext_ = new ZIndexContext();
+    }
+    return frameState.declutter ? this.deferredContext_.getContext() : this.context;
+  }
+  /**
+   * @param {import("../../Map.js").FrameState} frameState Frame state.
+   * @override
+   */
+  renderDeferred(frameState) {
+    if (!frameState.declutter) {
+      return;
+    }
+    this.dispatchRenderEvent_(
+      RenderEventType.PRERENDER,
+      this.context,
+      frameState
+    );
+    if (frameState.declutter && this.deferredContext_) {
+      this.deferredContext_.draw(this.context);
+      this.deferredContext_.clear();
+    }
+    this.renderDeferredInternal(frameState);
+    this.dispatchRenderEvent_(
+      RenderEventType.POSTRENDER,
+      this.context,
+      frameState
+    );
   }
   /**
    * Creates a transform for rendering to an element that will be rotated after rendering.
@@ -20086,8 +25447,9 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
     let extent = frameState.extent;
     const resolution = frameState.viewState.resolution;
     const tilePixelRatio = tileSource.getTilePixelRatio(pixelRatio);
-    const width = Math.round(getWidth(extent) / resolution * pixelRatio);
-    const height = Math.round(getHeight(extent) / resolution * pixelRatio);
+    this.prepareContainer(frameState, target);
+    const width = this.context.canvas.width;
+    const height = this.context.canvas.height;
     const layerExtent = layerState.extent && fromUserExtent(layerState.extent);
     if (layerExtent) {
       extent = getIntersection(
@@ -20163,21 +25525,7 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
       }
     }
     const canvasScale = tileResolution / viewResolution * pixelRatio / tilePixelRatio;
-    compose(
-      this.pixelTransform,
-      frameState.size[0] / 2,
-      frameState.size[1] / 2,
-      1 / pixelRatio,
-      1 / pixelRatio,
-      rotation,
-      -width / 2,
-      -height / 2
-    );
-    const canvasTransform = toString$1(this.pixelTransform);
-    this.useContainer(target, canvasTransform, this.getBackground(frameState));
-    const context = this.context;
-    const canvas = context.canvas;
-    makeInverse(this.inversePixelTransform, this.pixelTransform);
+    const context = this.getRenderContext(frameState);
     compose(
       this.tempTransform,
       width / 2,
@@ -20188,12 +25536,6 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
       -width / 2,
       -height / 2
     );
-    if (canvas.width != width || canvas.height != height) {
-      canvas.width = width;
-      canvas.height = height;
-    } else if (!this.containerReused) {
-      context.clearRect(0, 0, width, height);
-    }
     if (layerExtent) {
       this.clipUnrotated(context, frameState, layerExtent);
     }
@@ -20256,7 +25598,7 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
             for (let i2 = 0, ii = clips.length; i2 < ii; ++i2) {
               if (z2 !== currentZ && currentZ < clipZs[i2]) {
                 const clip = clips[i2];
-                if (intersects(
+                if (intersects$1(
                   [x2, y2, x2 + w2, y2 + h],
                   [clip[0], clip[3], clip[4], clip[7]]
                 )) {
@@ -20321,14 +25663,11 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
       tileLayer.getPreload()
     );
     this.scheduleExpireCache(frameState, tileSource);
-    this.postRender(context, frameState);
+    this.postRender(this.context, frameState);
     if (layerState.extent) {
       context.restore();
     }
     context.imageSmoothingEnabled = true;
-    if (canvasTransform !== canvas.style.transform) {
-      canvas.style.transform = canvasTransform;
-    }
     return this.container;
   }
   /**
@@ -20346,15 +25685,16 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
     if (!image) {
       return;
     }
+    const context = this.getRenderContext(frameState);
     const uid = getUid(this);
     const layerState = frameState.layerStatesArray[frameState.layerIndex];
     const alpha = layerState.opacity * (transition ? tile.getAlpha(uid, frameState.time) : 1);
-    const alphaChanged = alpha !== this.context.globalAlpha;
+    const alphaChanged = alpha !== context.globalAlpha;
     if (alphaChanged) {
-      this.context.save();
-      this.context.globalAlpha = alpha;
+      context.save();
+      context.globalAlpha = alpha;
     }
-    this.context.drawImage(
+    context.drawImage(
       image,
       gutter,
       gutter,
@@ -20366,7 +25706,7 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
       h
     );
     if (alphaChanged) {
-      this.context.restore();
+      context.restore();
     }
     if (alpha !== layerState.opacity) {
       frameState.animate = true;
@@ -20505,14 +25845,13 @@ class TileLayer extends BaseTileLayer {
     return new CanvasTileLayerRenderer(this);
   }
 }
-const TileLayer$1 = TileLayer;
 function getRenderPixel(event, pixel) {
   return apply(event.inversePixelTransform, pixel.slice(0));
 }
 /*!
-  * ol-contextmenu - v5.3.0
+  * ol-contextmenu - v5.4.0
   * https://github.com/jonataswalker/ol-contextmenu
-  * Built: Fri Sep 22 2023 13:13:39 GMT-0300 (Brasilia Standard Time)
+  * Built: Fri Mar 08 2024 12:11:47 GMT+0000 (Coordinated Universal Time)
   */
 var k = Object.defineProperty;
 var I = (n, t, e) => t in n ? k(n, t, { enumerable: true, configurable: true, writable: true, value: e }) : n[t] = e;
@@ -20873,12 +26212,12 @@ class R extends Control {
     this.menuEntries.set(e.id, e), this.positionContainer(), "callback" in e && typeof e.callback == "function" && s.addEventListener("click", this.entryCallbackEventListener, false);
   }
 }
-const imgUrl = "/assets/osm_logo-PoOM4wQH.png";
+const imgUrl = "/assets/osm_logo--g4zjBAe.png";
 const HOSTNAME = "VITE_HOSTNAME";
 const OSML10N_VERSION = "VITE_OSML10N_VERSION";
 const OPENSTREETMAP_CARTO_DE_VERSION = "VITE_OPENSTREETMAP_CARTO_DE_VERSION";
 const folder = getGETParameter("folder") !== null && getGETParameter("folder") !== "" ? "/" + getGETParameter("folder") + "/" : "/";
-const osm = new TileLayer$1({
+const osm = new TileLayer({
   source: new OSM()
 });
 const tileUrl = folder + "{z}/{x}/{y}.png";
@@ -20889,7 +26228,16 @@ document.getElementById("logo").src = imgUrl;
 document.getElementById("header-h1").innerHTML = "Server: " + HOSTNAME + ", Folder: " + folder;
 document.getElementById("main-carto").innerHTML = OPENSTREETMAP_CARTO_DE_VERSION;
 document.getElementById("main-local").innerHTML = OSML10N_VERSION;
-const defaultStyle = new TileLayer$1({
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const response = await fetch("/importdate.txt");
+    const text = await response.text();
+    document.getElementById("db-import-dates").innerText = text;
+  } catch (error) {
+    console.error("Fehler beim Laden der Textdatei (importdate.txt):", error);
+  }
+});
+const defaultStyle = new TileLayer({
   source: new XYZ({
     attributions: [
       "| © sobuskutkowacy pola OpenStreetMap. | © OpenStreetMap Mitwirkende."
@@ -20898,10 +26246,10 @@ const defaultStyle = new TileLayer$1({
     maxZoom: 20
   })
 });
-const map = new Map$2({
+const map = new Map$1({
   layers: [osm, defaultStyle],
   target: "map",
-  view: new View$1({
+  view: new View({
     center: fromLonLat([10.33649, 51.006271]),
     projection: "EPSG:3857",
     zoom: 6,

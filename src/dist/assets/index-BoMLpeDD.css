@@ -292,9 +292,9 @@
   cursor: move;
 }
 /*!
-  * ol-contextmenu - v5.3.0
+  * ol-contextmenu - v5.4.0
   * https://github.com/jonataswalker/ol-contextmenu
-  * Built: Fri Sep 22 2023 13:13:39 GMT-0300 (Brasilia Standard Time)
+  * Built: Fri Mar 08 2024 12:11:47 GMT+0000 (Coordinated Universal Time)
   */
 .ol-ctx-menu-container{position:absolute;padding:8px;background:#fff;color:#222;font-size:13px;border-radius:5px;box-shadow:#0003 3px 3px 5px;box-sizing:border-box}
 .ol-ctx-menu-container div,.ol-ctx-menu-container span,.ol-ctx-menu-container a,.ol-ctx-menu-container img,.ol-ctx-menu-container ul,.ol-ctx-menu-container li{margin:0;padding:0;border:0;font:inherit;font-size:100%;vertical-align:baseline}
@@ -309,7 +309,7 @@
 .ol-ctx-menu-container li.ol-ctx-menu-submenu:hover:after{border-color:#eee}
 .ol-ctx-menu-container:not(.ol-ctx-menu-hidden) li.ol-ctx-menu-submenu:hover>.ol-ctx-menu-container{opacity:1;visibility:visible;transition-delay:0s}
 .ol-ctx-menu-container li.ol-ctx-menu-separator{padding:0}
-.ol-ctx-menu-container li.ol-ctx-menu-separator hr{border:0;height:1px;background-image:linear-gradient(to left,rgba(0,0,0,0),rgba(0,0,0,.75),rgba(0,0,0,0))}
+.ol-ctx-menu-container li.ol-ctx-menu-separator hr{border:0;height:1px;background-image:linear-gradient(to left,#0000,#000000bf,#0000)}
 .ol-ctx-menu-icon{text-indent:20px;background-size:20px auto;background-repeat:no-repeat;background-position:left center}
 .ol-ctx-menu-zoom-in{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAABaUlEQVQ4T72U7VHCQBCGn90GtAMuNGCswFiBWIFQgWMFxg6wArECsQKhArEBiB1Qwa1zgQn5IAYcxv13k71n3919L8KJQ07M47+BzgG9TRfZ/JBuWhS6BJFHRJICYrZGZIz3z5Ct2+B7gG6I6kt+wewdkQVwjtkAkR5mC8yu26A1oItR/cTsOweQBdgutD8G7jGm2PJ2n8oqUKIpIjd4HxTM8gvaT/F+AlmWnyWaIXKF95eNguFzTYFhNsdWu9kFgFlaFMANUH3D8wDLoLgSTSD2il8NCe2ZXQBxWDGwxmyUzzOMBZ7wy7Qb2K0wQfXjMOBuhlFpZtNty5sFaTQBuTusZdymeqs1SpYKcO9HkE3KbTd9WFijMHJQ5hBNEAYNq5Qd0dhyke0GiE4QzjqfW23mHT8Hl4DG4Lce3FPE7AtbBSdsbNqpoJLgYkRnNeUV+xwJDHTnUEkxHGbhBXUs5TjJjew/KPy94g+NRaIVRYmMXwAAAABJRU5ErkJggg==)}
 .ol-ctx-menu-container li:hover.ol-ctx-menu-zoom-in{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAABc0lEQVQ4T71U21ECQRDsJgGdvQDECMQIxAjECMQILCPwzAAjECIQI0AiEDPQAPaWCBhrcKHuCUcV5f7dY3v6tUscefHIePhfwBBCF8CZqRCReRs1tQxDCH1VfQLQz4EsSY4AvIjIsgm8AhhCGKrqa9zwrqoLAKckB5HtguR1E2gBMITQU9VPAD8GICIGtl3e+xHJBwBT59xtHcsCYJZlUwA3kcGHbfDep51OZywi3/acZZm9vyJ5WR5o38uACmDunNt6ZwAkUxFZDwghDFT1jeSjiJinhVUBVNVJkiTDKO8CQA+AsbNQ7s1Ps0VVn5MkSfcCtmBoDZi1Bdx4eJ7zbBolrwPy3o9J3rWSHPs3A1BbjVKlYBaIyDgvu9LDXDU2RTZmXVW1oKyLxRD+OrkOrJLy5mVM0iaftDhuhVbsvBzMglzKUNW6IV/OOWtCM8MmVvEkmbwt83LaB19fdgOtVquUZJeknaDdobTwbOcvBzPcN/AXH1DFFWP7u9oAAAAASUVORK5CYII=)}
@@ -901,6 +901,9 @@ progress {
   border-color: var(--bs-btn-active-border-color);
 }
 .btn-check:checked + .btn:focus-visible, :not(.btn-check) + .btn:active:focus-visible, .btn:first-child:active:focus-visible, .btn.active:focus-visible, .btn.show:focus-visible {
+  box-shadow: var(--bs-btn-focus-box-shadow);
+}
+.btn-check:checked:focus-visible + .btn {
   box-shadow: var(--bs-btn-focus-box-shadow);
 }
 .btn:disabled, .btn.disabled, fieldset:disabled .btn {
@@ -2549,7 +2552,6 @@ progress {
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  justify-content: space-between;
   padding: var(--bs-modal-header-padding);
   border-bottom: var(--bs-modal-header-border-width) solid var(--bs-modal-header-border-color);
   border-top-left-radius: var(--bs-modal-inner-border-radius);
