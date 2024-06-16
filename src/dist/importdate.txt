@@ -1,0 +1,7 @@
+ http://download.geofabrik.de/europe/germany/brandenburg-updates | 15.06.2024 10:06
+
+ simplified_water_polygons           | 30.05.2024
+ water_polygons                      | 30.05.2024
+ icesheet_polygons                   | 30.05.2024
+ icesheet_outlines                   | 30.05.2024
+ ne_110m_admin_0_boundary_lines_land | 13.05.2022

@@ -37,7 +37,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         const response = await fetch('/importdate.txt');
         const text = await response.text();
-        document.getElementById('db-import-dates').innerText = text;
+        document.getElementById('db-import-dates').innerText = 
+        text.trim().replace(/\n\n|\r/g, "; ").replace(/\n|\r/g, "; ").replace(/[\|]/g, "-");
     } catch (error) {
         console.error('Fehler beim Laden der Textdatei (importdate.txt):', error);
     }
