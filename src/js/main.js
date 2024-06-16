@@ -32,6 +32,17 @@ document.getElementById('header-h1').innerHTML = 'Server: ' + HOSTNAME + ', Fold
 document.getElementById('main-carto').innerHTML = OPENSTREETMAP_CARTO_DE_VERSION;
 document.getElementById('main-local').innerHTML = OSML10N_VERSION;
 
+
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const response = await fetch('/importdate.txt');
+        const text = await response.text();
+        document.getElementById('db-import-dates').innerText = text;
+    } catch (error) {
+        console.error('Fehler beim Laden der Textdatei (importdate.txt):', error);
+    }
+});
+
 const defaultStyle = new TileLayer({
     source: new XYZ({
         attributions: [
