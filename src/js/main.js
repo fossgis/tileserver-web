@@ -8,6 +8,7 @@ import XYZ from 'ol/source/XYZ.js';
 import { fromLonLat } from 'ol/proj.js';
 import { getRenderPixel } from 'ol/render';
 import ContextMenu from 'ol-contextmenu';
+import Link from 'ol/interaction/Link.js';
 import imgUrl from '../images/osm_logo.png'
 
 const HOSTNAME = import.meta.env.VITE_HOSTNAME || 'tile';
@@ -21,6 +22,8 @@ const osm = new TileLayer({
 });
 
 const tileUrl = folder + '{z}/{x}/{y}.png';
+
+const link = new Link();
 
 sessionStorage.setItem('tileUrl', tileUrl);
 sessionStorage.setItem('hostname', HOSTNAME);
@@ -110,6 +113,8 @@ var contextmenu = new ContextMenu({
     ],
 });
 map.addControl(contextmenu);
+
+map.addInteraction(link);
 
 let currZoom = map.getView().getZoom();
 document.getElementById('zoomlevel').innerHTML = 'Zoom: ' + currZoom;
