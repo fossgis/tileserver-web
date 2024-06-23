@@ -6,8 +6,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   if (relList && relList.supports && relList.supports("modulepreload")) {
     return;
   }
-  for (const link of document.querySelectorAll('link[rel="modulepreload"]')) {
-    processPreload(link);
+  for (const link2 of document.querySelectorAll('link[rel="modulepreload"]')) {
+    processPreload(link2);
   }
   new MutationObserver((mutations) => {
     for (const mutation of mutations) {
@@ -20,22 +20,22 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
     }
   }).observe(document, { childList: true, subtree: true });
-  function getFetchOpts(link) {
+  function getFetchOpts(link2) {
     const fetchOpts = {};
-    if (link.integrity) fetchOpts.integrity = link.integrity;
-    if (link.referrerPolicy) fetchOpts.referrerPolicy = link.referrerPolicy;
-    if (link.crossOrigin === "use-credentials")
+    if (link2.integrity) fetchOpts.integrity = link2.integrity;
+    if (link2.referrerPolicy) fetchOpts.referrerPolicy = link2.referrerPolicy;
+    if (link2.crossOrigin === "use-credentials")
       fetchOpts.credentials = "include";
-    else if (link.crossOrigin === "anonymous") fetchOpts.credentials = "omit";
+    else if (link2.crossOrigin === "anonymous") fetchOpts.credentials = "omit";
     else fetchOpts.credentials = "same-origin";
     return fetchOpts;
   }
-  function processPreload(link) {
-    if (link.ep)
+  function processPreload(link2) {
+    if (link2.ep)
       return;
-    link.ep = true;
-    const fetchOpts = getFetchOpts(link);
-    fetch(link.href, fetchOpts);
+    link2.ep = true;
+    const fetchOpts = getFetchOpts(link2);
+    fetch(link2.href, fetchOpts);
   }
 })();
 var top = "top";
@@ -26212,6 +26212,322 @@ class R extends Control {
     this.menuEntries.set(e.id, e), this.positionContainer(), "callback" in e && typeof e.callback == "function" && s.addEventListener("click", this.entryCallbackEventListener, false);
   }
 }
+function to5(number) {
+  return toFixed(number, 5);
+}
+function readNumber(string) {
+  return parseFloat(string);
+}
+function writeNumber(number) {
+  return to5(number).toString();
+}
+function differentNumber(a2, b2) {
+  if (isNaN(a2)) {
+    return false;
+  }
+  return a2 !== readNumber(writeNumber(b2));
+}
+function differentArray(a2, b2) {
+  return differentNumber(a2[0], b2[0]) || differentNumber(a2[1], b2[1]);
+}
+class Link extends Interaction {
+  /**
+   * @param {Options} [options] Link options.
+   */
+  constructor(options) {
+    super();
+    options = Object.assign(
+      {
+        animate: true,
+        params: ["x", "y", "z", "r", "l"],
+        replace: false,
+        prefix: ""
+      },
+      options || {}
+    );
+    let animationOptions;
+    if (options.animate === true) {
+      animationOptions = { duration: 250 };
+    } else if (!options.animate) {
+      animationOptions = null;
+    } else {
+      animationOptions = options.animate;
+    }
+    this.animationOptions_ = animationOptions;
+    this.params_ = options.params.reduce((acc, value) => {
+      acc[value] = true;
+      return acc;
+    }, {});
+    this.replace_ = options.replace;
+    this.prefix_ = options.prefix;
+    this.listenerKeys_ = [];
+    this.initial_ = true;
+    this.updateState_ = this.updateState_.bind(this);
+    this.trackedCallbacks_ = {};
+    this.trackedValues_ = {};
+  }
+  /**
+   * @private
+   * @param {string} name A parameter name.
+   * @return {string} A name with the prefix applied.
+   */
+  getParamName_(name) {
+    if (!this.prefix_) {
+      return name;
+    }
+    return this.prefix_ + name;
+  }
+  /**
+   * @private
+   * @param {URLSearchParams} params The search params.
+   * @param {string} name The unprefixed parameter name.
+   * @return {string|null} The parameter value.
+   */
+  get_(params, name) {
+    return params.get(this.getParamName_(name));
+  }
+  /**
+   * @private
+   * @param {URLSearchParams} params The search params.
+   * @param {string} name The unprefixed parameter name.
+   * @param {string} value The param value.
+   */
+  set_(params, name, value) {
+    if (!(name in this.params_)) {
+      return;
+    }
+    params.set(this.getParamName_(name), value);
+  }
+  /**
+   * @private
+   * @param {URLSearchParams} params The search params.
+   * @param {string} name The unprefixed parameter name.
+   */
+  delete_(params, name) {
+    if (!(name in this.params_)) {
+      return;
+    }
+    params.delete(this.getParamName_(name));
+  }
+  /**
+   * @param {import("../Map.js").default|null} map Map.
+   */
+  setMap(map2) {
+    const oldMap = this.getMap();
+    super.setMap(map2);
+    if (map2 === oldMap) {
+      return;
+    }
+    if (oldMap) {
+      this.unregisterListeners_(oldMap);
+    }
+    if (map2) {
+      this.initial_ = true;
+      this.updateState_();
+      this.registerListeners_(map2);
+    }
+  }
+  /**
+   * @param {import("../Map.js").default} map Map.
+   * @private
+   */
+  registerListeners_(map2) {
+    this.listenerKeys_.push(
+      listen(map2, MapEventType.MOVEEND, this.updateUrl_, this),
+      listen(map2.getLayerGroup(), EventType.CHANGE, this.updateUrl_, this),
+      listen(map2, "change:layergroup", this.handleChangeLayerGroup_, this)
+    );
+    if (!this.replace_) {
+      addEventListener("popstate", this.updateState_);
+    }
+  }
+  /**
+   * @param {import("../Map.js").default} map Map.
+   * @private
+   */
+  unregisterListeners_(map2) {
+    for (let i = 0, ii = this.listenerKeys_.length; i < ii; ++i) {
+      unlistenByKey(this.listenerKeys_[i]);
+    }
+    this.listenerKeys_.length = 0;
+    if (!this.replace_) {
+      removeEventListener("popstate", this.updateState_);
+    }
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
+    this.delete_(params, "x");
+    this.delete_(params, "y");
+    this.delete_(params, "z");
+    this.delete_(params, "r");
+    this.delete_(params, "l");
+    window.history.replaceState(null, "", url);
+  }
+  /**
+   * @private
+   */
+  handleChangeLayerGroup_() {
+    const map2 = this.getMap();
+    if (!map2) {
+      return;
+    }
+    this.unregisterListeners_(map2);
+    this.registerListeners_(map2);
+    this.initial_ = true;
+    this.updateUrl_();
+  }
+  /**
+   * @private
+   */
+  updateState_() {
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
+    for (const key in this.trackedCallbacks_) {
+      const value = params.get(key);
+      if (key in this.trackedCallbacks_ && value !== this.trackedValues_[key]) {
+        this.trackedValues_[key] = value;
+        this.trackedCallbacks_[key](value);
+      }
+    }
+    const map2 = this.getMap();
+    if (!map2) {
+      return;
+    }
+    const view = map2.getView();
+    if (!view) {
+      return;
+    }
+    let updateView = false;
+    const viewProperties = {};
+    const zoom = readNumber(this.get_(params, "z"));
+    if ("z" in this.params_ && differentNumber(zoom, view.getZoom())) {
+      updateView = true;
+      viewProperties.zoom = zoom;
+    }
+    const rotation = readNumber(this.get_(params, "r"));
+    if ("r" in this.params_ && differentNumber(rotation, view.getRotation())) {
+      updateView = true;
+      viewProperties.rotation = rotation;
+    }
+    const center = [
+      readNumber(this.get_(params, "x")),
+      readNumber(this.get_(params, "y"))
+    ];
+    if (("x" in this.params_ || "y" in this.params_) && differentArray(center, view.getCenter())) {
+      updateView = true;
+      viewProperties.center = center;
+    }
+    if (updateView) {
+      if (!this.initial_ && this.animationOptions_) {
+        view.animate(Object.assign(viewProperties, this.animationOptions_));
+      } else {
+        if (viewProperties.center) {
+          view.setCenter(viewProperties.center);
+        }
+        if ("zoom" in viewProperties) {
+          view.setZoom(viewProperties.zoom);
+        }
+        if ("rotation" in viewProperties) {
+          view.setRotation(viewProperties.rotation);
+        }
+      }
+    }
+    const layers = map2.getAllLayers();
+    const layersParam = this.get_(params, "l");
+    if ("l" in this.params_ && layersParam && layersParam.length === layers.length) {
+      for (let i = 0, ii = layers.length; i < ii; ++i) {
+        const value = parseInt(layersParam[i]);
+        if (!isNaN(value)) {
+          const visible = Boolean(value);
+          const layer = layers[i];
+          if (layer.getVisible() !== visible) {
+            layer.setVisible(visible);
+          }
+        }
+      }
+    }
+  }
+  /**
+   * Register a listener for a URL search parameter.  The callback will be called with a new value
+   * when the corresponding search parameter changes due to history events (e.g. browser navigation).
+   *
+   * @param {string} key The URL search parameter.
+   * @param {Callback} callback The function to call when the search parameter changes.
+   * @return {string|null} The initial value of the search parameter (or null if absent from the URL).
+   * @api
+   */
+  track(key, callback) {
+    this.trackedCallbacks_[key] = callback;
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
+    const value = params.get(key);
+    this.trackedValues_[key] = value;
+    return value;
+  }
+  /**
+   * Update the URL with a new search parameter value.  If the value is null, it will be
+   * deleted from the search parameters.
+   *
+   * @param {string} key The URL search parameter.
+   * @param {string|null} value The updated value (or null to remove it from the URL).
+   * @api
+   */
+  update(key, value) {
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
+    if (value === null) {
+      params.delete(key);
+    } else {
+      params.set(key, value);
+    }
+    if (key in this.trackedValues_) {
+      this.trackedValues_[key] = value;
+    }
+    this.updateHistory_(url);
+  }
+  /**
+   * @private
+   */
+  updateUrl_() {
+    const map2 = this.getMap();
+    if (!map2) {
+      return;
+    }
+    const view = map2.getView();
+    if (!view) {
+      return;
+    }
+    const center = view.getCenter();
+    const zoom = view.getZoom();
+    const rotation = view.getRotation();
+    const layers = map2.getAllLayers();
+    const visibilities = new Array(layers.length);
+    for (let i = 0, ii = layers.length; i < ii; ++i) {
+      visibilities[i] = layers[i].getVisible() ? "1" : "0";
+    }
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
+    this.set_(params, "x", writeNumber(center[0]));
+    this.set_(params, "y", writeNumber(center[1]));
+    this.set_(params, "z", writeNumber(zoom));
+    this.set_(params, "r", writeNumber(rotation));
+    this.set_(params, "l", visibilities.join(""));
+    this.updateHistory_(url);
+    this.initial_ = false;
+  }
+  /**
+   * @private
+   * @param {URL} url The URL.
+   */
+  updateHistory_(url) {
+    if (url.href !== window.location.href) {
+      if (this.initial_ || this.replace_) {
+        window.history.replaceState(history.state, "", url);
+      } else {
+        window.history.pushState(null, "", url);
+      }
+    }
+  }
+}
 const imgUrl = "/assets/osm_logo--g4zjBAe.png";
 const HOSTNAME = "VITE_HOSTNAME";
 const OSML10N_VERSION = "VITE_OSML10N_VERSION";
@@ -26221,6 +26537,7 @@ const osm = new TileLayer({
   source: new OSM()
 });
 const tileUrl = folder + "{z}/{x}/{y}.png";
+const link = new Link();
 sessionStorage.setItem("tileUrl", tileUrl);
 sessionStorage.setItem("hostname", HOSTNAME);
 sessionStorage.setItem("folder", folder);
@@ -26296,6 +26613,7 @@ var contextmenu = new R({
   ]
 });
 map.addControl(contextmenu);
+map.addInteraction(link);
 let currZoom = map.getView().getZoom();
 document.getElementById("zoomlevel").innerHTML = "Zoom: " + currZoom;
 sessionStorage.setItem("zoomlevel", currZoom);
