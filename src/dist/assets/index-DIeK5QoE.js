@@ -26554,6 +26554,42 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Fehler beim Laden der Textdatei (importdate.txt):", error);
   }
 });
+document.addEventListener("DOMContentLoaded", function() {
+  var navList = document.getElementById("nav-list");
+  var links = navList.getElementsByTagName("a");
+  function mergeQueryStrings(baseUrl, additionalQueryString) {
+    var url = new URL(baseUrl);
+    var additionalParams = new URLSearchParams(additionalQueryString);
+    additionalParams.forEach((value, key) => {
+      url.searchParams.set(key, value);
+    });
+    return url.toString();
+  }
+  function updateLinks() {
+    var queryString = window.location.search;
+    for (var i = 0; i < links.length; i++) {
+      links[i].href = mergeQueryStrings(links[i].href, queryString);
+    }
+  }
+  updateLinks();
+  window.addEventListener("popstate", function(event) {
+    updateLinks();
+  });
+  window.history.pushState = /* @__PURE__ */ function(f) {
+    return function pushState() {
+      var ret = f.apply(this, arguments);
+      window.dispatchEvent(new Event("popstate"));
+      return ret;
+    };
+  }(window.history.pushState);
+  window.history.replaceState = /* @__PURE__ */ function(f) {
+    return function replaceState() {
+      var ret = f.apply(this, arguments);
+      window.dispatchEvent(new Event("popstate"));
+      return ret;
+    };
+  }(window.history.replaceState);
+});
 const defaultStyle = new TileLayer({
   source: new XYZ({
     attributions: [
