@@ -18,7 +18,7 @@ https://www.npmjs.com/package/vite-plugin-favicons-inject
 ## Importdaten
 
 ```bash
-sudo -u _tirex psql -d osm -t -c "SELECT url, TO_CHAR(importdate,'dd.mm.yyyy hh:mm') FROM planet_osm_replication_status" > /srv/tile/site/importdate.txt
+sudo -u _tirex psql -d osm -t -c "SELECT url, TO_CHAR(importdate,'dd.mm.yyyy hh:mm') FROM planet_osm_replication_status" > /srv/tile/site/textimport/importdate.txt
 sudo -u _tirex psql -d osm -t -c "SELECT name, TO_CHAR(TO_DATE(last_modified, 'Dy, DD Mon YYYY HH24:MI:SS "GMT"'), 'dd.mm.yyyy') FROM external_data" >> /srv/tile/site/importdate.txt
 cat /srv/tile/site/importdate.txt
 ```
