@@ -10,6 +10,7 @@ import { getRenderPixel } from 'ol/render';
 import ContextMenu from 'ol-contextmenu';
 import Link from 'ol/interaction/Link.js';
 import imgUrl from '../images/osm_logo.png'
+import {FullScreen, defaults as defaultControls} from 'ol/control.js';
 
 const HOSTNAME = import.meta.env.VITE_HOSTNAME || 'tile';
 const OSML10N_VERSION = import.meta.env.VITE_OSML10N_VERSION || '1.0';
@@ -103,6 +104,7 @@ const defaultStyle = new TileLayer({
 });
 
 const map = new Map({
+    controls: defaultControls().extend([new FullScreen()]),
     layers: [osm, defaultStyle],
     target: 'map',
     view: new View({
