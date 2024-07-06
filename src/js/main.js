@@ -10,7 +10,13 @@ import { getRenderPixel } from 'ol/render';
 import ContextMenu from 'ol-contextmenu';
 import Link from 'ol/interaction/Link.js';
 import imgUrl from '../images/osm_logo.png'
-import {FullScreen, defaults as defaultControls} from 'ol/control.js';
+import { FullScreen, Control, defaults as defaultControls } from 'ol/control.js';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
+import Feature from 'ol/Feature';
+import Point from 'ol/geom/Point';
+import { circular } from 'ol/geom/Polygon';
+
 
 const HOSTNAME = import.meta.env.VITE_HOSTNAME || 'tile';
 const OSML10N_VERSION = import.meta.env.VITE_OSML10N_VERSION || '1.0';
@@ -20,6 +26,11 @@ const folder = helper.getGETParameter('folder') !== null && helper.getGETParamet
 
 const osm = new TileLayer({
     source: new OSM(),
+});
+
+const source = new VectorSource();
+const geolocatelayer = new VectorLayer({
+    source: source,
 });
 
 const tileUrl = folder + '{z}/{x}/{y}.png';
@@ -105,7 +116,7 @@ const defaultStyle = new TileLayer({
 
 const map = new Map({
     controls: defaultControls().extend([new FullScreen()]),
-    layers: [osm, defaultStyle],
+    layers: [osm, defaultStyle, geolocatelayer],
     target: 'map',
     view: new View({
         center: fromLonLat([10.33649, 51.006271]),
@@ -174,3 +185,40 @@ map.on('moveend', function (e) {
         currZoom = newZoom;
     }
 });
+
+// Geoloacate
+navigator.geolocation.watchPosition(
+    function (pos) {
+        const coords = [pos.coords.longitude, pos.coords.latitude];
+        const accuracy = circular(coords, pos.coords.accuracy);
+        source.clear(true);
+        source.addFeatures([
+            new Feature(
+                accuracy.transform('EPSG:4326', map.getView().getProjection())
+            ),
+            new Feature(new Point(fromLonLat(coords))),
+        ]);
+    },
+    function (error) {
+        alert(`ERROR: ${error.message}`);
+    },
+    {
+        enableHighAccuracy: true,
+    }
+);
+const locate = document.createElement('div');
+locate.className = 'ol-control ol-control-custom-geo ol-unselectable locate';
+locate.innerHTML = '<button title="Lokalisiere mich">◎</button>';
+locate.addEventListener('click', function () {
+    if (!source.isEmpty()) {
+        map.getView().fit(source.getExtent(), {
+            maxZoom: 18,
+            duration: 500,
+        });
+    }
+});
+map.addControl(
+    new Control({
+        element: locate,
+    })
+);

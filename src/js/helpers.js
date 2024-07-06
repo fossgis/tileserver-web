@@ -1,7 +1,6 @@
 import { Modal } from 'bootstrap';
 import { transform } from 'ol/proj.js';
 
-
 let modal = document.getElementById('modal');
 let bootstrapModal = Modal.getOrCreateInstance(modal);
 
