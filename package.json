@@ -22,6 +22,7 @@
     "bootstrap": "^5.3.3",
     "ol": "9.2.4",
     "ol-contextmenu": "^5.4.0",
+    "ol-geocoder": "^4.3.3",
     "vite-plugin-favicons-inject": "^2.2.0"
   }
 }

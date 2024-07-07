@@ -13,9 +13,8 @@ import imgUrl from '../images/osm_logo.png'
 import { FullScreen, Control, defaults as defaultControls } from 'ol/control.js';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
-import Feature from 'ol/Feature';
-import Point from 'ol/geom/Point';
-import { circular } from 'ol/geom/Polygon';
+import Geocoder from 'ol-geocoder';
+import 'ol-geocoder/dist/ol-geocoder.min.css';
 
 
 const HOSTNAME = import.meta.env.VITE_HOSTNAME || 'tile';
@@ -186,39 +185,13 @@ map.on('moveend', function (e) {
     }
 });
 
-// Geoloacate
-navigator.geolocation.watchPosition(
-    function (pos) {
-        const coords = [pos.coords.longitude, pos.coords.latitude];
-        const accuracy = circular(coords, pos.coords.accuracy);
-        source.clear(true);
-        source.addFeatures([
-            new Feature(
-                accuracy.transform('EPSG:4326', map.getView().getProjection())
-            ),
-            new Feature(new Point(fromLonLat(coords))),
-        ]);
-    },
-    function (error) {
-        alert(`ERROR: ${error.message}`);
-    },
-    {
-        enableHighAccuracy: true,
-    }
-);
-const locate = document.createElement('div');
-locate.className = 'ol-control ol-control-custom-geo ol-unselectable locate';
-locate.innerHTML = '<button title="Lokalisiere mich">◎</button>';
-locate.addEventListener('click', function () {
-    if (!source.isEmpty()) {
-        map.getView().fit(source.getExtent(), {
-            maxZoom: 18,
-            duration: 500,
-        });
-    }
+// GEocoder
+const geocoder = new Geocoder('nominatim', {
+    provider: 'osm',
+    lang: 'de-DE',
+    placeholder: 'Suche nach ...',
+    targetType: 'text-input',
+    limit: 5,
+    keepOpen: true
 });
-map.addControl(
-    new Control({
-        element: locate,
-    })
-);
+map.addControl(geocoder);

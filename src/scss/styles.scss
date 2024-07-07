@@ -62,7 +62,14 @@ a {
   margin-bottom: 2%;
 }
 
-.ol-control-custom-geo {
-  top: 2.5em;
-  right: 0.5em;
+div.ol-full-screen {
+  top: 4em;
+  right: .5em;
+  left: auto;
+}
+
+div.ol-zoom {
+  top: .5em;
+  right: .5em;
+  left: auto;
 }
