@@ -996,7 +996,7 @@ function distanceAndSkiddingToXY(placement, rects, offset2) {
     y: distance
   };
 }
-function offset(_ref2) {
+function offset$1(_ref2) {
   var state = _ref2.state, options = _ref2.options, name = _ref2.name;
   var _options$offset = options.offset, offset2 = _options$offset === void 0 ? [0, 0] : _options$offset;
   var data = placements.reduce(function(acc, placement) {
@@ -1010,12 +1010,12 @@ function offset(_ref2) {
   }
   state.modifiersData[name] = data;
 }
-const offset$1 = {
+const offset$2 = {
   name: "offset",
   enabled: true,
   phase: "main",
   requires: ["popperOffsets"],
-  fn: offset
+  fn: offset$1
 };
 function popperOffsets(_ref) {
   var state = _ref.state, name = _ref.name;
@@ -1387,7 +1387,7 @@ var defaultModifiers$1 = [eventListeners, popperOffsets$1, computeStyles$1, appl
 var createPopper$1 = /* @__PURE__ */ popperGenerator({
   defaultModifiers: defaultModifiers$1
 });
-var defaultModifiers = [eventListeners, popperOffsets$1, computeStyles$1, applyStyles$1, offset$1, flip$1, preventOverflow$1, arrow$1, hide$1];
+var defaultModifiers = [eventListeners, popperOffsets$1, computeStyles$1, applyStyles$1, offset$2, flip$1, preventOverflow$1, arrow$1, hide$1];
 var createPopper = /* @__PURE__ */ popperGenerator({
   defaultModifiers
 });
@@ -1417,7 +1417,7 @@ const Popper = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProper
   left,
   main,
   modifierPhases,
-  offset: offset$1,
+  offset: offset$2,
   placements,
   popper,
   popperGenerator,
@@ -1707,8 +1707,8 @@ function bootstrapDelegationHandler(element, selector, fn2) {
     }
   };
 }
-function findHandler(events, callable, delegationSelector = null) {
-  return Object.values(events).find((event) => event.callable === callable && event.delegationSelector === delegationSelector);
+function findHandler(events2, callable, delegationSelector = null) {
+  return Object.values(events2).find((event) => event.callable === callable && event.delegationSelector === delegationSelector);
 }
 function normalizeParameters(originalTypeEvent, handler, delegationFunction) {
   const isDelegated = typeof handler === "string";
@@ -1734,8 +1734,8 @@ function addHandler(element, originalTypeEvent, handler, delegationFunction, one
     };
     callable = wrapFunction(callable);
   }
-  const events = getElementEvents(element);
-  const handlers = events[typeEvent] || (events[typeEvent] = {});
+  const events2 = getElementEvents(element);
+  const handlers = events2[typeEvent] || (events2[typeEvent] = {});
   const previousFunction = findHandler(handlers, callable, isDelegated ? handler : null);
   if (previousFunction) {
     previousFunction.oneOff = previousFunction.oneOff && oneOff;
@@ -1750,19 +1750,19 @@ function addHandler(element, originalTypeEvent, handler, delegationFunction, one
   handlers[uid] = fn2;
   element.addEventListener(typeEvent, fn2, isDelegated);
 }
-function removeHandler(element, events, typeEvent, handler, delegationSelector) {
-  const fn2 = findHandler(events[typeEvent], handler, delegationSelector);
+function removeHandler(element, events2, typeEvent, handler, delegationSelector) {
+  const fn2 = findHandler(events2[typeEvent], handler, delegationSelector);
   if (!fn2) {
     return;
   }
   element.removeEventListener(typeEvent, fn2, Boolean(delegationSelector));
-  delete events[typeEvent][fn2.uidEvent];
+  delete events2[typeEvent][fn2.uidEvent];
 }
-function removeNamespacedHandlers(element, events, typeEvent, namespace) {
-  const storeElementEvent = events[typeEvent] || {};
+function removeNamespacedHandlers(element, events2, typeEvent, namespace) {
+  const storeElementEvent = events2[typeEvent] || {};
   for (const [handlerKey, event] of Object.entries(storeElementEvent)) {
     if (handlerKey.includes(namespace)) {
-      removeHandler(element, events, typeEvent, event.callable, event.delegationSelector);
+      removeHandler(element, events2, typeEvent, event.callable, event.delegationSelector);
     }
   }
 }
@@ -1783,25 +1783,25 @@ const EventHandler = {
     }
     const [isDelegated, callable, typeEvent] = normalizeParameters(originalTypeEvent, handler, delegationFunction);
     const inNamespace = typeEvent !== originalTypeEvent;
-    const events = getElementEvents(element);
-    const storeElementEvent = events[typeEvent] || {};
+    const events2 = getElementEvents(element);
+    const storeElementEvent = events2[typeEvent] || {};
     const isNamespace = originalTypeEvent.startsWith(".");
     if (typeof callable !== "undefined") {
       if (!Object.keys(storeElementEvent).length) {
         return;
       }
-      removeHandler(element, events, typeEvent, callable, isDelegated ? handler : null);
+      removeHandler(element, events2, typeEvent, callable, isDelegated ? handler : null);
       return;
     }
     if (isNamespace) {
-      for (const elementEvent of Object.keys(events)) {
-        removeNamespacedHandlers(element, events, elementEvent, originalTypeEvent.slice(1));
+      for (const elementEvent of Object.keys(events2)) {
+        removeNamespacedHandlers(element, events2, elementEvent, originalTypeEvent.slice(1));
       }
     }
     for (const [keyHandlers, event] of Object.entries(storeElementEvent)) {
       const handlerKey = keyHandlers.replace(stripUidRegex, "");
       if (!inNamespace || originalTypeEvent.includes(handlerKey)) {
-        removeHandler(element, events, typeEvent, event.callable, event.delegationSelector);
+        removeHandler(element, events2, typeEvent, event.callable, event.delegationSelector);
       }
     }
   },
@@ -5355,8 +5355,8 @@ function isEmpty$1(object) {
   return !property;
 }
 let transforms = {};
-function add$1(source, destination, transformFn) {
-  const sourceCode = source.getCode();
+function add$1(source2, destination, transformFn) {
+  const sourceCode = source2.getCode();
   const destinationCode = destination.getCode();
   if (!(sourceCode in transforms)) {
     transforms[sourceCode] = {};
@@ -5384,6 +5384,21 @@ function boundingExtent(coordinates2) {
     extendCoordinate(extent, coordinates2[i]);
   }
   return extent;
+}
+function buffer(extent, value, dest) {
+  if (dest) {
+    dest[0] = extent[0] - value;
+    dest[1] = extent[1] - value;
+    dest[2] = extent[2] + value;
+    dest[3] = extent[3] + value;
+    return dest;
+  }
+  return [
+    extent[0] - value,
+    extent[1] - value,
+    extent[2] + value,
+    extent[3] + value
+  ];
 }
 function clone(extent, dest) {
   if (dest) {
@@ -5797,6 +5812,9 @@ function solveLinearSystem(mat) {
   }
   return x2;
 }
+function toDegrees(angleInRadians) {
+  return angleInRadians * 180 / Math.PI;
+}
 function toRadians(angleInDegrees) {
   return angleInDegrees * Math.PI / 180;
 }
@@ -5876,6 +5894,20 @@ function getDistance(c1, c2, radius) {
   const deltaLonBy2 = toRadians(c2[0] - c1[0]) / 2;
   const a2 = Math.sin(deltaLatBy2) * Math.sin(deltaLatBy2) + Math.sin(deltaLonBy2) * Math.sin(deltaLonBy2) * Math.cos(lat1) * Math.cos(lat2);
   return 2 * radius * Math.atan2(Math.sqrt(a2), Math.sqrt(1 - a2));
+}
+function offset(c1, distance, bearing, radius) {
+  radius = radius || DEFAULT_RADIUS;
+  const lat1 = toRadians(c1[1]);
+  const lon1 = toRadians(c1[0]);
+  const dByR = distance / radius;
+  const lat = Math.asin(
+    Math.sin(lat1) * Math.cos(dByR) + Math.cos(lat1) * Math.sin(dByR) * Math.cos(bearing)
+  );
+  const lon = lon1 + Math.atan2(
+    Math.sin(bearing) * Math.sin(dByR) * Math.cos(lat1),
+    Math.cos(dByR) - Math.sin(lat1) * Math.sin(lat)
+  );
+  return [toDegrees(lon), toDegrees(lat)];
 }
 function warn(...args) {
   console.warn(...args);
@@ -5964,10 +5996,10 @@ function getPointResolution(projection, resolution, point, units) {
 }
 function addEquivalentProjections(projections) {
   addProjections(projections);
-  projections.forEach(function(source) {
+  projections.forEach(function(source2) {
     projections.forEach(function(destination) {
-      if (source !== destination) {
-        add$1(source, destination, cloneTransform);
+      if (source2 !== destination) {
+        add$1(source2, destination, cloneTransform);
       }
     });
   });
@@ -6020,13 +6052,13 @@ function getTransformFromProjections(sourceProjection, destinationProjection) {
   }
   return transformFunc;
 }
-function getTransform(source, destination) {
-  const sourceProjection = get$1(source);
+function getTransform(source2, destination) {
+  const sourceProjection = get$1(source2);
   const destinationProjection = get$1(destination);
   return getTransformFromProjections(sourceProjection, destinationProjection);
 }
-function transform(coordinate, source, destination) {
-  const transformFunc = getTransform(source, destination);
+function transform(coordinate, source2, destination) {
+  const transformFunc = getTransform(source2, destination);
   return transformFunc(coordinate, void 0, coordinate.length);
 }
 function toUserCoordinate(coordinate, sourceProjection) {
@@ -6184,6 +6216,24 @@ class Disposable {
   disposeInternal() {
   }
 }
+function binarySearch(haystack, needle, comparator) {
+  let mid, cmp;
+  comparator = comparator || ascending;
+  let low = 0;
+  let high = haystack.length;
+  let found = false;
+  while (low < high) {
+    mid = low + (high - low >> 1);
+    cmp = +comparator(haystack[mid], needle);
+    if (cmp < 0) {
+      low = mid + 1;
+    } else {
+      high = mid;
+      found = !cmp;
+    }
+  }
+  return found ? low : ~low;
+}
 function ascending(a2, b2) {
   return a2 > b2 ? 1 : a2 < b2 ? -1 : 0;
 }
@@ -6238,6 +6288,15 @@ function linearFindNearest(arr, target, direction) {
     }
   }
   return n - 1;
+}
+function reverseSubArray(arr, begin, end2) {
+  while (begin < end2) {
+    const tmp = arr[begin];
+    arr[begin] = arr[end2];
+    arr[end2] = tmp;
+    ++begin;
+    --end2;
+  }
 }
 function extend$1(arr, data) {
   const extension = Array.isArray(data) ? data : [data];
@@ -6750,11 +6809,11 @@ class BaseObject extends Observable {
    * @param {BaseObject} source The source object.
    * @protected
    */
-  applyProperties(source) {
-    if (!source.values_) {
+  applyProperties(source2) {
+    if (!source2.values_) {
       return;
     }
-    Object.assign(this.values_ || (this.values_ = {}), source.values_);
+    Object.assign(this.values_ || (this.values_ = {}), source2.values_);
   }
   /**
    * Unsets a property.
@@ -7624,6 +7683,15 @@ new Array(6);
 function create() {
   return [1, 0, 0, 1, 0, 0];
 }
+function setFromArray(transform1, transform2) {
+  transform1[0] = transform2[0];
+  transform1[1] = transform2[1];
+  transform1[2] = transform2[2];
+  transform1[3] = transform2[3];
+  transform1[4] = transform2[4];
+  transform1[5] = transform2[5];
+  return transform1;
+}
 function apply(transform2, coordinate) {
   const x2 = coordinate[0];
   const y2 = coordinate[1];
@@ -7642,15 +7710,15 @@ function compose(transform2, dx1, dy1, sx, sy, angle, dx2, dy2) {
   transform2[5] = dx2 * sy * sin + dy2 * sy * cos + dy1;
   return transform2;
 }
-function makeInverse(target, source) {
-  const det = determinant(source);
+function makeInverse(target, source2) {
+  const det = determinant(source2);
   assert(det !== 0, "Transformation matrix cannot be inverted");
-  const a2 = source[0];
-  const b2 = source[1];
-  const c = source[2];
-  const d2 = source[3];
-  const e = source[4];
-  const f = source[5];
+  const a2 = source2[0];
+  const b2 = source2[1];
+  const c = source2[2];
+  const d2 = source2[3];
+  const e = source2[4];
+  const f = source2[5];
   target[0] = d2 / det;
   target[1] = -b2 / det;
   target[2] = -c / det;
@@ -7738,7 +7806,7 @@ function translate(flatCoordinates, offset2, end2, stride, deltaX, deltaY, dest)
   }
   return dest;
 }
-const tmpTransform = create();
+const tmpTransform$1 = create();
 class Geometry extends BaseObject {
   constructor() {
     super();
@@ -7949,14 +8017,14 @@ class Geometry extends BaseObject {
    *     modified in place.
    * @api
    */
-  transform(source, destination) {
-    const sourceProj = get$1(source);
+  transform(source2, destination) {
+    const sourceProj = get$1(source2);
     const transformFn = sourceProj.getUnits() == "tile-pixels" ? function(inCoordinates, outCoordinates, stride) {
       const pixelExtent = sourceProj.getExtent();
       const projectedExtent = sourceProj.getWorldExtent();
       const scale2 = getHeight(projectedExtent) / getHeight(pixelExtent);
       compose(
-        tmpTransform,
+        tmpTransform$1,
         projectedExtent[0],
         projectedExtent[3],
         scale2,
@@ -7970,7 +8038,7 @@ class Geometry extends BaseObject {
         0,
         inCoordinates.length,
         stride,
-        tmpTransform,
+        tmpTransform$1,
         outCoordinates
       );
       return getTransform(sourceProj, destination)(
@@ -8243,6 +8311,21 @@ function getStrideForLayout(layout) {
     stride
   );
 }
+function transformGeom2D(simpleGeometry, transform2, dest) {
+  const flatCoordinates = simpleGeometry.getFlatCoordinates();
+  if (!flatCoordinates) {
+    return null;
+  }
+  const stride = simpleGeometry.getStride();
+  return transform2D(
+    flatCoordinates,
+    0,
+    flatCoordinates.length,
+    stride,
+    transform2,
+    dest
+  );
+}
 function assignClosest(flatCoordinates, offset1, offset2, stride, x2, y2, closestPoint) {
   const x1 = flatCoordinates[offset1];
   const y1 = flatCoordinates[offset1 + 1];
@@ -8467,6 +8550,23 @@ function douglasPeucker(flatCoordinates, offset2, end2, stride, squaredTolerance
   }
   return simplifiedOffset;
 }
+function douglasPeuckerArray(flatCoordinates, offset2, ends, stride, squaredTolerance, simplifiedFlatCoordinates, simplifiedOffset, simplifiedEnds) {
+  for (let i = 0, ii = ends.length; i < ii; ++i) {
+    const end2 = ends[i];
+    simplifiedOffset = douglasPeucker(
+      flatCoordinates,
+      offset2,
+      end2,
+      stride,
+      squaredTolerance,
+      simplifiedFlatCoordinates,
+      simplifiedOffset
+    );
+    simplifiedEnds.push(simplifiedOffset);
+    offset2 = end2;
+  }
+  return simplifiedOffset;
+}
 function snap(value, tolerance) {
   return tolerance * Math.round(value / tolerance);
 }
@@ -8559,6 +8659,23 @@ function inflateCoordinatesArray(flatCoordinates, offset2, ends, stride, coordin
   }
   coordinatess.length = i;
   return coordinatess;
+}
+function inflateMultiCoordinatesArray(flatCoordinates, offset2, endss, stride, coordinatesss) {
+  coordinatesss = coordinatesss !== void 0 ? coordinatesss : [];
+  let i = 0;
+  for (let j = 0, jj = endss.length; j < jj; ++j) {
+    const ends = endss[j];
+    coordinatesss[i++] = ends.length === 1 && ends[0] === offset2 ? [] : inflateCoordinatesArray(
+      flatCoordinates,
+      offset2,
+      ends,
+      stride,
+      coordinatesss[i]
+    );
+    offset2 = ends[ends.length - 1];
+  }
+  coordinatesss.length = i;
+  return coordinatesss;
 }
 function linearRing(flatCoordinates, offset2, end2, stride) {
   let twiceArea = 0;
@@ -8918,7 +9035,28 @@ function getInteriorPointOfArray(flatCoordinates, offset2, ends, stride, flatCen
   if (isNaN(pointX)) {
     pointX = flatCenters[flatCentersOffset];
   }
+  if (dest) {
+    dest.push(pointX, y3, maxSegmentLength);
+    return dest;
+  }
   return [pointX, y3, maxSegmentLength];
+}
+function getInteriorPointsOfMultiArray(flatCoordinates, offset2, endss, stride, flatCenters) {
+  let interiorPoints = [];
+  for (let i = 0, ii = endss.length; i < ii; ++i) {
+    const ends = endss[i];
+    interiorPoints = getInteriorPointOfArray(
+      flatCoordinates,
+      offset2,
+      ends,
+      stride,
+      flatCenters,
+      2 * i,
+      interiorPoints
+    );
+    offset2 = ends[ends.length - 1];
+  }
+  return interiorPoints;
 }
 function forEach(flatCoordinates, offset2, end2, stride, callback) {
   let ret;
@@ -9108,6 +9246,30 @@ function orientLinearRings(flatCoordinates, offset2, ends, stride, right2) {
     offset2 = end2;
   }
   return offset2;
+}
+function inflateEnds(flatCoordinates, ends) {
+  const endss = [];
+  let offset2 = 0;
+  let prevEndIndex = 0;
+  let startOrientation;
+  for (let i = 0, ii = ends.length; i < ii; ++i) {
+    const end2 = ends[i];
+    const orientation = linearRingIsClockwise(flatCoordinates, offset2, end2, 2);
+    if (startOrientation === void 0) {
+      startOrientation = orientation;
+    }
+    if (orientation === startOrientation) {
+      endss.push(ends.slice(prevEndIndex, i + 1));
+    } else {
+      if (endss.length === 0) {
+        continue;
+      }
+      endss[endss.length - 1].push(ends[prevEndIndex]);
+    }
+    prevEndIndex = i + 1;
+    offset2 = end2;
+  }
+  return endss;
 }
 class Polygon extends SimpleGeometry {
   /**
@@ -9438,6 +9600,18 @@ class Polygon extends SimpleGeometry {
     this.flatCoordinates.length = ends.length === 0 ? 0 : ends[ends.length - 1];
     this.changed();
   }
+}
+function circular(center, radius, n, sphereRadius) {
+  n = n ? n : 32;
+  const flatCoordinates = [];
+  for (let i = 0; i < n; ++i) {
+    extend$1(
+      flatCoordinates,
+      offset(center, radius, 2 * Math.PI * i / n, sphereRadius)
+    );
+  }
+  flatCoordinates.push(flatCoordinates[0], flatCoordinates[1]);
+  return new Polygon(flatCoordinates, "XY", [flatCoordinates.length]);
 }
 function fromExtent(extent) {
   if (isEmpty(extent)) {
@@ -10994,11 +11168,11 @@ class Layer extends BaseLayer {
       LayerProperty.SOURCE,
       this.handleSourcePropertyChange_
     );
-    const source = options.source ? (
+    const source2 = options.source ? (
       /** @type {SourceType} */
       options.source
     ) : null;
-    this.setSource(source);
+    this.setSource(source2);
   }
   /**
    * @param {Array<import("./Layer.js").default>} [array] Array of layers (to be modified in place).
@@ -11040,8 +11214,8 @@ class Layer extends BaseLayer {
    * @return {import("../source/Source.js").State} Source state.
    */
   getSourceState() {
-    const source = this.getSource();
-    return !source ? "undefined" : source.getState();
+    const source2 = this.getSource();
+    return !source2 ? "undefined" : source2.getState();
   }
   /**
    * @private
@@ -11063,15 +11237,15 @@ class Layer extends BaseLayer {
       this.sourceChangeKey_ = null;
     }
     this.sourceReady_ = false;
-    const source = this.getSource();
-    if (source) {
+    const source2 = this.getSource();
+    if (source2) {
       this.sourceChangeKey_ = listen(
-        source,
+        source2,
         EventType.CHANGE,
         this.handleSourceChange_,
         this
       );
-      if (source.getState() === "ready") {
+      if (source2.getState() === "ready") {
         this.sourceReady_ = true;
         setTimeout(() => {
           this.dispatchEvent("sourceready");
@@ -11150,9 +11324,9 @@ class Layer extends BaseLayer {
       return [];
     }
     let getAttributions;
-    const source = this.getSource();
-    if (source) {
-      getAttributions = source.getAttributions();
+    const source2 = this.getSource();
+    if (source2) {
+      getAttributions = source2.getAttributions();
     }
     if (!getAttributions) {
       return [];
@@ -11278,8 +11452,8 @@ class Layer extends BaseLayer {
    * @observable
    * @api
    */
-  setSource(source) {
-    this.set(LayerProperty.SOURCE, source);
+  setSource(source2) {
+    this.set(LayerProperty.SOURCE, source2);
   }
   /**
    * Get the renderer for this layer.
@@ -11328,7 +11502,6 @@ function inView(layerState, viewState) {
   const zoom = viewState.zoom;
   return zoom > layerState.minZoom && zoom <= layerState.maxZoom;
 }
-const Layer$1 = Layer;
 function quickselect(arr, k2, left2, right2, compare) {
   quickselectStep(arr, k2, left2 || 0, right2 || arr.length - 1, compare || defaultCompare);
 }
@@ -11373,7 +11546,7 @@ function swap(arr, i, j) {
 function defaultCompare(a2, b2) {
   return a2 < b2 ? -1 : a2 > b2 ? 1 : 0;
 }
-class RBush {
+let RBush$1 = class RBush {
   constructor(maxEntries = 9) {
     this._maxEntries = Math.max(4, maxEntries);
     this._minEntries = Math.max(2, Math.ceil(this._maxEntries * 0.4));
@@ -11667,7 +11840,7 @@ class RBush {
       } else calcBBox(path[i], this.toBBox);
     }
   }
-}
+};
 function findItem(item, items, equalsFn) {
   if (!equalsFn) return items.indexOf(item);
   for (let i = 0; i < items.length; i++) {
@@ -11678,13 +11851,13 @@ function findItem(item, items, equalsFn) {
 function calcBBox(node, toBBox) {
   distBBox(node, 0, node.children.length, toBBox, node);
 }
-function distBBox(node, k2, p2, toBBox, destNode) {
+function distBBox(node, k2, p5, toBBox, destNode) {
   if (!destNode) destNode = createNode(null);
   destNode.minX = Infinity;
   destNode.minY = Infinity;
   destNode.maxX = -Infinity;
   destNode.maxY = -Infinity;
-  for (let i = k2; i < p2; i++) {
+  for (let i = k2; i < p5; i++) {
     const child = node.children[i];
     extend(destNode, node.leaf ? toBBox(child) : child);
   }
@@ -13101,15 +13274,289 @@ function asCanvasPattern(pattern) {
 }
 const CLASS_HIDDEN = "ol-hidden";
 const CLASS_UNSELECTABLE = "ol-unselectable";
+const CLASS_UNSUPPORTED = "ol-unsupported";
 const CLASS_CONTROL = "ol-control";
 const CLASS_COLLAPSED = "ol-collapsed";
+const fontRegEx = new RegExp(
+  [
+    "^\\s*(?=(?:(?:[-a-z]+\\s*){0,2}(italic|oblique))?)",
+    "(?=(?:(?:[-a-z]+\\s*){0,2}(small-caps))?)",
+    "(?=(?:(?:[-a-z]+\\s*){0,2}(bold(?:er)?|lighter|[1-9]00 ))?)",
+    "(?:(?:normal|\\1|\\2|\\3)\\s*){0,3}((?:xx?-)?",
+    "(?:small|large)|medium|smaller|larger|[\\.\\d]+(?:\\%|in|[cem]m|ex|p[ctx]))",
+    "(?:\\s*\\/\\s*(normal|[\\.\\d]+(?:\\%|in|[cem]m|ex|p[ctx])?))",
+    `?\\s*([-,\\"\\'\\sa-z]+?)\\s*$`
+  ].join(""),
+  "i"
+);
+const fontRegExMatchIndex = [
+  "style",
+  "variant",
+  "weight",
+  "size",
+  "lineHeight",
+  "family"
+];
+const getFontParameters = function(fontSpec) {
+  const match = fontSpec.match(fontRegEx);
+  if (!match) {
+    return null;
+  }
+  const style = (
+    /** @type {FontParameters} */
+    {
+      lineHeight: "normal",
+      size: "1.2em",
+      style: "normal",
+      weight: "normal",
+      variant: "normal"
+    }
+  );
+  for (let i = 0, ii = fontRegExMatchIndex.length; i < ii; ++i) {
+    const value = match[i + 1];
+    if (value !== void 0) {
+      style[fontRegExMatchIndex[i]] = value;
+    }
+  }
+  style.families = style.family.split(/,\s?/);
+  return style;
+};
+const defaultFont = "10px sans-serif";
 const defaultFillStyle = "#000";
 const defaultLineCap = "round";
+const defaultLineDash = [];
+const defaultLineDashOffset = 0;
 const defaultLineJoin = "round";
 const defaultMiterLimit = 10;
 const defaultStrokeStyle = "#000";
+const defaultTextAlign = "center";
+const defaultTextBaseline = "middle";
+const defaultPadding = [0, 0, 0, 0];
 const defaultLineWidth = 1;
 const checkedFonts = new BaseObject();
+let measureContext = null;
+let measureFont;
+const textHeights = {};
+const registerFont = function() {
+  const retries = 100;
+  const size = "32px ";
+  const referenceFonts = ["monospace", "serif"];
+  const len = referenceFonts.length;
+  const text = "wmytzilWMYTZIL@#/&?$%10";
+  let interval, referenceWidth;
+  function isAvailable(fontStyle, fontWeight, fontFamily) {
+    let available = true;
+    for (let i = 0; i < len; ++i) {
+      const referenceFont = referenceFonts[i];
+      referenceWidth = measureTextWidth(
+        fontStyle + " " + fontWeight + " " + size + referenceFont,
+        text
+      );
+      if (fontFamily != referenceFont) {
+        const width = measureTextWidth(
+          fontStyle + " " + fontWeight + " " + size + fontFamily + "," + referenceFont,
+          text
+        );
+        available = available && width != referenceWidth;
+      }
+    }
+    if (available) {
+      return true;
+    }
+    return false;
+  }
+  function check() {
+    let done = true;
+    const fonts = checkedFonts.getKeys();
+    for (let i = 0, ii = fonts.length; i < ii; ++i) {
+      const font = fonts[i];
+      if (checkedFonts.get(font) < retries) {
+        if (isAvailable.apply(this, font.split("\n"))) {
+          clear(textHeights);
+          measureContext = null;
+          measureFont = void 0;
+          checkedFonts.set(font, retries);
+        } else {
+          checkedFonts.set(font, checkedFonts.get(font) + 1, true);
+          done = false;
+        }
+      }
+    }
+    if (done) {
+      clearInterval(interval);
+      interval = void 0;
+    }
+  }
+  return function(fontSpec) {
+    const font = getFontParameters(fontSpec);
+    if (!font) {
+      return;
+    }
+    const families = font.families;
+    for (let i = 0, ii = families.length; i < ii; ++i) {
+      const family = families[i];
+      const key = font.style + "\n" + font.weight + "\n" + family;
+      if (checkedFonts.get(key) === void 0) {
+        checkedFonts.set(key, retries, true);
+        if (!isAvailable(font.style, font.weight, family)) {
+          checkedFonts.set(key, 0, true);
+          if (interval === void 0) {
+            interval = setInterval(check, 32);
+          }
+        }
+      }
+    }
+  };
+}();
+const measureTextHeight = /* @__PURE__ */ function() {
+  let measureElement;
+  return function(fontSpec) {
+    let height = textHeights[fontSpec];
+    if (height == void 0) {
+      if (WORKER_OFFSCREEN_CANVAS) {
+        const font = getFontParameters(fontSpec);
+        const metrics = measureText(fontSpec, "Žg");
+        const lineHeight = isNaN(Number(font.lineHeight)) ? 1.2 : Number(font.lineHeight);
+        height = lineHeight * (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent);
+      } else {
+        if (!measureElement) {
+          measureElement = document.createElement("div");
+          measureElement.innerHTML = "M";
+          measureElement.style.minHeight = "0";
+          measureElement.style.maxHeight = "none";
+          measureElement.style.height = "auto";
+          measureElement.style.padding = "0";
+          measureElement.style.border = "none";
+          measureElement.style.position = "absolute";
+          measureElement.style.display = "block";
+          measureElement.style.left = "-99999px";
+        }
+        measureElement.style.font = fontSpec;
+        document.body.appendChild(measureElement);
+        height = measureElement.offsetHeight;
+        document.body.removeChild(measureElement);
+      }
+      textHeights[fontSpec] = height;
+    }
+    return height;
+  };
+}();
+function measureText(font, text) {
+  if (!measureContext) {
+    measureContext = createCanvasContext2D(1, 1);
+  }
+  if (font != measureFont) {
+    measureContext.font = font;
+    measureFont = measureContext.font;
+  }
+  return measureContext.measureText(text);
+}
+function measureTextWidth(font, text) {
+  return measureText(font, text).width;
+}
+function measureAndCacheTextWidth(font, text, cache2) {
+  if (text in cache2) {
+    return cache2[text];
+  }
+  const width = text.split("\n").reduce((prev, curr) => Math.max(prev, measureTextWidth(font, curr)), 0);
+  cache2[text] = width;
+  return width;
+}
+function getTextDimensions(baseStyle, chunks) {
+  const widths = [];
+  const heights = [];
+  const lineWidths = [];
+  let width = 0;
+  let lineWidth = 0;
+  let height = 0;
+  let lineHeight = 0;
+  for (let i = 0, ii = chunks.length; i <= ii; i += 2) {
+    const text = chunks[i];
+    if (text === "\n" || i === ii) {
+      width = Math.max(width, lineWidth);
+      lineWidths.push(lineWidth);
+      lineWidth = 0;
+      height += lineHeight;
+      lineHeight = 0;
+      continue;
+    }
+    const font = chunks[i + 1] || baseStyle.font;
+    const currentWidth = measureTextWidth(font, text);
+    widths.push(currentWidth);
+    lineWidth += currentWidth;
+    const currentHeight = measureTextHeight(font);
+    heights.push(currentHeight);
+    lineHeight = Math.max(lineHeight, currentHeight);
+  }
+  return { width, height, widths, heights, lineWidths };
+}
+function drawImageOrLabel(context, transform2, opacity, labelOrImage, originX, originY, w2, h, x2, y2, scale2) {
+  context.save();
+  if (opacity !== 1) {
+    if (context.globalAlpha === void 0) {
+      context.globalAlpha = (context2) => context2.globalAlpha *= opacity;
+    } else {
+      context.globalAlpha *= opacity;
+    }
+  }
+  if (transform2) {
+    context.transform.apply(context, transform2);
+  }
+  if (
+    /** @type {*} */
+    labelOrImage.contextInstructions
+  ) {
+    context.translate(x2, y2);
+    context.scale(scale2[0], scale2[1]);
+    executeLabelInstructions(
+      /** @type {Label} */
+      labelOrImage,
+      context
+    );
+  } else if (scale2[0] < 0 || scale2[1] < 0) {
+    context.translate(x2, y2);
+    context.scale(scale2[0], scale2[1]);
+    context.drawImage(
+      /** @type {HTMLCanvasElement|HTMLImageElement|HTMLVideoElement} */
+      labelOrImage,
+      originX,
+      originY,
+      w2,
+      h,
+      0,
+      0,
+      w2,
+      h
+    );
+  } else {
+    context.drawImage(
+      /** @type {HTMLCanvasElement|HTMLImageElement|HTMLVideoElement} */
+      labelOrImage,
+      originX,
+      originY,
+      w2,
+      h,
+      x2,
+      y2,
+      w2 * scale2[0],
+      h * scale2[1]
+    );
+  }
+  context.restore();
+}
+function executeLabelInstructions(label, context) {
+  const contextInstructions = label.contextInstructions;
+  for (let i = 0, ii = contextInstructions.length; i < ii; i += 2) {
+    if (Array.isArray(contextInstructions[i + 1])) {
+      context[contextInstructions[i]].apply(
+        context,
+        contextInstructions[i + 1]
+      );
+    } else {
+      context[contextInstructions[i]] = contextInstructions[i + 1];
+    }
+  }
+}
 class RegularShape extends ImageStyle {
   /**
    * @param {Options} options Options.
@@ -16980,7 +17427,7 @@ function requireSizeLike(value, property) {
 const Property$1 = {
   RENDER_ORDER: "renderOrder"
 };
-class BaseVectorLayer extends Layer$1 {
+class BaseVectorLayer extends Layer {
   /**
    * @param {Options<VectorSourceType>} [options] Options.
    */
@@ -17078,7 +17525,7 @@ class BaseVectorLayer extends Layer$1 {
   renderDeclutter(frameState, layerState) {
     const declutterGroup = this.getDeclutter();
     if (declutterGroup in frameState.declutter === false) {
-      frameState.declutter[declutterGroup] = new RBush(9);
+      frameState.declutter[declutterGroup] = new RBush$1(9);
     }
     this.getRenderer().renderDeclutter(frameState, layerState);
   }
@@ -17244,9 +17691,9 @@ class MapRenderer extends Disposable {
         const layer = layerState.layer;
         if (layer.hasRenderer() && inView(layerState, viewState) && layerFilter.call(thisArg2, layer)) {
           const layerRenderer = layer.getRenderer();
-          const source = layer.getSource();
-          if (layerRenderer && source) {
-            const coordinates2 = source.getWrapX() ? translatedCoordinate : coordinate;
+          const source2 = layer.getSource();
+          if (layerRenderer && source2) {
+            const coordinates2 = source2.getWrapX() ? translatedCoordinate : coordinate;
             const callback2 = forEachFeatureAtCoordinate.bind(
               null,
               layerState.managed
@@ -19193,7 +19640,7 @@ function centroid(pointerEvents) {
   }
   return { clientX: clientX / length, clientY: clientY / length };
 }
-function all(var_args) {
+function all$1(var_args) {
   const conditions = arguments;
   return function(event) {
     let pass = true;
@@ -19299,8 +19746,8 @@ class DragPan extends PointerInteraction {
     this.lastCentroid = null;
     this.lastPointersCount_;
     this.panning_ = false;
-    const condition = options.condition ? options.condition : all(noModifierKeys, primaryAction);
-    this.condition_ = options.onFocusOnly ? all(focusWithTabindex, condition) : condition;
+    const condition = options.condition ? options.condition : all$1(noModifierKeys, primaryAction);
+    this.condition_ = options.onFocusOnly ? all$1(focusWithTabindex, condition) : condition;
     this.noKinetic_ = false;
   }
   /**
@@ -19950,7 +20397,7 @@ class MouseWheelZoom extends Interaction {
     this.useAnchor_ = options.useAnchor !== void 0 ? options.useAnchor : true;
     this.constrainResolution_ = options.constrainResolution !== void 0 ? options.constrainResolution : false;
     const condition = options.condition ? options.condition : always;
-    this.condition_ = options.onFocusOnly ? all(focusWithTabindex, condition) : condition;
+    this.condition_ = options.onFocusOnly ? all$1(focusWithTabindex, condition) : condition;
     this.lastAnchor_ = null;
     this.startTime_ = void 0;
     this.timeoutId_;
@@ -20319,7 +20766,7 @@ function defaults(options) {
   return interactions;
 }
 function removeLayerMapProperty(layer) {
-  if (layer instanceof Layer$1) {
+  if (layer instanceof Layer) {
     layer.setMapInternal(null);
     return;
   }
@@ -20328,7 +20775,7 @@ function removeLayerMapProperty(layer) {
   }
 }
 function setLayerMapProperty(layer, map2) {
-  if (layer instanceof Layer$1) {
+  if (layer instanceof Layer) {
     layer.setMapInternal(map2);
     return;
   }
@@ -20854,8 +21301,8 @@ let Map$1 = class Map2 extends BaseObject {
       if (renderer && !renderer.ready) {
         return true;
       }
-      const source = state.layer.getSource();
-      if (source && source.loading) {
+      const source2 = state.layer.getSource();
+      if (source2 && source2.loading) {
         return true;
       }
     }
@@ -22183,7 +22630,7 @@ class Triangulation {
   }
 }
 let brokenDiagonalRendering_;
-const canvasPool = [];
+const canvasPool$1 = [];
 function drawTestTriangle(ctx, u1, v1, u2, v2) {
   ctx.beginPath();
   ctx.moveTo(0, 0);
@@ -22200,7 +22647,7 @@ function verifyBrokenDiagonalRendering(data, offset2) {
 }
 function isBrokenDiagonalRendering() {
   if (brokenDiagonalRendering_ === void 0) {
-    const ctx = createCanvasContext2D(6, 6, canvasPool);
+    const ctx = createCanvasContext2D(6, 6, canvasPool$1);
     ctx.globalCompositeOperation = "lighter";
     ctx.fillStyle = "rgba(210, 0, 0, 0.75)";
     drawTestTriangle(ctx, 4, 5, 4, 0);
@@ -22208,7 +22655,7 @@ function isBrokenDiagonalRendering() {
     const data = ctx.getImageData(0, 0, 3, 3).data;
     brokenDiagonalRendering_ = verifyBrokenDiagonalRendering(data, 0) || verifyBrokenDiagonalRendering(data, 4) || verifyBrokenDiagonalRendering(data, 8);
     releaseCanvas(ctx);
-    canvasPool.push(ctx.canvas);
+    canvasPool$1.push(ctx.canvas);
   }
   return brokenDiagonalRendering_;
 }
@@ -22261,7 +22708,7 @@ function render(width, height, pixelRatio, sourceResolution, sourceExtent, targe
   const context = createCanvasContext2D(
     Math.round(pixelRatio * width),
     Math.round(pixelRatio * height),
-    canvasPool
+    canvasPool$1
   );
   if (!interpolate) {
     context.imageSmoothingEnabled = false;
@@ -22285,7 +22732,7 @@ function render(width, height, pixelRatio, sourceResolution, sourceExtent, targe
     stitchContext = createCanvasContext2D(
       Math.round(getWidth(sourceDataExtent) * stitchScale),
       Math.round(getHeight(sourceDataExtent) * stitchScale),
-      canvasPool
+      canvasPool$1
     );
     if (!interpolate) {
       stitchContext.imageSmoothingEnabled = false;
@@ -22337,11 +22784,11 @@ function render(width, height, pixelRatio, sourceResolution, sourceExtent, targe
   }
   const targetTopLeft = getTopLeft(targetExtent);
   triangulation.getTriangles().forEach(function(triangle, i, arr) {
-    const source = triangle.source;
+    const source2 = triangle.source;
     const target = triangle.target;
-    let x0 = source[0][0], y0 = source[0][1];
-    let x1 = source[1][0], y1 = source[1][1];
-    let x2 = source[2][0], y2 = source[2][1];
+    let x0 = source2[0][0], y0 = source2[0][1];
+    let x1 = source2[1][0], y1 = source2[1][1];
+    let x2 = source2[2][0], y2 = source2[2][1];
     const u0 = pixelRound((target[0][0] - targetTopLeft[0]) / targetResolution);
     const v0 = pixelRound(
       -(target[0][1] - targetTopLeft[1]) / targetResolution
@@ -22415,9 +22862,9 @@ function render(width, height, pixelRatio, sourceResolution, sourceExtent, targe
       image = stitchContext.canvas;
       context.scale(inverseScale, -inverseScale);
     } else {
-      const source2 = sources[0];
-      const extent = source2.extent;
-      image = source2.image;
+      const source3 = sources[0];
+      const extent = source3.extent;
+      image = source3.image;
       context.scale(
         getWidth(extent) / image.width,
         -getHeight(extent) / image.height
@@ -22428,7 +22875,7 @@ function render(width, height, pixelRatio, sourceResolution, sourceExtent, targe
   });
   if (stitchContext) {
     releaseCanvas(stitchContext);
-    canvasPool.push(stitchContext.canvas);
+    canvasPool$1.push(stitchContext.canvas);
   }
   if (renderEdges) {
     context.save();
@@ -22594,17 +23041,17 @@ class ReprojTile extends Tile {
    */
   reproject_() {
     const sources = [];
-    this.sourceTiles_.forEach((source) => {
+    this.sourceTiles_.forEach((source2) => {
       var _a;
-      const tile = source.tile;
+      const tile = source2.tile;
       if (tile && tile.getState() == TileState.LOADED) {
         const extent = this.sourceTileGrid_.getTileCoordExtent(tile.tileCoord);
-        extent[0] += source.offset;
-        extent[2] += source.offset;
+        extent[0] += source2.offset;
+        extent[2] += source2.offset;
         const clipExtent = (_a = this.clipExtent_) == null ? void 0 : _a.slice();
         if (clipExtent) {
-          clipExtent[0] += source.offset;
-          clipExtent[2] += source.offset;
+          clipExtent[0] += source2.offset;
+          clipExtent[2] += source2.offset;
         }
         sources.push({
           extent,
@@ -22703,7 +23150,7 @@ class ReprojTile extends Tile {
   release() {
     if (this.canvas_) {
       releaseCanvas(this.canvas_.getContext("2d"));
-      canvasPool.push(this.canvas_);
+      canvasPool$1.push(this.canvas_);
       this.canvas_ = null;
     }
     super.release();
@@ -24676,7 +25123,7 @@ const TileProperty = {
   PRELOAD: "preload",
   USE_INTERIM_TILES_ON_ERROR: "useInterimTilesOnError"
 };
-class BaseTileLayer extends Layer$1 {
+class BaseTileLayer extends Layer {
   /**
    * @param {Options<TileSourceType>} [options] Tile layer options.
    */
@@ -24823,7 +25270,7 @@ class LayerRenderer extends Observable {
    *     called with a zoom level and a tile range to add loaded tiles to the lookup.
    * @protected
    */
-  createLoadedTileFinder(source, projection, tiles) {
+  createLoadedTileFinder(source2, projection, tiles) {
     return (
       /**
        * @param {number} zoom Zoom level.
@@ -24832,7 +25279,7 @@ class LayerRenderer extends Observable {
        */
       (zoom, tileRange) => {
         const callback = this.loadedTileCallback.bind(this, tiles, zoom);
-        return source.forEachLoadedTile(projection, zoom, tileRange, callback);
+        return source2.forEachLoadedTile(projection, zoom, tileRange, callback);
       }
     );
   }
@@ -25007,6 +25454,7 @@ class ZIndexContext {
     this.zIndex = 0;
   }
 }
+const canvasPool = [];
 let pixelContext = null;
 function createPixelContext() {
   pixelContext = createCanvasContext2D(1, 1, void 0, {
@@ -25370,12 +25818,12 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
     const pixelRatio = frameState.pixelRatio;
     const projection = frameState.viewState.projection;
     const viewState = frameState.viewState;
-    const source = layer.getRenderSource();
-    const tileGrid = source.getTileGridForProjection(viewState.projection);
-    const tilePixelRatio = source.getTilePixelRatio(frameState.pixelRatio);
+    const source2 = layer.getRenderSource();
+    const tileGrid = source2.getTileGridForProjection(viewState.projection);
+    const tilePixelRatio = source2.getTilePixelRatio(frameState.pixelRatio);
     for (let z2 = tileGrid.getZForResolution(viewState.resolution); z2 >= tileGrid.getMinZoom(); --z2) {
       const tileCoord = tileGrid.getTileCoordForCoordAndZ(coordinate, z2);
-      const tile = source.getTile(
+      const tile = source2.getTile(
         z2,
         tileCoord[1],
         tileCoord[2],
@@ -25398,7 +25846,7 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
         tilePixelRatio * ((tileOrigin[1] - coordinate[1]) / tileResolution - tileCoord[2] * tileSize[1])
       );
       const gutter = Math.round(
-        tilePixelRatio * source.getGutterForProjection(viewState.projection)
+        tilePixelRatio * source2.getGutterForProjection(viewState.projection)
       );
       return this.getImageData(tile.getImage(), col + gutter, row + gutter);
     }
@@ -25473,7 +25921,7 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
       projection,
       tilesToDrawByZ
     );
-    const tmpExtent = this.tmpExtent;
+    const tmpExtent2 = this.tmpExtent;
     const tmpTileRange = this.tmpTileRange_;
     this.newTiles_ = false;
     const viewport2 = rotation ? getRotatedViewport(
@@ -25508,7 +25956,7 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
         const childTileRange = tileGrid.getTileCoordChildTileRange(
           tile.tileCoord,
           tmpTileRange,
-          tmpExtent
+          tmpExtent2
         );
         let covered = false;
         if (childTileRange) {
@@ -25519,7 +25967,7 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
             tile.tileCoord,
             findLoadedTiles,
             tmpTileRange,
-            tmpExtent
+            tmpExtent2
           );
         }
       }
@@ -25843,6 +26291,1226 @@ class TileLayer extends BaseTileLayer {
   }
   createRenderer() {
     return new CanvasTileLayerRenderer(this);
+  }
+}
+class VectorContext {
+  /**
+   * Render a geometry with a custom renderer.
+   *
+   * @param {import("../geom/SimpleGeometry.js").default} geometry Geometry.
+   * @param {import("../Feature.js").FeatureLike} feature Feature.
+   * @param {Function} renderer Renderer.
+   * @param {Function} hitDetectionRenderer Renderer.
+   * @param {number} [index] Render order index.
+   */
+  drawCustom(geometry, feature, renderer, hitDetectionRenderer, index) {
+  }
+  /**
+   * Render a geometry.
+   *
+   * @param {import("../geom/Geometry.js").default} geometry The geometry to render.
+   */
+  drawGeometry(geometry) {
+  }
+  /**
+   * Set the rendering style.
+   *
+   * @param {import("../style/Style.js").default} style The rendering style.
+   */
+  setStyle(style) {
+  }
+  /**
+   * @param {import("../geom/Circle.js").default} circleGeometry Circle geometry.
+   * @param {import("../Feature.js").default} feature Feature.
+   * @param {number} [index] Render order index.
+   */
+  drawCircle(circleGeometry, feature, index) {
+  }
+  /**
+   * @param {import("../Feature.js").default} feature Feature.
+   * @param {import("../style/Style.js").default} style Style.
+   * @param {number} [index] Render order index.
+   */
+  drawFeature(feature, style, index) {
+  }
+  /**
+   * @param {import("../geom/GeometryCollection.js").default} geometryCollectionGeometry Geometry collection.
+   * @param {import("../Feature.js").default} feature Feature.
+   * @param {number} [index] Render order index.
+   */
+  drawGeometryCollection(geometryCollectionGeometry, feature, index) {
+  }
+  /**
+   * @param {import("../geom/LineString.js").default|import("./Feature.js").default} lineStringGeometry Line string geometry.
+   * @param {import("../Feature.js").FeatureLike} feature Feature.
+   * @param {number} [index] Render order index.
+   */
+  drawLineString(lineStringGeometry, feature, index) {
+  }
+  /**
+   * @param {import("../geom/MultiLineString.js").default|import("./Feature.js").default} multiLineStringGeometry MultiLineString geometry.
+   * @param {import("../Feature.js").FeatureLike} feature Feature.
+   * @param {number} [index] Render order index.
+   */
+  drawMultiLineString(multiLineStringGeometry, feature, index) {
+  }
+  /**
+   * @param {import("../geom/MultiPoint.js").default|import("./Feature.js").default} multiPointGeometry MultiPoint geometry.
+   * @param {import("../Feature.js").FeatureLike} feature Feature.
+   * @param {number} [index] Render order index.
+   */
+  drawMultiPoint(multiPointGeometry, feature, index) {
+  }
+  /**
+   * @param {import("../geom/MultiPolygon.js").default} multiPolygonGeometry MultiPolygon geometry.
+   * @param {import("../Feature.js").FeatureLike} feature Feature.
+   * @param {number} [index] Render order index.
+   */
+  drawMultiPolygon(multiPolygonGeometry, feature, index) {
+  }
+  /**
+   * @param {import("../geom/Point.js").default|import("./Feature.js").default} pointGeometry Point geometry.
+   * @param {import("../Feature.js").FeatureLike} feature Feature.
+   * @param {number} [index] Render order index.
+   */
+  drawPoint(pointGeometry, feature, index) {
+  }
+  /**
+   * @param {import("../geom/Polygon.js").default|import("./Feature.js").default} polygonGeometry Polygon geometry.
+   * @param {import("../Feature.js").FeatureLike} feature Feature.
+   * @param {number} [index] Render order index.
+   */
+  drawPolygon(polygonGeometry, feature, index) {
+  }
+  /**
+   * @param {import("../geom/SimpleGeometry.js").default|import("./Feature.js").default} geometry Geometry.
+   * @param {import("../Feature.js").FeatureLike} feature Feature.
+   * @param {number} [index] Render order index.
+   */
+  drawText(geometry, feature, index) {
+  }
+  /**
+   * @param {import("../style/Fill.js").default} fillStyle Fill style.
+   * @param {import("../style/Stroke.js").default} strokeStyle Stroke style.
+   */
+  setFillStrokeStyle(fillStyle, strokeStyle) {
+  }
+  /**
+   * @param {import("../style/Image.js").default} imageStyle Image style.
+   * @param {import("../render/canvas.js").DeclutterImageWithText} [declutterImageWithText] Shared data for combined decluttering with a text style.
+   */
+  setImageStyle(imageStyle, declutterImageWithText) {
+  }
+  /**
+   * @param {import("../style/Text.js").default} textStyle Text style.
+   * @param {import("../render/canvas.js").DeclutterImageWithText} [declutterImageWithText] Shared data for combined decluttering with an image style.
+   */
+  setTextStyle(textStyle, declutterImageWithText) {
+  }
+}
+class CanvasImmediateRenderer extends VectorContext {
+  /**
+   * @param {CanvasRenderingContext2D} context Context.
+   * @param {number} pixelRatio Pixel ratio.
+   * @param {import("../../extent.js").Extent} extent Extent.
+   * @param {import("../../transform.js").Transform} transform Transform.
+   * @param {number} viewRotation View rotation.
+   * @param {number} [squaredTolerance] Optional squared tolerance for simplification.
+   * @param {import("../../proj.js").TransformFunction} [userTransform] Transform from user to view projection.
+   */
+  constructor(context, pixelRatio, extent, transform2, viewRotation, squaredTolerance, userTransform) {
+    super();
+    this.context_ = context;
+    this.pixelRatio_ = pixelRatio;
+    this.extent_ = extent;
+    this.transform_ = transform2;
+    this.transformRotation_ = transform2 ? toFixed(Math.atan2(transform2[1], transform2[0]), 10) : 0;
+    this.viewRotation_ = viewRotation;
+    this.squaredTolerance_ = squaredTolerance;
+    this.userTransform_ = userTransform;
+    this.contextFillState_ = null;
+    this.contextStrokeState_ = null;
+    this.contextTextState_ = null;
+    this.fillState_ = null;
+    this.strokeState_ = null;
+    this.image_ = null;
+    this.imageAnchorX_ = 0;
+    this.imageAnchorY_ = 0;
+    this.imageHeight_ = 0;
+    this.imageOpacity_ = 0;
+    this.imageOriginX_ = 0;
+    this.imageOriginY_ = 0;
+    this.imageRotateWithView_ = false;
+    this.imageRotation_ = 0;
+    this.imageScale_ = [0, 0];
+    this.imageWidth_ = 0;
+    this.text_ = "";
+    this.textOffsetX_ = 0;
+    this.textOffsetY_ = 0;
+    this.textRotateWithView_ = false;
+    this.textRotation_ = 0;
+    this.textScale_ = [0, 0];
+    this.textFillState_ = null;
+    this.textStrokeState_ = null;
+    this.textState_ = null;
+    this.pixelCoordinates_ = [];
+    this.tmpLocalTransform_ = create();
+  }
+  /**
+   * @param {Array<number>} flatCoordinates Flat coordinates.
+   * @param {number} offset Offset.
+   * @param {number} end End.
+   * @param {number} stride Stride.
+   * @private
+   */
+  drawImages_(flatCoordinates, offset2, end2, stride) {
+    if (!this.image_) {
+      return;
+    }
+    const pixelCoordinates = transform2D(
+      flatCoordinates,
+      offset2,
+      end2,
+      stride,
+      this.transform_,
+      this.pixelCoordinates_
+    );
+    const context = this.context_;
+    const localTransform = this.tmpLocalTransform_;
+    const alpha = context.globalAlpha;
+    if (this.imageOpacity_ != 1) {
+      context.globalAlpha = alpha * this.imageOpacity_;
+    }
+    let rotation = this.imageRotation_;
+    if (this.transformRotation_ === 0) {
+      rotation -= this.viewRotation_;
+    }
+    if (this.imageRotateWithView_) {
+      rotation += this.viewRotation_;
+    }
+    for (let i = 0, ii = pixelCoordinates.length; i < ii; i += 2) {
+      const x2 = pixelCoordinates[i] - this.imageAnchorX_;
+      const y2 = pixelCoordinates[i + 1] - this.imageAnchorY_;
+      if (rotation !== 0 || this.imageScale_[0] != 1 || this.imageScale_[1] != 1) {
+        const centerX = x2 + this.imageAnchorX_;
+        const centerY = y2 + this.imageAnchorY_;
+        compose(
+          localTransform,
+          centerX,
+          centerY,
+          1,
+          1,
+          rotation,
+          -centerX,
+          -centerY
+        );
+        context.save();
+        context.transform.apply(context, localTransform);
+        context.translate(centerX, centerY);
+        context.scale(this.imageScale_[0], this.imageScale_[1]);
+        context.drawImage(
+          this.image_,
+          this.imageOriginX_,
+          this.imageOriginY_,
+          this.imageWidth_,
+          this.imageHeight_,
+          -this.imageAnchorX_,
+          -this.imageAnchorY_,
+          this.imageWidth_,
+          this.imageHeight_
+        );
+        context.restore();
+      } else {
+        context.drawImage(
+          this.image_,
+          this.imageOriginX_,
+          this.imageOriginY_,
+          this.imageWidth_,
+          this.imageHeight_,
+          x2,
+          y2,
+          this.imageWidth_,
+          this.imageHeight_
+        );
+      }
+    }
+    if (this.imageOpacity_ != 1) {
+      context.globalAlpha = alpha;
+    }
+  }
+  /**
+   * @param {Array<number>} flatCoordinates Flat coordinates.
+   * @param {number} offset Offset.
+   * @param {number} end End.
+   * @param {number} stride Stride.
+   * @private
+   */
+  drawText_(flatCoordinates, offset2, end2, stride) {
+    if (!this.textState_ || this.text_ === "") {
+      return;
+    }
+    if (this.textFillState_) {
+      this.setContextFillState_(this.textFillState_);
+    }
+    if (this.textStrokeState_) {
+      this.setContextStrokeState_(this.textStrokeState_);
+    }
+    this.setContextTextState_(this.textState_);
+    const pixelCoordinates = transform2D(
+      flatCoordinates,
+      offset2,
+      end2,
+      stride,
+      this.transform_,
+      this.pixelCoordinates_
+    );
+    const context = this.context_;
+    let rotation = this.textRotation_;
+    if (this.transformRotation_ === 0) {
+      rotation -= this.viewRotation_;
+    }
+    if (this.textRotateWithView_) {
+      rotation += this.viewRotation_;
+    }
+    for (; offset2 < end2; offset2 += stride) {
+      const x2 = pixelCoordinates[offset2] + this.textOffsetX_;
+      const y2 = pixelCoordinates[offset2 + 1] + this.textOffsetY_;
+      if (rotation !== 0 || this.textScale_[0] != 1 || this.textScale_[1] != 1) {
+        context.save();
+        context.translate(x2 - this.textOffsetX_, y2 - this.textOffsetY_);
+        context.rotate(rotation);
+        context.translate(this.textOffsetX_, this.textOffsetY_);
+        context.scale(this.textScale_[0], this.textScale_[1]);
+        if (this.textStrokeState_) {
+          context.strokeText(this.text_, 0, 0);
+        }
+        if (this.textFillState_) {
+          context.fillText(this.text_, 0, 0);
+        }
+        context.restore();
+      } else {
+        if (this.textStrokeState_) {
+          context.strokeText(this.text_, x2, y2);
+        }
+        if (this.textFillState_) {
+          context.fillText(this.text_, x2, y2);
+        }
+      }
+    }
+  }
+  /**
+   * @param {Array<number>} flatCoordinates Flat coordinates.
+   * @param {number} offset Offset.
+   * @param {number} end End.
+   * @param {number} stride Stride.
+   * @param {boolean} close Close.
+   * @private
+   * @return {number} end End.
+   */
+  moveToLineTo_(flatCoordinates, offset2, end2, stride, close) {
+    const context = this.context_;
+    const pixelCoordinates = transform2D(
+      flatCoordinates,
+      offset2,
+      end2,
+      stride,
+      this.transform_,
+      this.pixelCoordinates_
+    );
+    context.moveTo(pixelCoordinates[0], pixelCoordinates[1]);
+    let length = pixelCoordinates.length;
+    if (close) {
+      length -= 2;
+    }
+    for (let i = 2; i < length; i += 2) {
+      context.lineTo(pixelCoordinates[i], pixelCoordinates[i + 1]);
+    }
+    if (close) {
+      context.closePath();
+    }
+    return end2;
+  }
+  /**
+   * @param {Array<number>} flatCoordinates Flat coordinates.
+   * @param {number} offset Offset.
+   * @param {Array<number>} ends Ends.
+   * @param {number} stride Stride.
+   * @private
+   * @return {number} End.
+   */
+  drawRings_(flatCoordinates, offset2, ends, stride) {
+    for (let i = 0, ii = ends.length; i < ii; ++i) {
+      offset2 = this.moveToLineTo_(
+        flatCoordinates,
+        offset2,
+        ends[i],
+        stride,
+        true
+      );
+    }
+    return offset2;
+  }
+  /**
+   * Render a circle geometry into the canvas.  Rendering is immediate and uses
+   * the current fill and stroke styles.
+   *
+   * @param {import("../../geom/Circle.js").default} geometry Circle geometry.
+   * @api
+   */
+  drawCircle(geometry) {
+    if (this.squaredTolerance_) {
+      geometry = /** @type {import("../../geom/Circle.js").default} */
+      geometry.simplifyTransformed(
+        this.squaredTolerance_,
+        this.userTransform_
+      );
+    }
+    if (!intersects$1(this.extent_, geometry.getExtent())) {
+      return;
+    }
+    if (this.fillState_ || this.strokeState_) {
+      if (this.fillState_) {
+        this.setContextFillState_(this.fillState_);
+      }
+      if (this.strokeState_) {
+        this.setContextStrokeState_(this.strokeState_);
+      }
+      const pixelCoordinates = transformGeom2D(
+        geometry,
+        this.transform_,
+        this.pixelCoordinates_
+      );
+      const dx = pixelCoordinates[2] - pixelCoordinates[0];
+      const dy = pixelCoordinates[3] - pixelCoordinates[1];
+      const radius = Math.sqrt(dx * dx + dy * dy);
+      const context = this.context_;
+      context.beginPath();
+      context.arc(
+        pixelCoordinates[0],
+        pixelCoordinates[1],
+        radius,
+        0,
+        2 * Math.PI
+      );
+      if (this.fillState_) {
+        context.fill();
+      }
+      if (this.strokeState_) {
+        context.stroke();
+      }
+    }
+    if (this.text_ !== "") {
+      this.drawText_(geometry.getCenter(), 0, 2, 2);
+    }
+  }
+  /**
+   * Set the rendering style.  Note that since this is an immediate rendering API,
+   * any `zIndex` on the provided style will be ignored.
+   *
+   * @param {import("../../style/Style.js").default} style The rendering style.
+   * @api
+   */
+  setStyle(style) {
+    this.setFillStrokeStyle(style.getFill(), style.getStroke());
+    this.setImageStyle(style.getImage());
+    this.setTextStyle(style.getText());
+  }
+  /**
+   * @param {import("../../transform.js").Transform} transform Transform.
+   */
+  setTransform(transform2) {
+    this.transform_ = transform2;
+  }
+  /**
+   * Render a geometry into the canvas.  Call
+   * {@link module:ol/render/canvas/Immediate~CanvasImmediateRenderer#setStyle renderer.setStyle()} first to set the rendering style.
+   *
+   * @param {import("../../geom/Geometry.js").default|import("../Feature.js").default} geometry The geometry to render.
+   * @api
+   */
+  drawGeometry(geometry) {
+    const type = geometry.getType();
+    switch (type) {
+      case "Point":
+        this.drawPoint(
+          /** @type {import("../../geom/Point.js").default} */
+          geometry
+        );
+        break;
+      case "LineString":
+        this.drawLineString(
+          /** @type {import("../../geom/LineString.js").default} */
+          geometry
+        );
+        break;
+      case "Polygon":
+        this.drawPolygon(
+          /** @type {import("../../geom/Polygon.js").default} */
+          geometry
+        );
+        break;
+      case "MultiPoint":
+        this.drawMultiPoint(
+          /** @type {import("../../geom/MultiPoint.js").default} */
+          geometry
+        );
+        break;
+      case "MultiLineString":
+        this.drawMultiLineString(
+          /** @type {import("../../geom/MultiLineString.js").default} */
+          geometry
+        );
+        break;
+      case "MultiPolygon":
+        this.drawMultiPolygon(
+          /** @type {import("../../geom/MultiPolygon.js").default} */
+          geometry
+        );
+        break;
+      case "GeometryCollection":
+        this.drawGeometryCollection(
+          /** @type {import("../../geom/GeometryCollection.js").default} */
+          geometry
+        );
+        break;
+      case "Circle":
+        this.drawCircle(
+          /** @type {import("../../geom/Circle.js").default} */
+          geometry
+        );
+        break;
+    }
+  }
+  /**
+   * Render a feature into the canvas.  Note that any `zIndex` on the provided
+   * style will be ignored - features are rendered immediately in the order that
+   * this method is called.  If you need `zIndex` support, you should be using an
+   * {@link module:ol/layer/Vector~VectorLayer} instead.
+   *
+   * @param {import("../../Feature.js").default} feature Feature.
+   * @param {import("../../style/Style.js").default} style Style.
+   * @api
+   */
+  drawFeature(feature, style) {
+    const geometry = style.getGeometryFunction()(feature);
+    if (!geometry) {
+      return;
+    }
+    this.setStyle(style);
+    this.drawGeometry(geometry);
+  }
+  /**
+   * Render a GeometryCollection to the canvas.  Rendering is immediate and
+   * uses the current styles appropriate for each geometry in the collection.
+   *
+   * @param {import("../../geom/GeometryCollection.js").default} geometry Geometry collection.
+   */
+  drawGeometryCollection(geometry) {
+    const geometries = geometry.getGeometriesArray();
+    for (let i = 0, ii = geometries.length; i < ii; ++i) {
+      this.drawGeometry(geometries[i]);
+    }
+  }
+  /**
+   * Render a Point geometry into the canvas.  Rendering is immediate and uses
+   * the current style.
+   *
+   * @param {import("../../geom/Point.js").default|import("../Feature.js").default} geometry Point geometry.
+   */
+  drawPoint(geometry) {
+    if (this.squaredTolerance_) {
+      geometry = /** @type {import("../../geom/Point.js").default} */
+      geometry.simplifyTransformed(
+        this.squaredTolerance_,
+        this.userTransform_
+      );
+    }
+    const flatCoordinates = geometry.getFlatCoordinates();
+    const stride = geometry.getStride();
+    if (this.image_) {
+      this.drawImages_(flatCoordinates, 0, flatCoordinates.length, stride);
+    }
+    if (this.text_ !== "") {
+      this.drawText_(flatCoordinates, 0, flatCoordinates.length, stride);
+    }
+  }
+  /**
+   * Render a MultiPoint geometry  into the canvas.  Rendering is immediate and
+   * uses the current style.
+   *
+   * @param {import("../../geom/MultiPoint.js").default|import("../Feature.js").default} geometry MultiPoint geometry.
+   */
+  drawMultiPoint(geometry) {
+    if (this.squaredTolerance_) {
+      geometry = /** @type {import("../../geom/MultiPoint.js").default} */
+      geometry.simplifyTransformed(
+        this.squaredTolerance_,
+        this.userTransform_
+      );
+    }
+    const flatCoordinates = geometry.getFlatCoordinates();
+    const stride = geometry.getStride();
+    if (this.image_) {
+      this.drawImages_(flatCoordinates, 0, flatCoordinates.length, stride);
+    }
+    if (this.text_ !== "") {
+      this.drawText_(flatCoordinates, 0, flatCoordinates.length, stride);
+    }
+  }
+  /**
+   * Render a LineString into the canvas.  Rendering is immediate and uses
+   * the current style.
+   *
+   * @param {import("../../geom/LineString.js").default|import("../Feature.js").default} geometry LineString geometry.
+   */
+  drawLineString(geometry) {
+    if (this.squaredTolerance_) {
+      geometry = /** @type {import("../../geom/LineString.js").default} */
+      geometry.simplifyTransformed(
+        this.squaredTolerance_,
+        this.userTransform_
+      );
+    }
+    if (!intersects$1(this.extent_, geometry.getExtent())) {
+      return;
+    }
+    if (this.strokeState_) {
+      this.setContextStrokeState_(this.strokeState_);
+      const context = this.context_;
+      const flatCoordinates = geometry.getFlatCoordinates();
+      context.beginPath();
+      this.moveToLineTo_(
+        flatCoordinates,
+        0,
+        flatCoordinates.length,
+        geometry.getStride(),
+        false
+      );
+      context.stroke();
+    }
+    if (this.text_ !== "") {
+      const flatMidpoint = geometry.getFlatMidpoint();
+      this.drawText_(flatMidpoint, 0, 2, 2);
+    }
+  }
+  /**
+   * Render a MultiLineString geometry into the canvas.  Rendering is immediate
+   * and uses the current style.
+   *
+   * @param {import("../../geom/MultiLineString.js").default|import("../Feature.js").default} geometry MultiLineString geometry.
+   */
+  drawMultiLineString(geometry) {
+    if (this.squaredTolerance_) {
+      geometry = /** @type {import("../../geom/MultiLineString.js").default} */
+      geometry.simplifyTransformed(
+        this.squaredTolerance_,
+        this.userTransform_
+      );
+    }
+    const geometryExtent = geometry.getExtent();
+    if (!intersects$1(this.extent_, geometryExtent)) {
+      return;
+    }
+    if (this.strokeState_) {
+      this.setContextStrokeState_(this.strokeState_);
+      const context = this.context_;
+      const flatCoordinates = geometry.getFlatCoordinates();
+      let offset2 = 0;
+      const ends = (
+        /** @type {Array<number>} */
+        geometry.getEnds()
+      );
+      const stride = geometry.getStride();
+      context.beginPath();
+      for (let i = 0, ii = ends.length; i < ii; ++i) {
+        offset2 = this.moveToLineTo_(
+          flatCoordinates,
+          offset2,
+          ends[i],
+          stride,
+          false
+        );
+      }
+      context.stroke();
+    }
+    if (this.text_ !== "") {
+      const flatMidpoints = geometry.getFlatMidpoints();
+      this.drawText_(flatMidpoints, 0, flatMidpoints.length, 2);
+    }
+  }
+  /**
+   * Render a Polygon geometry into the canvas.  Rendering is immediate and uses
+   * the current style.
+   *
+   * @param {import("../../geom/Polygon.js").default|import("../Feature.js").default} geometry Polygon geometry.
+   */
+  drawPolygon(geometry) {
+    if (this.squaredTolerance_) {
+      geometry = /** @type {import("../../geom/Polygon.js").default} */
+      geometry.simplifyTransformed(
+        this.squaredTolerance_,
+        this.userTransform_
+      );
+    }
+    if (!intersects$1(this.extent_, geometry.getExtent())) {
+      return;
+    }
+    if (this.strokeState_ || this.fillState_) {
+      if (this.fillState_) {
+        this.setContextFillState_(this.fillState_);
+      }
+      if (this.strokeState_) {
+        this.setContextStrokeState_(this.strokeState_);
+      }
+      const context = this.context_;
+      context.beginPath();
+      this.drawRings_(
+        geometry.getOrientedFlatCoordinates(),
+        0,
+        /** @type {Array<number>} */
+        geometry.getEnds(),
+        geometry.getStride()
+      );
+      if (this.fillState_) {
+        context.fill();
+      }
+      if (this.strokeState_) {
+        context.stroke();
+      }
+    }
+    if (this.text_ !== "") {
+      const flatInteriorPoint = geometry.getFlatInteriorPoint();
+      this.drawText_(flatInteriorPoint, 0, 2, 2);
+    }
+  }
+  /**
+   * Render MultiPolygon geometry into the canvas.  Rendering is immediate and
+   * uses the current style.
+   * @param {import("../../geom/MultiPolygon.js").default} geometry MultiPolygon geometry.
+   */
+  drawMultiPolygon(geometry) {
+    if (this.squaredTolerance_) {
+      geometry = /** @type {import("../../geom/MultiPolygon.js").default} */
+      geometry.simplifyTransformed(
+        this.squaredTolerance_,
+        this.userTransform_
+      );
+    }
+    if (!intersects$1(this.extent_, geometry.getExtent())) {
+      return;
+    }
+    if (this.strokeState_ || this.fillState_) {
+      if (this.fillState_) {
+        this.setContextFillState_(this.fillState_);
+      }
+      if (this.strokeState_) {
+        this.setContextStrokeState_(this.strokeState_);
+      }
+      const context = this.context_;
+      const flatCoordinates = geometry.getOrientedFlatCoordinates();
+      let offset2 = 0;
+      const endss = geometry.getEndss();
+      const stride = geometry.getStride();
+      context.beginPath();
+      for (let i = 0, ii = endss.length; i < ii; ++i) {
+        const ends = endss[i];
+        offset2 = this.drawRings_(flatCoordinates, offset2, ends, stride);
+      }
+      if (this.fillState_) {
+        context.fill();
+      }
+      if (this.strokeState_) {
+        context.stroke();
+      }
+    }
+    if (this.text_ !== "") {
+      const flatInteriorPoints = geometry.getFlatInteriorPoints();
+      this.drawText_(flatInteriorPoints, 0, flatInteriorPoints.length, 2);
+    }
+  }
+  /**
+   * @param {import("../canvas.js").FillState} fillState Fill state.
+   * @private
+   */
+  setContextFillState_(fillState) {
+    const context = this.context_;
+    const contextFillState = this.contextFillState_;
+    if (!contextFillState) {
+      context.fillStyle = fillState.fillStyle;
+      this.contextFillState_ = {
+        fillStyle: fillState.fillStyle
+      };
+    } else {
+      if (contextFillState.fillStyle != fillState.fillStyle) {
+        contextFillState.fillStyle = fillState.fillStyle;
+        context.fillStyle = fillState.fillStyle;
+      }
+    }
+  }
+  /**
+   * @param {import("../canvas.js").StrokeState} strokeState Stroke state.
+   * @private
+   */
+  setContextStrokeState_(strokeState) {
+    const context = this.context_;
+    const contextStrokeState = this.contextStrokeState_;
+    if (!contextStrokeState) {
+      context.lineCap = strokeState.lineCap;
+      context.setLineDash(strokeState.lineDash);
+      context.lineDashOffset = strokeState.lineDashOffset;
+      context.lineJoin = strokeState.lineJoin;
+      context.lineWidth = strokeState.lineWidth;
+      context.miterLimit = strokeState.miterLimit;
+      context.strokeStyle = strokeState.strokeStyle;
+      this.contextStrokeState_ = {
+        lineCap: strokeState.lineCap,
+        lineDash: strokeState.lineDash,
+        lineDashOffset: strokeState.lineDashOffset,
+        lineJoin: strokeState.lineJoin,
+        lineWidth: strokeState.lineWidth,
+        miterLimit: strokeState.miterLimit,
+        strokeStyle: strokeState.strokeStyle
+      };
+    } else {
+      if (contextStrokeState.lineCap != strokeState.lineCap) {
+        contextStrokeState.lineCap = strokeState.lineCap;
+        context.lineCap = strokeState.lineCap;
+      }
+      if (!equals(contextStrokeState.lineDash, strokeState.lineDash)) {
+        context.setLineDash(
+          contextStrokeState.lineDash = strokeState.lineDash
+        );
+      }
+      if (contextStrokeState.lineDashOffset != strokeState.lineDashOffset) {
+        contextStrokeState.lineDashOffset = strokeState.lineDashOffset;
+        context.lineDashOffset = strokeState.lineDashOffset;
+      }
+      if (contextStrokeState.lineJoin != strokeState.lineJoin) {
+        contextStrokeState.lineJoin = strokeState.lineJoin;
+        context.lineJoin = strokeState.lineJoin;
+      }
+      if (contextStrokeState.lineWidth != strokeState.lineWidth) {
+        contextStrokeState.lineWidth = strokeState.lineWidth;
+        context.lineWidth = strokeState.lineWidth;
+      }
+      if (contextStrokeState.miterLimit != strokeState.miterLimit) {
+        contextStrokeState.miterLimit = strokeState.miterLimit;
+        context.miterLimit = strokeState.miterLimit;
+      }
+      if (contextStrokeState.strokeStyle != strokeState.strokeStyle) {
+        contextStrokeState.strokeStyle = strokeState.strokeStyle;
+        context.strokeStyle = strokeState.strokeStyle;
+      }
+    }
+  }
+  /**
+   * @param {import("../canvas.js").TextState} textState Text state.
+   * @private
+   */
+  setContextTextState_(textState) {
+    const context = this.context_;
+    const contextTextState = this.contextTextState_;
+    const textAlign = textState.textAlign ? textState.textAlign : defaultTextAlign;
+    if (!contextTextState) {
+      context.font = textState.font;
+      context.textAlign = textAlign;
+      context.textBaseline = textState.textBaseline;
+      this.contextTextState_ = {
+        font: textState.font,
+        textAlign,
+        textBaseline: textState.textBaseline
+      };
+    } else {
+      if (contextTextState.font != textState.font) {
+        contextTextState.font = textState.font;
+        context.font = textState.font;
+      }
+      if (contextTextState.textAlign != textAlign) {
+        contextTextState.textAlign = textAlign;
+        context.textAlign = textAlign;
+      }
+      if (contextTextState.textBaseline != textState.textBaseline) {
+        contextTextState.textBaseline = textState.textBaseline;
+        context.textBaseline = textState.textBaseline;
+      }
+    }
+  }
+  /**
+   * Set the fill and stroke style for subsequent draw operations.  To clear
+   * either fill or stroke styles, pass null for the appropriate parameter.
+   *
+   * @param {import("../../style/Fill.js").default} fillStyle Fill style.
+   * @param {import("../../style/Stroke.js").default} strokeStyle Stroke style.
+   */
+  setFillStrokeStyle(fillStyle, strokeStyle) {
+    if (!fillStyle) {
+      this.fillState_ = null;
+    } else {
+      const fillStyleColor = fillStyle.getColor();
+      this.fillState_ = {
+        fillStyle: asColorLike(
+          fillStyleColor ? fillStyleColor : defaultFillStyle
+        )
+      };
+    }
+    if (!strokeStyle) {
+      this.strokeState_ = null;
+    } else {
+      const strokeStyleColor = strokeStyle.getColor();
+      const strokeStyleLineCap = strokeStyle.getLineCap();
+      const strokeStyleLineDash = strokeStyle.getLineDash();
+      const strokeStyleLineDashOffset = strokeStyle.getLineDashOffset();
+      const strokeStyleLineJoin = strokeStyle.getLineJoin();
+      const strokeStyleWidth = strokeStyle.getWidth();
+      const strokeStyleMiterLimit = strokeStyle.getMiterLimit();
+      const lineDash = strokeStyleLineDash ? strokeStyleLineDash : defaultLineDash;
+      this.strokeState_ = {
+        lineCap: strokeStyleLineCap !== void 0 ? strokeStyleLineCap : defaultLineCap,
+        lineDash: this.pixelRatio_ === 1 ? lineDash : lineDash.map((n) => n * this.pixelRatio_),
+        lineDashOffset: (strokeStyleLineDashOffset ? strokeStyleLineDashOffset : defaultLineDashOffset) * this.pixelRatio_,
+        lineJoin: strokeStyleLineJoin !== void 0 ? strokeStyleLineJoin : defaultLineJoin,
+        lineWidth: (strokeStyleWidth !== void 0 ? strokeStyleWidth : defaultLineWidth) * this.pixelRatio_,
+        miterLimit: strokeStyleMiterLimit !== void 0 ? strokeStyleMiterLimit : defaultMiterLimit,
+        strokeStyle: asColorLike(
+          strokeStyleColor ? strokeStyleColor : defaultStrokeStyle
+        )
+      };
+    }
+  }
+  /**
+   * Set the image style for subsequent draw operations.  Pass null to remove
+   * the image style.
+   *
+   * @param {import("../../style/Image.js").default} imageStyle Image style.
+   */
+  setImageStyle(imageStyle) {
+    let imageSize;
+    if (!imageStyle || !(imageSize = imageStyle.getSize())) {
+      this.image_ = null;
+      return;
+    }
+    const imagePixelRatio = imageStyle.getPixelRatio(this.pixelRatio_);
+    const imageAnchor = imageStyle.getAnchor();
+    const imageOrigin = imageStyle.getOrigin();
+    this.image_ = imageStyle.getImage(this.pixelRatio_);
+    this.imageAnchorX_ = imageAnchor[0] * imagePixelRatio;
+    this.imageAnchorY_ = imageAnchor[1] * imagePixelRatio;
+    this.imageHeight_ = imageSize[1] * imagePixelRatio;
+    this.imageOpacity_ = imageStyle.getOpacity();
+    this.imageOriginX_ = imageOrigin[0];
+    this.imageOriginY_ = imageOrigin[1];
+    this.imageRotateWithView_ = imageStyle.getRotateWithView();
+    this.imageRotation_ = imageStyle.getRotation();
+    const imageScale = imageStyle.getScaleArray();
+    this.imageScale_ = [
+      imageScale[0] * this.pixelRatio_ / imagePixelRatio,
+      imageScale[1] * this.pixelRatio_ / imagePixelRatio
+    ];
+    this.imageWidth_ = imageSize[0] * imagePixelRatio;
+  }
+  /**
+   * Set the text style for subsequent draw operations.  Pass null to
+   * remove the text style.
+   *
+   * @param {import("../../style/Text.js").default} textStyle Text style.
+   */
+  setTextStyle(textStyle) {
+    if (!textStyle) {
+      this.text_ = "";
+    } else {
+      const textFillStyle = textStyle.getFill();
+      if (!textFillStyle) {
+        this.textFillState_ = null;
+      } else {
+        const textFillStyleColor = textFillStyle.getColor();
+        this.textFillState_ = {
+          fillStyle: asColorLike(
+            textFillStyleColor ? textFillStyleColor : defaultFillStyle
+          )
+        };
+      }
+      const textStrokeStyle = textStyle.getStroke();
+      if (!textStrokeStyle) {
+        this.textStrokeState_ = null;
+      } else {
+        const textStrokeStyleColor = textStrokeStyle.getColor();
+        const textStrokeStyleLineCap = textStrokeStyle.getLineCap();
+        const textStrokeStyleLineDash = textStrokeStyle.getLineDash();
+        const textStrokeStyleLineDashOffset = textStrokeStyle.getLineDashOffset();
+        const textStrokeStyleLineJoin = textStrokeStyle.getLineJoin();
+        const textStrokeStyleWidth = textStrokeStyle.getWidth();
+        const textStrokeStyleMiterLimit = textStrokeStyle.getMiterLimit();
+        this.textStrokeState_ = {
+          lineCap: textStrokeStyleLineCap !== void 0 ? textStrokeStyleLineCap : defaultLineCap,
+          lineDash: textStrokeStyleLineDash ? textStrokeStyleLineDash : defaultLineDash,
+          lineDashOffset: textStrokeStyleLineDashOffset ? textStrokeStyleLineDashOffset : defaultLineDashOffset,
+          lineJoin: textStrokeStyleLineJoin !== void 0 ? textStrokeStyleLineJoin : defaultLineJoin,
+          lineWidth: textStrokeStyleWidth !== void 0 ? textStrokeStyleWidth : defaultLineWidth,
+          miterLimit: textStrokeStyleMiterLimit !== void 0 ? textStrokeStyleMiterLimit : defaultMiterLimit,
+          strokeStyle: asColorLike(
+            textStrokeStyleColor ? textStrokeStyleColor : defaultStrokeStyle
+          )
+        };
+      }
+      const textFont = textStyle.getFont();
+      const textOffsetX = textStyle.getOffsetX();
+      const textOffsetY = textStyle.getOffsetY();
+      const textRotateWithView = textStyle.getRotateWithView();
+      const textRotation = textStyle.getRotation();
+      const textScale = textStyle.getScaleArray();
+      const textText = textStyle.getText();
+      const textTextAlign = textStyle.getTextAlign();
+      const textTextBaseline = textStyle.getTextBaseline();
+      this.textState_ = {
+        font: textFont !== void 0 ? textFont : defaultFont,
+        textAlign: textTextAlign !== void 0 ? textTextAlign : defaultTextAlign,
+        textBaseline: textTextBaseline !== void 0 ? textTextBaseline : defaultTextBaseline
+      };
+      this.text_ = textText !== void 0 ? Array.isArray(textText) ? textText.reduce((acc, t, i) => acc += i % 2 ? " " : t, "") : textText : "";
+      this.textOffsetX_ = textOffsetX !== void 0 ? this.pixelRatio_ * textOffsetX : 0;
+      this.textOffsetY_ = textOffsetY !== void 0 ? this.pixelRatio_ * textOffsetY : 0;
+      this.textRotateWithView_ = textRotateWithView !== void 0 ? textRotateWithView : false;
+      this.textRotation_ = textRotation !== void 0 ? textRotation : 0;
+      this.textScale_ = [
+        this.pixelRatio_ * textScale[0],
+        this.pixelRatio_ * textScale[1]
+      ];
+    }
+  }
+}
+const SIMPLIFY_TOLERANCE = 0.5;
+const GEOMETRY_RENDERERS = {
+  "Point": renderPointGeometry,
+  "LineString": renderLineStringGeometry,
+  "Polygon": renderPolygonGeometry,
+  "MultiPoint": renderMultiPointGeometry,
+  "MultiLineString": renderMultiLineStringGeometry,
+  "MultiPolygon": renderMultiPolygonGeometry,
+  "GeometryCollection": renderGeometryCollectionGeometry,
+  "Circle": renderCircleGeometry
+};
+function defaultOrder(feature1, feature2) {
+  return parseInt(getUid(feature1), 10) - parseInt(getUid(feature2), 10);
+}
+function getSquaredTolerance(resolution, pixelRatio) {
+  const tolerance = getTolerance(resolution, pixelRatio);
+  return tolerance * tolerance;
+}
+function getTolerance(resolution, pixelRatio) {
+  return SIMPLIFY_TOLERANCE * resolution / pixelRatio;
+}
+function renderCircleGeometry(builderGroup, geometry, style, feature, index) {
+  const fillStyle = style.getFill();
+  const strokeStyle = style.getStroke();
+  if (fillStyle || strokeStyle) {
+    const circleReplay = builderGroup.getBuilder(style.getZIndex(), "Circle");
+    circleReplay.setFillStrokeStyle(fillStyle, strokeStyle);
+    circleReplay.drawCircle(geometry, feature, index);
+  }
+  const textStyle = style.getText();
+  if (textStyle && textStyle.getText()) {
+    const textReplay = builderGroup.getBuilder(style.getZIndex(), "Text");
+    textReplay.setTextStyle(textStyle);
+    textReplay.drawText(geometry, feature);
+  }
+}
+function renderFeature(replayGroup, feature, style, squaredTolerance, listener, transform2, declutter, index) {
+  const loadingPromises = [];
+  const imageStyle = style.getImage();
+  if (imageStyle) {
+    let loading2 = true;
+    const imageState = imageStyle.getImageState();
+    if (imageState == ImageState.LOADED || imageState == ImageState.ERROR) {
+      loading2 = false;
+    } else {
+      if (imageState == ImageState.IDLE) {
+        imageStyle.load();
+      }
+    }
+    if (loading2) {
+      loadingPromises.push(imageStyle.ready());
+    }
+  }
+  const fillStyle = style.getFill();
+  if (fillStyle && fillStyle.loading()) {
+    loadingPromises.push(fillStyle.ready());
+  }
+  const loading = loadingPromises.length > 0;
+  if (loading) {
+    Promise.all(loadingPromises).then(() => listener(null));
+  }
+  renderFeatureInternal(
+    replayGroup,
+    feature,
+    style,
+    squaredTolerance,
+    transform2,
+    declutter,
+    index
+  );
+  return loading;
+}
+function renderFeatureInternal(replayGroup, feature, style, squaredTolerance, transform2, declutter, index) {
+  const geometry = style.getGeometryFunction()(feature);
+  if (!geometry) {
+    return;
+  }
+  const simplifiedGeometry = geometry.simplifyTransformed(
+    squaredTolerance,
+    transform2
+  );
+  const renderer = style.getRenderer();
+  if (renderer) {
+    renderGeometry(replayGroup, simplifiedGeometry, style, feature, index);
+  } else {
+    const geometryRenderer = GEOMETRY_RENDERERS[simplifiedGeometry.getType()];
+    geometryRenderer(
+      replayGroup,
+      simplifiedGeometry,
+      style,
+      feature,
+      index,
+      declutter
+    );
+  }
+}
+function renderGeometry(replayGroup, geometry, style, feature, index) {
+  if (geometry.getType() == "GeometryCollection") {
+    const geometries = (
+      /** @type {import("../geom/GeometryCollection.js").default} */
+      geometry.getGeometries()
+    );
+    for (let i = 0, ii = geometries.length; i < ii; ++i) {
+      renderGeometry(replayGroup, geometries[i], style, feature, index);
+    }
+    return;
+  }
+  const replay = replayGroup.getBuilder(style.getZIndex(), "Default");
+  replay.drawCustom(
+    /** @type {import("../geom/SimpleGeometry.js").default} */
+    geometry,
+    feature,
+    style.getRenderer(),
+    style.getHitDetectionRenderer(),
+    index
+  );
+}
+function renderGeometryCollectionGeometry(replayGroup, geometry, style, feature, declutterBuilderGroup, index) {
+  const geometries = geometry.getGeometriesArray();
+  let i, ii;
+  for (i = 0, ii = geometries.length; i < ii; ++i) {
+    const geometryRenderer = GEOMETRY_RENDERERS[geometries[i].getType()];
+    geometryRenderer(
+      replayGroup,
+      geometries[i],
+      style,
+      feature,
+      declutterBuilderGroup,
+      index
+    );
+  }
+}
+function renderLineStringGeometry(builderGroup, geometry, style, feature, index) {
+  const strokeStyle = style.getStroke();
+  if (strokeStyle) {
+    const lineStringReplay = builderGroup.getBuilder(
+      style.getZIndex(),
+      "LineString"
+    );
+    lineStringReplay.setFillStrokeStyle(null, strokeStyle);
+    lineStringReplay.drawLineString(geometry, feature, index);
+  }
+  const textStyle = style.getText();
+  if (textStyle && textStyle.getText()) {
+    const textReplay = builderGroup.getBuilder(style.getZIndex(), "Text");
+    textReplay.setTextStyle(textStyle);
+    textReplay.drawText(geometry, feature, index);
+  }
+}
+function renderMultiLineStringGeometry(builderGroup, geometry, style, feature, index) {
+  const strokeStyle = style.getStroke();
+  if (strokeStyle) {
+    const lineStringReplay = builderGroup.getBuilder(
+      style.getZIndex(),
+      "LineString"
+    );
+    lineStringReplay.setFillStrokeStyle(null, strokeStyle);
+    lineStringReplay.drawMultiLineString(geometry, feature, index);
+  }
+  const textStyle = style.getText();
+  if (textStyle && textStyle.getText()) {
+    const textReplay = builderGroup.getBuilder(style.getZIndex(), "Text");
+    textReplay.setTextStyle(textStyle);
+    textReplay.drawText(geometry, feature, index);
+  }
+}
+function renderMultiPolygonGeometry(builderGroup, geometry, style, feature, index) {
+  const fillStyle = style.getFill();
+  const strokeStyle = style.getStroke();
+  if (strokeStyle || fillStyle) {
+    const polygonReplay = builderGroup.getBuilder(style.getZIndex(), "Polygon");
+    polygonReplay.setFillStrokeStyle(fillStyle, strokeStyle);
+    polygonReplay.drawMultiPolygon(geometry, feature, index);
+  }
+  const textStyle = style.getText();
+  if (textStyle && textStyle.getText()) {
+    const textReplay = builderGroup.getBuilder(style.getZIndex(), "Text");
+    textReplay.setTextStyle(textStyle);
+    textReplay.drawText(geometry, feature, index);
+  }
+}
+function renderPointGeometry(builderGroup, geometry, style, feature, index, declutter) {
+  const imageStyle = style.getImage();
+  const textStyle = style.getText();
+  const hasText = textStyle && textStyle.getText();
+  const declutterImageWithText = declutter && imageStyle && hasText ? {} : void 0;
+  if (imageStyle) {
+    if (imageStyle.getImageState() != ImageState.LOADED) {
+      return;
+    }
+    const imageReplay = builderGroup.getBuilder(style.getZIndex(), "Image");
+    imageReplay.setImageStyle(imageStyle, declutterImageWithText);
+    imageReplay.drawPoint(geometry, feature, index);
+  }
+  if (hasText) {
+    const textReplay = builderGroup.getBuilder(style.getZIndex(), "Text");
+    textReplay.setTextStyle(textStyle, declutterImageWithText);
+    textReplay.drawText(geometry, feature, index);
+  }
+}
+function renderMultiPointGeometry(builderGroup, geometry, style, feature, index, declutter) {
+  const imageStyle = style.getImage();
+  const hasImage = imageStyle && imageStyle.getOpacity() !== 0;
+  const textStyle = style.getText();
+  const hasText = textStyle && textStyle.getText();
+  const declutterImageWithText = declutter && hasImage && hasText ? {} : void 0;
+  if (hasImage) {
+    if (imageStyle.getImageState() != ImageState.LOADED) {
+      return;
+    }
+    const imageReplay = builderGroup.getBuilder(style.getZIndex(), "Image");
+    imageReplay.setImageStyle(imageStyle, declutterImageWithText);
+    imageReplay.drawMultiPoint(geometry, feature, index);
+  }
+  if (hasText) {
+    const textReplay = builderGroup.getBuilder(style.getZIndex(), "Text");
+    textReplay.setTextStyle(textStyle, declutterImageWithText);
+    textReplay.drawText(geometry, feature, index);
+  }
+}
+function renderPolygonGeometry(builderGroup, geometry, style, feature, index) {
+  const fillStyle = style.getFill();
+  const strokeStyle = style.getStroke();
+  if (fillStyle || strokeStyle) {
+    const polygonReplay = builderGroup.getBuilder(style.getZIndex(), "Polygon");
+    polygonReplay.setFillStrokeStyle(fillStyle, strokeStyle);
+    polygonReplay.drawPolygon(geometry, feature, index);
+  }
+  const textStyle = style.getText();
+  if (textStyle && textStyle.getText()) {
+    const textReplay = builderGroup.getBuilder(style.getZIndex(), "Text");
+    textReplay.setTextStyle(textStyle);
+    textReplay.drawText(geometry, feature, index);
   }
 }
 function getRenderPixel(event, pixel) {
@@ -26529,12 +28197,5871 @@ class Link extends Interaction {
   }
 }
 const imgUrl = "/assets/osm_logo--g4zjBAe.png";
+const events = [
+  "fullscreenchange",
+  "webkitfullscreenchange",
+  "MSFullscreenChange"
+];
+const FullScreenEventType = {
+  /**
+   * Triggered after the map entered fullscreen.
+   * @event FullScreenEventType#enterfullscreen
+   * @api
+   */
+  ENTERFULLSCREEN: "enterfullscreen",
+  /**
+   * Triggered after the map leave fullscreen.
+   * @event FullScreenEventType#leavefullscreen
+   * @api
+   */
+  LEAVEFULLSCREEN: "leavefullscreen"
+};
+class FullScreen extends Control {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    options = options ? options : {};
+    super({
+      element: document.createElement("div"),
+      target: options.target
+    });
+    this.on;
+    this.once;
+    this.un;
+    this.keys_ = options.keys !== void 0 ? options.keys : false;
+    this.source_ = options.source;
+    this.isInFullscreen_ = false;
+    this.boundHandleMapTargetChange_ = this.handleMapTargetChange_.bind(this);
+    this.cssClassName_ = options.className !== void 0 ? options.className : "ol-full-screen";
+    this.documentListeners_ = [];
+    this.activeClassName_ = options.activeClassName !== void 0 ? options.activeClassName.split(" ") : [this.cssClassName_ + "-true"];
+    this.inactiveClassName_ = options.inactiveClassName !== void 0 ? options.inactiveClassName.split(" ") : [this.cssClassName_ + "-false"];
+    const label = options.label !== void 0 ? options.label : "⤢";
+    this.labelNode_ = typeof label === "string" ? document.createTextNode(label) : label;
+    const labelActive = options.labelActive !== void 0 ? options.labelActive : "×";
+    this.labelActiveNode_ = typeof labelActive === "string" ? document.createTextNode(labelActive) : labelActive;
+    const tipLabel = options.tipLabel ? options.tipLabel : "Toggle full-screen";
+    this.button_ = document.createElement("button");
+    this.button_.title = tipLabel;
+    this.button_.setAttribute("type", "button");
+    this.button_.appendChild(this.labelNode_);
+    this.button_.addEventListener(
+      EventType.CLICK,
+      this.handleClick_.bind(this),
+      false
+    );
+    this.setClassName_(this.button_, this.isInFullscreen_);
+    this.element.className = `${this.cssClassName_} ${CLASS_UNSELECTABLE} ${CLASS_CONTROL}`;
+    this.element.appendChild(this.button_);
+  }
+  /**
+   * @param {MouseEvent} event The event to handle
+   * @private
+   */
+  handleClick_(event) {
+    event.preventDefault();
+    this.handleFullScreen_();
+  }
+  /**
+   * @private
+   */
+  handleFullScreen_() {
+    const map2 = this.getMap();
+    if (!map2) {
+      return;
+    }
+    const doc = map2.getOwnerDocument();
+    if (!isFullScreenSupported(doc)) {
+      return;
+    }
+    if (isFullScreen(doc)) {
+      exitFullScreen(doc);
+    } else {
+      let element;
+      if (this.source_) {
+        element = typeof this.source_ === "string" ? doc.getElementById(this.source_) : this.source_;
+      } else {
+        element = map2.getTargetElement();
+      }
+      if (this.keys_) {
+        requestFullScreenWithKeys(element);
+      } else {
+        requestFullScreen(element);
+      }
+    }
+  }
+  /**
+   * @private
+   */
+  handleFullScreenChange_() {
+    const map2 = this.getMap();
+    if (!map2) {
+      return;
+    }
+    const wasInFullscreen = this.isInFullscreen_;
+    this.isInFullscreen_ = isFullScreen(map2.getOwnerDocument());
+    if (wasInFullscreen !== this.isInFullscreen_) {
+      this.setClassName_(this.button_, this.isInFullscreen_);
+      if (this.isInFullscreen_) {
+        replaceNode(this.labelActiveNode_, this.labelNode_);
+        this.dispatchEvent(FullScreenEventType.ENTERFULLSCREEN);
+      } else {
+        replaceNode(this.labelNode_, this.labelActiveNode_);
+        this.dispatchEvent(FullScreenEventType.LEAVEFULLSCREEN);
+      }
+      map2.updateSize();
+    }
+  }
+  /**
+   * @param {HTMLElement} element Target element
+   * @param {boolean} fullscreen True if fullscreen class name should be active
+   * @private
+   */
+  setClassName_(element, fullscreen) {
+    if (fullscreen) {
+      element.classList.remove(...this.inactiveClassName_);
+      element.classList.add(...this.activeClassName_);
+    } else {
+      element.classList.remove(...this.activeClassName_);
+      element.classList.add(...this.inactiveClassName_);
+    }
+  }
+  /**
+   * Remove the control from its current map and attach it to the new map.
+   * Pass `null` to just remove the control from the current map.
+   * Subclasses may set up event handlers to get notified about changes to
+   * the map here.
+   * @param {import("../Map.js").default|null} map Map.
+   * @api
+   */
+  setMap(map2) {
+    const oldMap = this.getMap();
+    if (oldMap) {
+      oldMap.removeChangeListener(
+        MapProperty.TARGET,
+        this.boundHandleMapTargetChange_
+      );
+    }
+    super.setMap(map2);
+    this.handleMapTargetChange_();
+    if (map2) {
+      map2.addChangeListener(
+        MapProperty.TARGET,
+        this.boundHandleMapTargetChange_
+      );
+    }
+  }
+  /**
+   * @private
+   */
+  handleMapTargetChange_() {
+    const listeners = this.documentListeners_;
+    for (let i = 0, ii = listeners.length; i < ii; ++i) {
+      unlistenByKey(listeners[i]);
+    }
+    listeners.length = 0;
+    const map2 = this.getMap();
+    if (map2) {
+      const doc = map2.getOwnerDocument();
+      if (isFullScreenSupported(doc)) {
+        this.element.classList.remove(CLASS_UNSUPPORTED);
+      } else {
+        this.element.classList.add(CLASS_UNSUPPORTED);
+      }
+      for (let i = 0, ii = events.length; i < ii; ++i) {
+        listeners.push(
+          listen(doc, events[i], this.handleFullScreenChange_, this)
+        );
+      }
+      this.handleFullScreenChange_();
+    }
+  }
+}
+function isFullScreenSupported(doc) {
+  const body = doc.body;
+  return !!(body["webkitRequestFullscreen"] || body.requestFullscreen && doc.fullscreenEnabled);
+}
+function isFullScreen(doc) {
+  return !!(doc["webkitIsFullScreen"] || doc.fullscreenElement);
+}
+function requestFullScreen(element) {
+  if (element.requestFullscreen) {
+    element.requestFullscreen();
+  } else if (element["webkitRequestFullscreen"]) {
+    element["webkitRequestFullscreen"]();
+  }
+}
+function requestFullScreenWithKeys(element) {
+  if (element["webkitRequestFullscreen"]) {
+    element["webkitRequestFullscreen"]();
+  } else {
+    requestFullScreen(element);
+  }
+}
+function exitFullScreen(doc) {
+  if (doc.exitFullscreen) {
+    doc.exitFullscreen();
+  } else if (doc["webkitExitFullscreen"]) {
+    doc["webkitExitFullscreen"]();
+  }
+}
+const Instruction = {
+  BEGIN_GEOMETRY: 0,
+  BEGIN_PATH: 1,
+  CIRCLE: 2,
+  CLOSE_PATH: 3,
+  CUSTOM: 4,
+  DRAW_CHARS: 5,
+  DRAW_IMAGE: 6,
+  END_GEOMETRY: 7,
+  FILL: 8,
+  MOVE_TO_LINE_TO: 9,
+  SET_FILL_STYLE: 10,
+  SET_STROKE_STYLE: 11,
+  STROKE: 12
+};
+const fillInstruction = [Instruction.FILL];
+const strokeInstruction = [Instruction.STROKE];
+const beginPathInstruction = [Instruction.BEGIN_PATH];
+const closePathInstruction = [Instruction.CLOSE_PATH];
+class CanvasBuilder extends VectorContext {
+  /**
+   * @param {number} tolerance Tolerance.
+   * @param {import("../../extent.js").Extent} maxExtent Maximum extent.
+   * @param {number} resolution Resolution.
+   * @param {number} pixelRatio Pixel ratio.
+   */
+  constructor(tolerance, maxExtent, resolution, pixelRatio) {
+    super();
+    this.tolerance = tolerance;
+    this.maxExtent = maxExtent;
+    this.pixelRatio = pixelRatio;
+    this.maxLineWidth = 0;
+    this.resolution = resolution;
+    this.beginGeometryInstruction1_ = null;
+    this.beginGeometryInstruction2_ = null;
+    this.bufferedMaxExtent_ = null;
+    this.instructions = [];
+    this.coordinates = [];
+    this.tmpCoordinate_ = [];
+    this.hitDetectionInstructions = [];
+    this.state = /** @type {import("../canvas.js").FillStrokeState} */
+    {};
+  }
+  /**
+   * @protected
+   * @param {Array<number>} dashArray Dash array.
+   * @return {Array<number>} Dash array with pixel ratio applied
+   */
+  applyPixelRatio(dashArray) {
+    const pixelRatio = this.pixelRatio;
+    return pixelRatio == 1 ? dashArray : dashArray.map(function(dash) {
+      return dash * pixelRatio;
+    });
+  }
+  /**
+   * @param {Array<number>} flatCoordinates Flat coordinates.
+   * @param {number} stride Stride.
+   * @protected
+   * @return {number} My end
+   */
+  appendFlatPointCoordinates(flatCoordinates, stride) {
+    const extent = this.getBufferedMaxExtent();
+    const tmpCoord = this.tmpCoordinate_;
+    const coordinates2 = this.coordinates;
+    let myEnd = coordinates2.length;
+    for (let i = 0, ii = flatCoordinates.length; i < ii; i += stride) {
+      tmpCoord[0] = flatCoordinates[i];
+      tmpCoord[1] = flatCoordinates[i + 1];
+      if (containsCoordinate(extent, tmpCoord)) {
+        coordinates2[myEnd++] = tmpCoord[0];
+        coordinates2[myEnd++] = tmpCoord[1];
+      }
+    }
+    return myEnd;
+  }
+  /**
+   * @param {Array<number>} flatCoordinates Flat coordinates.
+   * @param {number} offset Offset.
+   * @param {number} end End.
+   * @param {number} stride Stride.
+   * @param {boolean} closed Last input coordinate equals first.
+   * @param {boolean} skipFirst Skip first coordinate.
+   * @protected
+   * @return {number} My end.
+   */
+  appendFlatLineCoordinates(flatCoordinates, offset2, end2, stride, closed, skipFirst) {
+    const coordinates2 = this.coordinates;
+    let myEnd = coordinates2.length;
+    const extent = this.getBufferedMaxExtent();
+    if (skipFirst) {
+      offset2 += stride;
+    }
+    let lastXCoord = flatCoordinates[offset2];
+    let lastYCoord = flatCoordinates[offset2 + 1];
+    const nextCoord = this.tmpCoordinate_;
+    let skipped = true;
+    let i, lastRel, nextRel;
+    for (i = offset2 + stride; i < end2; i += stride) {
+      nextCoord[0] = flatCoordinates[i];
+      nextCoord[1] = flatCoordinates[i + 1];
+      nextRel = coordinateRelationship(extent, nextCoord);
+      if (nextRel !== lastRel) {
+        if (skipped) {
+          coordinates2[myEnd++] = lastXCoord;
+          coordinates2[myEnd++] = lastYCoord;
+          skipped = false;
+        }
+        coordinates2[myEnd++] = nextCoord[0];
+        coordinates2[myEnd++] = nextCoord[1];
+      } else if (nextRel === Relationship.INTERSECTING) {
+        coordinates2[myEnd++] = nextCoord[0];
+        coordinates2[myEnd++] = nextCoord[1];
+        skipped = false;
+      } else {
+        skipped = true;
+      }
+      lastXCoord = nextCoord[0];
+      lastYCoord = nextCoord[1];
+      lastRel = nextRel;
+    }
+    if (closed && skipped || i === offset2 + stride) {
+      coordinates2[myEnd++] = lastXCoord;
+      coordinates2[myEnd++] = lastYCoord;
+    }
+    return myEnd;
+  }
+  /**
+   * @param {Array<number>} flatCoordinates Flat coordinates.
+   * @param {number} offset Offset.
+   * @param {Array<number>} ends Ends.
+   * @param {number} stride Stride.
+   * @param {Array<number>} builderEnds Builder ends.
+   * @return {number} Offset.
+   */
+  drawCustomCoordinates_(flatCoordinates, offset2, ends, stride, builderEnds) {
+    for (let i = 0, ii = ends.length; i < ii; ++i) {
+      const end2 = ends[i];
+      const builderEnd = this.appendFlatLineCoordinates(
+        flatCoordinates,
+        offset2,
+        end2,
+        stride,
+        false,
+        false
+      );
+      builderEnds.push(builderEnd);
+      offset2 = end2;
+    }
+    return offset2;
+  }
+  /**
+   * @param {import("../../geom/SimpleGeometry.js").default} geometry Geometry.
+   * @param {import("../../Feature.js").FeatureLike} feature Feature.
+   * @param {Function} renderer Renderer.
+   * @param {Function} hitDetectionRenderer Renderer.
+   * @param {number} [index] Render order index.
+   */
+  drawCustom(geometry, feature, renderer, hitDetectionRenderer, index) {
+    this.beginGeometry(geometry, feature, index);
+    const type = geometry.getType();
+    const stride = geometry.getStride();
+    const builderBegin = this.coordinates.length;
+    let flatCoordinates, builderEnd, builderEnds, builderEndss;
+    let offset2;
+    switch (type) {
+      case "MultiPolygon":
+        flatCoordinates = /** @type {import("../../geom/MultiPolygon.js").default} */
+        geometry.getOrientedFlatCoordinates();
+        builderEndss = [];
+        const endss = (
+          /** @type {import("../../geom/MultiPolygon.js").default} */
+          geometry.getEndss()
+        );
+        offset2 = 0;
+        for (let i = 0, ii = endss.length; i < ii; ++i) {
+          const myEnds = [];
+          offset2 = this.drawCustomCoordinates_(
+            flatCoordinates,
+            offset2,
+            endss[i],
+            stride,
+            myEnds
+          );
+          builderEndss.push(myEnds);
+        }
+        this.instructions.push([
+          Instruction.CUSTOM,
+          builderBegin,
+          builderEndss,
+          geometry,
+          renderer,
+          inflateMultiCoordinatesArray,
+          index
+        ]);
+        this.hitDetectionInstructions.push([
+          Instruction.CUSTOM,
+          builderBegin,
+          builderEndss,
+          geometry,
+          hitDetectionRenderer || renderer,
+          inflateMultiCoordinatesArray,
+          index
+        ]);
+        break;
+      case "Polygon":
+      case "MultiLineString":
+        builderEnds = [];
+        flatCoordinates = type == "Polygon" ? (
+          /** @type {import("../../geom/Polygon.js").default} */
+          geometry.getOrientedFlatCoordinates()
+        ) : geometry.getFlatCoordinates();
+        offset2 = this.drawCustomCoordinates_(
+          flatCoordinates,
+          0,
+          /** @type {import("../../geom/Polygon.js").default|import("../../geom/MultiLineString.js").default} */
+          geometry.getEnds(),
+          stride,
+          builderEnds
+        );
+        this.instructions.push([
+          Instruction.CUSTOM,
+          builderBegin,
+          builderEnds,
+          geometry,
+          renderer,
+          inflateCoordinatesArray,
+          index
+        ]);
+        this.hitDetectionInstructions.push([
+          Instruction.CUSTOM,
+          builderBegin,
+          builderEnds,
+          geometry,
+          hitDetectionRenderer || renderer,
+          inflateCoordinatesArray,
+          index
+        ]);
+        break;
+      case "LineString":
+      case "Circle":
+        flatCoordinates = geometry.getFlatCoordinates();
+        builderEnd = this.appendFlatLineCoordinates(
+          flatCoordinates,
+          0,
+          flatCoordinates.length,
+          stride,
+          false,
+          false
+        );
+        this.instructions.push([
+          Instruction.CUSTOM,
+          builderBegin,
+          builderEnd,
+          geometry,
+          renderer,
+          inflateCoordinates,
+          index
+        ]);
+        this.hitDetectionInstructions.push([
+          Instruction.CUSTOM,
+          builderBegin,
+          builderEnd,
+          geometry,
+          hitDetectionRenderer || renderer,
+          inflateCoordinates,
+          index
+        ]);
+        break;
+      case "MultiPoint":
+        flatCoordinates = geometry.getFlatCoordinates();
+        builderEnd = this.appendFlatPointCoordinates(flatCoordinates, stride);
+        if (builderEnd > builderBegin) {
+          this.instructions.push([
+            Instruction.CUSTOM,
+            builderBegin,
+            builderEnd,
+            geometry,
+            renderer,
+            inflateCoordinates,
+            index
+          ]);
+          this.hitDetectionInstructions.push([
+            Instruction.CUSTOM,
+            builderBegin,
+            builderEnd,
+            geometry,
+            hitDetectionRenderer || renderer,
+            inflateCoordinates,
+            index
+          ]);
+        }
+        break;
+      case "Point":
+        flatCoordinates = geometry.getFlatCoordinates();
+        this.coordinates.push(flatCoordinates[0], flatCoordinates[1]);
+        builderEnd = this.coordinates.length;
+        this.instructions.push([
+          Instruction.CUSTOM,
+          builderBegin,
+          builderEnd,
+          geometry,
+          renderer,
+          void 0,
+          index
+        ]);
+        this.hitDetectionInstructions.push([
+          Instruction.CUSTOM,
+          builderBegin,
+          builderEnd,
+          geometry,
+          hitDetectionRenderer || renderer,
+          void 0,
+          index
+        ]);
+        break;
+    }
+    this.endGeometry(feature);
+  }
+  /**
+   * @protected
+   * @param {import("../../geom/Geometry").default|import("../Feature.js").default} geometry The geometry.
+   * @param {import("../../Feature.js").FeatureLike} feature Feature.
+   * @param {number} index Render order index
+   */
+  beginGeometry(geometry, feature, index) {
+    this.beginGeometryInstruction1_ = [
+      Instruction.BEGIN_GEOMETRY,
+      feature,
+      0,
+      geometry,
+      index
+    ];
+    this.instructions.push(this.beginGeometryInstruction1_);
+    this.beginGeometryInstruction2_ = [
+      Instruction.BEGIN_GEOMETRY,
+      feature,
+      0,
+      geometry,
+      index
+    ];
+    this.hitDetectionInstructions.push(this.beginGeometryInstruction2_);
+  }
+  /**
+   * @return {import("../canvas.js").SerializableInstructions} the serializable instructions.
+   */
+  finish() {
+    return {
+      instructions: this.instructions,
+      hitDetectionInstructions: this.hitDetectionInstructions,
+      coordinates: this.coordinates
+    };
+  }
+  /**
+   * Reverse the hit detection instructions.
+   */
+  reverseHitDetectionInstructions() {
+    const hitDetectionInstructions = this.hitDetectionInstructions;
+    hitDetectionInstructions.reverse();
+    let i;
+    const n = hitDetectionInstructions.length;
+    let instruction;
+    let type;
+    let begin = -1;
+    for (i = 0; i < n; ++i) {
+      instruction = hitDetectionInstructions[i];
+      type = /** @type {import("./Instruction.js").default} */
+      instruction[0];
+      if (type == Instruction.END_GEOMETRY) {
+        begin = i;
+      } else if (type == Instruction.BEGIN_GEOMETRY) {
+        instruction[2] = i;
+        reverseSubArray(this.hitDetectionInstructions, begin, i);
+        begin = -1;
+      }
+    }
+  }
+  /**
+   * @param {import("../../style/Fill.js").default} fillStyle Fill style.
+   * @param {import("../../style/Stroke.js").default} strokeStyle Stroke style.
+   */
+  setFillStrokeStyle(fillStyle, strokeStyle) {
+    const state = this.state;
+    if (fillStyle) {
+      const fillStyleColor = fillStyle.getColor();
+      state.fillPatternScale = fillStyleColor && typeof fillStyleColor === "object" && "src" in fillStyleColor ? this.pixelRatio : 1;
+      state.fillStyle = asColorLike(
+        fillStyleColor ? fillStyleColor : defaultFillStyle
+      );
+    } else {
+      state.fillStyle = void 0;
+    }
+    if (strokeStyle) {
+      const strokeStyleColor = strokeStyle.getColor();
+      state.strokeStyle = asColorLike(
+        strokeStyleColor ? strokeStyleColor : defaultStrokeStyle
+      );
+      const strokeStyleLineCap = strokeStyle.getLineCap();
+      state.lineCap = strokeStyleLineCap !== void 0 ? strokeStyleLineCap : defaultLineCap;
+      const strokeStyleLineDash = strokeStyle.getLineDash();
+      state.lineDash = strokeStyleLineDash ? strokeStyleLineDash.slice() : defaultLineDash;
+      const strokeStyleLineDashOffset = strokeStyle.getLineDashOffset();
+      state.lineDashOffset = strokeStyleLineDashOffset ? strokeStyleLineDashOffset : defaultLineDashOffset;
+      const strokeStyleLineJoin = strokeStyle.getLineJoin();
+      state.lineJoin = strokeStyleLineJoin !== void 0 ? strokeStyleLineJoin : defaultLineJoin;
+      const strokeStyleWidth = strokeStyle.getWidth();
+      state.lineWidth = strokeStyleWidth !== void 0 ? strokeStyleWidth : defaultLineWidth;
+      const strokeStyleMiterLimit = strokeStyle.getMiterLimit();
+      state.miterLimit = strokeStyleMiterLimit !== void 0 ? strokeStyleMiterLimit : defaultMiterLimit;
+      if (state.lineWidth > this.maxLineWidth) {
+        this.maxLineWidth = state.lineWidth;
+        this.bufferedMaxExtent_ = null;
+      }
+    } else {
+      state.strokeStyle = void 0;
+      state.lineCap = void 0;
+      state.lineDash = null;
+      state.lineDashOffset = void 0;
+      state.lineJoin = void 0;
+      state.lineWidth = void 0;
+      state.miterLimit = void 0;
+    }
+  }
+  /**
+   * @param {import("../canvas.js").FillStrokeState} state State.
+   * @return {Array<*>} Fill instruction.
+   */
+  createFill(state) {
+    const fillStyle = state.fillStyle;
+    const fillInstruction2 = [Instruction.SET_FILL_STYLE, fillStyle];
+    if (typeof fillStyle !== "string") {
+      fillInstruction2.push(state.fillPatternScale);
+    }
+    return fillInstruction2;
+  }
+  /**
+   * @param {import("../canvas.js").FillStrokeState} state State.
+   */
+  applyStroke(state) {
+    this.instructions.push(this.createStroke(state));
+  }
+  /**
+   * @param {import("../canvas.js").FillStrokeState} state State.
+   * @return {Array<*>} Stroke instruction.
+   */
+  createStroke(state) {
+    return [
+      Instruction.SET_STROKE_STYLE,
+      state.strokeStyle,
+      state.lineWidth * this.pixelRatio,
+      state.lineCap,
+      state.lineJoin,
+      state.miterLimit,
+      this.applyPixelRatio(state.lineDash),
+      state.lineDashOffset * this.pixelRatio
+    ];
+  }
+  /**
+   * @param {import("../canvas.js").FillStrokeState} state State.
+   * @param {function(this:CanvasBuilder, import("../canvas.js").FillStrokeState):Array<*>} createFill Create fill.
+   */
+  updateFillStyle(state, createFill) {
+    const fillStyle = state.fillStyle;
+    if (typeof fillStyle !== "string" || state.currentFillStyle != fillStyle) {
+      if (fillStyle !== void 0) {
+        this.instructions.push(createFill.call(this, state));
+      }
+      state.currentFillStyle = fillStyle;
+    }
+  }
+  /**
+   * @param {import("../canvas.js").FillStrokeState} state State.
+   * @param {function(this:CanvasBuilder, import("../canvas.js").FillStrokeState): void} applyStroke Apply stroke.
+   */
+  updateStrokeStyle(state, applyStroke) {
+    const strokeStyle = state.strokeStyle;
+    const lineCap = state.lineCap;
+    const lineDash = state.lineDash;
+    const lineDashOffset = state.lineDashOffset;
+    const lineJoin = state.lineJoin;
+    const lineWidth = state.lineWidth;
+    const miterLimit = state.miterLimit;
+    if (state.currentStrokeStyle != strokeStyle || state.currentLineCap != lineCap || lineDash != state.currentLineDash && !equals(state.currentLineDash, lineDash) || state.currentLineDashOffset != lineDashOffset || state.currentLineJoin != lineJoin || state.currentLineWidth != lineWidth || state.currentMiterLimit != miterLimit) {
+      if (strokeStyle !== void 0) {
+        applyStroke.call(this, state);
+      }
+      state.currentStrokeStyle = strokeStyle;
+      state.currentLineCap = lineCap;
+      state.currentLineDash = lineDash;
+      state.currentLineDashOffset = lineDashOffset;
+      state.currentLineJoin = lineJoin;
+      state.currentLineWidth = lineWidth;
+      state.currentMiterLimit = miterLimit;
+    }
+  }
+  /**
+   * @param {import("../../Feature.js").FeatureLike} feature Feature.
+   */
+  endGeometry(feature) {
+    this.beginGeometryInstruction1_[2] = this.instructions.length;
+    this.beginGeometryInstruction1_ = null;
+    this.beginGeometryInstruction2_[2] = this.hitDetectionInstructions.length;
+    this.beginGeometryInstruction2_ = null;
+    const endGeometryInstruction = [Instruction.END_GEOMETRY, feature];
+    this.instructions.push(endGeometryInstruction);
+    this.hitDetectionInstructions.push(endGeometryInstruction);
+  }
+  /**
+   * Get the buffered rendering extent.  Rendering will be clipped to the extent
+   * provided to the constructor.  To account for symbolizers that may intersect
+   * this extent, we calculate a buffered extent (e.g. based on stroke width).
+   * @return {import("../../extent.js").Extent} The buffered rendering extent.
+   * @protected
+   */
+  getBufferedMaxExtent() {
+    if (!this.bufferedMaxExtent_) {
+      this.bufferedMaxExtent_ = clone(this.maxExtent);
+      if (this.maxLineWidth > 0) {
+        const width = this.resolution * (this.maxLineWidth + 1) / 2;
+        buffer(this.bufferedMaxExtent_, width, this.bufferedMaxExtent_);
+      }
+    }
+    return this.bufferedMaxExtent_;
+  }
+}
+class CanvasImageBuilder extends CanvasBuilder {
+  /**
+   * @param {number} tolerance Tolerance.
+   * @param {import("../../extent.js").Extent} maxExtent Maximum extent.
+   * @param {number} resolution Resolution.
+   * @param {number} pixelRatio Pixel ratio.
+   */
+  constructor(tolerance, maxExtent, resolution, pixelRatio) {
+    super(tolerance, maxExtent, resolution, pixelRatio);
+    this.hitDetectionImage_ = null;
+    this.image_ = null;
+    this.imagePixelRatio_ = void 0;
+    this.anchorX_ = void 0;
+    this.anchorY_ = void 0;
+    this.height_ = void 0;
+    this.opacity_ = void 0;
+    this.originX_ = void 0;
+    this.originY_ = void 0;
+    this.rotateWithView_ = void 0;
+    this.rotation_ = void 0;
+    this.scale_ = void 0;
+    this.width_ = void 0;
+    this.declutterMode_ = void 0;
+    this.declutterImageWithText_ = void 0;
+  }
+  /**
+   * @param {import("../../geom/Point.js").default|import("../Feature.js").default} pointGeometry Point geometry.
+   * @param {import("../../Feature.js").FeatureLike} feature Feature.
+   * @param {number} [index] Render order index.
+   */
+  drawPoint(pointGeometry, feature, index) {
+    if (!this.image_ || this.maxExtent && !containsCoordinate(this.maxExtent, pointGeometry.getFlatCoordinates())) {
+      return;
+    }
+    this.beginGeometry(pointGeometry, feature, index);
+    const flatCoordinates = pointGeometry.getFlatCoordinates();
+    const stride = pointGeometry.getStride();
+    const myBegin = this.coordinates.length;
+    const myEnd = this.appendFlatPointCoordinates(flatCoordinates, stride);
+    this.instructions.push([
+      Instruction.DRAW_IMAGE,
+      myBegin,
+      myEnd,
+      this.image_,
+      // Remaining arguments to DRAW_IMAGE are in alphabetical order
+      this.anchorX_ * this.imagePixelRatio_,
+      this.anchorY_ * this.imagePixelRatio_,
+      Math.ceil(this.height_ * this.imagePixelRatio_),
+      this.opacity_,
+      this.originX_ * this.imagePixelRatio_,
+      this.originY_ * this.imagePixelRatio_,
+      this.rotateWithView_,
+      this.rotation_,
+      [
+        this.scale_[0] * this.pixelRatio / this.imagePixelRatio_,
+        this.scale_[1] * this.pixelRatio / this.imagePixelRatio_
+      ],
+      Math.ceil(this.width_ * this.imagePixelRatio_),
+      this.declutterMode_,
+      this.declutterImageWithText_
+    ]);
+    this.hitDetectionInstructions.push([
+      Instruction.DRAW_IMAGE,
+      myBegin,
+      myEnd,
+      this.hitDetectionImage_,
+      // Remaining arguments to DRAW_IMAGE are in alphabetical order
+      this.anchorX_,
+      this.anchorY_,
+      this.height_,
+      1,
+      this.originX_,
+      this.originY_,
+      this.rotateWithView_,
+      this.rotation_,
+      this.scale_,
+      this.width_,
+      this.declutterMode_,
+      this.declutterImageWithText_
+    ]);
+    this.endGeometry(feature);
+  }
+  /**
+   * @param {import("../../geom/MultiPoint.js").default|import("../Feature.js").default} multiPointGeometry MultiPoint geometry.
+   * @param {import("../../Feature.js").FeatureLike} feature Feature.
+   * @param {number} [index] Render order index.
+   */
+  drawMultiPoint(multiPointGeometry, feature, index) {
+    if (!this.image_) {
+      return;
+    }
+    this.beginGeometry(multiPointGeometry, feature, index);
+    const flatCoordinates = multiPointGeometry.getFlatCoordinates();
+    const filteredFlatCoordinates = [];
+    for (let i = 0, ii = flatCoordinates.length; i < ii; i += multiPointGeometry.getStride()) {
+      if (!this.maxExtent || containsCoordinate(this.maxExtent, flatCoordinates.slice(i, i + 2))) {
+        filteredFlatCoordinates.push(
+          flatCoordinates[i],
+          flatCoordinates[i + 1]
+        );
+      }
+    }
+    const myBegin = this.coordinates.length;
+    const myEnd = this.appendFlatPointCoordinates(filteredFlatCoordinates, 2);
+    this.instructions.push([
+      Instruction.DRAW_IMAGE,
+      myBegin,
+      myEnd,
+      this.image_,
+      // Remaining arguments to DRAW_IMAGE are in alphabetical order
+      this.anchorX_ * this.imagePixelRatio_,
+      this.anchorY_ * this.imagePixelRatio_,
+      Math.ceil(this.height_ * this.imagePixelRatio_),
+      this.opacity_,
+      this.originX_ * this.imagePixelRatio_,
+      this.originY_ * this.imagePixelRatio_,
+      this.rotateWithView_,
+      this.rotation_,
+      [
+        this.scale_[0] * this.pixelRatio / this.imagePixelRatio_,
+        this.scale_[1] * this.pixelRatio / this.imagePixelRatio_
+      ],
+      Math.ceil(this.width_ * this.imagePixelRatio_),
+      this.declutterMode_,
+      this.declutterImageWithText_
+    ]);
+    this.hitDetectionInstructions.push([
+      Instruction.DRAW_IMAGE,
+      myBegin,
+      myEnd,
+      this.hitDetectionImage_,
+      // Remaining arguments to DRAW_IMAGE are in alphabetical order
+      this.anchorX_,
+      this.anchorY_,
+      this.height_,
+      1,
+      this.originX_,
+      this.originY_,
+      this.rotateWithView_,
+      this.rotation_,
+      this.scale_,
+      this.width_,
+      this.declutterMode_,
+      this.declutterImageWithText_
+    ]);
+    this.endGeometry(feature);
+  }
+  /**
+   * @return {import("../canvas.js").SerializableInstructions} the serializable instructions.
+   */
+  finish() {
+    this.reverseHitDetectionInstructions();
+    this.anchorX_ = void 0;
+    this.anchorY_ = void 0;
+    this.hitDetectionImage_ = null;
+    this.image_ = null;
+    this.imagePixelRatio_ = void 0;
+    this.height_ = void 0;
+    this.scale_ = void 0;
+    this.opacity_ = void 0;
+    this.originX_ = void 0;
+    this.originY_ = void 0;
+    this.rotateWithView_ = void 0;
+    this.rotation_ = void 0;
+    this.width_ = void 0;
+    return super.finish();
+  }
+  /**
+   * @param {import("../../style/Image.js").default} imageStyle Image style.
+   * @param {Object} [sharedData] Shared data.
+   */
+  setImageStyle(imageStyle, sharedData) {
+    const anchor = imageStyle.getAnchor();
+    const size = imageStyle.getSize();
+    const origin = imageStyle.getOrigin();
+    this.imagePixelRatio_ = imageStyle.getPixelRatio(this.pixelRatio);
+    this.anchorX_ = anchor[0];
+    this.anchorY_ = anchor[1];
+    this.hitDetectionImage_ = imageStyle.getHitDetectionImage();
+    this.image_ = imageStyle.getImage(this.pixelRatio);
+    this.height_ = size[1];
+    this.opacity_ = imageStyle.getOpacity();
+    this.originX_ = origin[0];
+    this.originY_ = origin[1];
+    this.rotateWithView_ = imageStyle.getRotateWithView();
+    this.rotation_ = imageStyle.getRotation();
+    this.scale_ = imageStyle.getScaleArray();
+    this.width_ = size[0];
+    this.declutterMode_ = imageStyle.getDeclutterMode();
+    this.declutterImageWithText_ = sharedData;
+  }
+}
+class CanvasLineStringBuilder extends CanvasBuilder {
+  /**
+   * @param {number} tolerance Tolerance.
+   * @param {import("../../extent.js").Extent} maxExtent Maximum extent.
+   * @param {number} resolution Resolution.
+   * @param {number} pixelRatio Pixel ratio.
+   */
+  constructor(tolerance, maxExtent, resolution, pixelRatio) {
+    super(tolerance, maxExtent, resolution, pixelRatio);
+  }
+  /**
+   * @param {Array<number>} flatCoordinates Flat coordinates.
+   * @param {number} offset Offset.
+   * @param {number} end End.
+   * @param {number} stride Stride.
+   * @private
+   * @return {number} end.
+   */
+  drawFlatCoordinates_(flatCoordinates, offset2, end2, stride) {
+    const myBegin = this.coordinates.length;
+    const myEnd = this.appendFlatLineCoordinates(
+      flatCoordinates,
+      offset2,
+      end2,
+      stride,
+      false,
+      false
+    );
+    const moveToLineToInstruction = [
+      Instruction.MOVE_TO_LINE_TO,
+      myBegin,
+      myEnd
+    ];
+    this.instructions.push(moveToLineToInstruction);
+    this.hitDetectionInstructions.push(moveToLineToInstruction);
+    return end2;
+  }
+  /**
+   * @param {import("../../geom/LineString.js").default|import("../Feature.js").default} lineStringGeometry Line string geometry.
+   * @param {import("../../Feature.js").FeatureLike} feature Feature.
+   * @param {number} [index] Render order index.
+   */
+  drawLineString(lineStringGeometry, feature, index) {
+    const state = this.state;
+    const strokeStyle = state.strokeStyle;
+    const lineWidth = state.lineWidth;
+    if (strokeStyle === void 0 || lineWidth === void 0) {
+      return;
+    }
+    this.updateStrokeStyle(state, this.applyStroke);
+    this.beginGeometry(lineStringGeometry, feature, index);
+    this.hitDetectionInstructions.push(
+      [
+        Instruction.SET_STROKE_STYLE,
+        state.strokeStyle,
+        state.lineWidth,
+        state.lineCap,
+        state.lineJoin,
+        state.miterLimit,
+        defaultLineDash,
+        defaultLineDashOffset
+      ],
+      beginPathInstruction
+    );
+    const flatCoordinates = lineStringGeometry.getFlatCoordinates();
+    const stride = lineStringGeometry.getStride();
+    this.drawFlatCoordinates_(
+      flatCoordinates,
+      0,
+      flatCoordinates.length,
+      stride
+    );
+    this.hitDetectionInstructions.push(strokeInstruction);
+    this.endGeometry(feature);
+  }
+  /**
+   * @param {import("../../geom/MultiLineString.js").default|import("../Feature.js").default} multiLineStringGeometry MultiLineString geometry.
+   * @param {import("../../Feature.js").FeatureLike} feature Feature.
+   * @param {number} [index] Render order index.
+   */
+  drawMultiLineString(multiLineStringGeometry, feature, index) {
+    const state = this.state;
+    const strokeStyle = state.strokeStyle;
+    const lineWidth = state.lineWidth;
+    if (strokeStyle === void 0 || lineWidth === void 0) {
+      return;
+    }
+    this.updateStrokeStyle(state, this.applyStroke);
+    this.beginGeometry(multiLineStringGeometry, feature, index);
+    this.hitDetectionInstructions.push(
+      [
+        Instruction.SET_STROKE_STYLE,
+        state.strokeStyle,
+        state.lineWidth,
+        state.lineCap,
+        state.lineJoin,
+        state.miterLimit,
+        defaultLineDash,
+        defaultLineDashOffset
+      ],
+      beginPathInstruction
+    );
+    const ends = multiLineStringGeometry.getEnds();
+    const flatCoordinates = multiLineStringGeometry.getFlatCoordinates();
+    const stride = multiLineStringGeometry.getStride();
+    let offset2 = 0;
+    for (let i = 0, ii = ends.length; i < ii; ++i) {
+      offset2 = this.drawFlatCoordinates_(
+        flatCoordinates,
+        offset2,
+        /** @type {number} */
+        ends[i],
+        stride
+      );
+    }
+    this.hitDetectionInstructions.push(strokeInstruction);
+    this.endGeometry(feature);
+  }
+  /**
+   * @return {import("../canvas.js").SerializableInstructions} the serializable instructions.
+   */
+  finish() {
+    const state = this.state;
+    if (state.lastStroke != void 0 && state.lastStroke != this.coordinates.length) {
+      this.instructions.push(strokeInstruction);
+    }
+    this.reverseHitDetectionInstructions();
+    this.state = null;
+    return super.finish();
+  }
+  /**
+   * @param {import("../canvas.js").FillStrokeState} state State.
+   */
+  applyStroke(state) {
+    if (state.lastStroke != void 0 && state.lastStroke != this.coordinates.length) {
+      this.instructions.push(strokeInstruction);
+      state.lastStroke = this.coordinates.length;
+    }
+    state.lastStroke = 0;
+    super.applyStroke(state);
+    this.instructions.push(beginPathInstruction);
+  }
+}
+class CanvasPolygonBuilder extends CanvasBuilder {
+  /**
+   * @param {number} tolerance Tolerance.
+   * @param {import("../../extent.js").Extent} maxExtent Maximum extent.
+   * @param {number} resolution Resolution.
+   * @param {number} pixelRatio Pixel ratio.
+   */
+  constructor(tolerance, maxExtent, resolution, pixelRatio) {
+    super(tolerance, maxExtent, resolution, pixelRatio);
+  }
+  /**
+   * @param {Array<number>} flatCoordinates Flat coordinates.
+   * @param {number} offset Offset.
+   * @param {Array<number>} ends Ends.
+   * @param {number} stride Stride.
+   * @private
+   * @return {number} End.
+   */
+  drawFlatCoordinatess_(flatCoordinates, offset2, ends, stride) {
+    const state = this.state;
+    const fill = state.fillStyle !== void 0;
+    const stroke = state.strokeStyle !== void 0;
+    const numEnds = ends.length;
+    this.instructions.push(beginPathInstruction);
+    this.hitDetectionInstructions.push(beginPathInstruction);
+    for (let i = 0; i < numEnds; ++i) {
+      const end2 = ends[i];
+      const myBegin = this.coordinates.length;
+      const myEnd = this.appendFlatLineCoordinates(
+        flatCoordinates,
+        offset2,
+        end2,
+        stride,
+        true,
+        !stroke
+      );
+      const moveToLineToInstruction = [
+        Instruction.MOVE_TO_LINE_TO,
+        myBegin,
+        myEnd
+      ];
+      this.instructions.push(moveToLineToInstruction);
+      this.hitDetectionInstructions.push(moveToLineToInstruction);
+      if (stroke) {
+        this.instructions.push(closePathInstruction);
+        this.hitDetectionInstructions.push(closePathInstruction);
+      }
+      offset2 = end2;
+    }
+    if (fill) {
+      this.instructions.push(fillInstruction);
+      this.hitDetectionInstructions.push(fillInstruction);
+    }
+    if (stroke) {
+      this.instructions.push(strokeInstruction);
+      this.hitDetectionInstructions.push(strokeInstruction);
+    }
+    return offset2;
+  }
+  /**
+   * @param {import("../../geom/Circle.js").default} circleGeometry Circle geometry.
+   * @param {import("../../Feature.js").default} feature Feature.
+   * @param {number} [index] Render order index.
+   */
+  drawCircle(circleGeometry, feature, index) {
+    const state = this.state;
+    const fillStyle = state.fillStyle;
+    const strokeStyle = state.strokeStyle;
+    if (fillStyle === void 0 && strokeStyle === void 0) {
+      return;
+    }
+    this.setFillStrokeStyles_();
+    this.beginGeometry(circleGeometry, feature, index);
+    if (state.fillStyle !== void 0) {
+      this.hitDetectionInstructions.push([
+        Instruction.SET_FILL_STYLE,
+        defaultFillStyle
+      ]);
+    }
+    if (state.strokeStyle !== void 0) {
+      this.hitDetectionInstructions.push([
+        Instruction.SET_STROKE_STYLE,
+        state.strokeStyle,
+        state.lineWidth,
+        state.lineCap,
+        state.lineJoin,
+        state.miterLimit,
+        defaultLineDash,
+        defaultLineDashOffset
+      ]);
+    }
+    const flatCoordinates = circleGeometry.getFlatCoordinates();
+    const stride = circleGeometry.getStride();
+    const myBegin = this.coordinates.length;
+    this.appendFlatLineCoordinates(
+      flatCoordinates,
+      0,
+      flatCoordinates.length,
+      stride,
+      false,
+      false
+    );
+    const circleInstruction = [Instruction.CIRCLE, myBegin];
+    this.instructions.push(beginPathInstruction, circleInstruction);
+    this.hitDetectionInstructions.push(beginPathInstruction, circleInstruction);
+    if (state.fillStyle !== void 0) {
+      this.instructions.push(fillInstruction);
+      this.hitDetectionInstructions.push(fillInstruction);
+    }
+    if (state.strokeStyle !== void 0) {
+      this.instructions.push(strokeInstruction);
+      this.hitDetectionInstructions.push(strokeInstruction);
+    }
+    this.endGeometry(feature);
+  }
+  /**
+   * @param {import("../../geom/Polygon.js").default|import("../Feature.js").default} polygonGeometry Polygon geometry.
+   * @param {import("../../Feature.js").FeatureLike} feature Feature.
+   * @param {number} [index] Render order index.
+   */
+  drawPolygon(polygonGeometry, feature, index) {
+    const state = this.state;
+    const fillStyle = state.fillStyle;
+    const strokeStyle = state.strokeStyle;
+    if (fillStyle === void 0 && strokeStyle === void 0) {
+      return;
+    }
+    this.setFillStrokeStyles_();
+    this.beginGeometry(polygonGeometry, feature, index);
+    if (state.fillStyle !== void 0) {
+      this.hitDetectionInstructions.push([
+        Instruction.SET_FILL_STYLE,
+        defaultFillStyle
+      ]);
+    }
+    if (state.strokeStyle !== void 0) {
+      this.hitDetectionInstructions.push([
+        Instruction.SET_STROKE_STYLE,
+        state.strokeStyle,
+        state.lineWidth,
+        state.lineCap,
+        state.lineJoin,
+        state.miterLimit,
+        defaultLineDash,
+        defaultLineDashOffset
+      ]);
+    }
+    const ends = polygonGeometry.getEnds();
+    const flatCoordinates = polygonGeometry.getOrientedFlatCoordinates();
+    const stride = polygonGeometry.getStride();
+    this.drawFlatCoordinatess_(
+      flatCoordinates,
+      0,
+      /** @type {Array<number>} */
+      ends,
+      stride
+    );
+    this.endGeometry(feature);
+  }
+  /**
+   * @param {import("../../geom/MultiPolygon.js").default} multiPolygonGeometry MultiPolygon geometry.
+   * @param {import("../../Feature.js").FeatureLike} feature Feature.
+   * @param {number} [index] Render order index.
+   */
+  drawMultiPolygon(multiPolygonGeometry, feature, index) {
+    const state = this.state;
+    const fillStyle = state.fillStyle;
+    const strokeStyle = state.strokeStyle;
+    if (fillStyle === void 0 && strokeStyle === void 0) {
+      return;
+    }
+    this.setFillStrokeStyles_();
+    this.beginGeometry(multiPolygonGeometry, feature, index);
+    if (state.fillStyle !== void 0) {
+      this.hitDetectionInstructions.push([
+        Instruction.SET_FILL_STYLE,
+        defaultFillStyle
+      ]);
+    }
+    if (state.strokeStyle !== void 0) {
+      this.hitDetectionInstructions.push([
+        Instruction.SET_STROKE_STYLE,
+        state.strokeStyle,
+        state.lineWidth,
+        state.lineCap,
+        state.lineJoin,
+        state.miterLimit,
+        defaultLineDash,
+        defaultLineDashOffset
+      ]);
+    }
+    const endss = multiPolygonGeometry.getEndss();
+    const flatCoordinates = multiPolygonGeometry.getOrientedFlatCoordinates();
+    const stride = multiPolygonGeometry.getStride();
+    let offset2 = 0;
+    for (let i = 0, ii = endss.length; i < ii; ++i) {
+      offset2 = this.drawFlatCoordinatess_(
+        flatCoordinates,
+        offset2,
+        endss[i],
+        stride
+      );
+    }
+    this.endGeometry(feature);
+  }
+  /**
+   * @return {import("../canvas.js").SerializableInstructions} the serializable instructions.
+   */
+  finish() {
+    this.reverseHitDetectionInstructions();
+    this.state = null;
+    const tolerance = this.tolerance;
+    if (tolerance !== 0) {
+      const coordinates2 = this.coordinates;
+      for (let i = 0, ii = coordinates2.length; i < ii; ++i) {
+        coordinates2[i] = snap(coordinates2[i], tolerance);
+      }
+    }
+    return super.finish();
+  }
+  /**
+   * @private
+   */
+  setFillStrokeStyles_() {
+    const state = this.state;
+    const fillStyle = state.fillStyle;
+    if (fillStyle !== void 0) {
+      this.updateFillStyle(state, this.createFill);
+    }
+    if (state.strokeStyle !== void 0) {
+      this.updateStrokeStyle(state, this.applyStroke);
+    }
+  }
+}
+function lineChunk(chunkLength, flatCoordinates, offset2, end2, stride) {
+  const chunks = [];
+  let cursor = offset2;
+  let chunkM = 0;
+  let currentChunk = flatCoordinates.slice(offset2, 2);
+  while (chunkM < chunkLength && cursor + stride < end2) {
+    const [x1, y1] = currentChunk.slice(-2);
+    const x2 = flatCoordinates[cursor + stride];
+    const y2 = flatCoordinates[cursor + stride + 1];
+    const segmentLength = Math.sqrt(
+      (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)
+    );
+    chunkM += segmentLength;
+    if (chunkM >= chunkLength) {
+      const m = (chunkLength - chunkM + segmentLength) / segmentLength;
+      const x3 = lerp(x1, x2, m);
+      const y3 = lerp(y1, y2, m);
+      currentChunk.push(x3, y3);
+      chunks.push(currentChunk);
+      currentChunk = [x3, y3];
+      if (chunkM == chunkLength) {
+        cursor += stride;
+      }
+      chunkM = 0;
+    } else if (chunkM < chunkLength) {
+      currentChunk.push(
+        flatCoordinates[cursor + stride],
+        flatCoordinates[cursor + stride + 1]
+      );
+      cursor += stride;
+    } else {
+      const missing = segmentLength - chunkM;
+      const x3 = lerp(x1, x2, missing / segmentLength);
+      const y3 = lerp(y1, y2, missing / segmentLength);
+      currentChunk.push(x3, y3);
+      chunks.push(currentChunk);
+      currentChunk = [x3, y3];
+      chunkM = 0;
+      cursor += stride;
+    }
+  }
+  if (chunkM > 0) {
+    chunks.push(currentChunk);
+  }
+  return chunks;
+}
+function matchingChunk(maxAngle, flatCoordinates, offset2, end2, stride) {
+  let chunkStart = offset2;
+  let chunkEnd = offset2;
+  let chunkM = 0;
+  let m = 0;
+  let start2 = offset2;
+  let acos, i, m12, m23, x1, y1, x12, y12, x23, y23;
+  for (i = offset2; i < end2; i += stride) {
+    const x2 = flatCoordinates[i];
+    const y2 = flatCoordinates[i + 1];
+    if (x1 !== void 0) {
+      x23 = x2 - x1;
+      y23 = y2 - y1;
+      m23 = Math.sqrt(x23 * x23 + y23 * y23);
+      if (x12 !== void 0) {
+        m += m12;
+        acos = Math.acos((x12 * x23 + y12 * y23) / (m12 * m23));
+        if (acos > maxAngle) {
+          if (m > chunkM) {
+            chunkM = m;
+            chunkStart = start2;
+            chunkEnd = i;
+          }
+          m = 0;
+          start2 = i - stride;
+        }
+      }
+      m12 = m23;
+      x12 = x23;
+      y12 = y23;
+    }
+    x1 = x2;
+    y1 = y2;
+  }
+  m += m23;
+  return m > chunkM ? [start2, i] : [chunkStart, chunkEnd];
+}
+const TEXT_ALIGN = {
+  "left": 0,
+  "center": 0.5,
+  "right": 1,
+  "top": 0,
+  "middle": 0.5,
+  "hanging": 0.2,
+  "alphabetic": 0.8,
+  "ideographic": 0.8,
+  "bottom": 1
+};
+class CanvasTextBuilder extends CanvasBuilder {
+  /**
+   * @param {number} tolerance Tolerance.
+   * @param {import("../../extent.js").Extent} maxExtent Maximum extent.
+   * @param {number} resolution Resolution.
+   * @param {number} pixelRatio Pixel ratio.
+   */
+  constructor(tolerance, maxExtent, resolution, pixelRatio) {
+    super(tolerance, maxExtent, resolution, pixelRatio);
+    this.labels_ = null;
+    this.text_ = "";
+    this.textOffsetX_ = 0;
+    this.textOffsetY_ = 0;
+    this.textRotateWithView_ = void 0;
+    this.textRotation_ = 0;
+    this.textFillState_ = null;
+    this.fillStates = {};
+    this.fillStates[defaultFillStyle] = { fillStyle: defaultFillStyle };
+    this.textStrokeState_ = null;
+    this.strokeStates = {};
+    this.textState_ = /** @type {import("../canvas.js").TextState} */
+    {};
+    this.textStates = {};
+    this.textKey_ = "";
+    this.fillKey_ = "";
+    this.strokeKey_ = "";
+    this.declutterMode_ = void 0;
+    this.declutterImageWithText_ = void 0;
+  }
+  /**
+   * @return {import("../canvas.js").SerializableInstructions} the serializable instructions.
+   */
+  finish() {
+    const instructions = super.finish();
+    instructions.textStates = this.textStates;
+    instructions.fillStates = this.fillStates;
+    instructions.strokeStates = this.strokeStates;
+    return instructions;
+  }
+  /**
+   * @param {import("../../geom/SimpleGeometry.js").default|import("../Feature.js").default} geometry Geometry.
+   * @param {import("../../Feature.js").FeatureLike} feature Feature.
+   * @param {number} [index] Render order index.
+   */
+  drawText(geometry, feature, index) {
+    const fillState = this.textFillState_;
+    const strokeState = this.textStrokeState_;
+    const textState = this.textState_;
+    if (this.text_ === "" || !textState || !fillState && !strokeState) {
+      return;
+    }
+    const coordinates2 = this.coordinates;
+    let begin = coordinates2.length;
+    const geometryType = geometry.getType();
+    let flatCoordinates = null;
+    let stride = geometry.getStride();
+    if (textState.placement === "line" && (geometryType == "LineString" || geometryType == "MultiLineString" || geometryType == "Polygon" || geometryType == "MultiPolygon")) {
+      if (!intersects$1(this.maxExtent, geometry.getExtent())) {
+        return;
+      }
+      let ends;
+      flatCoordinates = geometry.getFlatCoordinates();
+      if (geometryType == "LineString") {
+        ends = [flatCoordinates.length];
+      } else if (geometryType == "MultiLineString") {
+        ends = /** @type {import("../../geom/MultiLineString.js").default} */
+        geometry.getEnds();
+      } else if (geometryType == "Polygon") {
+        ends = /** @type {import("../../geom/Polygon.js").default} */
+        geometry.getEnds().slice(0, 1);
+      } else if (geometryType == "MultiPolygon") {
+        const endss = (
+          /** @type {import("../../geom/MultiPolygon.js").default} */
+          geometry.getEndss()
+        );
+        ends = [];
+        for (let i = 0, ii = endss.length; i < ii; ++i) {
+          ends.push(endss[i][0]);
+        }
+      }
+      this.beginGeometry(geometry, feature, index);
+      const repeat = textState.repeat;
+      const textAlign = repeat ? void 0 : textState.textAlign;
+      let flatOffset = 0;
+      for (let o = 0, oo = ends.length; o < oo; ++o) {
+        let chunks;
+        if (repeat) {
+          chunks = lineChunk(
+            repeat * this.resolution,
+            flatCoordinates,
+            flatOffset,
+            ends[o],
+            stride
+          );
+        } else {
+          chunks = [flatCoordinates.slice(flatOffset, ends[o])];
+        }
+        for (let c = 0, cc = chunks.length; c < cc; ++c) {
+          const chunk = chunks[c];
+          let chunkBegin = 0;
+          let chunkEnd = chunk.length;
+          if (textAlign == void 0) {
+            const range = matchingChunk(
+              textState.maxAngle,
+              chunk,
+              0,
+              chunk.length,
+              2
+            );
+            chunkBegin = range[0];
+            chunkEnd = range[1];
+          }
+          for (let i = chunkBegin; i < chunkEnd; i += stride) {
+            coordinates2.push(chunk[i], chunk[i + 1]);
+          }
+          const end2 = coordinates2.length;
+          flatOffset = ends[o];
+          this.drawChars_(begin, end2);
+          begin = end2;
+        }
+      }
+      this.endGeometry(feature);
+    } else {
+      let geometryWidths = textState.overflow ? null : [];
+      switch (geometryType) {
+        case "Point":
+        case "MultiPoint":
+          flatCoordinates = /** @type {import("../../geom/MultiPoint.js").default} */
+          geometry.getFlatCoordinates();
+          break;
+        case "LineString":
+          flatCoordinates = /** @type {import("../../geom/LineString.js").default} */
+          geometry.getFlatMidpoint();
+          break;
+        case "Circle":
+          flatCoordinates = /** @type {import("../../geom/Circle.js").default} */
+          geometry.getCenter();
+          break;
+        case "MultiLineString":
+          flatCoordinates = /** @type {import("../../geom/MultiLineString.js").default} */
+          geometry.getFlatMidpoints();
+          stride = 2;
+          break;
+        case "Polygon":
+          flatCoordinates = /** @type {import("../../geom/Polygon.js").default} */
+          geometry.getFlatInteriorPoint();
+          if (!textState.overflow) {
+            geometryWidths.push(flatCoordinates[2] / this.resolution);
+          }
+          stride = 3;
+          break;
+        case "MultiPolygon":
+          const interiorPoints = (
+            /** @type {import("../../geom/MultiPolygon.js").default} */
+            geometry.getFlatInteriorPoints()
+          );
+          flatCoordinates = [];
+          for (let i = 0, ii = interiorPoints.length; i < ii; i += 3) {
+            if (!textState.overflow) {
+              geometryWidths.push(interiorPoints[i + 2] / this.resolution);
+            }
+            flatCoordinates.push(interiorPoints[i], interiorPoints[i + 1]);
+          }
+          if (flatCoordinates.length === 0) {
+            return;
+          }
+          stride = 2;
+          break;
+      }
+      const end2 = this.appendFlatPointCoordinates(flatCoordinates, stride);
+      if (end2 === begin) {
+        return;
+      }
+      if (geometryWidths && (end2 - begin) / 2 !== flatCoordinates.length / stride) {
+        let beg = begin / 2;
+        geometryWidths = geometryWidths.filter((w2, i) => {
+          const keep = coordinates2[(beg + i) * 2] === flatCoordinates[i * stride] && coordinates2[(beg + i) * 2 + 1] === flatCoordinates[i * stride + 1];
+          if (!keep) {
+            --beg;
+          }
+          return keep;
+        });
+      }
+      this.saveTextStates_();
+      if (textState.backgroundFill || textState.backgroundStroke) {
+        this.setFillStrokeStyle(
+          textState.backgroundFill,
+          textState.backgroundStroke
+        );
+        if (textState.backgroundFill) {
+          this.updateFillStyle(this.state, this.createFill);
+        }
+        if (textState.backgroundStroke) {
+          this.updateStrokeStyle(this.state, this.applyStroke);
+          this.hitDetectionInstructions.push(this.createStroke(this.state));
+        }
+      }
+      this.beginGeometry(geometry, feature, index);
+      let padding = textState.padding;
+      if (padding != defaultPadding && (textState.scale[0] < 0 || textState.scale[1] < 0)) {
+        let p0 = textState.padding[0];
+        let p12 = textState.padding[1];
+        let p22 = textState.padding[2];
+        let p32 = textState.padding[3];
+        if (textState.scale[0] < 0) {
+          p12 = -p12;
+          p32 = -p32;
+        }
+        if (textState.scale[1] < 0) {
+          p0 = -p0;
+          p22 = -p22;
+        }
+        padding = [p0, p12, p22, p32];
+      }
+      const pixelRatio = this.pixelRatio;
+      this.instructions.push([
+        Instruction.DRAW_IMAGE,
+        begin,
+        end2,
+        null,
+        NaN,
+        NaN,
+        NaN,
+        1,
+        0,
+        0,
+        this.textRotateWithView_,
+        this.textRotation_,
+        [1, 1],
+        NaN,
+        this.declutterMode_,
+        this.declutterImageWithText_,
+        padding == defaultPadding ? defaultPadding : padding.map(function(p5) {
+          return p5 * pixelRatio;
+        }),
+        !!textState.backgroundFill,
+        !!textState.backgroundStroke,
+        this.text_,
+        this.textKey_,
+        this.strokeKey_,
+        this.fillKey_,
+        this.textOffsetX_,
+        this.textOffsetY_,
+        geometryWidths
+      ]);
+      const scale2 = 1 / pixelRatio;
+      const currentFillStyle = this.state.fillStyle;
+      if (textState.backgroundFill) {
+        this.state.fillStyle = defaultFillStyle;
+        this.hitDetectionInstructions.push(this.createFill(this.state));
+      }
+      this.hitDetectionInstructions.push([
+        Instruction.DRAW_IMAGE,
+        begin,
+        end2,
+        null,
+        NaN,
+        NaN,
+        NaN,
+        1,
+        0,
+        0,
+        this.textRotateWithView_,
+        this.textRotation_,
+        [scale2, scale2],
+        NaN,
+        this.declutterMode_,
+        this.declutterImageWithText_,
+        padding,
+        !!textState.backgroundFill,
+        !!textState.backgroundStroke,
+        this.text_,
+        this.textKey_,
+        this.strokeKey_,
+        this.fillKey_ ? defaultFillStyle : this.fillKey_,
+        this.textOffsetX_,
+        this.textOffsetY_,
+        geometryWidths
+      ]);
+      if (textState.backgroundFill) {
+        this.state.fillStyle = currentFillStyle;
+        this.hitDetectionInstructions.push(this.createFill(this.state));
+      }
+      this.endGeometry(feature);
+    }
+  }
+  /**
+   * @private
+   */
+  saveTextStates_() {
+    const strokeState = this.textStrokeState_;
+    const textState = this.textState_;
+    const fillState = this.textFillState_;
+    const strokeKey = this.strokeKey_;
+    if (strokeState) {
+      if (!(strokeKey in this.strokeStates)) {
+        this.strokeStates[strokeKey] = {
+          strokeStyle: strokeState.strokeStyle,
+          lineCap: strokeState.lineCap,
+          lineDashOffset: strokeState.lineDashOffset,
+          lineWidth: strokeState.lineWidth,
+          lineJoin: strokeState.lineJoin,
+          miterLimit: strokeState.miterLimit,
+          lineDash: strokeState.lineDash
+        };
+      }
+    }
+    const textKey = this.textKey_;
+    if (!(textKey in this.textStates)) {
+      this.textStates[textKey] = {
+        font: textState.font,
+        textAlign: textState.textAlign || defaultTextAlign,
+        justify: textState.justify,
+        textBaseline: textState.textBaseline || defaultTextBaseline,
+        scale: textState.scale
+      };
+    }
+    const fillKey = this.fillKey_;
+    if (fillState) {
+      if (!(fillKey in this.fillStates)) {
+        this.fillStates[fillKey] = {
+          fillStyle: fillState.fillStyle
+        };
+      }
+    }
+  }
+  /**
+   * @private
+   * @param {number} begin Begin.
+   * @param {number} end End.
+   */
+  drawChars_(begin, end2) {
+    const strokeState = this.textStrokeState_;
+    const textState = this.textState_;
+    const strokeKey = this.strokeKey_;
+    const textKey = this.textKey_;
+    const fillKey = this.fillKey_;
+    this.saveTextStates_();
+    const pixelRatio = this.pixelRatio;
+    const baseline = TEXT_ALIGN[textState.textBaseline];
+    const offsetY = this.textOffsetY_ * pixelRatio;
+    const text = this.text_;
+    const strokeWidth = strokeState ? strokeState.lineWidth * Math.abs(textState.scale[0]) / 2 : 0;
+    this.instructions.push([
+      Instruction.DRAW_CHARS,
+      begin,
+      end2,
+      baseline,
+      textState.overflow,
+      fillKey,
+      textState.maxAngle,
+      pixelRatio,
+      offsetY,
+      strokeKey,
+      strokeWidth * pixelRatio,
+      text,
+      textKey,
+      1,
+      this.declutterMode_
+    ]);
+    this.hitDetectionInstructions.push([
+      Instruction.DRAW_CHARS,
+      begin,
+      end2,
+      baseline,
+      textState.overflow,
+      fillKey ? defaultFillStyle : fillKey,
+      textState.maxAngle,
+      pixelRatio,
+      offsetY,
+      strokeKey,
+      strokeWidth * pixelRatio,
+      text,
+      textKey,
+      1 / pixelRatio,
+      this.declutterMode_
+    ]);
+  }
+  /**
+   * @param {import("../../style/Text.js").default} textStyle Text style.
+   * @param {Object} [sharedData] Shared data.
+   */
+  setTextStyle(textStyle, sharedData) {
+    let textState, fillState, strokeState;
+    if (!textStyle) {
+      this.text_ = "";
+    } else {
+      const textFillStyle = textStyle.getFill();
+      if (!textFillStyle) {
+        fillState = null;
+        this.textFillState_ = fillState;
+      } else {
+        fillState = this.textFillState_;
+        if (!fillState) {
+          fillState = /** @type {import("../canvas.js").FillState} */
+          {};
+          this.textFillState_ = fillState;
+        }
+        fillState.fillStyle = asColorLike(
+          textFillStyle.getColor() || defaultFillStyle
+        );
+      }
+      const textStrokeStyle = textStyle.getStroke();
+      if (!textStrokeStyle) {
+        strokeState = null;
+        this.textStrokeState_ = strokeState;
+      } else {
+        strokeState = this.textStrokeState_;
+        if (!strokeState) {
+          strokeState = /** @type {import("../canvas.js").StrokeState} */
+          {};
+          this.textStrokeState_ = strokeState;
+        }
+        const lineDash = textStrokeStyle.getLineDash();
+        const lineDashOffset = textStrokeStyle.getLineDashOffset();
+        const lineWidth = textStrokeStyle.getWidth();
+        const miterLimit = textStrokeStyle.getMiterLimit();
+        strokeState.lineCap = textStrokeStyle.getLineCap() || defaultLineCap;
+        strokeState.lineDash = lineDash ? lineDash.slice() : defaultLineDash;
+        strokeState.lineDashOffset = lineDashOffset === void 0 ? defaultLineDashOffset : lineDashOffset;
+        strokeState.lineJoin = textStrokeStyle.getLineJoin() || defaultLineJoin;
+        strokeState.lineWidth = lineWidth === void 0 ? defaultLineWidth : lineWidth;
+        strokeState.miterLimit = miterLimit === void 0 ? defaultMiterLimit : miterLimit;
+        strokeState.strokeStyle = asColorLike(
+          textStrokeStyle.getColor() || defaultStrokeStyle
+        );
+      }
+      textState = this.textState_;
+      const font = textStyle.getFont() || defaultFont;
+      registerFont(font);
+      const textScale = textStyle.getScaleArray();
+      textState.overflow = textStyle.getOverflow();
+      textState.font = font;
+      textState.maxAngle = textStyle.getMaxAngle();
+      textState.placement = textStyle.getPlacement();
+      textState.textAlign = textStyle.getTextAlign();
+      textState.repeat = textStyle.getRepeat();
+      textState.justify = textStyle.getJustify();
+      textState.textBaseline = textStyle.getTextBaseline() || defaultTextBaseline;
+      textState.backgroundFill = textStyle.getBackgroundFill();
+      textState.backgroundStroke = textStyle.getBackgroundStroke();
+      textState.padding = textStyle.getPadding() || defaultPadding;
+      textState.scale = textScale === void 0 ? [1, 1] : textScale;
+      const textOffsetX = textStyle.getOffsetX();
+      const textOffsetY = textStyle.getOffsetY();
+      const textRotateWithView = textStyle.getRotateWithView();
+      const textRotation = textStyle.getRotation();
+      this.text_ = textStyle.getText() || "";
+      this.textOffsetX_ = textOffsetX === void 0 ? 0 : textOffsetX;
+      this.textOffsetY_ = textOffsetY === void 0 ? 0 : textOffsetY;
+      this.textRotateWithView_ = textRotateWithView === void 0 ? false : textRotateWithView;
+      this.textRotation_ = textRotation === void 0 ? 0 : textRotation;
+      this.strokeKey_ = strokeState ? (typeof strokeState.strokeStyle == "string" ? strokeState.strokeStyle : getUid(strokeState.strokeStyle)) + strokeState.lineCap + strokeState.lineDashOffset + "|" + strokeState.lineWidth + strokeState.lineJoin + strokeState.miterLimit + "[" + strokeState.lineDash.join() + "]" : "";
+      this.textKey_ = textState.font + textState.scale + (textState.textAlign || "?") + (textState.repeat || "?") + (textState.justify || "?") + (textState.textBaseline || "?");
+      this.fillKey_ = fillState && fillState.fillStyle ? typeof fillState.fillStyle == "string" ? fillState.fillStyle : "|" + getUid(fillState.fillStyle) : "";
+    }
+    this.declutterMode_ = textStyle.getDeclutterMode();
+    this.declutterImageWithText_ = sharedData;
+  }
+}
+const BATCH_CONSTRUCTORS = {
+  "Circle": CanvasPolygonBuilder,
+  "Default": CanvasBuilder,
+  "Image": CanvasImageBuilder,
+  "LineString": CanvasLineStringBuilder,
+  "Polygon": CanvasPolygonBuilder,
+  "Text": CanvasTextBuilder
+};
+class BuilderGroup {
+  /**
+   * @param {number} tolerance Tolerance.
+   * @param {import("../../extent.js").Extent} maxExtent Max extent.
+   * @param {number} resolution Resolution.
+   * @param {number} pixelRatio Pixel ratio.
+   */
+  constructor(tolerance, maxExtent, resolution, pixelRatio) {
+    this.tolerance_ = tolerance;
+    this.maxExtent_ = maxExtent;
+    this.pixelRatio_ = pixelRatio;
+    this.resolution_ = resolution;
+    this.buildersByZIndex_ = {};
+  }
+  /**
+   * @return {!Object<string, !Object<import("../canvas.js").BuilderType, import("./Builder.js").SerializableInstructions>>} The serializable instructions
+   */
+  finish() {
+    const builderInstructions = {};
+    for (const zKey in this.buildersByZIndex_) {
+      builderInstructions[zKey] = builderInstructions[zKey] || {};
+      const builders = this.buildersByZIndex_[zKey];
+      for (const builderKey in builders) {
+        const builderInstruction = builders[builderKey].finish();
+        builderInstructions[zKey][builderKey] = builderInstruction;
+      }
+    }
+    return builderInstructions;
+  }
+  /**
+   * @param {number|undefined} zIndex Z index.
+   * @param {import("../canvas.js").BuilderType} builderType Replay type.
+   * @return {import("../VectorContext.js").default} Replay.
+   */
+  getBuilder(zIndex, builderType) {
+    const zIndexKey = zIndex !== void 0 ? zIndex.toString() : "0";
+    let replays = this.buildersByZIndex_[zIndexKey];
+    if (replays === void 0) {
+      replays = {};
+      this.buildersByZIndex_[zIndexKey] = replays;
+    }
+    let replay = replays[builderType];
+    if (replay === void 0) {
+      const Constructor = BATCH_CONSTRUCTORS[builderType];
+      replay = new Constructor(
+        this.tolerance_,
+        this.maxExtent_,
+        this.resolution_,
+        this.pixelRatio_
+      );
+      replays[builderType] = replay;
+    }
+    return replay;
+  }
+}
+function drawTextOnPath(flatCoordinates, offset2, end2, stride, text, startM, maxAngle, scale2, measureAndCacheTextWidth2, font, cache2, rotation) {
+  let x2 = flatCoordinates[offset2];
+  let y2 = flatCoordinates[offset2 + 1];
+  let x1 = 0;
+  let y1 = 0;
+  let segmentLength = 0;
+  let segmentM = 0;
+  function advance() {
+    x1 = x2;
+    y1 = y2;
+    offset2 += stride;
+    x2 = flatCoordinates[offset2];
+    y2 = flatCoordinates[offset2 + 1];
+    segmentM += segmentLength;
+    segmentLength = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+  }
+  do {
+    advance();
+  } while (offset2 < end2 - stride && segmentM + segmentLength < startM);
+  let interpolate = segmentLength === 0 ? 0 : (startM - segmentM) / segmentLength;
+  const beginX = lerp(x1, x2, interpolate);
+  const beginY = lerp(y1, y2, interpolate);
+  const startOffset = offset2 - stride;
+  const startLength = segmentM;
+  const endM = startM + scale2 * measureAndCacheTextWidth2(font, text, cache2);
+  while (offset2 < end2 - stride && segmentM + segmentLength < endM) {
+    advance();
+  }
+  interpolate = segmentLength === 0 ? 0 : (endM - segmentM) / segmentLength;
+  const endX = lerp(x1, x2, interpolate);
+  const endY = lerp(y1, y2, interpolate);
+  let reverse;
+  if (rotation) {
+    const flat = [beginX, beginY, endX, endY];
+    rotate(flat, 0, 4, 2, rotation, flat, flat);
+    reverse = flat[0] > flat[2];
+  } else {
+    reverse = beginX > endX;
+  }
+  const PI = Math.PI;
+  const result = [];
+  const singleSegment = startOffset + stride === offset2;
+  offset2 = startOffset;
+  segmentLength = 0;
+  segmentM = startLength;
+  x2 = flatCoordinates[offset2];
+  y2 = flatCoordinates[offset2 + 1];
+  let previousAngle;
+  if (singleSegment) {
+    advance();
+    previousAngle = Math.atan2(y2 - y1, x2 - x1);
+    if (reverse) {
+      previousAngle += previousAngle > 0 ? -PI : PI;
+    }
+    const x3 = (endX + beginX) / 2;
+    const y3 = (endY + beginY) / 2;
+    result[0] = [x3, y3, (endM - startM) / 2, previousAngle, text];
+    return result;
+  }
+  text = text.replace(/\n/g, " ");
+  for (let i = 0, ii = text.length; i < ii; ) {
+    advance();
+    let angle = Math.atan2(y2 - y1, x2 - x1);
+    if (reverse) {
+      angle += angle > 0 ? -PI : PI;
+    }
+    if (previousAngle !== void 0) {
+      let delta = angle - previousAngle;
+      delta += delta > PI ? -2 * PI : delta < -PI ? 2 * PI : 0;
+      if (Math.abs(delta) > maxAngle) {
+        return null;
+      }
+    }
+    previousAngle = angle;
+    const iStart = i;
+    let charLength = 0;
+    for (; i < ii; ++i) {
+      const index = reverse ? ii - i - 1 : i;
+      const len = scale2 * measureAndCacheTextWidth2(font, text[index], cache2);
+      if (offset2 + stride < end2 && segmentM + segmentLength < startM + charLength + len / 2) {
+        break;
+      }
+      charLength += len;
+    }
+    if (i === iStart) {
+      continue;
+    }
+    const chars = reverse ? text.substring(ii - iStart, ii - i) : text.substring(iStart, i);
+    interpolate = segmentLength === 0 ? 0 : (startM + charLength / 2 - segmentM) / segmentLength;
+    const x3 = lerp(x1, x2, interpolate);
+    const y3 = lerp(y1, y2, interpolate);
+    result.push([x3, y3, charLength / 2, angle, chars]);
+    startM += charLength;
+  }
+  return result;
+}
+function lineStringLength(flatCoordinates, offset2, end2, stride) {
+  let x1 = flatCoordinates[offset2];
+  let y1 = flatCoordinates[offset2 + 1];
+  let length = 0;
+  for (let i = offset2 + stride; i < end2; i += stride) {
+    const x2 = flatCoordinates[i];
+    const y2 = flatCoordinates[i + 1];
+    length += Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+    x1 = x2;
+    y1 = y2;
+  }
+  return length;
+}
+const tmpExtent = createEmpty();
+const p1 = [];
+const p2 = [];
+const p3 = [];
+const p4 = [];
+function getDeclutterBox(replayImageOrLabelArgs) {
+  return replayImageOrLabelArgs[3].declutterBox;
+}
+const rtlRegEx = new RegExp(
+  /* eslint-disable prettier/prettier */
+  "[" + String.fromCharCode(1425) + "-" + String.fromCharCode(2303) + String.fromCharCode(64285) + "-" + String.fromCharCode(65023) + String.fromCharCode(65136) + "-" + String.fromCharCode(65276) + String.fromCharCode(67584) + "-" + String.fromCharCode(69631) + String.fromCharCode(124928) + "-" + String.fromCharCode(126975) + "]"
+  /* eslint-enable prettier/prettier */
+);
+function horizontalTextAlign(text, align) {
+  if (align === "start") {
+    align = rtlRegEx.test(text) ? "right" : "left";
+  } else if (align === "end") {
+    align = rtlRegEx.test(text) ? "left" : "right";
+  }
+  return TEXT_ALIGN[align];
+}
+function createTextChunks(acc, line, i) {
+  if (i > 0) {
+    acc.push("\n", "");
+  }
+  acc.push(line, "");
+  return acc;
+}
+class Executor {
+  /**
+   * @param {number} resolution Resolution.
+   * @param {number} pixelRatio Pixel ratio.
+   * @param {boolean} overlaps The replay can have overlapping geometries.
+   * @param {import("../canvas.js").SerializableInstructions} instructions The serializable instructions.
+   * @param {boolean} [deferredRendering] Enable deferred rendering.
+   */
+  constructor(resolution, pixelRatio, overlaps, instructions, deferredRendering) {
+    this.overlaps = overlaps;
+    this.pixelRatio = pixelRatio;
+    this.resolution = resolution;
+    this.alignAndScaleFill_;
+    this.instructions = instructions.instructions;
+    this.coordinates = instructions.coordinates;
+    this.coordinateCache_ = {};
+    this.renderedTransform_ = create();
+    this.hitDetectionInstructions = instructions.hitDetectionInstructions;
+    this.pixelCoordinates_ = null;
+    this.viewRotation_ = 0;
+    this.fillStates = instructions.fillStates || {};
+    this.strokeStates = instructions.strokeStates || {};
+    this.textStates = instructions.textStates || {};
+    this.widths_ = {};
+    this.labels_ = {};
+    this.zIndexContext_ = deferredRendering ? new ZIndexContext() : null;
+  }
+  /**
+   * @return {ZIndexContext} ZIndex context.
+   */
+  getZIndexContext() {
+    return this.zIndexContext_;
+  }
+  /**
+   * @param {string|Array<string>} text Text.
+   * @param {string} textKey Text style key.
+   * @param {string} fillKey Fill style key.
+   * @param {string} strokeKey Stroke style key.
+   * @return {import("../canvas.js").Label} Label.
+   */
+  createLabel(text, textKey, fillKey, strokeKey) {
+    const key = text + textKey + fillKey + strokeKey;
+    if (this.labels_[key]) {
+      return this.labels_[key];
+    }
+    const strokeState = strokeKey ? this.strokeStates[strokeKey] : null;
+    const fillState = fillKey ? this.fillStates[fillKey] : null;
+    const textState = this.textStates[textKey];
+    const pixelRatio = this.pixelRatio;
+    const scale2 = [
+      textState.scale[0] * pixelRatio,
+      textState.scale[1] * pixelRatio
+    ];
+    const textIsArray = Array.isArray(text);
+    const align = textState.justify ? TEXT_ALIGN[textState.justify] : horizontalTextAlign(
+      Array.isArray(text) ? text[0] : text,
+      textState.textAlign || defaultTextAlign
+    );
+    const strokeWidth = strokeKey && strokeState.lineWidth ? strokeState.lineWidth : 0;
+    const chunks = textIsArray ? text : text.split("\n").reduce(createTextChunks, []);
+    const { width, height, widths, heights, lineWidths } = getTextDimensions(
+      textState,
+      chunks
+    );
+    const renderWidth = width + strokeWidth;
+    const contextInstructions = [];
+    const w2 = (renderWidth + 2) * scale2[0];
+    const h = (height + strokeWidth) * scale2[1];
+    const label = {
+      width: w2 < 0 ? Math.floor(w2) : Math.ceil(w2),
+      height: h < 0 ? Math.floor(h) : Math.ceil(h),
+      contextInstructions
+    };
+    if (scale2[0] != 1 || scale2[1] != 1) {
+      contextInstructions.push("scale", scale2);
+    }
+    if (strokeKey) {
+      contextInstructions.push("strokeStyle", strokeState.strokeStyle);
+      contextInstructions.push("lineWidth", strokeWidth);
+      contextInstructions.push("lineCap", strokeState.lineCap);
+      contextInstructions.push("lineJoin", strokeState.lineJoin);
+      contextInstructions.push("miterLimit", strokeState.miterLimit);
+      contextInstructions.push("setLineDash", [strokeState.lineDash]);
+      contextInstructions.push("lineDashOffset", strokeState.lineDashOffset);
+    }
+    if (fillKey) {
+      contextInstructions.push("fillStyle", fillState.fillStyle);
+    }
+    contextInstructions.push("textBaseline", "middle");
+    contextInstructions.push("textAlign", "center");
+    const leftRight = 0.5 - align;
+    let x2 = align * renderWidth + leftRight * strokeWidth;
+    const strokeInstructions = [];
+    const fillInstructions = [];
+    let lineHeight = 0;
+    let lineOffset = 0;
+    let widthHeightIndex = 0;
+    let lineWidthIndex = 0;
+    let previousFont;
+    for (let i = 0, ii = chunks.length; i < ii; i += 2) {
+      const text2 = chunks[i];
+      if (text2 === "\n") {
+        lineOffset += lineHeight;
+        lineHeight = 0;
+        x2 = align * renderWidth + leftRight * strokeWidth;
+        ++lineWidthIndex;
+        continue;
+      }
+      const font = chunks[i + 1] || textState.font;
+      if (font !== previousFont) {
+        if (strokeKey) {
+          strokeInstructions.push("font", font);
+        }
+        if (fillKey) {
+          fillInstructions.push("font", font);
+        }
+        previousFont = font;
+      }
+      lineHeight = Math.max(lineHeight, heights[widthHeightIndex]);
+      const fillStrokeArgs = [
+        text2,
+        x2 + leftRight * widths[widthHeightIndex] + align * (widths[widthHeightIndex] - lineWidths[lineWidthIndex]),
+        0.5 * (strokeWidth + lineHeight) + lineOffset
+      ];
+      x2 += widths[widthHeightIndex];
+      if (strokeKey) {
+        strokeInstructions.push("strokeText", fillStrokeArgs);
+      }
+      if (fillKey) {
+        fillInstructions.push("fillText", fillStrokeArgs);
+      }
+      ++widthHeightIndex;
+    }
+    Array.prototype.push.apply(contextInstructions, strokeInstructions);
+    Array.prototype.push.apply(contextInstructions, fillInstructions);
+    this.labels_[key] = label;
+    return label;
+  }
+  /**
+   * @param {CanvasRenderingContext2D} context Context.
+   * @param {import("../../coordinate.js").Coordinate} p1 1st point of the background box.
+   * @param {import("../../coordinate.js").Coordinate} p2 2nd point of the background box.
+   * @param {import("../../coordinate.js").Coordinate} p3 3rd point of the background box.
+   * @param {import("../../coordinate.js").Coordinate} p4 4th point of the background box.
+   * @param {Array<*>} fillInstruction Fill instruction.
+   * @param {Array<*>} strokeInstruction Stroke instruction.
+   */
+  replayTextBackground_(context, p12, p22, p32, p42, fillInstruction2, strokeInstruction2) {
+    context.beginPath();
+    context.moveTo.apply(context, p12);
+    context.lineTo.apply(context, p22);
+    context.lineTo.apply(context, p32);
+    context.lineTo.apply(context, p42);
+    context.lineTo.apply(context, p12);
+    if (fillInstruction2) {
+      this.alignAndScaleFill_ = /** @type {number} */
+      fillInstruction2[2];
+      this.fill_(context);
+    }
+    if (strokeInstruction2) {
+      this.setStrokeStyle_(
+        context,
+        /** @type {Array<*>} */
+        strokeInstruction2
+      );
+      context.stroke();
+    }
+  }
+  /**
+   * @private
+   * @param {number} sheetWidth Width of the sprite sheet.
+   * @param {number} sheetHeight Height of the sprite sheet.
+   * @param {number} centerX X.
+   * @param {number} centerY Y.
+   * @param {number} width Width.
+   * @param {number} height Height.
+   * @param {number} anchorX Anchor X.
+   * @param {number} anchorY Anchor Y.
+   * @param {number} originX Origin X.
+   * @param {number} originY Origin Y.
+   * @param {number} rotation Rotation.
+   * @param {import("../../size.js").Size} scale Scale.
+   * @param {boolean} snapToPixel Snap to pixel.
+   * @param {Array<number>} padding Padding.
+   * @param {boolean} fillStroke Background fill or stroke.
+   * @param {import("../../Feature.js").FeatureLike} feature Feature.
+   * @return {ImageOrLabelDimensions} Dimensions for positioning and decluttering the image or label.
+   */
+  calculateImageOrLabelDimensions_(sheetWidth, sheetHeight, centerX, centerY, width, height, anchorX, anchorY, originX, originY, rotation, scale2, snapToPixel, padding, fillStroke, feature) {
+    anchorX *= scale2[0];
+    anchorY *= scale2[1];
+    let x2 = centerX - anchorX;
+    let y2 = centerY - anchorY;
+    const w2 = width + originX > sheetWidth ? sheetWidth - originX : width;
+    const h = height + originY > sheetHeight ? sheetHeight - originY : height;
+    const boxW = padding[3] + w2 * scale2[0] + padding[1];
+    const boxH = padding[0] + h * scale2[1] + padding[2];
+    const boxX = x2 - padding[3];
+    const boxY = y2 - padding[0];
+    if (fillStroke || rotation !== 0) {
+      p1[0] = boxX;
+      p4[0] = boxX;
+      p1[1] = boxY;
+      p2[1] = boxY;
+      p2[0] = boxX + boxW;
+      p3[0] = p2[0];
+      p3[1] = boxY + boxH;
+      p4[1] = p3[1];
+    }
+    let transform2;
+    if (rotation !== 0) {
+      transform2 = compose(
+        create(),
+        centerX,
+        centerY,
+        1,
+        1,
+        rotation,
+        -centerX,
+        -centerY
+      );
+      apply(transform2, p1);
+      apply(transform2, p2);
+      apply(transform2, p3);
+      apply(transform2, p4);
+      createOrUpdate$2(
+        Math.min(p1[0], p2[0], p3[0], p4[0]),
+        Math.min(p1[1], p2[1], p3[1], p4[1]),
+        Math.max(p1[0], p2[0], p3[0], p4[0]),
+        Math.max(p1[1], p2[1], p3[1], p4[1]),
+        tmpExtent
+      );
+    } else {
+      createOrUpdate$2(
+        Math.min(boxX, boxX + boxW),
+        Math.min(boxY, boxY + boxH),
+        Math.max(boxX, boxX + boxW),
+        Math.max(boxY, boxY + boxH),
+        tmpExtent
+      );
+    }
+    if (snapToPixel) {
+      x2 = Math.round(x2);
+      y2 = Math.round(y2);
+    }
+    return {
+      drawImageX: x2,
+      drawImageY: y2,
+      drawImageW: w2,
+      drawImageH: h,
+      originX,
+      originY,
+      declutterBox: {
+        minX: tmpExtent[0],
+        minY: tmpExtent[1],
+        maxX: tmpExtent[2],
+        maxY: tmpExtent[3],
+        value: feature
+      },
+      canvasTransform: transform2,
+      scale: scale2
+    };
+  }
+  /**
+   * @private
+   * @param {CanvasRenderingContext2D} context Context.
+   * @param {import('../../size.js').Size} scaledCanvasSize Scaled canvas size.
+   * @param {import("../canvas.js").Label|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement} imageOrLabel Image.
+   * @param {ImageOrLabelDimensions} dimensions Dimensions.
+   * @param {number} opacity Opacity.
+   * @param {Array<*>} fillInstruction Fill instruction.
+   * @param {Array<*>} strokeInstruction Stroke instruction.
+   * @return {boolean} The image or label was rendered.
+   */
+  replayImageOrLabel_(context, scaledCanvasSize, imageOrLabel, dimensions, opacity, fillInstruction2, strokeInstruction2) {
+    const fillStroke = !!(fillInstruction2 || strokeInstruction2);
+    const box = dimensions.declutterBox;
+    const strokePadding = strokeInstruction2 ? strokeInstruction2[2] * dimensions.scale[0] / 2 : 0;
+    const intersects2 = box.minX - strokePadding <= scaledCanvasSize[0] && box.maxX + strokePadding >= 0 && box.minY - strokePadding <= scaledCanvasSize[1] && box.maxY + strokePadding >= 0;
+    if (intersects2) {
+      if (fillStroke) {
+        this.replayTextBackground_(
+          context,
+          p1,
+          p2,
+          p3,
+          p4,
+          /** @type {Array<*>} */
+          fillInstruction2,
+          /** @type {Array<*>} */
+          strokeInstruction2
+        );
+      }
+      drawImageOrLabel(
+        context,
+        dimensions.canvasTransform,
+        opacity,
+        imageOrLabel,
+        dimensions.originX,
+        dimensions.originY,
+        dimensions.drawImageW,
+        dimensions.drawImageH,
+        dimensions.drawImageX,
+        dimensions.drawImageY,
+        dimensions.scale
+      );
+    }
+    return true;
+  }
+  /**
+   * @private
+   * @param {CanvasRenderingContext2D} context Context.
+   */
+  fill_(context) {
+    const alignAndScale = this.alignAndScaleFill_;
+    if (alignAndScale) {
+      const origin = apply(this.renderedTransform_, [0, 0]);
+      const repeatSize = 512 * this.pixelRatio;
+      context.save();
+      context.translate(origin[0] % repeatSize, origin[1] % repeatSize);
+      if (alignAndScale !== 1) {
+        context.scale(alignAndScale, alignAndScale);
+      }
+      context.rotate(this.viewRotation_);
+    }
+    context.fill();
+    if (alignAndScale) {
+      context.restore();
+    }
+  }
+  /**
+   * @private
+   * @param {CanvasRenderingContext2D} context Context.
+   * @param {Array<*>} instruction Instruction.
+   */
+  setStrokeStyle_(context, instruction) {
+    context.strokeStyle = /** @type {import("../../colorlike.js").ColorLike} */
+    instruction[1];
+    context.lineWidth = /** @type {number} */
+    instruction[2];
+    context.lineCap = /** @type {CanvasLineCap} */
+    instruction[3];
+    context.lineJoin = /** @type {CanvasLineJoin} */
+    instruction[4];
+    context.miterLimit = /** @type {number} */
+    instruction[5];
+    context.lineDashOffset = /** @type {number} */
+    instruction[7];
+    context.setLineDash(
+      /** @type {Array<number>} */
+      instruction[6]
+    );
+  }
+  /**
+   * @private
+   * @param {string|Array<string>} text The text to draw.
+   * @param {string} textKey The key of the text state.
+   * @param {string} strokeKey The key for the stroke state.
+   * @param {string} fillKey The key for the fill state.
+   * @return {{label: import("../canvas.js").Label, anchorX: number, anchorY: number}} The text image and its anchor.
+   */
+  drawLabelWithPointPlacement_(text, textKey, strokeKey, fillKey) {
+    const textState = this.textStates[textKey];
+    const label = this.createLabel(text, textKey, fillKey, strokeKey);
+    const strokeState = this.strokeStates[strokeKey];
+    const pixelRatio = this.pixelRatio;
+    const align = horizontalTextAlign(
+      Array.isArray(text) ? text[0] : text,
+      textState.textAlign || defaultTextAlign
+    );
+    const baseline = TEXT_ALIGN[textState.textBaseline || defaultTextBaseline];
+    const strokeWidth = strokeState && strokeState.lineWidth ? strokeState.lineWidth : 0;
+    const width = label.width / pixelRatio - 2 * textState.scale[0];
+    const anchorX = align * width + 2 * (0.5 - align) * strokeWidth;
+    const anchorY = baseline * label.height / pixelRatio + 2 * (0.5 - baseline) * strokeWidth;
+    return {
+      label,
+      anchorX,
+      anchorY
+    };
+  }
+  /**
+   * @private
+   * @param {CanvasRenderingContext2D} context Context.
+   * @param {import('../../size.js').Size} scaledCanvasSize Scaled canvas size
+   * @param {import("../../transform.js").Transform} transform Transform.
+   * @param {Array<*>} instructions Instructions array.
+   * @param {boolean} snapToPixel Snap point symbols and text to integer pixels.
+   * @param {FeatureCallback<T>} [featureCallback] Feature callback.
+   * @param {import("../../extent.js").Extent} [hitExtent] Only check
+   *     features that intersect this extent.
+   * @param {import("rbush").default} [declutterTree] Declutter tree.
+   * @return {T|undefined} Callback result.
+   * @template T
+   */
+  execute_(context, scaledCanvasSize, transform2, instructions, snapToPixel, featureCallback, hitExtent, declutterTree) {
+    const zIndexContext = this.zIndexContext_;
+    let pixelCoordinates;
+    if (this.pixelCoordinates_ && equals(transform2, this.renderedTransform_)) {
+      pixelCoordinates = this.pixelCoordinates_;
+    } else {
+      if (!this.pixelCoordinates_) {
+        this.pixelCoordinates_ = [];
+      }
+      pixelCoordinates = transform2D(
+        this.coordinates,
+        0,
+        this.coordinates.length,
+        2,
+        transform2,
+        this.pixelCoordinates_
+      );
+      setFromArray(this.renderedTransform_, transform2);
+    }
+    let i = 0;
+    const ii = instructions.length;
+    let d2 = 0;
+    let dd;
+    let anchorX, anchorY, declutterMode, prevX, prevY, roundX, roundY, image, text, textKey, strokeKey, fillKey;
+    let pendingFill = 0;
+    let pendingStroke = 0;
+    let lastFillInstruction = null;
+    let lastStrokeInstruction = null;
+    const coordinateCache = this.coordinateCache_;
+    const viewRotation = this.viewRotation_;
+    const viewRotationFromTransform = Math.round(Math.atan2(-transform2[1], transform2[0]) * 1e12) / 1e12;
+    const state = (
+      /** @type {import("../../render.js").State} */
+      {
+        context,
+        pixelRatio: this.pixelRatio,
+        resolution: this.resolution,
+        rotation: viewRotation
+      }
+    );
+    const batchSize = this.instructions != instructions || this.overlaps ? 0 : 200;
+    let feature;
+    let x2, y2, currentGeometry;
+    while (i < ii) {
+      const instruction = instructions[i];
+      const type = (
+        /** @type {import("./Instruction.js").default} */
+        instruction[0]
+      );
+      switch (type) {
+        case Instruction.BEGIN_GEOMETRY:
+          feature = /** @type {import("../../Feature.js").FeatureLike} */
+          instruction[1];
+          currentGeometry = instruction[3];
+          if (!feature.getGeometry()) {
+            i = /** @type {number} */
+            instruction[2];
+          } else if (hitExtent !== void 0 && !intersects$1(hitExtent, currentGeometry.getExtent())) {
+            i = /** @type {number} */
+            instruction[2] + 1;
+          } else {
+            ++i;
+          }
+          if (zIndexContext) {
+            zIndexContext.zIndex = instruction[4];
+          }
+          break;
+        case Instruction.BEGIN_PATH:
+          if (pendingFill > batchSize) {
+            this.fill_(context);
+            pendingFill = 0;
+          }
+          if (pendingStroke > batchSize) {
+            context.stroke();
+            pendingStroke = 0;
+          }
+          if (!pendingFill && !pendingStroke) {
+            context.beginPath();
+            prevX = NaN;
+            prevY = NaN;
+          }
+          ++i;
+          break;
+        case Instruction.CIRCLE:
+          d2 = /** @type {number} */
+          instruction[1];
+          const x1 = pixelCoordinates[d2];
+          const y1 = pixelCoordinates[d2 + 1];
+          const x22 = pixelCoordinates[d2 + 2];
+          const y22 = pixelCoordinates[d2 + 3];
+          const dx = x22 - x1;
+          const dy = y22 - y1;
+          const r2 = Math.sqrt(dx * dx + dy * dy);
+          context.moveTo(x1 + r2, y1);
+          context.arc(x1, y1, r2, 0, 2 * Math.PI, true);
+          ++i;
+          break;
+        case Instruction.CLOSE_PATH:
+          context.closePath();
+          ++i;
+          break;
+        case Instruction.CUSTOM:
+          d2 = /** @type {number} */
+          instruction[1];
+          dd = instruction[2];
+          const geometry = (
+            /** @type {import("../../geom/SimpleGeometry.js").default} */
+            instruction[3]
+          );
+          const renderer = instruction[4];
+          const fn2 = instruction[5];
+          state.geometry = geometry;
+          state.feature = feature;
+          if (!(i in coordinateCache)) {
+            coordinateCache[i] = [];
+          }
+          const coords = coordinateCache[i];
+          if (fn2) {
+            fn2(pixelCoordinates, d2, dd, 2, coords);
+          } else {
+            coords[0] = pixelCoordinates[d2];
+            coords[1] = pixelCoordinates[d2 + 1];
+            coords.length = 2;
+          }
+          if (zIndexContext) {
+            zIndexContext.zIndex = instruction[6];
+          }
+          renderer(coords, state);
+          ++i;
+          break;
+        case Instruction.DRAW_IMAGE:
+          d2 = /** @type {number} */
+          instruction[1];
+          dd = /** @type {number} */
+          instruction[2];
+          image = /** @type {HTMLCanvasElement|HTMLVideoElement|HTMLImageElement} */
+          instruction[3];
+          anchorX = /** @type {number} */
+          instruction[4];
+          anchorY = /** @type {number} */
+          instruction[5];
+          let height = (
+            /** @type {number} */
+            instruction[6]
+          );
+          const opacity = (
+            /** @type {number} */
+            instruction[7]
+          );
+          const originX = (
+            /** @type {number} */
+            instruction[8]
+          );
+          const originY = (
+            /** @type {number} */
+            instruction[9]
+          );
+          const rotateWithView = (
+            /** @type {boolean} */
+            instruction[10]
+          );
+          let rotation = (
+            /** @type {number} */
+            instruction[11]
+          );
+          const scale2 = (
+            /** @type {import("../../size.js").Size} */
+            instruction[12]
+          );
+          let width = (
+            /** @type {number} */
+            instruction[13]
+          );
+          declutterMode = instruction[14] || "declutter";
+          const declutterImageWithText = (
+            /** @type {{args: import("../canvas.js").DeclutterImageWithText, declutterMode: import('../../style/Style.js').DeclutterMode}} */
+            instruction[15]
+          );
+          if (!image && instruction.length >= 20) {
+            text = /** @type {string} */
+            instruction[19];
+            textKey = /** @type {string} */
+            instruction[20];
+            strokeKey = /** @type {string} */
+            instruction[21];
+            fillKey = /** @type {string} */
+            instruction[22];
+            const labelWithAnchor = this.drawLabelWithPointPlacement_(
+              text,
+              textKey,
+              strokeKey,
+              fillKey
+            );
+            image = labelWithAnchor.label;
+            instruction[3] = image;
+            const textOffsetX = (
+              /** @type {number} */
+              instruction[23]
+            );
+            anchorX = (labelWithAnchor.anchorX - textOffsetX) * this.pixelRatio;
+            instruction[4] = anchorX;
+            const textOffsetY = (
+              /** @type {number} */
+              instruction[24]
+            );
+            anchorY = (labelWithAnchor.anchorY - textOffsetY) * this.pixelRatio;
+            instruction[5] = anchorY;
+            height = image.height;
+            instruction[6] = height;
+            width = image.width;
+            instruction[13] = width;
+          }
+          let geometryWidths;
+          if (instruction.length > 25) {
+            geometryWidths = /** @type {number} */
+            instruction[25];
+          }
+          let padding, backgroundFill, backgroundStroke;
+          if (instruction.length > 17) {
+            padding = /** @type {Array<number>} */
+            instruction[16];
+            backgroundFill = /** @type {boolean} */
+            instruction[17];
+            backgroundStroke = /** @type {boolean} */
+            instruction[18];
+          } else {
+            padding = defaultPadding;
+            backgroundFill = false;
+            backgroundStroke = false;
+          }
+          if (rotateWithView && viewRotationFromTransform) {
+            rotation += viewRotation;
+          } else if (!rotateWithView && !viewRotationFromTransform) {
+            rotation -= viewRotation;
+          }
+          let widthIndex = 0;
+          for (; d2 < dd; d2 += 2) {
+            if (geometryWidths && geometryWidths[widthIndex++] < width / this.pixelRatio) {
+              continue;
+            }
+            const dimensions = this.calculateImageOrLabelDimensions_(
+              image.width,
+              image.height,
+              pixelCoordinates[d2],
+              pixelCoordinates[d2 + 1],
+              width,
+              height,
+              anchorX,
+              anchorY,
+              originX,
+              originY,
+              rotation,
+              scale2,
+              snapToPixel,
+              padding,
+              backgroundFill || backgroundStroke,
+              feature
+            );
+            const args = [
+              context,
+              scaledCanvasSize,
+              image,
+              dimensions,
+              opacity,
+              backgroundFill ? (
+                /** @type {Array<*>} */
+                lastFillInstruction
+              ) : null,
+              backgroundStroke ? (
+                /** @type {Array<*>} */
+                lastStrokeInstruction
+              ) : null
+            ];
+            if (declutterTree) {
+              let imageArgs, imageDeclutterMode, imageDeclutterBox;
+              if (declutterImageWithText) {
+                const index = dd - d2;
+                if (!declutterImageWithText[index]) {
+                  declutterImageWithText[index] = { args, declutterMode };
+                  continue;
+                }
+                const imageDeclutter = declutterImageWithText[index];
+                imageArgs = imageDeclutter.args;
+                imageDeclutterMode = imageDeclutter.declutterMode;
+                delete declutterImageWithText[index];
+                imageDeclutterBox = getDeclutterBox(imageArgs);
+              }
+              let renderImage, renderText;
+              if (imageArgs && (imageDeclutterMode !== "declutter" || !declutterTree.collides(imageDeclutterBox))) {
+                renderImage = true;
+              }
+              if (declutterMode !== "declutter" || !declutterTree.collides(dimensions.declutterBox)) {
+                renderText = true;
+              }
+              if (imageDeclutterMode === "declutter" && declutterMode === "declutter") {
+                const render2 = renderImage && renderText;
+                renderImage = render2;
+                renderText = render2;
+              }
+              if (renderImage) {
+                if (imageDeclutterMode !== "none") {
+                  declutterTree.insert(imageDeclutterBox);
+                }
+                this.replayImageOrLabel_.apply(this, imageArgs);
+              }
+              if (renderText) {
+                if (declutterMode !== "none") {
+                  declutterTree.insert(dimensions.declutterBox);
+                }
+                this.replayImageOrLabel_.apply(this, args);
+              }
+            } else {
+              this.replayImageOrLabel_.apply(this, args);
+            }
+          }
+          ++i;
+          break;
+        case Instruction.DRAW_CHARS:
+          const begin = (
+            /** @type {number} */
+            instruction[1]
+          );
+          const end2 = (
+            /** @type {number} */
+            instruction[2]
+          );
+          const baseline = (
+            /** @type {number} */
+            instruction[3]
+          );
+          const overflow = (
+            /** @type {number} */
+            instruction[4]
+          );
+          fillKey = /** @type {string} */
+          instruction[5];
+          const maxAngle = (
+            /** @type {number} */
+            instruction[6]
+          );
+          const measurePixelRatio = (
+            /** @type {number} */
+            instruction[7]
+          );
+          const offsetY = (
+            /** @type {number} */
+            instruction[8]
+          );
+          strokeKey = /** @type {string} */
+          instruction[9];
+          const strokeWidth = (
+            /** @type {number} */
+            instruction[10]
+          );
+          text = /** @type {string} */
+          instruction[11];
+          textKey = /** @type {string} */
+          instruction[12];
+          const pixelRatioScale = [
+            /** @type {number} */
+            instruction[13],
+            /** @type {number} */
+            instruction[13]
+          ];
+          declutterMode = instruction[14] || "declutter";
+          const textState = this.textStates[textKey];
+          const font = textState.font;
+          const textScale = [
+            textState.scale[0] * measurePixelRatio,
+            textState.scale[1] * measurePixelRatio
+          ];
+          let cachedWidths;
+          if (font in this.widths_) {
+            cachedWidths = this.widths_[font];
+          } else {
+            cachedWidths = {};
+            this.widths_[font] = cachedWidths;
+          }
+          const pathLength = lineStringLength(pixelCoordinates, begin, end2, 2);
+          const textLength = Math.abs(textScale[0]) * measureAndCacheTextWidth(font, text, cachedWidths);
+          if (overflow || textLength <= pathLength) {
+            const textAlign = this.textStates[textKey].textAlign;
+            const startM = (pathLength - textLength) * horizontalTextAlign(text, textAlign);
+            const parts = drawTextOnPath(
+              pixelCoordinates,
+              begin,
+              end2,
+              2,
+              text,
+              startM,
+              maxAngle,
+              Math.abs(textScale[0]),
+              measureAndCacheTextWidth,
+              font,
+              cachedWidths,
+              viewRotationFromTransform ? 0 : this.viewRotation_
+            );
+            drawChars: if (parts) {
+              const replayImageOrLabelArgs = [];
+              let c, cc, chars, label, part;
+              if (strokeKey) {
+                for (c = 0, cc = parts.length; c < cc; ++c) {
+                  part = parts[c];
+                  chars = /** @type {string} */
+                  part[4];
+                  label = this.createLabel(chars, textKey, "", strokeKey);
+                  anchorX = /** @type {number} */
+                  part[2] + (textScale[0] < 0 ? -strokeWidth : strokeWidth);
+                  anchorY = baseline * label.height + (0.5 - baseline) * 2 * strokeWidth * textScale[1] / textScale[0] - offsetY;
+                  const dimensions = this.calculateImageOrLabelDimensions_(
+                    label.width,
+                    label.height,
+                    part[0],
+                    part[1],
+                    label.width,
+                    label.height,
+                    anchorX,
+                    anchorY,
+                    0,
+                    0,
+                    part[3],
+                    pixelRatioScale,
+                    false,
+                    defaultPadding,
+                    false,
+                    feature
+                  );
+                  if (declutterTree && declutterMode === "declutter" && declutterTree.collides(dimensions.declutterBox)) {
+                    break drawChars;
+                  }
+                  replayImageOrLabelArgs.push([
+                    context,
+                    scaledCanvasSize,
+                    label,
+                    dimensions,
+                    1,
+                    null,
+                    null
+                  ]);
+                }
+              }
+              if (fillKey) {
+                for (c = 0, cc = parts.length; c < cc; ++c) {
+                  part = parts[c];
+                  chars = /** @type {string} */
+                  part[4];
+                  label = this.createLabel(chars, textKey, fillKey, "");
+                  anchorX = /** @type {number} */
+                  part[2];
+                  anchorY = baseline * label.height - offsetY;
+                  const dimensions = this.calculateImageOrLabelDimensions_(
+                    label.width,
+                    label.height,
+                    part[0],
+                    part[1],
+                    label.width,
+                    label.height,
+                    anchorX,
+                    anchorY,
+                    0,
+                    0,
+                    part[3],
+                    pixelRatioScale,
+                    false,
+                    defaultPadding,
+                    false,
+                    feature
+                  );
+                  if (declutterTree && declutterMode === "declutter" && declutterTree.collides(dimensions.declutterBox)) {
+                    break drawChars;
+                  }
+                  replayImageOrLabelArgs.push([
+                    context,
+                    scaledCanvasSize,
+                    label,
+                    dimensions,
+                    1,
+                    null,
+                    null
+                  ]);
+                }
+              }
+              if (declutterTree && declutterMode !== "none") {
+                declutterTree.load(replayImageOrLabelArgs.map(getDeclutterBox));
+              }
+              for (let i2 = 0, ii2 = replayImageOrLabelArgs.length; i2 < ii2; ++i2) {
+                this.replayImageOrLabel_.apply(this, replayImageOrLabelArgs[i2]);
+              }
+            }
+          }
+          ++i;
+          break;
+        case Instruction.END_GEOMETRY:
+          if (featureCallback !== void 0) {
+            feature = /** @type {import("../../Feature.js").FeatureLike} */
+            instruction[1];
+            const result = featureCallback(
+              feature,
+              currentGeometry,
+              declutterMode
+            );
+            if (result) {
+              return result;
+            }
+          }
+          ++i;
+          break;
+        case Instruction.FILL:
+          if (batchSize) {
+            pendingFill++;
+          } else {
+            this.fill_(context);
+          }
+          ++i;
+          break;
+        case Instruction.MOVE_TO_LINE_TO:
+          d2 = /** @type {number} */
+          instruction[1];
+          dd = /** @type {number} */
+          instruction[2];
+          x2 = pixelCoordinates[d2];
+          y2 = pixelCoordinates[d2 + 1];
+          context.moveTo(x2, y2);
+          prevX = x2 + 0.5 | 0;
+          prevY = y2 + 0.5 | 0;
+          for (d2 += 2; d2 < dd; d2 += 2) {
+            x2 = pixelCoordinates[d2];
+            y2 = pixelCoordinates[d2 + 1];
+            roundX = x2 + 0.5 | 0;
+            roundY = y2 + 0.5 | 0;
+            if (d2 == dd - 2 || roundX !== prevX || roundY !== prevY) {
+              context.lineTo(x2, y2);
+              prevX = roundX;
+              prevY = roundY;
+            }
+          }
+          ++i;
+          break;
+        case Instruction.SET_FILL_STYLE:
+          lastFillInstruction = instruction;
+          this.alignAndScaleFill_ = instruction[2];
+          if (pendingFill) {
+            this.fill_(context);
+            pendingFill = 0;
+            if (pendingStroke) {
+              context.stroke();
+              pendingStroke = 0;
+            }
+          }
+          context.fillStyle = instruction[1];
+          ++i;
+          break;
+        case Instruction.SET_STROKE_STYLE:
+          lastStrokeInstruction = instruction;
+          if (pendingStroke) {
+            context.stroke();
+            pendingStroke = 0;
+          }
+          this.setStrokeStyle_(
+            context,
+            /** @type {Array<*>} */
+            instruction
+          );
+          ++i;
+          break;
+        case Instruction.STROKE:
+          if (batchSize) {
+            pendingStroke++;
+          } else {
+            context.stroke();
+          }
+          ++i;
+          break;
+        default:
+          ++i;
+          break;
+      }
+    }
+    if (pendingFill) {
+      this.fill_(context);
+    }
+    if (pendingStroke) {
+      context.stroke();
+    }
+    return void 0;
+  }
+  /**
+   * @param {CanvasRenderingContext2D} context Context.
+   * @param {import('../../size.js').Size} scaledCanvasSize Scaled canvas size.
+   * @param {import("../../transform.js").Transform} transform Transform.
+   * @param {number} viewRotation View rotation.
+   * @param {boolean} snapToPixel Snap point symbols and text to integer pixels.
+   * @param {import("rbush").default} [declutterTree] Declutter tree.
+   */
+  execute(context, scaledCanvasSize, transform2, viewRotation, snapToPixel, declutterTree) {
+    this.viewRotation_ = viewRotation;
+    this.execute_(
+      context,
+      scaledCanvasSize,
+      transform2,
+      this.instructions,
+      snapToPixel,
+      void 0,
+      void 0,
+      declutterTree
+    );
+  }
+  /**
+   * @param {CanvasRenderingContext2D} context Context.
+   * @param {import("../../transform.js").Transform} transform Transform.
+   * @param {number} viewRotation View rotation.
+   * @param {FeatureCallback<T>} [featureCallback] Feature callback.
+   * @param {import("../../extent.js").Extent} [hitExtent] Only check
+   *     features that intersect this extent.
+   * @return {T|undefined} Callback result.
+   * @template T
+   */
+  executeHitDetection(context, transform2, viewRotation, featureCallback, hitExtent) {
+    this.viewRotation_ = viewRotation;
+    return this.execute_(
+      context,
+      [context.canvas.width, context.canvas.height],
+      transform2,
+      this.hitDetectionInstructions,
+      true,
+      featureCallback,
+      hitExtent
+    );
+  }
+}
+const ALL = [
+  "Polygon",
+  "Circle",
+  "LineString",
+  "Image",
+  "Text",
+  "Default"
+];
+const DECLUTTER = ["Image", "Text"];
+const NON_DECLUTTER = ALL.filter(
+  (builderType) => !DECLUTTER.includes(builderType)
+);
+class ExecutorGroup {
+  /**
+   * @param {import("../../extent.js").Extent} maxExtent Max extent for clipping. When a
+   * `maxExtent` was set on the Builder for this executor group, the same `maxExtent`
+   * should be set here, unless the target context does not exceed that extent (which
+   * can be the case when rendering to tiles).
+   * @param {number} resolution Resolution.
+   * @param {number} pixelRatio Pixel ratio.
+   * @param {boolean} overlaps The executor group can have overlapping geometries.
+   * @param {!Object<string, !Object<import("../canvas.js").BuilderType, import("../canvas.js").SerializableInstructions>>} allInstructions
+   * The serializable instructions.
+   * @param {number} [renderBuffer] Optional rendering buffer.
+   * @param {boolean} [deferredRendering] Enable deferred rendering with renderDeferred().
+   */
+  constructor(maxExtent, resolution, pixelRatio, overlaps, allInstructions, renderBuffer, deferredRendering) {
+    this.maxExtent_ = maxExtent;
+    this.overlaps_ = overlaps;
+    this.pixelRatio_ = pixelRatio;
+    this.resolution_ = resolution;
+    this.renderBuffer_ = renderBuffer;
+    this.executorsByZIndex_ = {};
+    this.hitDetectionContext_ = null;
+    this.hitDetectionTransform_ = create();
+    this.renderedContext_ = null;
+    this.deferredZIndexContexts_ = {};
+    this.createExecutors_(allInstructions, deferredRendering);
+  }
+  /**
+   * @param {CanvasRenderingContext2D} context Context.
+   * @param {import("../../transform.js").Transform} transform Transform.
+   */
+  clip(context, transform2) {
+    const flatClipCoords = this.getClipCoords(transform2);
+    context.beginPath();
+    context.moveTo(flatClipCoords[0], flatClipCoords[1]);
+    context.lineTo(flatClipCoords[2], flatClipCoords[3]);
+    context.lineTo(flatClipCoords[4], flatClipCoords[5]);
+    context.lineTo(flatClipCoords[6], flatClipCoords[7]);
+    context.clip();
+  }
+  /**
+   * Create executors and populate them using the provided instructions.
+   * @private
+   * @param {!Object<string, !Object<string, import("../canvas.js").SerializableInstructions>>} allInstructions The serializable instructions
+   * @param {boolean} deferredRendering Enable deferred rendering.
+   */
+  createExecutors_(allInstructions, deferredRendering) {
+    for (const zIndex in allInstructions) {
+      let executors = this.executorsByZIndex_[zIndex];
+      if (executors === void 0) {
+        executors = {};
+        this.executorsByZIndex_[zIndex] = executors;
+      }
+      const instructionByZindex = allInstructions[zIndex];
+      for (const builderType in instructionByZindex) {
+        const instructions = instructionByZindex[builderType];
+        executors[builderType] = new Executor(
+          this.resolution_,
+          this.pixelRatio_,
+          this.overlaps_,
+          instructions,
+          deferredRendering
+        );
+      }
+    }
+  }
+  /**
+   * @param {Array<import("../canvas.js").BuilderType>} executors Executors.
+   * @return {boolean} Has executors of the provided types.
+   */
+  hasExecutors(executors) {
+    for (const zIndex in this.executorsByZIndex_) {
+      const candidates = this.executorsByZIndex_[zIndex];
+      for (let i = 0, ii = executors.length; i < ii; ++i) {
+        if (executors[i] in candidates) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  /**
+   * @param {import("../../coordinate.js").Coordinate} coordinate Coordinate.
+   * @param {number} resolution Resolution.
+   * @param {number} rotation Rotation.
+   * @param {number} hitTolerance Hit tolerance in pixels.
+   * @param {function(import("../../Feature.js").FeatureLike, import("../../geom/SimpleGeometry.js").default, number): T} callback Feature callback.
+   * @param {Array<import("../../Feature.js").FeatureLike>} declutteredFeatures Decluttered features.
+   * @return {T|undefined} Callback result.
+   * @template T
+   */
+  forEachFeatureAtCoordinate(coordinate, resolution, rotation, hitTolerance, callback, declutteredFeatures) {
+    hitTolerance = Math.round(hitTolerance);
+    const contextSize = hitTolerance * 2 + 1;
+    const transform2 = compose(
+      this.hitDetectionTransform_,
+      hitTolerance + 0.5,
+      hitTolerance + 0.5,
+      1 / resolution,
+      -1 / resolution,
+      -rotation,
+      -coordinate[0],
+      -coordinate[1]
+    );
+    const newContext = !this.hitDetectionContext_;
+    if (newContext) {
+      this.hitDetectionContext_ = createCanvasContext2D(
+        contextSize,
+        contextSize,
+        void 0,
+        { willReadFrequently: true }
+      );
+    }
+    const context = this.hitDetectionContext_;
+    if (context.canvas.width !== contextSize || context.canvas.height !== contextSize) {
+      context.canvas.width = contextSize;
+      context.canvas.height = contextSize;
+    } else if (!newContext) {
+      context.clearRect(0, 0, contextSize, contextSize);
+    }
+    let hitExtent;
+    if (this.renderBuffer_ !== void 0) {
+      hitExtent = createEmpty();
+      extendCoordinate(hitExtent, coordinate);
+      buffer(
+        hitExtent,
+        resolution * (this.renderBuffer_ + hitTolerance),
+        hitExtent
+      );
+    }
+    const indexes = getPixelIndexArray(hitTolerance);
+    let builderType;
+    function featureCallback(feature, geometry, declutterMode) {
+      const imageData = context.getImageData(
+        0,
+        0,
+        contextSize,
+        contextSize
+      ).data;
+      for (let i2 = 0, ii = indexes.length; i2 < ii; i2++) {
+        if (imageData[indexes[i2]] > 0) {
+          if (!declutteredFeatures || declutterMode === "none" || builderType !== "Image" && builderType !== "Text" || declutteredFeatures.includes(feature)) {
+            const idx = (indexes[i2] - 3) / 4;
+            const x2 = hitTolerance - idx % contextSize;
+            const y2 = hitTolerance - (idx / contextSize | 0);
+            const result2 = callback(feature, geometry, x2 * x2 + y2 * y2);
+            if (result2) {
+              return result2;
+            }
+          }
+          context.clearRect(0, 0, contextSize, contextSize);
+          break;
+        }
+      }
+      return void 0;
+    }
+    const zs = Object.keys(this.executorsByZIndex_).map(Number);
+    zs.sort(ascending);
+    let i, j, executors, executor, result;
+    for (i = zs.length - 1; i >= 0; --i) {
+      const zIndexKey = zs[i].toString();
+      executors = this.executorsByZIndex_[zIndexKey];
+      for (j = ALL.length - 1; j >= 0; --j) {
+        builderType = ALL[j];
+        executor = executors[builderType];
+        if (executor !== void 0) {
+          result = executor.executeHitDetection(
+            context,
+            transform2,
+            rotation,
+            featureCallback,
+            hitExtent
+          );
+          if (result) {
+            return result;
+          }
+        }
+      }
+    }
+    return void 0;
+  }
+  /**
+   * @param {import("../../transform.js").Transform} transform Transform.
+   * @return {Array<number>|null} Clip coordinates.
+   */
+  getClipCoords(transform2) {
+    const maxExtent = this.maxExtent_;
+    if (!maxExtent) {
+      return null;
+    }
+    const minX = maxExtent[0];
+    const minY = maxExtent[1];
+    const maxX = maxExtent[2];
+    const maxY = maxExtent[3];
+    const flatClipCoords = [minX, minY, minX, maxY, maxX, maxY, maxX, minY];
+    transform2D(flatClipCoords, 0, 8, 2, transform2, flatClipCoords);
+    return flatClipCoords;
+  }
+  /**
+   * @return {boolean} Is empty.
+   */
+  isEmpty() {
+    return isEmpty$1(this.executorsByZIndex_);
+  }
+  /**
+   * @param {CanvasRenderingContext2D} targetContext Context.
+   * @param {import('../../size.js').Size} scaledCanvasSize Scale of the context.
+   * @param {import("../../transform.js").Transform} transform Transform.
+   * @param {number} viewRotation View rotation.
+   * @param {boolean} snapToPixel Snap point symbols and test to integer pixel.
+   * @param {Array<import("../canvas.js").BuilderType>} [builderTypes] Ordered replay types to replay.
+   *     Default is {@link module:ol/render/replay~ALL}
+   * @param {import("rbush").default|null} [declutterTree] Declutter tree.
+   *     When set to null, no decluttering is done, even when the executor group has a `ZIndexContext`.
+   */
+  execute(targetContext, scaledCanvasSize, transform2, viewRotation, snapToPixel, builderTypes, declutterTree) {
+    const zs = Object.keys(this.executorsByZIndex_).map(Number);
+    zs.sort(ascending);
+    builderTypes = builderTypes ? builderTypes : ALL;
+    const maxBuilderTypes = ALL.length;
+    let i, ii, j, jj, replays;
+    if (declutterTree) {
+      zs.reverse();
+    }
+    for (i = 0, ii = zs.length; i < ii; ++i) {
+      const zIndexKey = zs[i].toString();
+      replays = this.executorsByZIndex_[zIndexKey];
+      for (j = 0, jj = builderTypes.length; j < jj; ++j) {
+        const builderType = builderTypes[j];
+        const replay = replays[builderType];
+        if (replay !== void 0) {
+          const zIndexContext = declutterTree === null ? void 0 : replay.getZIndexContext();
+          const context = zIndexContext ? zIndexContext.getContext() : targetContext;
+          const requireClip = this.maxExtent_ && builderType !== "Image" && builderType !== "Text";
+          if (requireClip) {
+            context.save();
+            this.clip(context, transform2);
+          }
+          if (!zIndexContext || builderType === "Text" || builderType === "Image") {
+            replay.execute(
+              context,
+              scaledCanvasSize,
+              transform2,
+              viewRotation,
+              snapToPixel,
+              declutterTree
+            );
+          } else {
+            zIndexContext.pushFunction(
+              (context2) => replay.execute(
+                context2,
+                scaledCanvasSize,
+                transform2,
+                viewRotation,
+                snapToPixel,
+                declutterTree
+              )
+            );
+          }
+          if (requireClip) {
+            context.restore();
+          }
+          if (zIndexContext) {
+            zIndexContext.offset();
+            const index = zs[i] * maxBuilderTypes + j;
+            if (!this.deferredZIndexContexts_[index]) {
+              this.deferredZIndexContexts_[index] = [];
+            }
+            this.deferredZIndexContexts_[index].push(zIndexContext);
+          }
+        }
+      }
+    }
+    this.renderedContext_ = targetContext;
+  }
+  getDeferredZIndexContexts() {
+    return this.deferredZIndexContexts_;
+  }
+  getRenderedContext() {
+    return this.renderedContext_;
+  }
+  renderDeferred() {
+    const deferredZIndexContexts = this.deferredZIndexContexts_;
+    const zs = Object.keys(deferredZIndexContexts).map(Number).sort(ascending);
+    for (let i = 0, ii = zs.length; i < ii; ++i) {
+      deferredZIndexContexts[zs[i]].forEach((zIndexContext) => {
+        zIndexContext.draw(this.renderedContext_);
+        zIndexContext.clear();
+      });
+      deferredZIndexContexts[zs[i]].length = 0;
+    }
+  }
+}
+const circlePixelIndexArrayCache = {};
+function getPixelIndexArray(radius) {
+  if (circlePixelIndexArrayCache[radius] !== void 0) {
+    return circlePixelIndexArrayCache[radius];
+  }
+  const size = radius * 2 + 1;
+  const maxDistanceSq = radius * radius;
+  const distances = new Array(maxDistanceSq + 1);
+  for (let i = 0; i <= radius; ++i) {
+    for (let j = 0; j <= radius; ++j) {
+      const distanceSq = i * i + j * j;
+      if (distanceSq > maxDistanceSq) {
+        break;
+      }
+      let distance = distances[distanceSq];
+      if (!distance) {
+        distance = [];
+        distances[distanceSq] = distance;
+      }
+      distance.push(((radius + i) * size + (radius + j)) * 4 + 3);
+      if (i > 0) {
+        distance.push(((radius - i) * size + (radius + j)) * 4 + 3);
+      }
+      if (j > 0) {
+        distance.push(((radius + i) * size + (radius - j)) * 4 + 3);
+        if (i > 0) {
+          distance.push(((radius - i) * size + (radius - j)) * 4 + 3);
+        }
+      }
+    }
+  }
+  const pixelIndex = [];
+  for (let i = 0, ii = distances.length; i < ii; ++i) {
+    if (distances[i]) {
+      pixelIndex.push(...distances[i]);
+    }
+  }
+  circlePixelIndexArrayCache[radius] = pixelIndex;
+  return pixelIndex;
+}
+const HIT_DETECT_RESOLUTION = 0.5;
+function createHitDetectionImageData(size, transforms2, features, styleFunction, extent, resolution, rotation, squaredTolerance, projection) {
+  const userExtent = extent;
+  const width = size[0] * HIT_DETECT_RESOLUTION;
+  const height = size[1] * HIT_DETECT_RESOLUTION;
+  const context = createCanvasContext2D(width, height);
+  context.imageSmoothingEnabled = false;
+  const canvas = context.canvas;
+  const renderer = new CanvasImmediateRenderer(
+    context,
+    HIT_DETECT_RESOLUTION,
+    extent,
+    null,
+    rotation,
+    squaredTolerance,
+    null
+  );
+  const featureCount = features.length;
+  const indexFactor = Math.floor((256 * 256 * 256 - 1) / featureCount);
+  const featuresByZIndex = {};
+  for (let i = 1; i <= featureCount; ++i) {
+    const feature = features[i - 1];
+    const featureStyleFunction = feature.getStyleFunction() || styleFunction;
+    if (!featureStyleFunction) {
+      continue;
+    }
+    let styles = featureStyleFunction(feature, resolution);
+    if (!styles) {
+      continue;
+    }
+    if (!Array.isArray(styles)) {
+      styles = [styles];
+    }
+    const index = i * indexFactor;
+    const color = index.toString(16).padStart(7, "#00000");
+    for (let j = 0, jj = styles.length; j < jj; ++j) {
+      const originalStyle = styles[j];
+      const geometry = originalStyle.getGeometryFunction()(feature);
+      if (!geometry || !intersects$1(userExtent, geometry.getExtent())) {
+        continue;
+      }
+      const style = originalStyle.clone();
+      const fill = style.getFill();
+      if (fill) {
+        fill.setColor(color);
+      }
+      const stroke = style.getStroke();
+      if (stroke) {
+        stroke.setColor(color);
+        stroke.setLineDash(null);
+      }
+      style.setText(void 0);
+      const image = originalStyle.getImage();
+      if (image) {
+        const imgSize = image.getImageSize();
+        if (!imgSize) {
+          continue;
+        }
+        const imgContext = createCanvasContext2D(
+          imgSize[0],
+          imgSize[1],
+          void 0,
+          { alpha: false }
+        );
+        const img = imgContext.canvas;
+        imgContext.fillStyle = color;
+        imgContext.fillRect(0, 0, img.width, img.height);
+        style.setImage(
+          new Icon({
+            img,
+            anchor: image.getAnchor(),
+            anchorXUnits: "pixels",
+            anchorYUnits: "pixels",
+            offset: image.getOrigin(),
+            opacity: 1,
+            size: image.getSize(),
+            scale: image.getScale(),
+            rotation: image.getRotation(),
+            rotateWithView: image.getRotateWithView()
+          })
+        );
+      }
+      const zIndex = style.getZIndex() || 0;
+      let byGeometryType = featuresByZIndex[zIndex];
+      if (!byGeometryType) {
+        byGeometryType = {};
+        featuresByZIndex[zIndex] = byGeometryType;
+        byGeometryType["Polygon"] = [];
+        byGeometryType["Circle"] = [];
+        byGeometryType["LineString"] = [];
+        byGeometryType["Point"] = [];
+      }
+      const type = geometry.getType();
+      if (type === "GeometryCollection") {
+        const geometries = (
+          /** @type {import("../../geom/GeometryCollection.js").default} */
+          geometry.getGeometriesArrayRecursive()
+        );
+        for (let i2 = 0, ii = geometries.length; i2 < ii; ++i2) {
+          const geometry2 = geometries[i2];
+          byGeometryType[geometry2.getType().replace("Multi", "")].push(
+            geometry2,
+            style
+          );
+        }
+      } else {
+        byGeometryType[type.replace("Multi", "")].push(geometry, style);
+      }
+    }
+  }
+  const zIndexKeys = Object.keys(featuresByZIndex).map(Number).sort(ascending);
+  for (let i = 0, ii = zIndexKeys.length; i < ii; ++i) {
+    const byGeometryType = featuresByZIndex[zIndexKeys[i]];
+    for (const type in byGeometryType) {
+      const geomAndStyle = byGeometryType[type];
+      for (let j = 0, jj = geomAndStyle.length; j < jj; j += 2) {
+        renderer.setStyle(geomAndStyle[j + 1]);
+        for (let k2 = 0, kk = transforms2.length; k2 < kk; ++k2) {
+          renderer.setTransform(transforms2[k2]);
+          renderer.drawGeometry(geomAndStyle[j]);
+        }
+      }
+    }
+  }
+  return context.getImageData(0, 0, canvas.width, canvas.height);
+}
+function hitDetect(pixel, features, imageData) {
+  const resultFeatures = [];
+  if (imageData) {
+    const x2 = Math.floor(Math.round(pixel[0]) * HIT_DETECT_RESOLUTION);
+    const y2 = Math.floor(Math.round(pixel[1]) * HIT_DETECT_RESOLUTION);
+    const index = (clamp(x2, 0, imageData.width - 1) + clamp(y2, 0, imageData.height - 1) * imageData.width) * 4;
+    const r2 = imageData.data[index];
+    const g = imageData.data[index + 1];
+    const b2 = imageData.data[index + 2];
+    const i = b2 + 256 * (g + 256 * r2);
+    const indexFactor = Math.floor((256 * 256 * 256 - 1) / features.length);
+    if (i && i % indexFactor === 0) {
+      resultFeatures.push(features[i / indexFactor - 1]);
+    }
+  }
+  return resultFeatures;
+}
+class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
+  /**
+   * @param {import("../../layer/BaseVector.js").default} vectorLayer Vector layer.
+   */
+  constructor(vectorLayer) {
+    super(vectorLayer);
+    this.boundHandleStyleImageChange_ = this.handleStyleImageChange_.bind(this);
+    this.animatingOrInteracting_;
+    this.hitDetectionImageData_ = null;
+    this.clipped_ = false;
+    this.renderedFeatures_ = null;
+    this.renderedRevision_ = -1;
+    this.renderedResolution_ = NaN;
+    this.renderedExtent_ = createEmpty();
+    this.wrappedRenderedExtent_ = createEmpty();
+    this.renderedRotation_;
+    this.renderedCenter_ = null;
+    this.renderedProjection_ = null;
+    this.renderedPixelRatio_ = 1;
+    this.renderedRenderOrder_ = null;
+    this.renderedFrameDeclutter_;
+    this.replayGroup_ = null;
+    this.replayGroupChanged = true;
+    this.clipping = true;
+    this.targetContext_ = null;
+    this.opacity_ = 1;
+  }
+  /**
+   * @param {ExecutorGroup} executorGroup Executor group.
+   * @param {import("../../Map.js").FrameState} frameState Frame state.
+   * @param {boolean} [declutterable] `true` to only render declutterable items,
+   *     `false` to only render non-declutterable items, `undefined` to render all.
+   */
+  renderWorlds(executorGroup, frameState, declutterable) {
+    const extent = frameState.extent;
+    const viewState = frameState.viewState;
+    const center = viewState.center;
+    const resolution = viewState.resolution;
+    const projection = viewState.projection;
+    const rotation = viewState.rotation;
+    const projectionExtent = projection.getExtent();
+    const vectorSource = this.getLayer().getSource();
+    const declutter = this.getLayer().getDeclutter();
+    const pixelRatio = frameState.pixelRatio;
+    const viewHints = frameState.viewHints;
+    const snapToPixel = !(viewHints[ViewHint.ANIMATING] || viewHints[ViewHint.INTERACTING]);
+    const context = this.context;
+    const width = Math.round(getWidth(extent) / resolution * pixelRatio);
+    const height = Math.round(getHeight(extent) / resolution * pixelRatio);
+    const multiWorld = vectorSource.getWrapX() && projection.canWrapX();
+    const worldWidth = multiWorld ? getWidth(projectionExtent) : null;
+    const endWorld = multiWorld ? Math.ceil((extent[2] - projectionExtent[2]) / worldWidth) + 1 : 1;
+    let world = multiWorld ? Math.floor((extent[0] - projectionExtent[0]) / worldWidth) : 0;
+    do {
+      let transform2 = this.getRenderTransform(
+        center,
+        resolution,
+        0,
+        pixelRatio,
+        width,
+        height,
+        world * worldWidth
+      );
+      if (frameState.declutter) {
+        transform2 = transform2.slice(0);
+      }
+      executorGroup.execute(
+        context,
+        [context.canvas.width, context.canvas.height],
+        transform2,
+        rotation,
+        snapToPixel,
+        declutterable === void 0 ? ALL : declutterable ? DECLUTTER : NON_DECLUTTER,
+        declutterable ? declutter && frameState.declutter[declutter] : void 0
+      );
+    } while (++world < endWorld);
+  }
+  /**
+   * @private
+   */
+  setDrawContext_() {
+    if (this.opacity_ !== 1) {
+      this.targetContext_ = this.context;
+      this.context = createCanvasContext2D(
+        this.context.canvas.width,
+        this.context.canvas.height,
+        canvasPool
+      );
+    }
+  }
+  /**
+   * @private
+   */
+  resetDrawContext_() {
+    if (this.opacity_ !== 1) {
+      const alpha = this.targetContext_.globalAlpha;
+      this.targetContext_.globalAlpha = this.opacity_;
+      this.targetContext_.drawImage(this.context.canvas, 0, 0);
+      this.targetContext_.globalAlpha = alpha;
+      releaseCanvas(this.context);
+      canvasPool.push(this.context.canvas);
+      this.context = this.targetContext_;
+      this.targetContext_ = null;
+    }
+  }
+  /**
+   * Render declutter items for this layer
+   * @param {import("../../Map.js").FrameState} frameState Frame state.
+   */
+  renderDeclutter(frameState) {
+    if (!this.replayGroup_ || !this.getLayer().getDeclutter()) {
+      return;
+    }
+    this.renderWorlds(this.replayGroup_, frameState, true);
+  }
+  /**
+   * Render deferred instructions.
+   * @param {import("../../Map.js").FrameState} frameState Frame state.
+   */
+  renderDeferredInternal(frameState) {
+    if (!this.replayGroup_) {
+      return;
+    }
+    this.replayGroup_.renderDeferred();
+    if (this.clipped_) {
+      this.context.restore();
+    }
+    this.resetDrawContext_();
+  }
+  /**
+   * Render the layer.
+   * @param {import("../../Map.js").FrameState} frameState Frame state.
+   * @param {HTMLElement|null} target Target that may be used to render content to.
+   * @return {HTMLElement|null} The rendered element.
+   */
+  renderFrame(frameState, target) {
+    const layerState = frameState.layerStatesArray[frameState.layerIndex];
+    this.opacity_ = layerState.opacity;
+    const viewState = frameState.viewState;
+    this.prepareContainer(frameState, target);
+    const context = this.context;
+    const replayGroup = this.replayGroup_;
+    let render2 = replayGroup && !replayGroup.isEmpty();
+    if (!render2) {
+      const hasRenderListeners = this.getLayer().hasListener(RenderEventType.PRERENDER) || this.getLayer().hasListener(RenderEventType.POSTRENDER);
+      if (!hasRenderListeners) {
+        return null;
+      }
+    }
+    this.setDrawContext_();
+    this.preRender(context, frameState);
+    viewState.projection;
+    this.clipped_ = false;
+    if (render2 && layerState.extent && this.clipping) {
+      const layerExtent = fromUserExtent(layerState.extent);
+      render2 = intersects$1(layerExtent, frameState.extent);
+      this.clipped_ = render2 && !containsExtent(layerExtent, frameState.extent);
+      if (this.clipped_) {
+        this.clipUnrotated(context, frameState, layerExtent);
+      }
+    }
+    if (render2) {
+      this.renderWorlds(
+        replayGroup,
+        frameState,
+        this.getLayer().getDeclutter() ? false : void 0
+      );
+    }
+    if (!frameState.declutter && this.clipped_) {
+      context.restore();
+    }
+    this.postRender(context, frameState);
+    if (this.renderedRotation_ !== viewState.rotation) {
+      this.renderedRotation_ = viewState.rotation;
+      this.hitDetectionImageData_ = null;
+    }
+    if (!frameState.declutter) {
+      this.resetDrawContext_();
+    }
+    return this.container;
+  }
+  /**
+   * Asynchronous layer level hit detection.
+   * @param {import("../../pixel.js").Pixel} pixel Pixel.
+   * @return {Promise<Array<import("../../Feature").default>>} Promise
+   * that resolves with an array of features.
+   */
+  getFeatures(pixel) {
+    return new Promise((resolve) => {
+      if (this.frameState && !this.hitDetectionImageData_ && !this.animatingOrInteracting_) {
+        const size = this.frameState.size.slice();
+        const center = this.renderedCenter_;
+        const resolution = this.renderedResolution_;
+        const rotation = this.renderedRotation_;
+        const projection = this.renderedProjection_;
+        const extent = this.wrappedRenderedExtent_;
+        const layer = this.getLayer();
+        const transforms2 = [];
+        const width = size[0] * HIT_DETECT_RESOLUTION;
+        const height = size[1] * HIT_DETECT_RESOLUTION;
+        transforms2.push(
+          this.getRenderTransform(
+            center,
+            resolution,
+            rotation,
+            HIT_DETECT_RESOLUTION,
+            width,
+            height,
+            0
+          ).slice()
+        );
+        const source2 = layer.getSource();
+        const projectionExtent = projection.getExtent();
+        if (source2.getWrapX() && projection.canWrapX() && !containsExtent(projectionExtent, extent)) {
+          let startX = extent[0];
+          const worldWidth = getWidth(projectionExtent);
+          let world = 0;
+          let offsetX;
+          while (startX < projectionExtent[0]) {
+            --world;
+            offsetX = worldWidth * world;
+            transforms2.push(
+              this.getRenderTransform(
+                center,
+                resolution,
+                rotation,
+                HIT_DETECT_RESOLUTION,
+                width,
+                height,
+                offsetX
+              ).slice()
+            );
+            startX += worldWidth;
+          }
+          world = 0;
+          startX = extent[2];
+          while (startX > projectionExtent[2]) {
+            ++world;
+            offsetX = worldWidth * world;
+            transforms2.push(
+              this.getRenderTransform(
+                center,
+                resolution,
+                rotation,
+                HIT_DETECT_RESOLUTION,
+                width,
+                height,
+                offsetX
+              ).slice()
+            );
+            startX -= worldWidth;
+          }
+        }
+        this.hitDetectionImageData_ = createHitDetectionImageData(
+          size,
+          transforms2,
+          this.renderedFeatures_,
+          layer.getStyleFunction(),
+          extent,
+          resolution,
+          rotation,
+          getSquaredTolerance(resolution, this.renderedPixelRatio_)
+        );
+      }
+      resolve(
+        hitDetect(pixel, this.renderedFeatures_, this.hitDetectionImageData_)
+      );
+    });
+  }
+  /**
+   * @param {import("../../coordinate.js").Coordinate} coordinate Coordinate.
+   * @param {import("../../Map.js").FrameState} frameState Frame state.
+   * @param {number} hitTolerance Hit tolerance in pixels.
+   * @param {import("../vector.js").FeatureCallback<T>} callback Feature callback.
+   * @param {Array<import("../Map.js").HitMatch<T>>} matches The hit detected matches with tolerance.
+   * @return {T|undefined} Callback result.
+   * @template T
+   */
+  forEachFeatureAtCoordinate(coordinate, frameState, hitTolerance, callback, matches) {
+    if (!this.replayGroup_) {
+      return void 0;
+    }
+    const resolution = frameState.viewState.resolution;
+    const rotation = frameState.viewState.rotation;
+    const layer = this.getLayer();
+    const features = {};
+    const featureCallback = function(feature, geometry, distanceSq) {
+      const key = getUid(feature);
+      const match = features[key];
+      if (!match) {
+        if (distanceSq === 0) {
+          features[key] = true;
+          return callback(feature, layer, geometry);
+        }
+        matches.push(
+          features[key] = {
+            feature,
+            layer,
+            geometry,
+            distanceSq,
+            callback
+          }
+        );
+      } else if (match !== true && distanceSq < match.distanceSq) {
+        if (distanceSq === 0) {
+          features[key] = true;
+          matches.splice(matches.lastIndexOf(match), 1);
+          return callback(feature, layer, geometry);
+        }
+        match.geometry = geometry;
+        match.distanceSq = distanceSq;
+      }
+      return void 0;
+    };
+    let result;
+    const executorGroups = [this.replayGroup_];
+    const declutter = this.getLayer().getDeclutter();
+    executorGroups.some((executorGroup) => {
+      return result = executorGroup.forEachFeatureAtCoordinate(
+        coordinate,
+        resolution,
+        rotation,
+        hitTolerance,
+        featureCallback,
+        declutter && frameState.declutter[declutter] ? frameState.declutter[declutter].all().map((item) => item.value) : null
+      );
+    });
+    return result;
+  }
+  /**
+   * Perform action necessary to get the layer rendered after new fonts have loaded
+   */
+  handleFontsChanged() {
+    const layer = this.getLayer();
+    if (layer.getVisible() && this.replayGroup_) {
+      layer.changed();
+    }
+  }
+  /**
+   * Handle changes in image style state.
+   * @param {import("../../events/Event.js").default} event Image style change event.
+   * @private
+   */
+  handleStyleImageChange_(event) {
+    this.renderIfReadyAndVisible();
+  }
+  /**
+   * Determine whether render should be called.
+   * @param {import("../../Map.js").FrameState} frameState Frame state.
+   * @return {boolean} Layer is ready to be rendered.
+   */
+  prepareFrame(frameState) {
+    const vectorLayer = this.getLayer();
+    const vectorSource = vectorLayer.getSource();
+    if (!vectorSource) {
+      return false;
+    }
+    const animating = frameState.viewHints[ViewHint.ANIMATING];
+    const interacting = frameState.viewHints[ViewHint.INTERACTING];
+    const updateWhileAnimating = vectorLayer.getUpdateWhileAnimating();
+    const updateWhileInteracting = vectorLayer.getUpdateWhileInteracting();
+    if (this.ready && !updateWhileAnimating && animating || !updateWhileInteracting && interacting) {
+      this.animatingOrInteracting_ = true;
+      return true;
+    }
+    this.animatingOrInteracting_ = false;
+    const frameStateExtent = frameState.extent;
+    const viewState = frameState.viewState;
+    const projection = viewState.projection;
+    const resolution = viewState.resolution;
+    const pixelRatio = frameState.pixelRatio;
+    const vectorLayerRevision = vectorLayer.getRevision();
+    const vectorLayerRenderBuffer = vectorLayer.getRenderBuffer();
+    let vectorLayerRenderOrder = vectorLayer.getRenderOrder();
+    if (vectorLayerRenderOrder === void 0) {
+      vectorLayerRenderOrder = defaultOrder;
+    }
+    const center = viewState.center.slice();
+    const extent = buffer(
+      frameStateExtent,
+      vectorLayerRenderBuffer * resolution
+    );
+    const renderedExtent = extent.slice();
+    const loadExtents = [extent.slice()];
+    const projectionExtent = projection.getExtent();
+    if (vectorSource.getWrapX() && projection.canWrapX() && !containsExtent(projectionExtent, frameState.extent)) {
+      const worldWidth = getWidth(projectionExtent);
+      const gutter = Math.max(getWidth(extent) / 2, worldWidth);
+      extent[0] = projectionExtent[0] - gutter;
+      extent[2] = projectionExtent[2] + gutter;
+      wrapX$1(center, projection);
+      const loadExtent = wrapX$2(loadExtents[0], projection);
+      if (loadExtent[0] < projectionExtent[0] && loadExtent[2] < projectionExtent[2]) {
+        loadExtents.push([
+          loadExtent[0] + worldWidth,
+          loadExtent[1],
+          loadExtent[2] + worldWidth,
+          loadExtent[3]
+        ]);
+      } else if (loadExtent[0] > projectionExtent[0] && loadExtent[2] > projectionExtent[2]) {
+        loadExtents.push([
+          loadExtent[0] - worldWidth,
+          loadExtent[1],
+          loadExtent[2] - worldWidth,
+          loadExtent[3]
+        ]);
+      }
+    }
+    if (this.ready && this.renderedResolution_ == resolution && this.renderedRevision_ == vectorLayerRevision && this.renderedRenderOrder_ == vectorLayerRenderOrder && this.renderedFrameDeclutter_ === !!frameState.declutter && containsExtent(this.wrappedRenderedExtent_, extent)) {
+      if (!equals(this.renderedExtent_, renderedExtent)) {
+        this.hitDetectionImageData_ = null;
+        this.renderedExtent_ = renderedExtent;
+      }
+      this.renderedCenter_ = center;
+      this.replayGroupChanged = false;
+      return true;
+    }
+    this.replayGroup_ = null;
+    const replayGroup = new BuilderGroup(
+      getTolerance(resolution, pixelRatio),
+      extent,
+      resolution,
+      pixelRatio
+    );
+    let userTransform;
+    {
+      for (let i = 0, ii = loadExtents.length; i < ii; ++i) {
+        vectorSource.loadFeatures(loadExtents[i], resolution, projection);
+      }
+    }
+    const squaredTolerance = getSquaredTolerance(resolution, pixelRatio);
+    let ready = true;
+    const render2 = (
+      /**
+       * @param {import("../../Feature.js").default} feature Feature.
+       * @param {number} index Index.
+       */
+      (feature, index) => {
+        let styles;
+        const styleFunction = feature.getStyleFunction() || vectorLayer.getStyleFunction();
+        if (styleFunction) {
+          styles = styleFunction(feature, resolution);
+        }
+        if (styles) {
+          const dirty = this.renderFeature(
+            feature,
+            squaredTolerance,
+            styles,
+            replayGroup,
+            userTransform,
+            this.getLayer().getDeclutter(),
+            index
+          );
+          ready = ready && !dirty;
+        }
+      }
+    );
+    const userExtent = toUserExtent(extent);
+    const features = vectorSource.getFeaturesInExtent(userExtent);
+    if (vectorLayerRenderOrder) {
+      features.sort(vectorLayerRenderOrder);
+    }
+    for (let i = 0, ii = features.length; i < ii; ++i) {
+      render2(features[i], i);
+    }
+    this.renderedFeatures_ = features;
+    this.ready = ready;
+    const replayGroupInstructions = replayGroup.finish();
+    const executorGroup = new ExecutorGroup(
+      extent,
+      resolution,
+      pixelRatio,
+      vectorSource.getOverlaps(),
+      replayGroupInstructions,
+      vectorLayer.getRenderBuffer(),
+      !!frameState.declutter
+    );
+    this.renderedResolution_ = resolution;
+    this.renderedRevision_ = vectorLayerRevision;
+    this.renderedRenderOrder_ = vectorLayerRenderOrder;
+    this.renderedFrameDeclutter_ = !!frameState.declutter;
+    this.renderedExtent_ = renderedExtent;
+    this.wrappedRenderedExtent_ = extent;
+    this.renderedCenter_ = center;
+    this.renderedProjection_ = projection;
+    this.renderedPixelRatio_ = pixelRatio;
+    this.replayGroup_ = executorGroup;
+    this.hitDetectionImageData_ = null;
+    this.replayGroupChanged = true;
+    return true;
+  }
+  /**
+   * @param {import("../../Feature.js").default} feature Feature.
+   * @param {number} squaredTolerance Squared render tolerance.
+   * @param {import("../../style/Style.js").default|Array<import("../../style/Style.js").default>} styles The style or array of styles.
+   * @param {import("../../render/canvas/BuilderGroup.js").default} builderGroup Builder group.
+   * @param {import("../../proj.js").TransformFunction} [transform] Transform from user to view projection.
+   * @param {boolean} [declutter] Enable decluttering.
+   * @param {number} [index] Render order index.
+   * @return {boolean} `true` if an image is loading.
+   */
+  renderFeature(feature, squaredTolerance, styles, builderGroup, transform2, declutter, index) {
+    if (!styles) {
+      return false;
+    }
+    let loading = false;
+    if (Array.isArray(styles)) {
+      for (let i = 0, ii = styles.length; i < ii; ++i) {
+        loading = renderFeature(
+          builderGroup,
+          feature,
+          styles[i],
+          squaredTolerance,
+          this.boundHandleStyleImageChange_,
+          transform2,
+          declutter,
+          index
+        ) || loading;
+      }
+    } else {
+      loading = renderFeature(
+        builderGroup,
+        feature,
+        styles,
+        squaredTolerance,
+        this.boundHandleStyleImageChange_,
+        transform2,
+        declutter,
+        index
+      );
+    }
+    return loading;
+  }
+}
+class VectorLayer extends BaseVectorLayer {
+  /**
+   * @param {Options<FeatureType>} [options] Options.
+   */
+  constructor(options) {
+    super(options);
+  }
+  createRenderer() {
+    return new CanvasVectorLayerRenderer(this);
+  }
+}
+class RBush2 {
+  /**
+   * @param {number} [maxEntries] Max entries.
+   */
+  constructor(maxEntries) {
+    this.rbush_ = new RBush$1(maxEntries);
+    this.items_ = {};
+  }
+  /**
+   * Insert a value into the RBush.
+   * @param {import("../extent.js").Extent} extent Extent.
+   * @param {T} value Value.
+   */
+  insert(extent, value) {
+    const item = {
+      minX: extent[0],
+      minY: extent[1],
+      maxX: extent[2],
+      maxY: extent[3],
+      value
+    };
+    this.rbush_.insert(item);
+    this.items_[getUid(value)] = item;
+  }
+  /**
+   * Bulk-insert values into the RBush.
+   * @param {Array<import("../extent.js").Extent>} extents Extents.
+   * @param {Array<T>} values Values.
+   */
+  load(extents, values) {
+    const items = new Array(values.length);
+    for (let i = 0, l = values.length; i < l; i++) {
+      const extent = extents[i];
+      const value = values[i];
+      const item = {
+        minX: extent[0],
+        minY: extent[1],
+        maxX: extent[2],
+        maxY: extent[3],
+        value
+      };
+      items[i] = item;
+      this.items_[getUid(value)] = item;
+    }
+    this.rbush_.load(items);
+  }
+  /**
+   * Remove a value from the RBush.
+   * @param {T} value Value.
+   * @return {boolean} Removed.
+   */
+  remove(value) {
+    const uid = getUid(value);
+    const item = this.items_[uid];
+    delete this.items_[uid];
+    return this.rbush_.remove(item) !== null;
+  }
+  /**
+   * Update the extent of a value in the RBush.
+   * @param {import("../extent.js").Extent} extent Extent.
+   * @param {T} value Value.
+   */
+  update(extent, value) {
+    const item = this.items_[getUid(value)];
+    const bbox = [item.minX, item.minY, item.maxX, item.maxY];
+    if (!equals$2(bbox, extent)) {
+      this.remove(value);
+      this.insert(extent, value);
+    }
+  }
+  /**
+   * Return all values in the RBush.
+   * @return {Array<T>} All.
+   */
+  getAll() {
+    const items = this.rbush_.all();
+    return items.map(function(item) {
+      return item.value;
+    });
+  }
+  /**
+   * Return all values in the given extent.
+   * @param {import("../extent.js").Extent} extent Extent.
+   * @return {Array<T>} All in extent.
+   */
+  getInExtent(extent) {
+    const bbox = {
+      minX: extent[0],
+      minY: extent[1],
+      maxX: extent[2],
+      maxY: extent[3]
+    };
+    const items = this.rbush_.search(bbox);
+    return items.map(function(item) {
+      return item.value;
+    });
+  }
+  /**
+   * Calls a callback function with each value in the tree.
+   * If the callback returns a truthy value, this value is returned without
+   * checking the rest of the tree.
+   * @param {function(T): *} callback Callback.
+   * @return {*} Callback return value.
+   */
+  forEach(callback) {
+    return this.forEach_(this.getAll(), callback);
+  }
+  /**
+   * Calls a callback function with each value in the provided extent.
+   * @param {import("../extent.js").Extent} extent Extent.
+   * @param {function(T): *} callback Callback.
+   * @return {*} Callback return value.
+   */
+  forEachInExtent(extent, callback) {
+    return this.forEach_(this.getInExtent(extent), callback);
+  }
+  /**
+   * @param {Array<T>} values Values.
+   * @param {function(T): *} callback Callback.
+   * @private
+   * @return {*} Callback return value.
+   */
+  forEach_(values, callback) {
+    let result;
+    for (let i = 0, l = values.length; i < l; i++) {
+      result = callback(values[i]);
+      if (result) {
+        return result;
+      }
+    }
+    return result;
+  }
+  /**
+   * @return {boolean} Is empty.
+   */
+  isEmpty() {
+    return isEmpty$1(this.items_);
+  }
+  /**
+   * Remove all values from the RBush.
+   */
+  clear() {
+    this.rbush_.clear();
+    this.items_ = {};
+  }
+  /**
+   * @param {import("../extent.js").Extent} [extent] Extent.
+   * @return {import("../extent.js").Extent} Extent.
+   */
+  getExtent(extent) {
+    const data = this.rbush_.toJSON();
+    return createOrUpdate$2(data.minX, data.minY, data.maxX, data.maxY, extent);
+  }
+  /**
+   * @param {RBush} rbush R-Tree.
+   */
+  concat(rbush) {
+    this.rbush_.load(rbush.rbush_.all());
+    for (const i in rbush.items_) {
+      this.items_[i] = rbush.items_[i];
+    }
+  }
+}
+class Feature extends BaseObject {
+  /**
+   * @param {Geometry|ObjectWithGeometry<Geometry>} [geometryOrProperties]
+   *     You may pass a Geometry object directly, or an object literal containing
+   *     properties. If you pass an object literal, you may include a Geometry
+   *     associated with a `geometry` key.
+   */
+  constructor(geometryOrProperties) {
+    super();
+    this.on;
+    this.once;
+    this.un;
+    this.id_ = void 0;
+    this.geometryName_ = "geometry";
+    this.style_ = null;
+    this.styleFunction_ = void 0;
+    this.geometryChangeKey_ = null;
+    this.addChangeListener(this.geometryName_, this.handleGeometryChanged_);
+    if (geometryOrProperties) {
+      if (typeof /** @type {?} */
+      geometryOrProperties.getSimplifiedGeometry === "function") {
+        const geometry = (
+          /** @type {Geometry} */
+          geometryOrProperties
+        );
+        this.setGeometry(geometry);
+      } else {
+        const properties = geometryOrProperties;
+        this.setProperties(properties);
+      }
+    }
+  }
+  /**
+   * Clone this feature. If the original feature has a geometry it
+   * is also cloned. The feature id is not set in the clone.
+   * @return {Feature<Geometry>} The clone.
+   * @api
+   */
+  clone() {
+    const clone2 = (
+      /** @type {Feature<Geometry>} */
+      new Feature(this.hasProperties() ? this.getProperties() : null)
+    );
+    clone2.setGeometryName(this.getGeometryName());
+    const geometry = this.getGeometry();
+    if (geometry) {
+      clone2.setGeometry(
+        /** @type {Geometry} */
+        geometry.clone()
+      );
+    }
+    const style = this.getStyle();
+    if (style) {
+      clone2.setStyle(style);
+    }
+    return clone2;
+  }
+  /**
+   * Get the feature's default geometry.  A feature may have any number of named
+   * geometries.  The "default" geometry (the one that is rendered by default) is
+   * set when calling {@link module:ol/Feature~Feature#setGeometry}.
+   * @return {Geometry|undefined} The default geometry for the feature.
+   * @api
+   * @observable
+   */
+  getGeometry() {
+    return (
+      /** @type {Geometry|undefined} */
+      this.get(this.geometryName_)
+    );
+  }
+  /**
+   * Get the feature identifier.  This is a stable identifier for the feature and
+   * is either set when reading data from a remote source or set explicitly by
+   * calling {@link module:ol/Feature~Feature#setId}.
+   * @return {number|string|undefined} Id.
+   * @api
+   */
+  getId() {
+    return this.id_;
+  }
+  /**
+   * Get the name of the feature's default geometry.  By default, the default
+   * geometry is named `geometry`.
+   * @return {string} Get the property name associated with the default geometry
+   *     for this feature.
+   * @api
+   */
+  getGeometryName() {
+    return this.geometryName_;
+  }
+  /**
+   * Get the feature's style. Will return what was provided to the
+   * {@link module:ol/Feature~Feature#setStyle} method.
+   * @return {import("./style/Style.js").StyleLike|undefined} The feature style.
+   * @api
+   */
+  getStyle() {
+    return this.style_;
+  }
+  /**
+   * Get the feature's style function.
+   * @return {import("./style/Style.js").StyleFunction|undefined} Return a function
+   * representing the current style of this feature.
+   * @api
+   */
+  getStyleFunction() {
+    return this.styleFunction_;
+  }
+  /**
+   * @private
+   */
+  handleGeometryChange_() {
+    this.changed();
+  }
+  /**
+   * @private
+   */
+  handleGeometryChanged_() {
+    if (this.geometryChangeKey_) {
+      unlistenByKey(this.geometryChangeKey_);
+      this.geometryChangeKey_ = null;
+    }
+    const geometry = this.getGeometry();
+    if (geometry) {
+      this.geometryChangeKey_ = listen(
+        geometry,
+        EventType.CHANGE,
+        this.handleGeometryChange_,
+        this
+      );
+    }
+    this.changed();
+  }
+  /**
+   * Set the default geometry for the feature.  This will update the property
+   * with the name returned by {@link module:ol/Feature~Feature#getGeometryName}.
+   * @param {Geometry|undefined} geometry The new geometry.
+   * @api
+   * @observable
+   */
+  setGeometry(geometry) {
+    this.set(this.geometryName_, geometry);
+  }
+  /**
+   * Set the style for the feature to override the layer style.  This can be a
+   * single style object, an array of styles, or a function that takes a
+   * resolution and returns an array of styles. To unset the feature style, call
+   * `setStyle()` without arguments or a falsey value.
+   * @param {import("./style/Style.js").StyleLike} [style] Style for this feature.
+   * @api
+   * @fires module:ol/events/Event~BaseEvent#event:change
+   */
+  setStyle(style) {
+    this.style_ = style;
+    this.styleFunction_ = !style ? void 0 : createStyleFunction(style);
+    this.changed();
+  }
+  /**
+   * Set the feature id.  The feature id is considered stable and may be used when
+   * requesting features or comparing identifiers returned from a remote source.
+   * The feature id can be used with the
+   * {@link module:ol/source/Vector~VectorSource#getFeatureById} method.
+   * @param {number|string|undefined} id The feature id.
+   * @api
+   * @fires module:ol/events/Event~BaseEvent#event:change
+   */
+  setId(id) {
+    this.id_ = id;
+    this.changed();
+  }
+  /**
+   * Set the property name to be used when getting the feature's default geometry.
+   * When calling {@link module:ol/Feature~Feature#getGeometry}, the value of the property with
+   * this name will be returned.
+   * @param {string} name The property name of the default geometry.
+   * @api
+   */
+  setGeometryName(name) {
+    this.removeChangeListener(this.geometryName_, this.handleGeometryChanged_);
+    this.geometryName_ = name;
+    this.addChangeListener(this.geometryName_, this.handleGeometryChanged_);
+    this.handleGeometryChanged_();
+  }
+}
+function createStyleFunction(obj) {
+  if (typeof obj === "function") {
+    return obj;
+  }
+  let styles;
+  if (Array.isArray(obj)) {
+    styles = obj;
+  } else {
+    assert(
+      typeof /** @type {?} */
+      obj.getZIndex === "function",
+      "Expected an `ol/style/Style` or an array of `ol/style/Style.js`"
+    );
+    const style = (
+      /** @type {import("./style/Style.js").default} */
+      obj
+    );
+    styles = [style];
+  }
+  return function() {
+    return styles;
+  };
+}
+function interpolatePoint(flatCoordinates, offset2, end2, stride, fraction, dest, dimension) {
+  let o, t;
+  const n = (end2 - offset2) / stride;
+  if (n === 1) {
+    o = offset2;
+  } else if (n === 2) {
+    o = offset2;
+    t = fraction;
+  } else if (n !== 0) {
+    let x1 = flatCoordinates[offset2];
+    let y1 = flatCoordinates[offset2 + 1];
+    let length = 0;
+    const cumulativeLengths = [0];
+    for (let i = offset2 + stride; i < end2; i += stride) {
+      const x2 = flatCoordinates[i];
+      const y2 = flatCoordinates[i + 1];
+      length += Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+      cumulativeLengths.push(length);
+      x1 = x2;
+      y1 = y2;
+    }
+    const target = fraction * length;
+    const index = binarySearch(cumulativeLengths, target);
+    if (index < 0) {
+      t = (target - cumulativeLengths[-index - 2]) / (cumulativeLengths[-index - 1] - cumulativeLengths[-index - 2]);
+      o = offset2 + (-index - 2) * stride;
+    } else {
+      o = offset2 + index * stride;
+    }
+  }
+  dimension = dimension > 1 ? dimension : 2;
+  dest = dest ? dest : new Array(dimension);
+  for (let i = 0; i < dimension; ++i) {
+    dest[i] = o === void 0 ? NaN : t === void 0 ? flatCoordinates[o + i] : lerp(flatCoordinates[o + i], flatCoordinates[o + stride + i], t);
+  }
+  return dest;
+}
+function linearRingss(flatCoordinates, offset2, endss, stride) {
+  const flatCenters = [];
+  let extent = createEmpty();
+  for (let i = 0, ii = endss.length; i < ii; ++i) {
+    const ends = endss[i];
+    extent = createOrUpdateFromFlatCoordinates(
+      flatCoordinates,
+      offset2,
+      ends[0],
+      stride
+    );
+    flatCenters.push((extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2);
+    offset2 = ends[ends.length - 1];
+  }
+  return flatCenters;
+}
+const tmpTransform = create();
+class RenderFeature {
+  /**
+   * @param {Type} type Geometry type.
+   * @param {Array<number>} flatCoordinates Flat coordinates. These always need
+   *     to be right-handed for polygons.
+   * @param {Array<number>} ends Ends.
+   * @param {number} stride Stride.
+   * @param {Object<string, *>} properties Properties.
+   * @param {number|string|undefined} id Feature id.
+   */
+  constructor(type, flatCoordinates, ends, stride, properties, id) {
+    this.styleFunction;
+    this.extent_;
+    this.id_ = id;
+    this.type_ = type;
+    this.flatCoordinates_ = flatCoordinates;
+    this.flatInteriorPoints_ = null;
+    this.flatMidpoints_ = null;
+    this.ends_ = ends || null;
+    this.properties_ = properties;
+    this.squaredTolerance_;
+    this.stride_ = stride;
+    this.simplifiedGeometry_;
+  }
+  /**
+   * Get a feature property by its key.
+   * @param {string} key Key
+   * @return {*} Value for the requested key.
+   * @api
+   */
+  get(key) {
+    return this.properties_[key];
+  }
+  /**
+   * Get the extent of this feature's geometry.
+   * @return {import("../extent.js").Extent} Extent.
+   * @api
+   */
+  getExtent() {
+    if (!this.extent_) {
+      this.extent_ = this.type_ === "Point" ? createOrUpdateFromCoordinate(this.flatCoordinates_) : createOrUpdateFromFlatCoordinates(
+        this.flatCoordinates_,
+        0,
+        this.flatCoordinates_.length,
+        2
+      );
+    }
+    return this.extent_;
+  }
+  /**
+   * @return {Array<number>} Flat interior points.
+   */
+  getFlatInteriorPoint() {
+    if (!this.flatInteriorPoints_) {
+      const flatCenter = getCenter(this.getExtent());
+      this.flatInteriorPoints_ = getInteriorPointOfArray(
+        this.flatCoordinates_,
+        0,
+        this.ends_,
+        2,
+        flatCenter,
+        0
+      );
+    }
+    return this.flatInteriorPoints_;
+  }
+  /**
+   * @return {Array<number>} Flat interior points.
+   */
+  getFlatInteriorPoints() {
+    if (!this.flatInteriorPoints_) {
+      const ends = inflateEnds(this.flatCoordinates_, this.ends_);
+      const flatCenters = linearRingss(this.flatCoordinates_, 0, ends, 2);
+      this.flatInteriorPoints_ = getInteriorPointsOfMultiArray(
+        this.flatCoordinates_,
+        0,
+        ends,
+        2,
+        flatCenters
+      );
+    }
+    return this.flatInteriorPoints_;
+  }
+  /**
+   * @return {Array<number>} Flat midpoint.
+   */
+  getFlatMidpoint() {
+    if (!this.flatMidpoints_) {
+      this.flatMidpoints_ = interpolatePoint(
+        this.flatCoordinates_,
+        0,
+        this.flatCoordinates_.length,
+        2,
+        0.5
+      );
+    }
+    return this.flatMidpoints_;
+  }
+  /**
+   * @return {Array<number>} Flat midpoints.
+   */
+  getFlatMidpoints() {
+    if (!this.flatMidpoints_) {
+      this.flatMidpoints_ = [];
+      const flatCoordinates = this.flatCoordinates_;
+      let offset2 = 0;
+      const ends = (
+        /** @type {Array<number>} */
+        this.ends_
+      );
+      for (let i = 0, ii = ends.length; i < ii; ++i) {
+        const end2 = ends[i];
+        const midpoint = interpolatePoint(flatCoordinates, offset2, end2, 2, 0.5);
+        extend$1(this.flatMidpoints_, midpoint);
+        offset2 = end2;
+      }
+    }
+    return this.flatMidpoints_;
+  }
+  /**
+   * Get the feature identifier.  This is a stable identifier for the feature and
+   * is set when reading data from a remote source.
+   * @return {number|string|undefined} Id.
+   * @api
+   */
+  getId() {
+    return this.id_;
+  }
+  /**
+   * @return {Array<number>} Flat coordinates.
+   */
+  getOrientedFlatCoordinates() {
+    return this.flatCoordinates_;
+  }
+  /**
+   * For API compatibility with {@link module:ol/Feature~Feature}, this method is useful when
+   * determining the geometry type in style function (see {@link #getType}).
+   * @return {RenderFeature} Feature.
+   * @api
+   */
+  getGeometry() {
+    return this;
+  }
+  /**
+   * @param {number} squaredTolerance Squared tolerance.
+   * @return {RenderFeature} Simplified geometry.
+   */
+  getSimplifiedGeometry(squaredTolerance) {
+    return this;
+  }
+  /**
+   * Get a transformed and simplified version of the geometry.
+   * @param {number} squaredTolerance Squared tolerance.
+   * @param {import("../proj.js").TransformFunction} [transform] Optional transform function.
+   * @return {RenderFeature} Simplified geometry.
+   */
+  simplifyTransformed(squaredTolerance, transform2) {
+    return this;
+  }
+  /**
+   * Get the feature properties.
+   * @return {Object<string, *>} Feature properties.
+   * @api
+   */
+  getProperties() {
+    return this.properties_;
+  }
+  /**
+   * Get an object of all property names and values.  This has the same behavior as getProperties,
+   * but is here to conform with the {@link module:ol/Feature~Feature} interface.
+   * @return {Object<string, *>?} Object.
+   */
+  getPropertiesInternal() {
+    return this.properties_;
+  }
+  /**
+   * @return {number} Stride.
+   */
+  getStride() {
+    return this.stride_;
+  }
+  /**
+   * @return {import('../style/Style.js').StyleFunction|undefined} Style
+   */
+  getStyleFunction() {
+    return this.styleFunction;
+  }
+  /**
+   * Get the type of this feature's geometry.
+   * @return {Type} Geometry type.
+   * @api
+   */
+  getType() {
+    return this.type_;
+  }
+  /**
+   * Transform geometry coordinates from tile pixel space to projected.
+   *
+   * @param {import("../proj.js").ProjectionLike} projection The data projection
+   */
+  transform(projection) {
+    projection = get$1(projection);
+    const pixelExtent = projection.getExtent();
+    const projectedExtent = projection.getWorldExtent();
+    if (pixelExtent && projectedExtent) {
+      const scale2 = getHeight(projectedExtent) / getHeight(pixelExtent);
+      compose(
+        tmpTransform,
+        projectedExtent[0],
+        projectedExtent[3],
+        scale2,
+        -scale2,
+        0,
+        0,
+        0
+      );
+      transform2D(
+        this.flatCoordinates_,
+        0,
+        this.flatCoordinates_.length,
+        2,
+        tmpTransform,
+        this.flatCoordinates_
+      );
+    }
+  }
+  /**
+   * Apply a transform function to the coordinates of the geometry.
+   * The geometry is modified in place.
+   * If you do not want the geometry modified in place, first `clone()` it and
+   * then use this function on the clone.
+   * @param {import("../proj.js").TransformFunction} transformFn Transform function.
+   */
+  applyTransform(transformFn) {
+    transformFn(this.flatCoordinates_, this.flatCoordinates_, this.stride_);
+  }
+  /**
+   * @return {RenderFeature} A cloned render feature.
+   */
+  clone() {
+    var _a;
+    return new RenderFeature(
+      this.type_,
+      this.flatCoordinates_.slice(),
+      (_a = this.ends_) == null ? void 0 : _a.slice(),
+      this.stride_,
+      Object.assign({}, this.properties_),
+      this.id_
+    );
+  }
+  /**
+   * @return {Array<number>|null} Ends.
+   */
+  getEnds() {
+    return this.ends_;
+  }
+  /**
+   * Add transform and resolution based geometry simplification to this instance.
+   * @return {RenderFeature} This render feature.
+   */
+  enableSimplifyTransformed() {
+    this.simplifyTransformed = memoizeOne((squaredTolerance, transform2) => {
+      if (squaredTolerance === this.squaredTolerance_) {
+        return this.simplifiedGeometry_;
+      }
+      this.simplifiedGeometry_ = this.clone();
+      if (transform2) {
+        this.simplifiedGeometry_.applyTransform(transform2);
+      }
+      const simplifiedFlatCoordinates = this.simplifiedGeometry_.getFlatCoordinates();
+      let simplifiedEnds;
+      switch (this.type_) {
+        case "LineString":
+          simplifiedFlatCoordinates.length = douglasPeucker(
+            simplifiedFlatCoordinates,
+            0,
+            this.simplifiedGeometry_.flatCoordinates_.length,
+            this.simplifiedGeometry_.stride_,
+            squaredTolerance,
+            simplifiedFlatCoordinates,
+            0
+          );
+          simplifiedEnds = [simplifiedFlatCoordinates.length];
+          break;
+        case "MultiLineString":
+          simplifiedEnds = [];
+          simplifiedFlatCoordinates.length = douglasPeuckerArray(
+            simplifiedFlatCoordinates,
+            0,
+            this.simplifiedGeometry_.ends_,
+            this.simplifiedGeometry_.stride_,
+            squaredTolerance,
+            simplifiedFlatCoordinates,
+            0,
+            simplifiedEnds
+          );
+          break;
+        case "Polygon":
+          simplifiedEnds = [];
+          simplifiedFlatCoordinates.length = quantizeArray(
+            simplifiedFlatCoordinates,
+            0,
+            this.simplifiedGeometry_.ends_,
+            this.simplifiedGeometry_.stride_,
+            Math.sqrt(squaredTolerance),
+            simplifiedFlatCoordinates,
+            0,
+            simplifiedEnds
+          );
+          break;
+      }
+      if (simplifiedEnds) {
+        this.simplifiedGeometry_ = new RenderFeature(
+          this.type_,
+          simplifiedFlatCoordinates,
+          simplifiedEnds,
+          2,
+          this.properties_,
+          this.id_
+        );
+      }
+      this.squaredTolerance_ = squaredTolerance;
+      return this.simplifiedGeometry_;
+    });
+    return this;
+  }
+}
+RenderFeature.prototype.getFlatCoordinates = RenderFeature.prototype.getOrientedFlatCoordinates;
+const VectorEventType = {
+  /**
+   * Triggered when a feature is added to the source.
+   * @event module:ol/source/Vector.VectorSourceEvent#addfeature
+   * @api
+   */
+  ADDFEATURE: "addfeature",
+  /**
+   * Triggered when a feature is updated.
+   * @event module:ol/source/Vector.VectorSourceEvent#changefeature
+   * @api
+   */
+  CHANGEFEATURE: "changefeature",
+  /**
+   * Triggered when the clear method is called on the source.
+   * @event module:ol/source/Vector.VectorSourceEvent#clear
+   * @api
+   */
+  CLEAR: "clear",
+  /**
+   * Triggered when a feature is removed from the source.
+   * See {@link module:ol/source/Vector~VectorSource#clear source.clear()} for exceptions.
+   * @event module:ol/source/Vector.VectorSourceEvent#removefeature
+   * @api
+   */
+  REMOVEFEATURE: "removefeature",
+  /**
+   * Triggered when features starts loading.
+   * @event module:ol/source/Vector.VectorSourceEvent#featuresloadstart
+   * @api
+   */
+  FEATURESLOADSTART: "featuresloadstart",
+  /**
+   * Triggered when features finishes loading.
+   * @event module:ol/source/Vector.VectorSourceEvent#featuresloadend
+   * @api
+   */
+  FEATURESLOADEND: "featuresloadend",
+  /**
+   * Triggered if feature loading results in an error.
+   * @event module:ol/source/Vector.VectorSourceEvent#featuresloaderror
+   * @api
+   */
+  FEATURESLOADERROR: "featuresloaderror"
+};
+function all(extent, resolution) {
+  return [[-Infinity, -Infinity, Infinity, Infinity]];
+}
+let withCredentials = false;
+function loadFeaturesXhr(url, format, extent, resolution, projection, success, failure) {
+  const xhr2 = new XMLHttpRequest();
+  xhr2.open(
+    "GET",
+    typeof url === "function" ? url(extent, resolution, projection) : url,
+    true
+  );
+  if (format.getType() == "arraybuffer") {
+    xhr2.responseType = "arraybuffer";
+  }
+  xhr2.withCredentials = withCredentials;
+  xhr2.onload = function(event) {
+    if (!xhr2.status || xhr2.status >= 200 && xhr2.status < 300) {
+      const type = format.getType();
+      try {
+        let source2;
+        if (type == "text" || type == "json") {
+          source2 = xhr2.responseText;
+        } else if (type == "xml") {
+          source2 = xhr2.responseXML || xhr2.responseText;
+        } else if (type == "arraybuffer") {
+          source2 = /** @type {ArrayBuffer} */
+          xhr2.response;
+        }
+        if (source2) {
+          success(
+            /** @type {Array<FeatureType>} */
+            format.readFeatures(source2, {
+              extent,
+              featureProjection: projection
+            }),
+            format.readProjection(source2)
+          );
+        } else {
+          failure();
+        }
+      } catch {
+        failure();
+      }
+    } else {
+      failure();
+    }
+  };
+  xhr2.onerror = failure;
+  xhr2.send();
+}
+function xhr(url, format) {
+  return function(extent, resolution, projection, success, failure) {
+    const source2 = (
+      /** @type {import("./source/Vector").default<FeatureType>} */
+      this
+    );
+    loadFeaturesXhr(
+      url,
+      format,
+      extent,
+      resolution,
+      projection,
+      /**
+       * @param {Array<FeatureType>} features The loaded features.
+       * @param {import("./proj/Projection.js").default} dataProjection Data
+       * projection.
+       */
+      function(features, dataProjection) {
+        source2.addFeatures(features);
+        if (success !== void 0) {
+          success(features);
+        }
+      },
+      /* FIXME handle error */
+      failure ? failure : VOID
+    );
+  };
+}
+class VectorSourceEvent extends BaseEvent {
+  /**
+   * @param {string} type Type.
+   * @param {FeatureClass} [feature] Feature.
+   * @param {Array<FeatureClass>} [features] Features.
+   */
+  constructor(type, feature, features) {
+    super(type);
+    this.feature = feature;
+    this.features = features;
+  }
+}
+class VectorSource extends Source {
+  /**
+   * @param {Options<FeatureType>} [options] Vector source options.
+   */
+  constructor(options) {
+    options = options || {};
+    super({
+      attributions: options.attributions,
+      interpolate: true,
+      projection: void 0,
+      state: "ready",
+      wrapX: options.wrapX !== void 0 ? options.wrapX : true
+    });
+    this.on;
+    this.once;
+    this.un;
+    this.loader_ = VOID;
+    this.format_ = options.format;
+    this.overlaps_ = options.overlaps === void 0 ? true : options.overlaps;
+    this.url_ = options.url;
+    if (options.loader !== void 0) {
+      this.loader_ = options.loader;
+    } else if (this.url_ !== void 0) {
+      assert(this.format_, "`format` must be set when `url` is set");
+      this.loader_ = xhr(this.url_, this.format_);
+    }
+    this.strategy_ = options.strategy !== void 0 ? options.strategy : all;
+    const useSpatialIndex = options.useSpatialIndex !== void 0 ? options.useSpatialIndex : true;
+    this.featuresRtree_ = useSpatialIndex ? new RBush2() : null;
+    this.loadedExtentsRtree_ = new RBush2();
+    this.loadingExtentsCount_ = 0;
+    this.nullGeometryFeatures_ = {};
+    this.idIndex_ = {};
+    this.uidIndex_ = {};
+    this.featureChangeKeys_ = {};
+    this.featuresCollection_ = null;
+    let collection;
+    let features;
+    if (Array.isArray(options.features)) {
+      features = options.features;
+    } else if (options.features) {
+      collection = options.features;
+      features = collection.getArray();
+    }
+    if (!useSpatialIndex && collection === void 0) {
+      collection = new Collection(features);
+    }
+    if (features !== void 0) {
+      this.addFeaturesInternal(features);
+    }
+    if (collection !== void 0) {
+      this.bindFeaturesCollection_(collection);
+    }
+  }
+  /**
+   * Add a single feature to the source.  If you want to add a batch of features
+   * at once, call {@link module:ol/source/Vector~VectorSource#addFeatures #addFeatures()}
+   * instead. A feature will not be added to the source if feature with
+   * the same id is already there. The reason for this behavior is to avoid
+   * feature duplication when using bbox or tile loading strategies.
+   * Note: this also applies if an {@link module:ol/Collection~Collection} is used for features,
+   * meaning that if a feature with a duplicate id is added in the collection, it will
+   * be removed from it right away.
+   * @param {FeatureType} feature Feature to add.
+   * @api
+   */
+  addFeature(feature) {
+    this.addFeatureInternal(feature);
+    this.changed();
+  }
+  /**
+   * Add a feature without firing a `change` event.
+   * @param {FeatureType} feature Feature.
+   * @protected
+   */
+  addFeatureInternal(feature) {
+    const featureKey = getUid(feature);
+    if (!this.addToIndex_(featureKey, feature)) {
+      if (this.featuresCollection_) {
+        this.featuresCollection_.remove(feature);
+      }
+      return;
+    }
+    this.setupChangeEvents_(featureKey, feature);
+    const geometry = feature.getGeometry();
+    if (geometry) {
+      const extent = geometry.getExtent();
+      if (this.featuresRtree_) {
+        this.featuresRtree_.insert(extent, feature);
+      }
+    } else {
+      this.nullGeometryFeatures_[featureKey] = feature;
+    }
+    this.dispatchEvent(
+      new VectorSourceEvent(VectorEventType.ADDFEATURE, feature)
+    );
+  }
+  /**
+   * @param {string} featureKey Unique identifier for the feature.
+   * @param {FeatureType} feature The feature.
+   * @private
+   */
+  setupChangeEvents_(featureKey, feature) {
+    if (feature instanceof RenderFeature) {
+      return;
+    }
+    this.featureChangeKeys_[featureKey] = [
+      listen(feature, EventType.CHANGE, this.handleFeatureChange_, this),
+      listen(
+        feature,
+        ObjectEventType.PROPERTYCHANGE,
+        this.handleFeatureChange_,
+        this
+      )
+    ];
+  }
+  /**
+   * @param {string} featureKey Unique identifier for the feature.
+   * @param {FeatureType} feature The feature.
+   * @return {boolean} The feature is "valid", in the sense that it is also a
+   *     candidate for insertion into the Rtree.
+   * @private
+   */
+  addToIndex_(featureKey, feature) {
+    let valid = true;
+    if (feature.getId() !== void 0) {
+      const id = String(feature.getId());
+      if (!(id in this.idIndex_)) {
+        this.idIndex_[id] = feature;
+      } else if (feature instanceof RenderFeature) {
+        const indexedFeature = this.idIndex_[id];
+        if (!(indexedFeature instanceof RenderFeature)) {
+          valid = false;
+        } else {
+          if (!Array.isArray(indexedFeature)) {
+            this.idIndex_[id] = [indexedFeature, feature];
+          } else {
+            indexedFeature.push(feature);
+          }
+        }
+      } else {
+        valid = false;
+      }
+    }
+    if (valid) {
+      assert(
+        !(featureKey in this.uidIndex_),
+        "The passed `feature` was already added to the source"
+      );
+      this.uidIndex_[featureKey] = feature;
+    }
+    return valid;
+  }
+  /**
+   * Add a batch of features to the source.
+   * @param {Array<FeatureType>} features Features to add.
+   * @api
+   */
+  addFeatures(features) {
+    this.addFeaturesInternal(features);
+    this.changed();
+  }
+  /**
+   * Add features without firing a `change` event.
+   * @param {Array<FeatureType>} features Features.
+   * @protected
+   */
+  addFeaturesInternal(features) {
+    const extents = [];
+    const newFeatures = [];
+    const geometryFeatures = [];
+    for (let i = 0, length = features.length; i < length; i++) {
+      const feature = features[i];
+      const featureKey = getUid(feature);
+      if (this.addToIndex_(featureKey, feature)) {
+        newFeatures.push(feature);
+      }
+    }
+    for (let i = 0, length = newFeatures.length; i < length; i++) {
+      const feature = newFeatures[i];
+      const featureKey = getUid(feature);
+      this.setupChangeEvents_(featureKey, feature);
+      const geometry = feature.getGeometry();
+      if (geometry) {
+        const extent = geometry.getExtent();
+        extents.push(extent);
+        geometryFeatures.push(feature);
+      } else {
+        this.nullGeometryFeatures_[featureKey] = feature;
+      }
+    }
+    if (this.featuresRtree_) {
+      this.featuresRtree_.load(extents, geometryFeatures);
+    }
+    if (this.hasListener(VectorEventType.ADDFEATURE)) {
+      for (let i = 0, length = newFeatures.length; i < length; i++) {
+        this.dispatchEvent(
+          new VectorSourceEvent(VectorEventType.ADDFEATURE, newFeatures[i])
+        );
+      }
+    }
+  }
+  /**
+   * @param {!Collection<FeatureType>} collection Collection.
+   * @private
+   */
+  bindFeaturesCollection_(collection) {
+    let modifyingCollection = false;
+    this.addEventListener(
+      VectorEventType.ADDFEATURE,
+      /**
+       * @param {VectorSourceEvent<FeatureType>} evt The vector source event
+       */
+      function(evt) {
+        if (!modifyingCollection) {
+          modifyingCollection = true;
+          collection.push(evt.feature);
+          modifyingCollection = false;
+        }
+      }
+    );
+    this.addEventListener(
+      VectorEventType.REMOVEFEATURE,
+      /**
+       * @param {VectorSourceEvent<FeatureType>} evt The vector source event
+       */
+      function(evt) {
+        if (!modifyingCollection) {
+          modifyingCollection = true;
+          collection.remove(evt.feature);
+          modifyingCollection = false;
+        }
+      }
+    );
+    collection.addEventListener(
+      CollectionEventType.ADD,
+      /**
+       * @param {import("../Collection.js").CollectionEvent<FeatureType>} evt The collection event
+       */
+      (evt) => {
+        if (!modifyingCollection) {
+          modifyingCollection = true;
+          this.addFeature(evt.element);
+          modifyingCollection = false;
+        }
+      }
+    );
+    collection.addEventListener(
+      CollectionEventType.REMOVE,
+      /**
+       * @param {import("../Collection.js").CollectionEvent<FeatureType>} evt The collection event
+       */
+      (evt) => {
+        if (!modifyingCollection) {
+          modifyingCollection = true;
+          this.removeFeature(evt.element);
+          modifyingCollection = false;
+        }
+      }
+    );
+    this.featuresCollection_ = collection;
+  }
+  /**
+   * Remove all features from the source.
+   * @param {boolean} [fast] Skip dispatching of {@link module:ol/source/Vector.VectorSourceEvent#event:removefeature} events.
+   * @api
+   */
+  clear(fast) {
+    if (fast) {
+      for (const featureId in this.featureChangeKeys_) {
+        const keys = this.featureChangeKeys_[featureId];
+        keys.forEach(unlistenByKey);
+      }
+      if (!this.featuresCollection_) {
+        this.featureChangeKeys_ = {};
+        this.idIndex_ = {};
+        this.uidIndex_ = {};
+      }
+    } else {
+      if (this.featuresRtree_) {
+        const removeAndIgnoreReturn = (feature) => {
+          this.removeFeatureInternal(feature);
+        };
+        this.featuresRtree_.forEach(removeAndIgnoreReturn);
+        for (const id in this.nullGeometryFeatures_) {
+          this.removeFeatureInternal(this.nullGeometryFeatures_[id]);
+        }
+      }
+    }
+    if (this.featuresCollection_) {
+      this.featuresCollection_.clear();
+    }
+    if (this.featuresRtree_) {
+      this.featuresRtree_.clear();
+    }
+    this.nullGeometryFeatures_ = {};
+    const clearEvent = new VectorSourceEvent(VectorEventType.CLEAR);
+    this.dispatchEvent(clearEvent);
+    this.changed();
+  }
+  /**
+   * Iterate through all features on the source, calling the provided callback
+   * with each one.  If the callback returns any "truthy" value, iteration will
+   * stop and the function will return the same value.
+   * Note: this function only iterate through the feature that have a defined geometry.
+   *
+   * @param {function(FeatureType): T} callback Called with each feature
+   *     on the source.  Return a truthy value to stop iteration.
+   * @return {T|undefined} The return value from the last call to the callback.
+   * @template T
+   * @api
+   */
+  forEachFeature(callback) {
+    if (this.featuresRtree_) {
+      return this.featuresRtree_.forEach(callback);
+    }
+    if (this.featuresCollection_) {
+      this.featuresCollection_.forEach(callback);
+    }
+  }
+  /**
+   * Iterate through all features whose geometries contain the provided
+   * coordinate, calling the callback with each feature.  If the callback returns
+   * a "truthy" value, iteration will stop and the function will return the same
+   * value.
+   *
+   * For {@link module:ol/render/Feature~RenderFeature} features, the callback will be
+   * called for all features.
+   *
+   * @param {import("../coordinate.js").Coordinate} coordinate Coordinate.
+   * @param {function(FeatureType): T} callback Called with each feature
+   *     whose goemetry contains the provided coordinate.
+   * @return {T|undefined} The return value from the last call to the callback.
+   * @template T
+   */
+  forEachFeatureAtCoordinateDirect(coordinate, callback) {
+    const extent = [coordinate[0], coordinate[1], coordinate[0], coordinate[1]];
+    return this.forEachFeatureInExtent(extent, function(feature) {
+      const geometry = feature.getGeometry();
+      if (geometry instanceof RenderFeature || geometry.intersectsCoordinate(coordinate)) {
+        return callback(feature);
+      }
+      return void 0;
+    });
+  }
+  /**
+   * Iterate through all features whose bounding box intersects the provided
+   * extent (note that the feature's geometry may not intersect the extent),
+   * calling the callback with each feature.  If the callback returns a "truthy"
+   * value, iteration will stop and the function will return the same value.
+   *
+   * If you are interested in features whose geometry intersects an extent, call
+   * the {@link module:ol/source/Vector~VectorSource#forEachFeatureIntersectingExtent #forEachFeatureIntersectingExtent()} method instead.
+   *
+   * When `useSpatialIndex` is set to false, this method will loop through all
+   * features, equivalent to {@link module:ol/source/Vector~VectorSource#forEachFeature #forEachFeature()}.
+   *
+   * @param {import("../extent.js").Extent} extent Extent.
+   * @param {function(FeatureType): T} callback Called with each feature
+   *     whose bounding box intersects the provided extent.
+   * @return {T|undefined} The return value from the last call to the callback.
+   * @template T
+   * @api
+   */
+  forEachFeatureInExtent(extent, callback) {
+    if (this.featuresRtree_) {
+      return this.featuresRtree_.forEachInExtent(extent, callback);
+    }
+    if (this.featuresCollection_) {
+      this.featuresCollection_.forEach(callback);
+    }
+  }
+  /**
+   * Iterate through all features whose geometry intersects the provided extent,
+   * calling the callback with each feature.  If the callback returns a "truthy"
+   * value, iteration will stop and the function will return the same value.
+   *
+   * If you only want to test for bounding box intersection, call the
+   * {@link module:ol/source/Vector~VectorSource#forEachFeatureInExtent #forEachFeatureInExtent()} method instead.
+   *
+   * @param {import("../extent.js").Extent} extent Extent.
+   * @param {function(FeatureType): T} callback Called with each feature
+   *     whose geometry intersects the provided extent.
+   * @return {T|undefined} The return value from the last call to the callback.
+   * @template T
+   * @api
+   */
+  forEachFeatureIntersectingExtent(extent, callback) {
+    return this.forEachFeatureInExtent(
+      extent,
+      /**
+       * @param {FeatureType} feature Feature.
+       * @return {T|undefined} The return value from the last call to the callback.
+       */
+      function(feature) {
+        const geometry = feature.getGeometry();
+        if (geometry instanceof RenderFeature || geometry.intersectsExtent(extent)) {
+          const result = callback(feature);
+          if (result) {
+            return result;
+          }
+        }
+      }
+    );
+  }
+  /**
+   * Get the features collection associated with this source. Will be `null`
+   * unless the source was configured with `useSpatialIndex` set to `false`, or
+   * with an {@link module:ol/Collection~Collection} as `features`.
+   * @return {Collection<FeatureType>|null} The collection of features.
+   * @api
+   */
+  getFeaturesCollection() {
+    return this.featuresCollection_;
+  }
+  /**
+   * Get a snapshot of the features currently on the source in random order. The returned array
+   * is a copy, the features are references to the features in the source.
+   * @return {Array<FeatureType>} Features.
+   * @api
+   */
+  getFeatures() {
+    let features;
+    if (this.featuresCollection_) {
+      features = this.featuresCollection_.getArray().slice(0);
+    } else if (this.featuresRtree_) {
+      features = this.featuresRtree_.getAll();
+      if (!isEmpty$1(this.nullGeometryFeatures_)) {
+        extend$1(features, Object.values(this.nullGeometryFeatures_));
+      }
+    }
+    return features;
+  }
+  /**
+   * Get all features whose geometry intersects the provided coordinate.
+   * @param {import("../coordinate.js").Coordinate} coordinate Coordinate.
+   * @return {Array<import("../Feature.js").default>} Features.
+   * @api
+   */
+  getFeaturesAtCoordinate(coordinate) {
+    const features = [];
+    this.forEachFeatureAtCoordinateDirect(coordinate, function(feature) {
+      features.push(feature);
+    });
+    return features;
+  }
+  /**
+   * Get all features whose bounding box intersects the provided extent.  Note that this returns an array of
+   * all features intersecting the given extent in random order (so it may include
+   * features whose geometries do not intersect the extent).
+   *
+   * When `useSpatialIndex` is set to false, this method will return all
+   * features.
+   *
+   * @param {import("../extent.js").Extent} extent Extent.
+   * @param {import("../proj/Projection.js").default} [projection] Include features
+   * where `extent` exceeds the x-axis bounds of `projection` and wraps around the world.
+   * @return {Array<FeatureType>} Features.
+   * @api
+   */
+  getFeaturesInExtent(extent, projection) {
+    if (this.featuresRtree_) {
+      const multiWorld = projection && projection.canWrapX() && this.getWrapX();
+      if (!multiWorld) {
+        return this.featuresRtree_.getInExtent(extent);
+      }
+      const extents = wrapAndSliceX(extent, projection);
+      return [].concat(
+        ...extents.map((anExtent) => this.featuresRtree_.getInExtent(anExtent))
+      );
+    }
+    if (this.featuresCollection_) {
+      return this.featuresCollection_.getArray().slice(0);
+    }
+    return [];
+  }
+  /**
+   * Get the closest feature to the provided coordinate.
+   *
+   * This method is not available when the source is configured with
+   * `useSpatialIndex` set to `false` and the features in this source are of type
+   * {@link module:ol/Feature~Feature}.
+   * @param {import("../coordinate.js").Coordinate} coordinate Coordinate.
+   * @param {function(FeatureType):boolean} [filter] Feature filter function.
+   *     The filter function will receive one argument, the {@link module:ol/Feature~Feature feature}
+   *     and it should return a boolean value. By default, no filtering is made.
+   * @return {FeatureType} Closest feature.
+   * @api
+   */
+  getClosestFeatureToCoordinate(coordinate, filter) {
+    const x2 = coordinate[0];
+    const y2 = coordinate[1];
+    let closestFeature = null;
+    const closestPoint = [NaN, NaN];
+    let minSquaredDistance = Infinity;
+    const extent = [-Infinity, -Infinity, Infinity, Infinity];
+    filter = filter ? filter : TRUE;
+    this.featuresRtree_.forEachInExtent(
+      extent,
+      /**
+       * @param {FeatureType} feature Feature.
+       */
+      function(feature) {
+        if (filter(feature)) {
+          const geometry = feature.getGeometry();
+          const previousMinSquaredDistance = minSquaredDistance;
+          minSquaredDistance = geometry instanceof RenderFeature ? 0 : geometry.closestPointXY(x2, y2, closestPoint, minSquaredDistance);
+          if (minSquaredDistance < previousMinSquaredDistance) {
+            closestFeature = feature;
+            const minDistance = Math.sqrt(minSquaredDistance);
+            extent[0] = x2 - minDistance;
+            extent[1] = y2 - minDistance;
+            extent[2] = x2 + minDistance;
+            extent[3] = y2 + minDistance;
+          }
+        }
+      }
+    );
+    return closestFeature;
+  }
+  /**
+   * Get the extent of the features currently in the source.
+   *
+   * This method is not available when the source is configured with
+   * `useSpatialIndex` set to `false`.
+   * @param {import("../extent.js").Extent} [extent] Destination extent. If provided, no new extent
+   *     will be created. Instead, that extent's coordinates will be overwritten.
+   * @return {import("../extent.js").Extent} Extent.
+   * @api
+   */
+  getExtent(extent) {
+    return this.featuresRtree_.getExtent(extent);
+  }
+  /**
+   * Get a feature by its identifier (the value returned by feature.getId()). When `RenderFeature`s
+   * are used, `getFeatureById()` can return an array of `RenderFeature`s. This allows for handling
+   * of `GeometryCollection` geometries, where format readers create one `RenderFeature` per
+   * `GeometryCollection` member.
+   * Note that the index treats string and numeric identifiers as the same.  So
+   * `source.getFeatureById(2)` will return a feature with id `'2'` or `2`.
+   *
+   * @param {string|number} id Feature identifier.
+   * @return {FeatureClassOrArrayOfRenderFeatures<FeatureType>|null} The feature (or `null` if not found).
+   * @api
+   */
+  getFeatureById(id) {
+    const feature = this.idIndex_[id.toString()];
+    return feature !== void 0 ? (
+      /** @type {FeatureClassOrArrayOfRenderFeatures<FeatureType>} */
+      feature
+    ) : null;
+  }
+  /**
+   * Get a feature by its internal unique identifier (using `getUid`).
+   *
+   * @param {string} uid Feature identifier.
+   * @return {FeatureType|null} The feature (or `null` if not found).
+   */
+  getFeatureByUid(uid) {
+    const feature = this.uidIndex_[uid];
+    return feature !== void 0 ? feature : null;
+  }
+  /**
+   * Get the format associated with this source.
+   *
+   * @return {import("../format/Feature.js").default<import('../format/Feature.js').FeatureToFeatureClass<FeatureType>>|undefined} The feature format.
+   * @api
+   */
+  getFormat() {
+    return this.format_;
+  }
+  /**
+   * @return {boolean} The source can have overlapping geometries.
+   */
+  getOverlaps() {
+    return this.overlaps_;
+  }
+  /**
+   * Get the url associated with this source.
+   *
+   * @return {string|import("../featureloader.js").FeatureUrlFunction|undefined} The url.
+   * @api
+   */
+  getUrl() {
+    return this.url_;
+  }
+  /**
+   * @param {Event} event Event.
+   * @private
+   */
+  handleFeatureChange_(event) {
+    const feature = (
+      /** @type {FeatureType} */
+      event.target
+    );
+    const featureKey = getUid(feature);
+    const geometry = feature.getGeometry();
+    if (!geometry) {
+      if (!(featureKey in this.nullGeometryFeatures_)) {
+        if (this.featuresRtree_) {
+          this.featuresRtree_.remove(feature);
+        }
+        this.nullGeometryFeatures_[featureKey] = feature;
+      }
+    } else {
+      const extent = geometry.getExtent();
+      if (featureKey in this.nullGeometryFeatures_) {
+        delete this.nullGeometryFeatures_[featureKey];
+        if (this.featuresRtree_) {
+          this.featuresRtree_.insert(extent, feature);
+        }
+      } else {
+        if (this.featuresRtree_) {
+          this.featuresRtree_.update(extent, feature);
+        }
+      }
+    }
+    const id = feature.getId();
+    if (id !== void 0) {
+      const sid = id.toString();
+      if (this.idIndex_[sid] !== feature) {
+        this.removeFromIdIndex_(feature);
+        this.idIndex_[sid] = feature;
+      }
+    } else {
+      this.removeFromIdIndex_(feature);
+      this.uidIndex_[featureKey] = feature;
+    }
+    this.changed();
+    this.dispatchEvent(
+      new VectorSourceEvent(VectorEventType.CHANGEFEATURE, feature)
+    );
+  }
+  /**
+   * Returns true if the feature is contained within the source.
+   * @param {FeatureType} feature Feature.
+   * @return {boolean} Has feature.
+   * @api
+   */
+  hasFeature(feature) {
+    const id = feature.getId();
+    if (id !== void 0) {
+      return id in this.idIndex_;
+    }
+    return getUid(feature) in this.uidIndex_;
+  }
+  /**
+   * @return {boolean} Is empty.
+   */
+  isEmpty() {
+    if (this.featuresRtree_) {
+      return this.featuresRtree_.isEmpty() && isEmpty$1(this.nullGeometryFeatures_);
+    }
+    if (this.featuresCollection_) {
+      return this.featuresCollection_.getLength() === 0;
+    }
+    return true;
+  }
+  /**
+   * @param {import("../extent.js").Extent} extent Extent.
+   * @param {number} resolution Resolution.
+   * @param {import("../proj/Projection.js").default} projection Projection.
+   */
+  loadFeatures(extent, resolution, projection) {
+    const loadedExtentsRtree = this.loadedExtentsRtree_;
+    const extentsToLoad = this.strategy_(extent, resolution, projection);
+    for (let i = 0, ii = extentsToLoad.length; i < ii; ++i) {
+      const extentToLoad = extentsToLoad[i];
+      const alreadyLoaded = loadedExtentsRtree.forEachInExtent(
+        extentToLoad,
+        /**
+         * @param {{extent: import("../extent.js").Extent}} object Object.
+         * @return {boolean} Contains.
+         */
+        function(object) {
+          return containsExtent(object.extent, extentToLoad);
+        }
+      );
+      if (!alreadyLoaded) {
+        ++this.loadingExtentsCount_;
+        this.dispatchEvent(
+          new VectorSourceEvent(VectorEventType.FEATURESLOADSTART)
+        );
+        this.loader_.call(
+          this,
+          extentToLoad,
+          resolution,
+          projection,
+          (features) => {
+            --this.loadingExtentsCount_;
+            this.dispatchEvent(
+              new VectorSourceEvent(
+                VectorEventType.FEATURESLOADEND,
+                void 0,
+                features
+              )
+            );
+          },
+          () => {
+            --this.loadingExtentsCount_;
+            this.dispatchEvent(
+              new VectorSourceEvent(VectorEventType.FEATURESLOADERROR)
+            );
+          }
+        );
+        loadedExtentsRtree.insert(extentToLoad, { extent: extentToLoad.slice() });
+      }
+    }
+    this.loading = this.loader_.length < 4 ? false : this.loadingExtentsCount_ > 0;
+  }
+  refresh() {
+    this.clear(true);
+    this.loadedExtentsRtree_.clear();
+    super.refresh();
+  }
+  /**
+   * Remove an extent from the list of loaded extents.
+   * @param {import("../extent.js").Extent} extent Extent.
+   * @api
+   */
+  removeLoadedExtent(extent) {
+    const loadedExtentsRtree = this.loadedExtentsRtree_;
+    let obj;
+    loadedExtentsRtree.forEachInExtent(extent, function(object) {
+      if (equals$2(object.extent, extent)) {
+        obj = object;
+        return true;
+      }
+    });
+    if (obj) {
+      loadedExtentsRtree.remove(obj);
+    }
+  }
+  /**
+   * Batch remove features from the source.  If you want to remove all features
+   * at once, use the {@link module:ol/source/Vector~VectorSource#clear #clear()} method
+   * instead.
+   * @param {Array<FeatureType>} features Features to remove.
+   * @api
+   */
+  removeFeatures(features) {
+    const removedFeatures = [];
+    for (let i = 0, ii = features.length; i < ii; ++i) {
+      const feature = features[i];
+      const removedFeature = this.removeFeatureInternal(feature);
+      if (removedFeature) {
+        removedFeatures.push(removedFeature);
+      }
+    }
+    if (removedFeatures.length > 0) {
+      this.changed();
+    }
+  }
+  /**
+   * Remove a single feature from the source. If you want to batch remove
+   * features, use the {@link module:ol/source/Vector~VectorSource#removeFeatures #removeFeatures()} method
+   * instead.
+   * @param {FeatureType} feature Feature to remove.
+   * @api
+   */
+  removeFeature(feature) {
+    if (!feature) {
+      return;
+    }
+    const result = this.removeFeatureInternal(feature);
+    if (result) {
+      this.changed();
+    }
+  }
+  /**
+   * Remove feature without firing a `change` event.
+   * @param {FeatureType} feature Feature.
+   * @return {FeatureType|undefined} The removed feature
+   *     (or undefined if the feature was not found).
+   * @protected
+   */
+  removeFeatureInternal(feature) {
+    const featureKey = getUid(feature);
+    if (!(featureKey in this.uidIndex_)) {
+      return;
+    }
+    if (featureKey in this.nullGeometryFeatures_) {
+      delete this.nullGeometryFeatures_[featureKey];
+    } else {
+      if (this.featuresRtree_) {
+        this.featuresRtree_.remove(feature);
+      }
+    }
+    const featureChangeKeys = this.featureChangeKeys_[featureKey];
+    featureChangeKeys == null ? void 0 : featureChangeKeys.forEach(unlistenByKey);
+    delete this.featureChangeKeys_[featureKey];
+    const id = feature.getId();
+    if (id !== void 0) {
+      const idString = id.toString();
+      const indexedFeature = this.idIndex_[idString];
+      if (indexedFeature === feature) {
+        delete this.idIndex_[idString];
+      } else if (Array.isArray(indexedFeature)) {
+        indexedFeature.splice(indexedFeature.indexOf(feature), 1);
+        if (indexedFeature.length === 1) {
+          this.idIndex_[idString] = indexedFeature[0];
+        }
+      }
+    }
+    delete this.uidIndex_[featureKey];
+    if (this.hasListener(VectorEventType.REMOVEFEATURE)) {
+      this.dispatchEvent(
+        new VectorSourceEvent(VectorEventType.REMOVEFEATURE, feature)
+      );
+    }
+    return feature;
+  }
+  /**
+   * Remove a feature from the id index.  Called internally when the feature id
+   * may have changed.
+   * @param {FeatureType} feature The feature.
+   * @return {boolean} Removed the feature from the index.
+   * @private
+   */
+  removeFromIdIndex_(feature) {
+    let removed = false;
+    for (const id in this.idIndex_) {
+      const indexedFeature = this.idIndex_[id];
+      if (feature instanceof RenderFeature && Array.isArray(indexedFeature) && indexedFeature.includes(feature)) {
+        indexedFeature.splice(indexedFeature.indexOf(feature), 1);
+      } else if (this.idIndex_[id] === feature) {
+        delete this.idIndex_[id];
+        removed = true;
+        break;
+      }
+    }
+    return removed;
+  }
+  /**
+   * Set the new loader of the source. The next render cycle will use the
+   * new loader.
+   * @param {import("../featureloader.js").FeatureLoader<FeatureType>} loader The loader to set.
+   * @api
+   */
+  setLoader(loader) {
+    this.loader_ = loader;
+  }
+  /**
+   * Points the source to a new url. The next render cycle will use the new url.
+   * @param {string|import("../featureloader.js").FeatureUrlFunction} url Url.
+   * @api
+   */
+  setUrl(url) {
+    assert(this.format_, "`format` must be set when `url` is set");
+    this.url_ = url;
+    this.setLoader(xhr(url, this.format_));
+  }
+}
 const HOSTNAME = "VITE_HOSTNAME";
 const OSML10N_VERSION = "VITE_OSML10N_VERSION";
 const OPENSTREETMAP_CARTO_DE_VERSION = "VITE_OPENSTREETMAP_CARTO_DE_VERSION";
 const folder = getGETParameter("folder") !== null && getGETParameter("folder") !== "" ? "/" + getGETParameter("folder") + "/" : "/";
 const osm = new TileLayer({
   source: new OSM()
+});
+const source = new VectorSource();
+const geolocatelayer = new VectorLayer({
+  source
 });
 const tileUrl = folder + "{z}/{x}/{y}.png";
 const link = new Link();
@@ -26600,7 +34127,8 @@ const defaultStyle = new TileLayer({
   })
 });
 const map = new Map$1({
-  layers: [osm, defaultStyle],
+  controls: defaults$1().extend([new FullScreen()]),
+  layers: [osm, defaultStyle, geolocatelayer],
   target: "map",
   view: new View({
     center: fromLonLat([10.33649, 51.006271]),
@@ -26661,3 +34189,38 @@ map.on("moveend", function(e) {
     currZoom = newZoom;
   }
 });
+navigator.geolocation.watchPosition(
+  function(pos) {
+    const coords = [pos.coords.longitude, pos.coords.latitude];
+    const accuracy = circular(coords, pos.coords.accuracy);
+    source.clear(true);
+    source.addFeatures([
+      new Feature(
+        accuracy.transform("EPSG:4326", map.getView().getProjection())
+      ),
+      new Feature(new Point(fromLonLat(coords)))
+    ]);
+  },
+  function(error) {
+    alert(`ERROR: ${error.message}`);
+  },
+  {
+    enableHighAccuracy: true
+  }
+);
+const locate = document.createElement("div");
+locate.className = "ol-control ol-control-custom-geo ol-unselectable locate";
+locate.innerHTML = '<button title="Lokalisiere mich">◎</button>';
+locate.addEventListener("click", function() {
+  if (!source.isEmpty()) {
+    map.getView().fit(source.getExtent(), {
+      maxZoom: 18,
+      duration: 500
+    });
+  }
+});
+map.addControl(
+  new Control({
+    element: locate
+  })
+);

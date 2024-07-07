@@ -7209,8 +7209,21 @@ body {
 #map {
   width: auto;
   height: 400px;
+  position: relative;
 }
 a {
   padding: 0.5rem;
-  font-size: large;
+}
+#swipe {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 1%;
+  box-sizing: border-box;
+  z-index: 1;
+  margin-bottom: 2%;
+}
+.ol-control-custom-geo {
+  top: 2.5em;
+  right: 0.5em;
 }
