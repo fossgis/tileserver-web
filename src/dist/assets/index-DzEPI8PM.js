@@ -996,7 +996,7 @@ function distanceAndSkiddingToXY(placement, rects, offset2) {
     y: distance
   };
 }
-function offset$1(_ref2) {
+function offset(_ref2) {
   var state = _ref2.state, options = _ref2.options, name = _ref2.name;
   var _options$offset = options.offset, offset2 = _options$offset === void 0 ? [0, 0] : _options$offset;
   var data = placements.reduce(function(acc, placement) {
@@ -1010,12 +1010,12 @@ function offset$1(_ref2) {
   }
   state.modifiersData[name] = data;
 }
-const offset$2 = {
+const offset$1 = {
   name: "offset",
   enabled: true,
   phase: "main",
   requires: ["popperOffsets"],
-  fn: offset$1
+  fn: offset
 };
 function popperOffsets(_ref) {
   var state = _ref.state, name = _ref.name;
@@ -1387,7 +1387,7 @@ var defaultModifiers$1 = [eventListeners, popperOffsets$1, computeStyles$1, appl
 var createPopper$1 = /* @__PURE__ */ popperGenerator({
   defaultModifiers: defaultModifiers$1
 });
-var defaultModifiers = [eventListeners, popperOffsets$1, computeStyles$1, applyStyles$1, offset$2, flip$1, preventOverflow$1, arrow$1, hide$1];
+var defaultModifiers = [eventListeners, popperOffsets$1, computeStyles$1, applyStyles$1, offset$1, flip$1, preventOverflow$1, arrow$1, hide$1];
 var createPopper = /* @__PURE__ */ popperGenerator({
   defaultModifiers
 });
@@ -1417,7 +1417,7 @@ const Popper = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProper
   left,
   main,
   modifierPhases,
-  offset: offset$2,
+  offset: offset$1,
   placements,
   popper,
   popperGenerator,
@@ -5186,9 +5186,9 @@ class Projection {
    * @param {boolean} global Whether the projection is global.
    * @api
    */
-  setGlobal(global) {
-    this.global_ = global;
-    this.canWrapX_ = !!(global && this.extent_);
+  setGlobal(global2) {
+    this.global_ = global2;
+    this.canWrapX_ = !!(global2 && this.extent_);
   }
   /**
    * @return {import("../tilegrid/TileGrid.js").default} The default tile grid.
@@ -5238,12 +5238,13 @@ class Projection {
     return this.getPointResolutionFunc_;
   }
 }
+const Projection$1 = Projection;
 const RADIUS$1 = 6378137;
 const HALF_SIZE = Math.PI * RADIUS$1;
 const EXTENT$1 = [-HALF_SIZE, -HALF_SIZE, HALF_SIZE, HALF_SIZE];
 const WORLD_EXTENT = [-180, -85, 180, 85];
 const MAX_SAFE_Y = RADIUS$1 * Math.log(Math.tan(Math.PI / 2));
-class EPSG3857Projection extends Projection {
+class EPSG3857Projection extends Projection$1 {
   /**
    * @param {string} code Code.
    */
@@ -5309,7 +5310,7 @@ function toEPSG4326(input, output, dimension) {
 const RADIUS = 6378137;
 const EXTENT = [-180, -90, 180, 90];
 const METERS_PER_UNIT = Math.PI * RADIUS / 180;
-class EPSG4326Projection extends Projection {
+class EPSG4326Projection extends Projection$1 {
   /**
    * @param {string} code Code.
    * @param {string} [axisOrientation] Axis orientation.
@@ -5336,13 +5337,16 @@ const PROJECTIONS = [
   new EPSG4326Projection("http://www.opengis.net/def/crs/EPSG/0/4326", "neu")
 ];
 let cache$1 = {};
+function clear$2() {
+  cache$1 = {};
+}
 function get$3(code) {
   return cache$1[code] || cache$1[code.replace(/urn:(x-)?ogc:def:crs:EPSG:(.*:)?(\w+)$/, "EPSG:$3")] || null;
 }
 function add$2(code, projection) {
   cache$1[code] = projection;
 }
-function clear(object) {
+function clear$1(object) {
   for (const property in object) {
     delete object[property];
   }
@@ -5355,6 +5359,9 @@ function isEmpty$1(object) {
   return !property;
 }
 let transforms = {};
+function clear() {
+  transforms = {};
+}
 function add$1(source2, destination, transformFn) {
   const sourceCode = source2.getCode();
   const destinationCode = destination.getCode();
@@ -5384,6 +5391,13 @@ function boundingExtent(coordinates2) {
     extendCoordinate(extent, coordinates2[i]);
   }
   return extent;
+}
+function _boundingExtentXYs(xs, ys, dest) {
+  const minX = Math.min.apply(null, xs);
+  const minY = Math.min.apply(null, ys);
+  const maxX = Math.max.apply(null, xs);
+  const maxY = Math.max.apply(null, ys);
+  return createOrUpdate$2(minX, minY, maxX, maxY, dest);
 }
 function buffer(extent, value, dest) {
   if (dest) {
@@ -5711,6 +5725,47 @@ function intersectsSegment(extent, start2, end2) {
   }
   return intersects2;
 }
+function applyTransform(extent, transformFn, dest, stops) {
+  if (isEmpty(extent)) {
+    return createOrUpdateEmpty(dest);
+  }
+  let coordinates2 = [];
+  if (stops > 1) {
+    const width = extent[2] - extent[0];
+    const height = extent[3] - extent[1];
+    for (let i = 0; i < stops; ++i) {
+      coordinates2.push(
+        extent[0] + width * i / stops,
+        extent[1],
+        extent[2],
+        extent[1] + height * i / stops,
+        extent[2] - width * i / stops,
+        extent[3],
+        extent[0],
+        extent[3] - height * i / stops
+      );
+    }
+  } else {
+    coordinates2 = [
+      extent[0],
+      extent[1],
+      extent[2],
+      extent[1],
+      extent[2],
+      extent[3],
+      extent[0],
+      extent[3]
+    ];
+  }
+  transformFn(coordinates2, coordinates2, 2);
+  const xs = [];
+  const ys = [];
+  for (let i = 0, l = coordinates2.length; i < l; i += 2) {
+    xs.push(coordinates2[i]);
+    ys.push(coordinates2[i + 1]);
+  }
+  return _boundingExtentXYs(xs, ys, dest);
+}
 function wrapX$2(extent, projection) {
   const projectionExtent = projection.getExtent();
   const center = getCenter(extent);
@@ -5812,9 +5867,6 @@ function solveLinearSystem(mat) {
   }
   return x2;
 }
-function toDegrees(angleInRadians) {
-  return angleInRadians * 180 / Math.PI;
-}
 function toRadians(angleInDegrees) {
   return angleInDegrees * Math.PI / 180;
 }
@@ -5895,26 +5947,12 @@ function getDistance(c1, c2, radius) {
   const a2 = Math.sin(deltaLatBy2) * Math.sin(deltaLatBy2) + Math.sin(deltaLonBy2) * Math.sin(deltaLonBy2) * Math.cos(lat1) * Math.cos(lat2);
   return 2 * radius * Math.atan2(Math.sqrt(a2), Math.sqrt(1 - a2));
 }
-function offset(c1, distance, bearing, radius) {
-  radius = radius || DEFAULT_RADIUS;
-  const lat1 = toRadians(c1[1]);
-  const lon1 = toRadians(c1[0]);
-  const dByR = distance / radius;
-  const lat = Math.asin(
-    Math.sin(lat1) * Math.cos(dByR) + Math.cos(lat1) * Math.sin(dByR) * Math.cos(bearing)
-  );
-  const lon = lon1 + Math.atan2(
-    Math.sin(bearing) * Math.sin(dByR) * Math.cos(lat1),
-    Math.cos(dByR) - Math.sin(lat1) * Math.sin(lat)
-  );
-  return [toDegrees(lon), toDegrees(lat)];
-}
 function warn(...args) {
   console.warn(...args);
 }
 let showCoordinateWarning = true;
 function disableCoordinateWarning(disable2) {
-  const hide2 = true;
+  const hide2 = disable2 === void 0 ? true : disable2;
   showCoordinateWarning = !hide2;
 }
 function cloneTransform(input, output) {
@@ -5959,6 +5997,12 @@ function getPointResolution(projection, resolution, point, units) {
   const getter = projection.getPointResolutionFunc();
   if (getter) {
     pointResolution = getter(resolution, point);
+    if (units && units !== projection.getUnits()) {
+      const metersPerUnit = projection.getMetersPerUnit();
+      if (metersPerUnit) {
+        pointResolution = pointResolution * metersPerUnit / METERS_PER_UNIT$1[units];
+      }
+    }
   } else {
     const projUnits = projection.getUnits();
     if (projUnits == "degrees" && !units || units == "degrees") {
@@ -5986,7 +6030,7 @@ function getPointResolution(projection, resolution, point, units) {
         const height = getDistance(vertices.slice(4, 6), vertices.slice(6, 8));
         pointResolution = (width + height) / 2;
       }
-      const metersPerUnit = projection.getMetersPerUnit();
+      const metersPerUnit = units ? METERS_PER_UNIT$1[units] : projection.getMetersPerUnit();
       if (metersPerUnit !== void 0) {
         pointResolution /= metersPerUnit;
       }
@@ -6012,6 +6056,10 @@ function addEquivalentTransforms(projections1, projections2, forwardTransform, i
     });
   });
 }
+function clearAllProjections() {
+  clear$2();
+  clear();
+}
 function createProjection(projection, defaultCode) {
   if (!projection) {
     return get$1(defaultCode);
@@ -6024,13 +6072,62 @@ function createProjection(projection, defaultCode) {
     projection
   );
 }
+function createTransformFromCoordinateTransform(coordTransform) {
+  return (
+    /**
+     * @param {Array<number>} input Input.
+     * @param {Array<number>} [output] Output.
+     * @param {number} [dimension] Dimension.
+     * @return {Array<number>} Output.
+     */
+    function(input, output, dimension) {
+      const length = input.length;
+      dimension = dimension !== void 0 ? dimension : 2;
+      output = output !== void 0 ? output : new Array(length);
+      for (let i = 0; i < length; i += dimension) {
+        const point = coordTransform(input.slice(i, i + dimension));
+        const pointLength = point.length;
+        for (let j = 0, jj = dimension; j < jj; ++j) {
+          output[i + j] = j >= pointLength ? input[i + j] : point[j];
+        }
+      }
+      return output;
+    }
+  );
+}
+function addCoordinateTransforms(source2, destination, forward, inverse) {
+  const sourceProj = get$1(source2);
+  const destProj = get$1(destination);
+  add$1(
+    sourceProj,
+    destProj,
+    createTransformFromCoordinateTransform(forward)
+  );
+  add$1(
+    destProj,
+    sourceProj,
+    createTransformFromCoordinateTransform(inverse)
+  );
+}
 function fromLonLat(coordinate, projection) {
   disableCoordinateWarning();
   return transform(
     coordinate,
     "EPSG:4326",
-    "EPSG:3857"
+    projection !== void 0 ? projection : "EPSG:3857"
   );
+}
+function toLonLat(coordinate, projection) {
+  const lonLat = transform(
+    coordinate,
+    projection !== void 0 ? projection : "EPSG:3857",
+    "EPSG:4326"
+  );
+  const lon = lonLat[0];
+  if (lon < -180 || lon > 180) {
+    lonLat[0] = modulo(lon + 180, 360) - 180;
+  }
+  return lonLat;
 }
 function equivalent(projection1, projection2) {
   if (projection1 === projection2) {
@@ -6061,13 +6158,38 @@ function transform(coordinate, source2, destination) {
   const transformFunc = getTransform(source2, destination);
   return transformFunc(coordinate, void 0, coordinate.length);
 }
+function transformExtent(extent, source2, destination, stops) {
+  const transformFunc = getTransform(source2, destination);
+  return applyTransform(extent, transformFunc, void 0, stops);
+}
+function transformWithProjections(point, sourceProjection, destinationProjection) {
+  const transformFunc = getTransformFromProjections(
+    sourceProjection,
+    destinationProjection
+  );
+  return transformFunc(point);
+}
+let userProjection = null;
+function setUserProjection(projection) {
+  userProjection = get$1(projection);
+}
+function clearUserProjection() {
+  userProjection = null;
+}
+function getUserProjection() {
+  return userProjection;
+}
+function useGeographic() {
+  setUserProjection("EPSG:4326");
+}
 function toUserCoordinate(coordinate, sourceProjection) {
-  {
+  if (!userProjection) {
     return coordinate;
   }
+  return transform(coordinate, sourceProjection, userProjection);
 }
 function fromUserCoordinate(coordinate, destProjection) {
-  {
+  if (!userProjection) {
     if (showCoordinateWarning && !equals$1(coordinate, [0, 0]) && coordinate[0] >= -180 && coordinate[0] <= 180 && coordinate[1] >= -90 && coordinate[1] <= 90) {
       showCoordinateWarning = false;
       warn(
@@ -6076,16 +6198,58 @@ function fromUserCoordinate(coordinate, destProjection) {
     }
     return coordinate;
   }
+  return transform(coordinate, userProjection, destProjection);
 }
 function toUserExtent(extent, sourceProjection) {
-  {
+  if (!userProjection) {
     return extent;
   }
+  return transformExtent(extent, sourceProjection, userProjection);
 }
 function fromUserExtent(extent, destProjection) {
-  {
+  if (!userProjection) {
     return extent;
   }
+  return transformExtent(extent, userProjection, destProjection);
+}
+function toUserResolution(resolution, sourceProjection) {
+  if (!userProjection) {
+    return resolution;
+  }
+  const sourceMetersPerUnit = get$1(sourceProjection).getMetersPerUnit();
+  const userMetersPerUnit = userProjection.getMetersPerUnit();
+  return sourceMetersPerUnit && userMetersPerUnit ? resolution * sourceMetersPerUnit / userMetersPerUnit : resolution;
+}
+function fromUserResolution(resolution, destProjection) {
+  if (!userProjection) {
+    return resolution;
+  }
+  const destMetersPerUnit = get$1(destProjection).getMetersPerUnit();
+  const userMetersPerUnit = userProjection.getMetersPerUnit();
+  return destMetersPerUnit && userMetersPerUnit ? resolution * userMetersPerUnit / destMetersPerUnit : resolution;
+}
+function createSafeCoordinateTransform(sourceProj, destProj, transform2) {
+  return function(coord) {
+    let transformed, worldsAway;
+    if (sourceProj.canWrapX()) {
+      const sourceExtent = sourceProj.getExtent();
+      const sourceExtentWidth = getWidth(sourceExtent);
+      coord = coord.slice(0);
+      worldsAway = getWorldsAway(coord, sourceProj, sourceExtentWidth);
+      if (worldsAway) {
+        coord[0] = coord[0] - worldsAway * sourceExtentWidth;
+      }
+      coord[0] = clamp(coord[0], sourceExtent[0], sourceExtent[2]);
+      coord[1] = clamp(coord[1], sourceExtent[1], sourceExtent[3]);
+      transformed = transform2(coord);
+    } else {
+      transformed = transform2(coord);
+    }
+    if (worldsAway && destProj.canWrapX()) {
+      transformed[0] += worldsAway * getWidth(destProj.getExtent());
+    }
+    return transformed;
+  };
 }
 function addCommon() {
   addEquivalentProjections(PROJECTIONS$1);
@@ -6098,6 +6262,44 @@ function addCommon() {
   );
 }
 addCommon();
+const proj = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  METERS_PER_UNIT: METERS_PER_UNIT$1,
+  Projection: Projection$1,
+  addCommon,
+  addCoordinateTransforms,
+  addEquivalentProjections,
+  addEquivalentTransforms,
+  addProjection,
+  addProjections,
+  clearAllProjections,
+  clearUserProjection,
+  cloneTransform,
+  createProjection,
+  createSafeCoordinateTransform,
+  createTransformFromCoordinateTransform,
+  disableCoordinateWarning,
+  equivalent,
+  fromLonLat,
+  fromUserCoordinate,
+  fromUserExtent,
+  fromUserResolution,
+  get: get$1,
+  getPointResolution,
+  getTransform,
+  getTransformFromProjections,
+  getUserProjection,
+  identityTransform,
+  setUserProjection,
+  toLonLat,
+  toUserCoordinate,
+  toUserExtent,
+  toUserResolution,
+  transform,
+  transformExtent,
+  transformWithProjections,
+  useGeographic
+}, Symbol.toStringTag, { value: "Module" }));
 let modal = document.getElementById("modal");
 let bootstrapModal = Modal.getOrCreateInstance(modal);
 function getGETParameter(key) {
@@ -6450,7 +6652,7 @@ class Target extends Disposable {
    * Clean up.
    */
   disposeInternal() {
-    this.listeners_ && clear(this.listeners_);
+    this.listeners_ && clear$1(this.listeners_);
   }
   /**
    * Get the listeners for a specified event type. Listeners are returned in the
@@ -6553,7 +6755,7 @@ function listenOnce(target, type, listener, thisArg) {
 function unlistenByKey(key) {
   if (key && key.target) {
     key.target.removeEventListener(key.type, key.listener);
-    clear(key);
+    clear$1(key);
   }
 }
 class Observable extends Target {
@@ -8944,6 +9146,10 @@ class Point extends SimpleGeometry {
     this.changed();
   }
 }
+const Point$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: Point
+}, Symbol.toStringTag, { value: "Module" }));
 function linearRingContainsExtent(flatCoordinates, offset2, end2, stride, extent) {
   const outside = forEachCorner(
     extent,
@@ -9600,18 +9806,6 @@ class Polygon extends SimpleGeometry {
     this.flatCoordinates.length = ends.length === 0 ? 0 : ends[ends.length - 1];
     this.changed();
   }
-}
-function circular(center, radius, n, sphereRadius) {
-  n = n ? n : 32;
-  const flatCoordinates = [];
-  for (let i = 0; i < n; ++i) {
-    extend$1(
-      flatCoordinates,
-      offset(center, radius, 2 * Math.PI * i / n, sphereRadius)
-    );
-  }
-  flatCoordinates.push(flatCoordinates[0], flatCoordinates[1]);
-  return new Polygon(flatCoordinates, "XY", [flatCoordinates.length]);
 }
 function fromExtent(extent) {
   if (isEmpty(extent)) {
@@ -10501,7 +10695,11 @@ class View extends BaseObject {
       geometry = fromExtent(extent);
       geometry.rotate(this.getRotation(), getCenter(extent));
     } else {
-      {
+      const userProjection2 = getUserProjection();
+      if (userProjection2) {
+        geometry = /** @type {import("./geom/SimpleGeometry.js").default} */
+        geometryOrExtent.clone().transform(userProjection2, this.getProjection());
+      } else {
         geometry = geometryOrExtent;
       }
     }
@@ -13372,7 +13570,7 @@ const registerFont = function() {
       const font = fonts[i];
       if (checkedFonts.get(font) < retries) {
         if (isAvailable.apply(this, font.split("\n"))) {
-          clear(textHeights);
+          clear$1(textHeights);
           measureContext = null;
           measureFont = void 0;
           checkedFonts.set(font, retries);
@@ -14500,10 +14698,67 @@ function createDefaultStyle(feature, resolution) {
   }
   return defaultStyles;
 }
+function createEditingStyle() {
+  const styles = {};
+  const white = [255, 255, 255, 1];
+  const blue = [0, 153, 255, 1];
+  const width = 3;
+  styles["Polygon"] = [
+    new Style({
+      fill: new Fill({
+        color: [255, 255, 255, 0.5]
+      })
+    })
+  ];
+  styles["MultiPolygon"] = styles["Polygon"];
+  styles["LineString"] = [
+    new Style({
+      stroke: new Stroke({
+        color: white,
+        width: width + 2
+      })
+    }),
+    new Style({
+      stroke: new Stroke({
+        color: blue,
+        width
+      })
+    })
+  ];
+  styles["MultiLineString"] = styles["LineString"];
+  styles["Circle"] = styles["Polygon"].concat(styles["LineString"]);
+  styles["Point"] = [
+    new Style({
+      image: new CircleStyle({
+        radius: width * 2,
+        fill: new Fill({
+          color: blue
+        }),
+        stroke: new Stroke({
+          color: white,
+          width: width / 2
+        })
+      }),
+      zIndex: Infinity
+    })
+  ];
+  styles["MultiPoint"] = styles["Point"];
+  styles["GeometryCollection"] = styles["Polygon"].concat(
+    styles["LineString"],
+    styles["Point"]
+  );
+  return styles;
+}
 function defaultGeometryFunction(feature) {
   return feature.getGeometry();
 }
-const Style$1 = Style;
+const Style$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  createDefaultStyle,
+  createEditingStyle,
+  default: Style,
+  toFunction
+}, Symbol.toStringTag, { value: "Module" }));
 function calculateScale(width, height, wantedWidth, wantedHeight) {
   if (wantedWidth !== void 0 && wantedHeight !== void 0) {
     return [wantedWidth / width, wantedHeight / height];
@@ -14868,6 +15123,10 @@ class Icon extends ImageStyle {
     return this.iconImage_.ready();
   }
 }
+const Icon$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: Icon
+}, Symbol.toStringTag, { value: "Module" }));
 const DEFAULT_FILL_COLOR = "#333";
 class Text {
   /**
@@ -16664,7 +16923,7 @@ function buildStyle(flatStyle, context) {
       "No fill, stroke, point, or text symbolizer properties in style: " + JSON.stringify(flatStyle)
     );
   }
-  const style = new Style$1();
+  const style = new Style();
   return function(context2) {
     let empty = true;
     if (evaluateFill) {
@@ -17574,7 +17833,7 @@ function toStyleLike(style) {
   if (typeof style === "function") {
     return style;
   }
-  if (style instanceof Style$1) {
+  if (style instanceof Style) {
     return style;
   }
   if (!Array.isArray(style)) {
@@ -17585,11 +17844,11 @@ function toStyleLike(style) {
   }
   const length = style.length;
   const first = style[0];
-  if (first instanceof Style$1) {
+  if (first instanceof Style) {
     const styles = new Array(length);
     for (let i = 0; i < length; ++i) {
       const candidate = style[i];
-      if (!(candidate instanceof Style$1)) {
+      if (!(candidate instanceof Style)) {
         throw new Error("Expected a list of style instances");
       }
       styles[i] = candidate;
@@ -17979,7 +18238,7 @@ class LayerGroup extends BaseLayer {
     for (const id in this.listenerKeys_) {
       this.listenerKeys_[id].forEach(unlistenByKey);
     }
-    clear(this.listenerKeys_);
+    clear$1(this.listenerKeys_);
     const layersArray = layers.getArray();
     for (let i = 0, ii = layersArray.length; i < ii; i++) {
       const layer = layersArray[i];
@@ -18608,7 +18867,7 @@ class PriorityQueue {
   clear() {
     this.elements_.length = 0;
     this.priorities_.length = 0;
-    clear(this.queuedElements_);
+    clear$1(this.queuedElements_);
   }
   /**
    * Remove and return the highest-priority element. O(log N).
@@ -18984,6 +19243,10 @@ class Control extends BaseObject {
     this.target_ = typeof target === "string" ? document.getElementById(target) : target;
   }
 }
+const Control$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: Control
+}, Symbol.toStringTag, { value: "Module" }));
 class Attribution extends Control {
   /**
    * @param {Options} [options] Attribution options.
@@ -25027,9 +25290,9 @@ class TileImage extends UrlTile {
    * @api
    */
   setTileGridForProjection(projection, tilegrid) {
-    const proj = get$1(projection);
-    if (proj) {
-      const projKey = getUid(proj);
+    const proj2 = get$1(projection);
+    if (proj2) {
+      const projKey = getUid(proj2);
       if (!(projKey in this.tileGridForProjection)) {
         this.tileGridForProjection[projKey] = tilegrid;
       }
@@ -25898,11 +26161,11 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
     this.prepareContainer(frameState, target);
     const width = this.context.canvas.width;
     const height = this.context.canvas.height;
-    const layerExtent = layerState.extent && fromUserExtent(layerState.extent);
+    const layerExtent = layerState.extent && fromUserExtent(layerState.extent, projection);
     if (layerExtent) {
       extent = getIntersection(
         extent,
-        fromUserExtent(layerState.extent)
+        fromUserExtent(layerState.extent, projection)
       );
     }
     const dx = tileResolution * width / 2 / tilePixelRatio;
@@ -31625,7 +31888,7 @@ function getPixelIndexArray(radius) {
 }
 const HIT_DETECT_RESOLUTION = 0.5;
 function createHitDetectionImageData(size, transforms2, features, styleFunction, extent, resolution, rotation, squaredTolerance, projection) {
-  const userExtent = extent;
+  const userExtent = projection ? toUserExtent(extent, projection) : extent;
   const width = size[0] * HIT_DETECT_RESOLUTION;
   const height = size[1] * HIT_DETECT_RESOLUTION;
   const context = createCanvasContext2D(width, height);
@@ -31638,7 +31901,7 @@ function createHitDetectionImageData(size, transforms2, features, styleFunction,
     null,
     rotation,
     squaredTolerance,
-    null
+    projection ? getTransformFromProjections(getUserProjection(), projection) : null
   );
   const featureCount = features.length;
   const indexFactor = Math.floor((256 * 256 * 256 - 1) / featureCount);
@@ -31917,10 +32180,10 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
     }
     this.setDrawContext_();
     this.preRender(context, frameState);
-    viewState.projection;
+    const projection = viewState.projection;
     this.clipped_ = false;
     if (render2 && layerState.extent && this.clipping) {
-      const layerExtent = fromUserExtent(layerState.extent);
+      const layerExtent = fromUserExtent(layerState.extent, projection);
       render2 = intersects$1(layerExtent, frameState.extent);
       this.clipped_ = render2 && !containsExtent(layerExtent, frameState.extent);
       if (this.clipped_) {
@@ -32019,6 +32282,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
             startX -= worldWidth;
           }
         }
+        const userProjection2 = getUserProjection();
         this.hitDetectionImageData_ = createHitDetectionImageData(
           size,
           transforms2,
@@ -32027,7 +32291,8 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
           extent,
           resolution,
           rotation,
-          getSquaredTolerance(resolution, this.renderedPixelRatio_)
+          getSquaredTolerance(resolution, this.renderedPixelRatio_),
+          userProjection2 ? projection : null
         );
       }
       resolve(
@@ -32190,8 +32455,20 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
       resolution,
       pixelRatio
     );
+    const userProjection2 = getUserProjection();
     let userTransform;
-    {
+    if (userProjection2) {
+      for (let i = 0, ii = loadExtents.length; i < ii; ++i) {
+        const extent2 = loadExtents[i];
+        const userExtent2 = toUserExtent(extent2, projection);
+        vectorSource.loadFeatures(
+          userExtent2,
+          toUserResolution(resolution, projection),
+          userProjection2
+        );
+      }
+      userTransform = getTransformFromProjections(userProjection2, projection);
+    } else {
       for (let i = 0, ii = loadExtents.length; i < ii; ++i) {
         vectorSource.loadFeatures(loadExtents[i], resolution, projection);
       }
@@ -32223,7 +32500,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
         }
       }
     );
-    const userExtent = toUserExtent(extent);
+    const userExtent = toUserExtent(extent, projection);
     const features = vectorSource.getFeaturesInExtent(userExtent);
     if (vectorLayerRenderOrder) {
       features.sort(vectorLayerRenderOrder);
@@ -32311,6 +32588,10 @@ class VectorLayer extends BaseVectorLayer {
     return new CanvasVectorLayerRenderer(this);
   }
 }
+const Vector$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: VectorLayer
+}, Symbol.toStringTag, { value: "Module" }));
 class RBush2 {
   /**
    * @param {number} [maxEntries] Max entries.
@@ -32682,6 +32963,11 @@ function createStyleFunction(obj) {
     return styles;
   };
 }
+const Feature$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  createStyleFunction,
+  default: Feature
+}, Symbol.toStringTag, { value: "Module" }));
 function interpolatePoint(flatCoordinates, offset2, end2, stride, fraction, dest, dimension) {
   let o, t;
   const n = (end2 - offset2) / stride;
@@ -34052,6 +34338,378 @@ class VectorSource extends Source {
     this.setLoader(xhr(url, this.format_));
   }
 }
+const Vector = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  VectorSourceEvent,
+  default: VectorSource
+}, Symbol.toStringTag, { value: "Module" }));
+var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
+function getDefaultExportFromCjs(x2) {
+  return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
+}
+function getAugmentedNamespace(n) {
+  if (n.__esModule) return n;
+  var f = n.default;
+  if (typeof f == "function") {
+    var a2 = function a3() {
+      if (this instanceof a3) {
+        return Reflect.construct(f, arguments, this.constructor);
+      }
+      return f.apply(this, arguments);
+    };
+    a2.prototype = f.prototype;
+  } else a2 = {};
+  Object.defineProperty(a2, "__esModule", { value: true });
+  Object.keys(n).forEach(function(k2) {
+    var d2 = Object.getOwnPropertyDescriptor(n, k2);
+    Object.defineProperty(a2, k2, d2.get ? d2 : {
+      enumerable: true,
+      get: function() {
+        return n[k2];
+      }
+    });
+  });
+  return a2;
+}
+var olGeocoder = { exports: {} };
+const require$$0 = /* @__PURE__ */ getAugmentedNamespace(Control$1);
+const require$$1 = /* @__PURE__ */ getAugmentedNamespace(Style$1);
+const require$$2 = /* @__PURE__ */ getAugmentedNamespace(Icon$1);
+const require$$3 = /* @__PURE__ */ getAugmentedNamespace(Vector$1);
+const require$$4 = /* @__PURE__ */ getAugmentedNamespace(Vector);
+const require$$5 = /* @__PURE__ */ getAugmentedNamespace(Point$1);
+const require$$6 = /* @__PURE__ */ getAugmentedNamespace(Feature$1);
+const require$$7 = /* @__PURE__ */ getAugmentedNamespace(proj);
+/*!
+ * ol-geocoder - v4.3.3
+ * A geocoder extension compatible with OpenLayers v6.x to v9.0
+ * https://github.com/Dominique92/ol-geocoder
+ * Built: 15/03/2024 08:57:04
+ */
+(function(module, exports) {
+  !function(e, t) {
+    module.exports = t(require$$0, require$$1, require$$2, require$$3, require$$4, require$$5, require$$6, require$$7);
+  }(commonjsGlobal, function(e, t, s, r2, n, o, a2, i) {
+    function l(e2) {
+      return e2 && "object" == typeof e2 && "default" in e2 ? e2 : { default: e2 };
+    }
+    function c(e2) {
+      if (e2 && e2.__esModule) return e2;
+      var t2 = /* @__PURE__ */ Object.create(null);
+      return e2 && Object.keys(e2).forEach(function(s2) {
+        if ("default" !== s2) {
+          var r3 = Object.getOwnPropertyDescriptor(e2, s2);
+          Object.defineProperty(t2, s2, r3.get ? r3 : { enumerable: true, get: function() {
+            return e2[s2];
+          } });
+        }
+      }), t2.default = e2, Object.freeze(t2);
+    }
+    var d2 = l(e), u = l(t), p5 = l(s), h = l(r2), g = l(n), m = l(o), y2 = l(a2), f = c(i), b2 = "gcd-container", v = "gcd-button-control", w2 = "gcd-input-query", x2 = "gcd-input-label", $ = "gcd-input-search", k2 = { namespace: "ol-geocoder", spin: "gcd-pseudo-rotate", hidden: "gcd-hidden", address: "gcd-address", country: "gcd-country", city: "gcd-city", road: "gcd-road", olControl: "ol-control", glass: { container: "gcd-gl-container", control: "gcd-gl-control", button: "gcd-gl-btn", input: "gcd-gl-input", expanded: "gcd-gl-expanded", search: "gcd-gl-search", result: "gcd-gl-result" }, inputText: { container: "gcd-txt-container", control: "gcd-txt-control", label: "gcd-txt-label", input: "gcd-txt-input", search: "gcd-txt-search", icon: "gcd-txt-glass", result: "gcd-txt-result" } }, S2 = { containerId: b2, buttonControlId: v, inputQueryId: w2, inputLabelId: x2, inputSearchId: $, cssClasses: k2 };
+    const q = Object.freeze({ __proto__: null, containerId: b2, buttonControlId: v, inputQueryId: w2, inputLabelId: x2, inputSearchId: $, cssClasses: k2, default: S2 }), L2 = "addresschosen", C2 = "nominatim", E = "reverse", T = "glass-button", j = "text-input", I2 = "bing", N2 = "mapquest", P2 = "opencage", A = "osm", R2 = "photon", F = "https://dev.virtualearth.net/REST/v1/Locations", _2 = "https://nominatim.openstreetmap.org/search", M2 = "https://api.opencagedata.com/geocode/v1/json?", O = "https://nominatim.openstreetmap.org/search", D = "https://photon.komoot.io/api/", V = { provider: A, label: "", placeholder: "Search for an address", featureStyle: null, targetType: T, lang: "en-US", limit: 5, keepOpen: false, preventDefault: false, preventPanning: false, preventMarker: false, defaultFlyResolution: 10, debug: false };
+    function B(e2, t2 = "Assertion failed") {
+      if (!e2) {
+        if ("undefined" != typeof Error) throw new Error(t2);
+        throw t2;
+      }
+    }
+    function U(e2) {
+      const t2 = function() {
+        if ("performance" in window == 0 && (window.performance = {}), "now" in window.performance == 0) {
+          let e3 = Date.now();
+          performance.timing && performance.timing.navigationStart && (e3 = performance.timing.navigationStart), window.performance.now = () => Date.now() - e3;
+        }
+        return window.performance.now();
+      }().toString(36);
+      return e2 ? e2 + t2 : t2;
+    }
+    function Q(e2, t2, s2) {
+      if (Array.isArray(e2)) return void e2.forEach((e3) => Q(e3, t2));
+      const r3 = Array.isArray(t2) ? t2 : t2.split(/\s+/u);
+      let n2 = r3.length;
+      for (; n2--; ) H(e2, r3[n2]) || Y(e2, r3[n2]);
+    }
+    function z2(e2, t2, s2) {
+      if (Array.isArray(e2)) return void e2.forEach((e3) => z2(e3, t2));
+      const r3 = Array.isArray(t2) ? t2 : t2.split(/\s+/u);
+      let n2 = r3.length;
+      for (; n2--; ) H(e2, r3[n2]) && Z(e2, r3[n2]);
+    }
+    function H(e2, t2) {
+      return e2.classList ? e2.classList.contains(t2) : X(t2).test(e2.className);
+    }
+    function K(e2) {
+      for (; e2.firstChild; ) e2.firstChild.remove();
+    }
+    function J(e2, t2) {
+      return e2.replace(/\{\s*([\w-]+)\s*\}/gu, (e3, s2) => {
+        const r3 = void 0 === t2[s2] ? "" : t2[s2];
+        return String(r3).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+      });
+    }
+    function W(e2, t2) {
+      let s2;
+      if (Array.isArray(e2)) {
+        if (s2 = document.createElement(e2[0]), e2[1].id && (s2.id = e2[1].id), e2[1].classname && (s2.className = e2[1].classname), e2[1].attr) {
+          const { attr: t3 } = e2[1];
+          if (Array.isArray(t3)) {
+            let e3 = -1;
+            for (; ++e3 < t3.length; ) s2.setAttribute(t3[e3].name, t3[e3].value);
+          } else s2.setAttribute(t3.name, t3.value);
+        }
+      } else s2 = document.createElement(e2);
+      s2.innerHTML = t2;
+      const r3 = document.createDocumentFragment();
+      for (; s2.childNodes[0]; ) r3.append(s2.childNodes[0]);
+      return s2.append(r3), s2;
+    }
+    function X(e2) {
+      return new RegExp(`(^|\\s+) ${e2} (\\s+|$)`, "u");
+    }
+    function Y(e2, t2, s2) {
+      e2.classList ? e2.classList.add(t2) : e2.className = `${e2.className} ${t2}`.trim();
+    }
+    function Z(e2, t2, s2) {
+      e2.classList ? e2.classList.remove(t2) : e2.className = e2.className.replace(X(t2), " ").trim();
+    }
+    const ee = q.cssClasses;
+    class te {
+      constructor(e2) {
+        this.options = e2, this.els = this.createControl();
+      }
+      createControl() {
+        let e2, t2, s2;
+        return this.options.targetType === j ? (t2 = `${ee.namespace} ${ee.inputText.container}`, e2 = W(["div", { id: q.containerId, classname: t2 }], te.input), s2 = { container: e2, control: e2.querySelector(`.${ee.inputText.control}`), label: e2.querySelector(`.${ee.inputText.label}`), input: e2.querySelector(`.${ee.inputText.input}`), search: e2.querySelector(`.${ee.inputText.search}`), result: e2.querySelector(`.${ee.inputText.result}`) }, s2.label.innerHTML = this.options.label) : (t2 = `${ee.namespace} ${ee.glass.container}`, e2 = W(["div", { id: q.containerId, classname: t2 }], te.glass), s2 = { container: e2, control: e2.querySelector(`.${ee.glass.control}`), button: e2.querySelector(`.${ee.glass.button}`), input: e2.querySelector(`.${ee.glass.input}`), search: e2.querySelector(`.${ee.glass.search}`), result: e2.querySelector(`.${ee.glass.result}`) }), s2.input.placeholder = this.options.placeholder, s2;
+      }
+    }
+    function se(e2) {
+      return new Promise((t2, s2) => {
+        const r3 = function(e3, t3) {
+          t3 && "object" == typeof t3 && (e3 += (/\?/u.test(e3) ? "&" : "?") + re(t3));
+          return e3;
+        }(e2.url, e2.data), n2 = { method: "GET", mode: "cors", credentials: "same-origin" };
+        e2.jsonp ? function(e3, t3, s3) {
+          const { head: r4 } = document, n3 = document.createElement("script"), o2 = `f${Math.round(Math.random() * Date.now())}`;
+          n3.setAttribute("src", `${e3 + (e3.indexOf("?") > 0 ? "&" : "?") + t3}=${o2}`), window[o2] = (e4) => {
+            window[o2] = void 0, setTimeout(() => r4.removeChild(n3), 0), s3(e4);
+          }, r4.append(n3);
+        }(r3, e2.callbackName, t2) : fetch(r3, n2).then((e3) => e3.json()).then(t2).catch(s2);
+      });
+    }
+    function re(e2) {
+      return Object.keys(e2).reduce((t2, s2) => (t2.push("object" == typeof e2[s2] ? re(e2[s2]) : `${encodeURIComponent(s2)}=${encodeURIComponent(e2[s2])}`), t2), []).join("&");
+    }
+    te.glass = `
+  <div class="${ee.glass.control} ${ee.olControl}">
+    <button type="button" id="${q.buttonControlId}" class="${ee.glass.button}"></button>
+    <input type="text" id="${q.inputQueryId}" class="${ee.glass.input}" autocomplete="off" placeholder="Search ...">
+    <a id="${q.inputSearchId}" class="${ee.glass.search} ${ee.hidden}"></a>
+  </div>
+  <ul class="${ee.glass.result}"></ul>
+`, te.input = `
+  <div class="${ee.inputText.control}">
+    <label type="button" id="${q.inputSearchId}" class="${ee.inputText.label}"></label>
+    <input type="text" id="${q.inputQueryId}" class="${ee.inputText.input}" autocomplete="off" placeholder="Search ...">
+    <span class="${ee.inputText.icon}"></span>
+    <button type="button" id="${q.inputSearchId}" class="${ee.inputText.search} ${ee.hidden}"></button>
+  </div>
+  <ul class="${ee.inputText.result}"></ul>
+`;
+    class ne {
+      constructor() {
+        this.settings = { url: D, params: { q: "", limit: 10, lang: "en" }, langs: ["de", "it", "fr", "en"] };
+      }
+      getParameters(e2) {
+        return e2.lang = e2.lang.toLowerCase(), { url: this.settings.url, params: { q: e2.query, limit: e2.limit || this.settings.params.limit, lang: this.settings.langs.includes(e2.lang) ? e2.lang : this.settings.params.lang } };
+      }
+      handleResponse(e2) {
+        return 0 === e2.features.length ? [] : e2.features.map((e3) => ({ lon: e3.geometry.coordinates[0], lat: e3.geometry.coordinates[1], address: { name: e3.properties.name, postcode: e3.properties.postcode, city: e3.properties.city, state: e3.properties.state, country: e3.properties.country }, original: { formatted: e3.properties.name, details: e3.properties } }));
+      }
+    }
+    class oe {
+      constructor(e2) {
+        this.settings = { url: O, ...e2, params: { q: "", format: "json", addressdetails: 1, limit: 10, countrycodes: "", viewbox: "", "accept-language": "en-US" } };
+      }
+      getParameters(e2) {
+        return { url: this.settings.url, params: { q: e2.query, format: this.settings.params.format, addressdetails: this.settings.params.addressdetails, limit: e2.limit || this.settings.params.limit, countrycodes: e2.countrycodes || this.settings.params.countrycodes, viewbox: e2.viewbox || this.settings.params.viewbox, "accept-language": e2.lang || this.settings.params["accept-language"] } };
+      }
+      handleResponse(e2) {
+        return 0 === e2.length ? [] : e2.map((e3) => ({ lon: e3.lon, lat: e3.lat, bbox: e3.boundingbox, address: { name: e3.display_name, road: e3.address.road || "", houseNumber: e3.address.house_number || "", postcode: e3.address.postcode, city: e3.address.city || e3.address.town, state: e3.address.state, country: e3.address.country }, original: { formatted: e3.display_name, details: e3.address } }));
+      }
+    }
+    class ae {
+      constructor() {
+        this.settings = { url: _2, params: { q: "", key: "", format: "json", addressdetails: 1, limit: 10, countrycodes: "", "accept-language": "en-US" } };
+      }
+      getParameters(e2) {
+        return { url: this.settings.url, params: { q: e2.query, key: e2.key, format: "json", addressdetails: 1, limit: e2.limit || this.settings.params.limit, countrycodes: e2.countrycodes || this.settings.params.countrycodes, "accept-language": e2.lang || this.settings.params["accept-language"] } };
+      }
+      handleResponse(e2) {
+        return 0 === e2.length ? [] : e2.map((e3) => ({ lon: e3.lon, lat: e3.lat, address: { name: e3.address.neighbourhood || "", road: e3.address.road || "", postcode: e3.address.postcode, city: e3.address.city || e3.address.town, state: e3.address.state, country: e3.address.country }, original: { formatted: e3.display_name, details: e3.address } }));
+      }
+    }
+    class ie {
+      constructor() {
+        this.settings = { url: F, callbackName: "jsonp", params: { query: "", key: "", includeNeighborhood: 0, maxResults: 10 } };
+      }
+      getParameters(e2) {
+        return { url: this.settings.url, callbackName: this.settings.callbackName, params: { query: e2.query, key: e2.key, includeNeighborhood: e2.includeNeighborhood || this.settings.params.includeNeighborhood, maxResults: e2.maxResults || this.settings.params.maxResults } };
+      }
+      handleResponse(e2) {
+        const { resources: t2 } = e2.resourceSets[0];
+        return 0 === t2.length ? [] : t2.map((e3) => ({ lon: e3.point.coordinates[1], lat: e3.point.coordinates[0], address: { name: e3.name }, original: { formatted: e3.address.formattedAddress, details: e3.address } }));
+      }
+    }
+    class le {
+      constructor() {
+        this.settings = { url: M2, params: { q: "", key: "", limit: 10, countrycode: "", pretty: 1, no_annotations: 1 } };
+      }
+      getParameters(e2) {
+        return { url: this.settings.url, params: { q: e2.query, key: e2.key, limit: e2.limit || this.settings.params.limit, countrycode: e2.countrycodes || this.settings.params.countrycodes } };
+      }
+      handleResponse(e2) {
+        return 0 === e2.results.length ? [] : e2.results.map((e3) => ({ lon: e3.geometry.lng, lat: e3.geometry.lat, address: { name: e3.components.house_number || "", road: e3.components.road || "", postcode: e3.components.postcode, city: e3.components.city || e3.components.town, state: e3.components.state, country: e3.components.country }, original: { formatted: e3.formatted, details: e3.components } }));
+      }
+    }
+    const ce = q.cssClasses;
+    class de {
+      constructor(e2, t2) {
+        this.Base = e2, this.layerName = U("geocoder-layer-"), this.layer = new h.default({ background: "transparent", name: this.layerName, source: new g.default(), displayInLayerSwitcher: false }), this.options = e2.options, this.options.provider = "string" == typeof this.options.provider ? this.options.provider.toLowerCase() : this.options.provider, this.provider = this.newProvider(), this.els = t2, this.container = this.els.container, this.registeredListeners = { mapClick: false }, this.setListeners();
+      }
+      setListeners() {
+        const e2 = (e3) => {
+          e3.stopPropagation(), H(this.els.control, ce.glass.expanded) ? this.collapse() : this.expand();
+        };
+        this.els.input.addEventListener("keypress", (e3) => {
+          const t2 = e3.target.value.trim();
+          (e3.key ? "Enter" === e3.key : e3.which ? 13 === e3.which : !!e3.keyCode && 13 === e3.keyCode) && (e3.preventDefault(), this.query(t2));
+        }, false), this.els.input.addEventListener("click", (e3) => e3.stopPropagation(), false), this.els.input.addEventListener("input", (e3) => {
+          0 !== e3.target.value.trim().length ? z2(this.els.search, ce.hidden) : Q(this.els.search, ce.hidden);
+        }, false), this.els.search.addEventListener("click", () => {
+          this.els.input.focus(), this.query(this.els.input.value);
+        }, false), this.options.targetType === T && this.els.button.addEventListener("click", e2, false);
+      }
+      query(e2) {
+        this.provider || (this.provider = this.newProvider());
+        const t2 = this.provider.getParameters({ query: e2, key: this.options.key, lang: this.options.lang, countrycodes: this.options.countrycodes, viewbox: this.options.viewbox, limit: this.options.limit });
+        this.clearResults(false === this.options.keepOpen), Q(this.els.search, ce.spin);
+        const s2 = { url: t2.url, data: t2.params };
+        t2.callbackName && (s2.jsonp = true, s2.callbackName = t2.callbackName), se(s2).then((e3) => {
+          this.options.debug && console.info(e3), z2(this.els.search, ce.spin);
+          const t3 = this.provider.handleResponse(e3);
+          t3 && (this.createList(t3), this.listenMapClick());
+        }).catch(() => {
+          z2(this.els.search, ce.spin);
+          const e3 = W("li", "<h5>Error! No internet connection?</h5>");
+          this.els.result.append(e3);
+        });
+      }
+      createList(e2) {
+        const t2 = this.els.result;
+        e2.forEach((s2) => {
+          let r3;
+          if (this.options.provider === A) r3 = `<span class="${ce.road}">${s2.address.name}</span>`;
+          else r3 = this.addressTemplate(s2.address);
+          if (1 == e2.length) this.chosen(s2, r3, s2.address, s2.original);
+          else {
+            const e3 = W("li", `<a href="#">${r3}</a>`);
+            e3.addEventListener("click", (e4) => {
+              e4.preventDefault(), this.chosen(s2, r3, s2.address, s2.original);
+            }, false), t2.append(e3);
+          }
+        });
+      }
+      chosen(e2, t2, s2, r3) {
+        const n2 = this.Base.getMap(), o2 = [Number.parseFloat(e2.lon), Number.parseFloat(e2.lat)], a3 = n2.getView().getProjection(), i2 = f.transform(o2, "EPSG:4326", a3);
+        let { bbox: l2 } = e2;
+        l2 && (l2 = f.transformExtent([parseFloat(l2[2]), parseFloat(l2[0]), parseFloat(l2[3]), parseFloat(l2[1])], "EPSG:4326", a3));
+        const c2 = { formatted: t2, details: s2, original: r3 };
+        if (this.clearResults(true), true === this.options.preventDefault || true === this.options.preventMarker) this.Base.dispatchEvent({ type: L2, address: c2, coordinate: i2, bbox: l2, place: e2 });
+        else {
+          const t3 = this.createFeature(i2, c2);
+          this.Base.dispatchEvent({ type: L2, address: c2, feature: t3, coordinate: i2, bbox: l2, place: e2 });
+        }
+        true !== this.options.preventDefault && true !== this.options.preventPanning && (l2 ? n2.getView().fit(l2, { duration: 500 }) : n2.getView().animate({ center: i2, resolution: this.options.defaultFlyResolution, duration: 500 }));
+      }
+      createFeature(e2) {
+        const t2 = new y2.default(new m.default(e2));
+        return this.addLayer(), t2.setStyle(this.options.featureStyle), t2.setId(U("geocoder-ft-")), this.getSource().addFeature(t2), t2;
+      }
+      addressTemplate(e2) {
+        const t2 = [];
+        return e2.name && t2.push(['<span class="', ce.road, '">{name}</span>'].join("")), (e2.road || e2.building || e2.house_number) && t2.push(['<span class="', ce.road, '">{building} {road} {house_number}</span>'].join("")), (e2.city || e2.town || e2.village) && t2.push(['<span class="', ce.city, '">{postcode} {city} {town} {village}</span>'].join("")), (e2.state || e2.country) && t2.push(['<span class="', ce.country, '">{state} {country}</span>'].join("")), J(t2.join("<br>"), e2);
+      }
+      newProvider() {
+        switch (this.options.provider) {
+          case A:
+            return new oe(this.options);
+          case N2:
+            return new ae();
+          case R2:
+            return new ne();
+          case I2:
+            return new ie();
+          case P2:
+            return new le();
+          default:
+            return this.options.provider;
+        }
+      }
+      expand() {
+        z2(this.els.input, ce.spin), Q(this.els.control, ce.glass.expanded), window.setTimeout(() => this.els.input.focus(), 100), this.listenMapClick();
+      }
+      collapse() {
+        this.els.input.value = "", this.els.input.blur(), Q(this.els.search, ce.hidden), z2(this.els.control, ce.glass.expanded), K(this.els.result);
+      }
+      listenMapClick() {
+        if (this.registeredListeners.mapClick) return;
+        const e2 = this, t2 = this.Base.getMap().getTargetElement();
+        this.registeredListeners.mapClick = true, t2.addEventListener("click", { handleEvent(s2) {
+          t2.removeEventListener(s2.type, this, false), e2.registeredListeners.mapClick = false;
+        } }, false);
+      }
+      clearResults(e2) {
+        e2 && this.options.targetType === T ? this.collapse() : K(this.els.result);
+      }
+      getSource() {
+        return this.layer.getSource();
+      }
+      addLayer() {
+        let e2 = false;
+        const t2 = this.Base.getMap();
+        t2.getLayers().forEach((t3) => {
+          t3 === this.layer && (e2 = true);
+        }), e2 || t2.addLayer(this.layer);
+      }
+    }
+    class ue extends d2.default {
+      constructor(e2 = C2, t2) {
+        B("string" == typeof e2, "@param `type` should be string!"), B(e2 === C2 || e2 === E, `@param 'type' should be '${C2}'
+      or '${E}'!`);
+        const s2 = { ...V, featureStyle: [new u.default({ image: new p5.default({ anchor: [0.5, 1], src: 'data:image/svg+xml;charset=utf-8,<svg width="26" height="42" viewBox="0 0 26 42" xmlns="http://www.w3.org/2000/svg"><polygon points="1,18 14,42 25,18" fill="rgb(75,75,75)" /><ellipse cx="13" cy="13" rx="13" ry="13" fill="rgb(75,75,75)" /><ellipse cx="13" cy="14" rx="6" ry="6" fill="yellow" /></svg>' }) })], ...t2 };
+        let r3, n2;
+        const o2 = new te(s2);
+        if (e2 === C2 && (r3 = o2.els.container), super({ element: r3, ...s2 }), !(this instanceof ue)) return new ue();
+        this.options = s2, this.container = r3, e2 === C2 && (n2 = new de(this, o2.els), this.layer = n2.layer);
+      }
+      getLayer() {
+        return this.layer;
+      }
+      getSource() {
+        return this.getLayer().getSource();
+      }
+      setProvider(e2) {
+        this.options.provider = e2;
+      }
+      setProviderKey(e2) {
+        this.options.key = e2;
+      }
+    }
+    return ue;
+  });
+})(olGeocoder);
+var olGeocoderExports = olGeocoder.exports;
+const Geocoder = /* @__PURE__ */ getDefaultExportFromCjs(olGeocoderExports);
 const HOSTNAME = "VITE_HOSTNAME";
 const OSML10N_VERSION = "VITE_OSML10N_VERSION";
 const OPENSTREETMAP_CARTO_DE_VERSION = "VITE_OPENSTREETMAP_CARTO_DE_VERSION";
@@ -34189,38 +34847,12 @@ map.on("moveend", function(e) {
     currZoom = newZoom;
   }
 });
-navigator.geolocation.watchPosition(
-  function(pos) {
-    const coords = [pos.coords.longitude, pos.coords.latitude];
-    const accuracy = circular(coords, pos.coords.accuracy);
-    source.clear(true);
-    source.addFeatures([
-      new Feature(
-        accuracy.transform("EPSG:4326", map.getView().getProjection())
-      ),
-      new Feature(new Point(fromLonLat(coords)))
-    ]);
-  },
-  function(error) {
-    alert(`ERROR: ${error.message}`);
-  },
-  {
-    enableHighAccuracy: true
-  }
-);
-const locate = document.createElement("div");
-locate.className = "ol-control ol-control-custom-geo ol-unselectable locate";
-locate.innerHTML = '<button title="Lokalisiere mich">◎</button>';
-locate.addEventListener("click", function() {
-  if (!source.isEmpty()) {
-    map.getView().fit(source.getExtent(), {
-      maxZoom: 18,
-      duration: 500
-    });
-  }
+const geocoder = new Geocoder("nominatim", {
+  provider: "osm",
+  lang: "de-DE",
+  placeholder: "Suche nach ...",
+  targetType: "text-input",
+  limit: 5,
+  keepOpen: true
 });
-map.addControl(
-  new Control({
-    element: locate
-  })
-);
+map.addControl(geocoder);
