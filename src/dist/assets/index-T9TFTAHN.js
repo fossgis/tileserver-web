@@ -6538,14 +6538,12 @@ function FALSE() {
 function VOID() {
 }
 function memoizeOne(fn2) {
-  let called = false;
   let lastResult;
   let lastArgs;
   let lastThis;
   return function() {
     const nextArgs = Array.prototype.slice.call(arguments);
-    if (!called || this !== lastThis || !equals(nextArgs, lastArgs)) {
-      called = true;
+    if (!lastArgs || this !== lastThis || !equals(nextArgs, lastArgs)) {
       lastThis = this;
       lastArgs = nextArgs;
       lastResult = fn2.apply(this, arguments);
@@ -6650,6 +6648,7 @@ class Target extends Disposable {
   }
   /**
    * Clean up.
+   * @override
    */
   disposeInternal() {
     this.listeners_ && clear$1(this.listeners_);
@@ -6731,15 +6730,14 @@ const EventType = {
   WHEEL: "wheel"
 };
 function listen(target, type, listener, thisArg, once) {
-  if (thisArg && thisArg !== target) {
-    listener = listener.bind(thisArg);
-  }
   if (once) {
     const originalListener = listener;
     listener = function() {
       target.removeEventListener(type, listener);
-      originalListener.apply(this, arguments);
+      originalListener.apply(thisArg ?? this, arguments);
     };
+  } else if (thisArg && thisArg !== target) {
+    listener = listener.bind(thisArg);
   }
   const eventsKey = {
     target,
@@ -7577,6 +7575,7 @@ class BaseLayer extends BaseObject {
   }
   /**
    * Clean up.
+   * @override
    */
   disposeInternal() {
     if (this.state_) {
@@ -8264,6 +8263,7 @@ class SimpleGeometry extends Geometry {
    * @param {import("../extent.js").Extent} extent Extent.
    * @protected
    * @return {import("../extent.js").Extent} extent Extent.
+   * @override
    */
   computeExtent(extent) {
     return createOrUpdateFromFlatCoordinates(
@@ -8317,6 +8317,7 @@ class SimpleGeometry extends Geometry {
    * Create a simplified version of this geometry using the Douglas Peucker algorithm.
    * @param {number} squaredTolerance Squared tolerance.
    * @return {SimpleGeometry} Simplified geometry.
+   * @override
    */
   getSimplifiedGeometry(squaredTolerance) {
     if (this.simplifiedGeometryRevision !== this.getRevision()) {
@@ -8399,6 +8400,7 @@ class SimpleGeometry extends Geometry {
    * @param {import("../proj.js").TransformFunction} transformFn Transform function.
    * Called with a flat array of geometry coordinates.
    * @api
+   * @override
    */
   applyTransform(transformFn) {
     if (this.flatCoordinates) {
@@ -8412,6 +8414,7 @@ class SimpleGeometry extends Geometry {
    * @param {number} angle Rotation angle in counter-clockwise radians.
    * @param {import("../coordinate.js").Coordinate} anchor The rotation center.
    * @api
+   * @override
    */
   rotate(angle, anchor) {
     const flatCoordinates = this.getFlatCoordinates();
@@ -8437,6 +8440,7 @@ class SimpleGeometry extends Geometry {
    * @param {import("../coordinate.js").Coordinate} [anchor] The scale origin (defaults to the center
    *     of the geometry extent).
    * @api
+   * @override
    */
   scale(sx, sy, anchor) {
     if (sy === void 0) {
@@ -8467,6 +8471,7 @@ class SimpleGeometry extends Geometry {
    * @param {number} deltaX Delta X.
    * @param {number} deltaY Delta Y.
    * @api
+   * @override
    */
   translate(deltaX, deltaY) {
     const flatCoordinates = this.getFlatCoordinates();
@@ -8881,14 +8886,16 @@ function inflateMultiCoordinatesArray(flatCoordinates, offset2, endss, stride, c
 }
 function linearRing(flatCoordinates, offset2, end2, stride) {
   let twiceArea = 0;
-  let x1 = flatCoordinates[end2 - stride];
-  let y1 = flatCoordinates[end2 - stride + 1];
+  const x0 = flatCoordinates[end2 - stride];
+  const y0 = flatCoordinates[end2 - stride + 1];
+  let dx1 = 0;
+  let dy1 = 0;
   for (; offset2 < end2; offset2 += stride) {
-    const x2 = flatCoordinates[offset2];
-    const y2 = flatCoordinates[offset2 + 1];
-    twiceArea += y1 * x2 - x1 * y2;
-    x1 = x2;
-    y1 = y2;
+    const dx2 = flatCoordinates[offset2] - x0;
+    const dy2 = flatCoordinates[offset2 + 1] - y0;
+    twiceArea += dy1 * dx2 - dx1 * dy2;
+    dx1 = dx2;
+    dy1 = dy2;
   }
   return twiceArea / 2;
 }
@@ -8929,6 +8936,7 @@ class LinearRing extends SimpleGeometry {
    * Make a complete copy of the geometry.
    * @return {!LinearRing} Clone.
    * @api
+   * @override
    */
   clone() {
     return new LinearRing(this.flatCoordinates.slice(), this.layout);
@@ -8939,6 +8947,7 @@ class LinearRing extends SimpleGeometry {
    * @param {import("../coordinate.js").Coordinate} closestPoint Closest point.
    * @param {number} minSquaredDistance Minimum squared distance.
    * @return {number} Minimum squared distance.
+   * @override
    */
   closestPointXY(x2, y2, closestPoint, minSquaredDistance) {
     if (minSquaredDistance < closestSquaredDistanceXY(this.getExtent(), x2, y2)) {
@@ -8986,6 +8995,7 @@ class LinearRing extends SimpleGeometry {
    * Return the coordinates of the linear ring.
    * @return {Array<import("../coordinate.js").Coordinate>} Coordinates.
    * @api
+   * @override
    */
   getCoordinates() {
     return inflateCoordinates(
@@ -8999,6 +9009,7 @@ class LinearRing extends SimpleGeometry {
    * @param {number} squaredTolerance Squared tolerance.
    * @return {LinearRing} Simplified LinearRing.
    * @protected
+   * @override
    */
   getSimplifiedGeometryInternal(squaredTolerance) {
     const simplifiedFlatCoordinates = [];
@@ -9017,6 +9028,7 @@ class LinearRing extends SimpleGeometry {
    * Get the type of this geometry.
    * @return {import("./Geometry.js").Type} Geometry type.
    * @api
+   * @override
    */
   getType() {
     return "LinearRing";
@@ -9026,6 +9038,7 @@ class LinearRing extends SimpleGeometry {
    * @param {import("../extent.js").Extent} extent Extent.
    * @return {boolean} `true` if the geometry and the extent intersect.
    * @api
+   * @override
    */
   intersectsExtent(extent) {
     return false;
@@ -9035,6 +9048,7 @@ class LinearRing extends SimpleGeometry {
    * @param {!Array<import("../coordinate.js").Coordinate>} coordinates Coordinates.
    * @param {import("./Geometry.js").GeometryLayout} [layout] Layout.
    * @api
+   * @override
    */
   setCoordinates(coordinates2, layout) {
     this.setLayout(layout, coordinates2, 1);
@@ -9063,6 +9077,7 @@ class Point extends SimpleGeometry {
    * Make a complete copy of the geometry.
    * @return {!Point} Clone.
    * @api
+   * @override
    */
   clone() {
     const point = new Point(this.flatCoordinates.slice(), this.layout);
@@ -9075,6 +9090,7 @@ class Point extends SimpleGeometry {
    * @param {import("../coordinate.js").Coordinate} closestPoint Closest point.
    * @param {number} minSquaredDistance Minimum squared distance.
    * @return {number} Minimum squared distance.
+   * @override
    */
   closestPointXY(x2, y2, closestPoint, minSquaredDistance) {
     const flatCoordinates = this.flatCoordinates;
@@ -9098,6 +9114,7 @@ class Point extends SimpleGeometry {
    * Return the coordinate of the point.
    * @return {import("../coordinate.js").Coordinate} Coordinates.
    * @api
+   * @override
    */
   getCoordinates() {
     return this.flatCoordinates.slice();
@@ -9106,6 +9123,7 @@ class Point extends SimpleGeometry {
    * @param {import("../extent.js").Extent} extent Extent.
    * @protected
    * @return {import("../extent.js").Extent} extent Extent.
+   * @override
    */
   computeExtent(extent) {
     return createOrUpdateFromCoordinate(this.flatCoordinates, extent);
@@ -9114,6 +9132,7 @@ class Point extends SimpleGeometry {
    * Get the type of this geometry.
    * @return {import("./Geometry.js").Type} Geometry type.
    * @api
+   * @override
    */
   getType() {
     return "Point";
@@ -9123,6 +9142,7 @@ class Point extends SimpleGeometry {
    * @param {import("../extent.js").Extent} extent Extent.
    * @return {boolean} `true` if the geometry and the extent intersect.
    * @api
+   * @override
    */
   intersectsExtent(extent) {
     return containsXY(extent, this.flatCoordinates[0], this.flatCoordinates[1]);
@@ -9131,6 +9151,7 @@ class Point extends SimpleGeometry {
    * @param {!Array<*>} coordinates Coordinates.
    * @param {import("./Geometry.js").GeometryLayout} [layout] Layout.
    * @api
+   * @override
    */
   setCoordinates(coordinates2, layout) {
     this.setLayout(layout, coordinates2, 0);
@@ -9531,6 +9552,7 @@ class Polygon extends SimpleGeometry {
    * Make a complete copy of the geometry.
    * @return {!Polygon} Clone.
    * @api
+   * @override
    */
   clone() {
     const polygon = new Polygon(
@@ -9547,6 +9569,7 @@ class Polygon extends SimpleGeometry {
    * @param {import("../coordinate.js").Coordinate} closestPoint Closest point.
    * @param {number} minSquaredDistance Minimum squared distance.
    * @return {number} Minimum squared distance.
+   * @override
    */
   closestPointXY(x2, y2, closestPoint, minSquaredDistance) {
     if (minSquaredDistance < closestSquaredDistanceXY(this.getExtent(), x2, y2)) {
@@ -9581,6 +9604,7 @@ class Polygon extends SimpleGeometry {
    * @param {number} x X.
    * @param {number} y Y.
    * @return {boolean} Contains (x, y).
+   * @override
    */
   containsXY(x2, y2) {
     return linearRingsContainsXY(
@@ -9617,6 +9641,7 @@ class Polygon extends SimpleGeometry {
    *     constructed.
    * @return {Array<Array<import("../coordinate.js").Coordinate>>} Coordinates.
    * @api
+   * @override
    */
   getCoordinates(right2) {
     let flatCoordinates;
@@ -9746,6 +9771,7 @@ class Polygon extends SimpleGeometry {
    * @param {number} squaredTolerance Squared tolerance.
    * @return {Polygon} Simplified Polygon.
    * @protected
+   * @override
    */
   getSimplifiedGeometryInternal(squaredTolerance) {
     const simplifiedFlatCoordinates = [];
@@ -9766,6 +9792,7 @@ class Polygon extends SimpleGeometry {
    * Get the type of this geometry.
    * @return {import("./Geometry.js").Type} Geometry type.
    * @api
+   * @override
    */
   getType() {
     return "Polygon";
@@ -9775,6 +9802,7 @@ class Polygon extends SimpleGeometry {
    * @param {import("../extent.js").Extent} extent Extent.
    * @return {boolean} `true` if the geometry and the extent intersect.
    * @api
+   * @override
    */
   intersectsExtent(extent) {
     return intersectsLinearRingArray(
@@ -9790,6 +9818,7 @@ class Polygon extends SimpleGeometry {
    * @param {!Array<Array<import("../coordinate.js").Coordinate>>} coordinates Coordinates.
    * @param {import("./Geometry.js").GeometryLayout} [layout] Layout.
    * @api
+   * @override
    */
   setCoordinates(coordinates2, layout) {
     this.setLayout(layout, coordinates2, 2);
@@ -11375,6 +11404,7 @@ class Layer extends BaseLayer {
   /**
    * @param {Array<import("./Layer.js").default>} [array] Array of layers (to be modified in place).
    * @return {Array<import("./Layer.js").default>} Array of layers.
+   * @override
    */
   getLayersArray(array) {
     array = array ? array : [];
@@ -11384,6 +11414,7 @@ class Layer extends BaseLayer {
   /**
    * @param {Array<import("./Layer.js").State>} [states] Optional list of layer states (to be modified in place).
    * @return {Array<import("./Layer.js").State>} List of layer states.
+   * @override
    */
   getLayerStatesArray(states) {
     states = states ? states : [];
@@ -11410,6 +11441,7 @@ class Layer extends BaseLayer {
   }
   /**
    * @return {import("../source/Source.js").State} Source state.
+   * @override
    */
   getSourceState() {
     const source2 = this.getSource();
@@ -11518,14 +11550,11 @@ class Layer extends BaseLayer {
    * @api
    */
   getAttributions(view) {
+    var _a;
     if (!this.isVisible(view)) {
       return [];
     }
-    let getAttributions;
-    const source2 = this.getSource();
-    if (source2) {
-      getAttributions = source2.getAttributions();
-    }
+    const getAttributions = (_a = this.getSource()) == null ? void 0 : _a.getAttributions();
     if (!getAttributions) {
       return [];
     }
@@ -11623,7 +11652,7 @@ class Layer extends BaseLayer {
       this.mapPrecomposeKey_ = listen(
         map2,
         RenderEventType.PRECOMPOSE,
-        function(evt) {
+        (evt) => {
           const renderEvent = (
             /** @type {import("../render/Event.js").default} */
             evt
@@ -11637,8 +11666,7 @@ class Layer extends BaseLayer {
             "A layer can only be added to the map once. Use either `layer.setMap()` or `map.addLayer()`, not both."
           );
           layerStatesArray.push(layerState);
-        },
-        this
+        }
       );
       this.mapRenderKey_ = listen(this, EventType.CHANGE, map2.render, map2);
       this.changed();
@@ -11679,6 +11707,7 @@ class Layer extends BaseLayer {
   }
   /**
    * Clean up.
+   * @override
    */
   disposeInternal() {
     if (this.renderer_) {
@@ -12882,11 +12911,11 @@ function fromString(s) {
   }
   const color = rgba(s);
   if (color.length !== 4) {
-    throw new Error('Failed to parse "' + s + '" as color');
+    throw new Error('failed to parse "' + s + '" as color');
   }
   for (const c of color) {
     if (isNaN(c)) {
-      throw new Error('Failed to parse "' + s + '" as color');
+      throw new Error('failed to parse "' + s + '" as color');
     }
   }
   normalize(color);
@@ -12922,14 +12951,6 @@ function toString(color) {
   }
   const a2 = color[3] === void 0 ? 1 : Math.round(color[3] * 1e3) / 1e3;
   return "rgba(" + r2 + "," + g + "," + b2 + "," + a2 + ")";
-}
-function isStringColor(s) {
-  try {
-    fromString(s);
-    return true;
-  } catch (_2) {
-    return false;
-  }
 }
 const ua = typeof navigator !== "undefined" && typeof navigator.userAgent !== "undefined" ? navigator.userAgent.toLowerCase() : "";
 const FIREFOX = ua.includes("firefox");
@@ -12994,12 +13015,9 @@ function replaceNode(newNode, oldNode) {
     parent.replaceChild(newNode, oldNode);
   }
 }
-function removeNode(node) {
-  return node && node.parentNode ? node.parentNode.removeChild(node) : null;
-}
 function removeChildren(node) {
   while (node.lastChild) {
-    node.removeChild(node.lastChild);
+    node.lastChild.remove();
   }
 }
 function replaceChildren(node, children) {
@@ -13136,7 +13154,7 @@ class IconImageCache {
    * @return {import("./IconImage.js").default} Icon image.
    */
   get(src, crossOrigin, color) {
-    const key = getCacheKey(src, crossOrigin, color);
+    const key = getCacheKey$1(src, crossOrigin, color);
     return key in this.cache_ ? this.cache_[key] : null;
   }
   /**
@@ -13146,7 +13164,7 @@ class IconImageCache {
    * @return {CanvasPattern} Icon image.
    */
   getPattern(src, crossOrigin, color) {
-    const key = getCacheKey(src, crossOrigin, color);
+    const key = getCacheKey$1(src, crossOrigin, color);
     return key in this.patternCache_ ? this.patternCache_[key] : null;
   }
   /**
@@ -13157,7 +13175,7 @@ class IconImageCache {
    * @param {boolean} [pattern] Also cache a `'repeat'` pattern with this `iconImage`.
    */
   set(src, crossOrigin, color, iconImage, pattern) {
-    const key = getCacheKey(src, crossOrigin, color);
+    const key = getCacheKey$1(src, crossOrigin, color);
     const update = key in this.cache_;
     this.cache_[key] = iconImage;
     if (pattern) {
@@ -13194,7 +13212,7 @@ class IconImageCache {
     this.expire();
   }
 }
-function getCacheKey(src, crossOrigin, color) {
+function getCacheKey$1(src, crossOrigin, color) {
   const colorString = color ? asArray(color) : "null";
   return crossOrigin + ":" + src + ":" + colorString;
 }
@@ -13387,12 +13405,13 @@ class IconImage extends Target {
         if (this.imageState_ === ImageState.LOADED || this.imageState_ === ImageState.ERROR) {
           resolve();
         } else {
-          this.addEventListener(EventType.CHANGE, function onChange() {
+          const onChange = () => {
             if (this.imageState_ === ImageState.LOADED || this.imageState_ === ImageState.ERROR) {
               this.removeEventListener(EventType.CHANGE, onChange);
               resolve();
             }
-          });
+          };
+          this.addEventListener(EventType.CHANGE, onChange);
         }
       });
     }
@@ -13569,7 +13588,8 @@ const registerFont = function() {
     for (let i = 0, ii = fonts.length; i < ii; ++i) {
       const font = fonts[i];
       if (checkedFonts.get(font) < retries) {
-        if (isAvailable.apply(this, font.split("\n"))) {
+        const [style, weight, family] = font.split("\n");
+        if (isAvailable(style, weight, family)) {
           clear$1(textHeights);
           measureContext = null;
           measureFont = void 0;
@@ -13773,7 +13793,7 @@ class RegularShape extends ImageStyle {
     this.fill_ = options.fill !== void 0 ? options.fill : null;
     this.origin_ = [0, 0];
     this.points_ = options.points;
-    this.radius_ = options.radius;
+    this.radius = options.radius;
     this.radius2_ = options.radius2;
     this.angle_ = options.angle !== void 0 ? options.angle : 0;
     this.stroke_ = options.stroke !== void 0 ? options.stroke : null;
@@ -13789,6 +13809,7 @@ class RegularShape extends ImageStyle {
    * Clones the style.
    * @return {RegularShape} The cloned style.
    * @api
+   * @override
    */
   clone() {
     const scale2 = this.getScale();
@@ -13813,6 +13834,7 @@ class RegularShape extends ImageStyle {
    * symbolizer.
    * @return {Array<number>} Anchor.
    * @api
+   * @override
    */
   getAnchor() {
     const size = this.size_;
@@ -13850,6 +13872,7 @@ class RegularShape extends ImageStyle {
   }
   /**
    * @return {HTMLCanvasElement} Image element.
+   * @override
    */
   getHitDetectionImage() {
     if (!this.hitDetectionCanvas_) {
@@ -13864,6 +13887,7 @@ class RegularShape extends ImageStyle {
    * @param {number} pixelRatio Pixel ratio.
    * @return {HTMLCanvasElement} Image or Canvas element.
    * @api
+   * @override
    */
   getImage(pixelRatio) {
     let image = this.canvases_[pixelRatio];
@@ -13883,18 +13907,21 @@ class RegularShape extends ImageStyle {
    * Get the image pixel ratio.
    * @param {number} pixelRatio Pixel ratio.
    * @return {number} Pixel ratio.
+   * @override
    */
   getPixelRatio(pixelRatio) {
     return pixelRatio;
   }
   /**
    * @return {import("../size.js").Size} Image size.
+   * @override
    */
   getImageSize() {
     return this.size_;
   }
   /**
    * @return {import("../ImageState.js").default} Image state.
+   * @override
    */
   getImageState() {
     return this.imageState_;
@@ -13903,6 +13930,7 @@ class RegularShape extends ImageStyle {
    * Get the origin of the symbolizer.
    * @return {Array<number>} Origin.
    * @api
+   * @override
    */
   getOrigin() {
     return this.origin_;
@@ -13921,7 +13949,7 @@ class RegularShape extends ImageStyle {
    * @api
    */
   getRadius() {
-    return this.radius_;
+    return this.radius;
   }
   /**
    * Get the secondary radius for the shape.
@@ -13935,6 +13963,7 @@ class RegularShape extends ImageStyle {
    * Get the size of the symbolizer (in pixels).
    * @return {import("../size.js").Size} Size.
    * @api
+   * @override
    */
   getSize() {
     return this.size_;
@@ -13958,16 +13987,19 @@ class RegularShape extends ImageStyle {
   }
   /**
    * @param {function(import("../events/Event.js").default): void} listener Listener function.
+   * @override
    */
   listenImageChange(listener) {
   }
   /**
    * Load not yet loaded URI.
+   * @override
    */
   load() {
   }
   /**
    * @param {function(import("../events/Event.js").default): void} listener Listener function.
+   * @override
    */
   unlistenImageChange(listener) {
   }
@@ -13983,7 +14015,7 @@ class RegularShape extends ImageStyle {
     if (strokeWidth === 0 || this.points_ === Infinity || lineJoin !== "bevel" && lineJoin !== "miter") {
       return strokeWidth;
     }
-    let r1 = this.radius_;
+    let r1 = this.radius;
     let r2 = this.radius2_ === void 0 ? r1 : this.radius2_;
     if (r1 < r2) {
       const tmp = r1;
@@ -14040,7 +14072,7 @@ class RegularShape extends ImageStyle {
       miterLimit = this.stroke_.getMiterLimit() ?? defaultMiterLimit;
     }
     const add2 = this.calculateLineJoinSize_(lineJoin, strokeWidth, miterLimit);
-    const maxRadius = Math.max(this.radius_, this.radius2_ || 0);
+    const maxRadius = Math.max(this.radius, this.radius2_ || 0);
     const size = Math.ceil(2 * maxRadius + add2);
     return {
       strokeStyle,
@@ -14125,7 +14157,7 @@ class RegularShape extends ImageStyle {
    */
   createPath_(context) {
     let points = this.points_;
-    const radius = this.radius_;
+    const radius = this.radius;
     if (points === Infinity) {
       context.arc(0, 0, radius, 0, 2 * Math.PI);
     } else {
@@ -14165,6 +14197,9 @@ class RegularShape extends ImageStyle {
       context.stroke();
     }
   }
+  /**
+   * @override
+   */
   ready() {
     return this.fill_ ? this.fill_.ready() : Promise.resolve();
   }
@@ -14191,6 +14226,7 @@ class CircleStyle extends RegularShape {
    * Clones the style.
    * @return {CircleStyle} The cloned style.
    * @api
+   * @override
    */
   clone() {
     const scale2 = this.getScale();
@@ -14214,7 +14250,7 @@ class CircleStyle extends RegularShape {
    * @api
    */
   setRadius(radius) {
-    this.radius_ = radius;
+    this.radius = radius;
     this.render();
   }
 }
@@ -14231,7 +14267,7 @@ class Fill {
     }
   }
   /**
-   * Clones the style. The color is not cloned if it is an {@link module:ol/colorlike~ColorLike}.
+   * Clones the style. The color is not cloned if it is a {@link module:ol/colorlike~ColorLike}.
    * @return {Fill} The cloned style.
    * @api
    */
@@ -14840,6 +14876,7 @@ class Icon extends ImageStyle {
     this.offsetOrigin_ = options.offsetOrigin !== void 0 ? options.offsetOrigin : "top-left";
     this.origin_ = null;
     this.size_ = options.size !== void 0 ? options.size : null;
+    this.initialOptions_;
     if (options.width !== void 0 || options.height !== void 0) {
       let width, height;
       if (options.size) {
@@ -14881,6 +14918,7 @@ class Icon extends ImageStyle {
    * Clones the style. The underlying Image/HTMLCanvasElement is not cloned.
    * @return {Icon} The cloned style.
    * @api
+   * @override
    */
   clone() {
     let scale2, width, height;
@@ -14917,6 +14955,7 @@ class Icon extends ImageStyle {
    * symbolizer.
    * @return {Array<number>} Anchor.
    * @api
+   * @override
    */
   getAnchor() {
     let anchor = this.normalizedAnchor_;
@@ -14983,6 +15022,7 @@ class Icon extends ImageStyle {
    * @return {HTMLImageElement|HTMLCanvasElement|ImageBitmap} Image or Canvas element. If the Icon
    * style was configured with `src` or with a not let loaded `img`, an `ImageBitmap` will be returned.
    * @api
+   * @override
    */
   getImage(pixelRatio) {
     return this.iconImage_.getImage(pixelRatio);
@@ -14992,24 +15032,28 @@ class Icon extends ImageStyle {
    * @param {number} pixelRatio Pixel ratio.
    * @return {number} The pixel ratio of the image.
    * @api
+   * @override
    */
   getPixelRatio(pixelRatio) {
     return this.iconImage_.getPixelRatio(pixelRatio);
   }
   /**
    * @return {import("../size.js").Size} Image size.
+   * @override
    */
   getImageSize() {
     return this.iconImage_.getSize();
   }
   /**
    * @return {import("../ImageState.js").default} Image state.
+   * @override
    */
   getImageState() {
     return this.iconImage_.getImageState();
   }
   /**
    * @return {HTMLImageElement|HTMLCanvasElement|ImageBitmap} Image element.
+   * @override
    */
   getHitDetectionImage() {
     return this.iconImage_.getHitDetectionImage();
@@ -15018,6 +15062,7 @@ class Icon extends ImageStyle {
    * Get the origin of the symbolizer.
    * @return {Array<number>} Origin.
    * @api
+   * @override
    */
   getOrigin() {
     if (this.origin_) {
@@ -15053,6 +15098,7 @@ class Icon extends ImageStyle {
    * Get the size of the icon (in pixels).
    * @return {import("../size.js").Size} Image size.
    * @api
+   * @override
    */
   getSize() {
     return !this.size_ ? this.iconImage_.getSize() : this.size_;
@@ -15092,6 +15138,7 @@ class Icon extends ImageStyle {
    *
    * @param {number|import("../size.js").Size} scale Scale.
    * @api
+   * @override
    */
   setScale(scale2) {
     delete this.initialOptions_;
@@ -15099,6 +15146,7 @@ class Icon extends ImageStyle {
   }
   /**
    * @param {function(import("../events/Event.js").default): void} listener Listener function.
+   * @override
    */
   listenImageChange(listener) {
     this.iconImage_.addEventListener(EventType.CHANGE, listener);
@@ -15109,16 +15157,21 @@ class Icon extends ImageStyle {
    * automatically call this method. However, you might want to call this
    * method yourself for preloading or other purposes.
    * @api
+   * @override
    */
   load() {
     this.iconImage_.load();
   }
   /**
    * @param {function(import("../events/Event.js").default): void} listener Listener function.
+   * @override
    */
   unlistenImageChange(listener) {
     this.iconImage_.removeEventListener(EventType.CHANGE, listener);
   }
+  /**
+   * @override
+   */
   ready() {
     return this.iconImage_.ready();
   }
@@ -15526,7 +15579,6 @@ class Text {
   }
 }
 let numTypes = 0;
-const NoneType = 0;
 const BooleanType = 1 << numTypes++;
 const NumberType = 1 << numTypes++;
 const StringType = 1 << numTypes++;
@@ -15543,6 +15595,9 @@ const typeNames = {
   [SizeType]: "size"
 };
 const namedTypes = Object.keys(typeNames).map(Number).sort(ascending);
+function isSpecific(type) {
+  return type in typeNames;
+}
 function typeName(type) {
   const names2 = [];
   for (const namedType of namedTypes) {
@@ -15561,9 +15616,6 @@ function typeName(type) {
 function includesType(broad, specific) {
   return (broad & specific) === specific;
 }
-function overlapsType(oneType, otherType) {
-  return !!(oneType & otherType);
-}
 function isType(type, expected) {
   return type === expected;
 }
@@ -15573,6 +15625,11 @@ class LiteralExpression {
    * @param {LiteralValue} value The literal value.
    */
   constructor(type, value) {
+    if (!isSpecific(type)) {
+      throw new Error(
+        `literal expressions must have a specific type, got ${typeName(type)}`
+      );
+    }
     this.type = type;
     this.value = value;
   }
@@ -15594,72 +15651,89 @@ function newParsingContext() {
     variables: /* @__PURE__ */ new Set(),
     properties: /* @__PURE__ */ new Set(),
     featureId: false,
-    geometryType: false,
-    style: {}
+    geometryType: false
   };
 }
-function getTypeFromHint(typeHint) {
-  switch (typeHint) {
-    case "string":
-      return StringType;
-    case "color":
-      return ColorType;
-    case "number":
-      return NumberType;
-    case "boolean":
-      return BooleanType;
-    case "number[]":
-      return NumberArrayType;
-    default:
-      throw new Error(`Unrecognized type hint: ${typeHint}`);
-  }
-}
-function parse(encoded, context, typeHint) {
+function parse(encoded, expectedType, context) {
   switch (typeof encoded) {
     case "boolean": {
+      if (isType(expectedType, StringType)) {
+        return new LiteralExpression(StringType, encoded ? "true" : "false");
+      }
+      if (!includesType(expectedType, BooleanType)) {
+        throw new Error(
+          `got a boolean, but expected ${typeName(expectedType)}`
+        );
+      }
       return new LiteralExpression(BooleanType, encoded);
     }
     case "number": {
-      return new LiteralExpression(
-        typeHint === SizeType ? SizeType : NumberType,
-        encoded
-      );
+      if (isType(expectedType, SizeType)) {
+        return new LiteralExpression(SizeType, toSize(encoded));
+      }
+      if (isType(expectedType, BooleanType)) {
+        return new LiteralExpression(BooleanType, !!encoded);
+      }
+      if (isType(expectedType, StringType)) {
+        return new LiteralExpression(StringType, encoded.toString());
+      }
+      if (!includesType(expectedType, NumberType)) {
+        throw new Error(`got a number, but expected ${typeName(expectedType)}`);
+      }
+      return new LiteralExpression(NumberType, encoded);
     }
     case "string": {
-      let type2 = StringType;
-      if (isStringColor(encoded)) {
-        type2 |= ColorType;
+      if (isType(expectedType, ColorType)) {
+        return new LiteralExpression(ColorType, fromString(encoded));
       }
-      if (!isType(type2 & typeHint, NoneType)) {
-        type2 &= typeHint;
+      if (isType(expectedType, BooleanType)) {
+        return new LiteralExpression(BooleanType, !!encoded);
       }
-      return new LiteralExpression(type2, encoded);
+      if (!includesType(expectedType, StringType)) {
+        throw new Error(`got a string, but expected ${typeName(expectedType)}`);
+      }
+      return new LiteralExpression(StringType, encoded);
     }
   }
   if (!Array.isArray(encoded)) {
-    throw new Error("Expression must be an array or a primitive value");
+    throw new Error("expression must be an array or a primitive value");
   }
   if (encoded.length === 0) {
-    throw new Error("Empty expression");
+    throw new Error("empty expression");
   }
   if (typeof encoded[0] === "string") {
-    return parseCallExpression(encoded, context, typeHint);
+    return parseCallExpression(encoded, expectedType, context);
   }
   for (const item of encoded) {
     if (typeof item !== "number") {
-      throw new Error("Expected an array of numbers");
+      throw new Error("expected an array of numbers");
     }
   }
-  let type = NumberArrayType;
-  if (encoded.length === 2) {
-    type |= SizeType;
-  } else if (encoded.length === 3 || encoded.length === 4) {
-    type |= ColorType;
+  if (isType(expectedType, SizeType)) {
+    if (encoded.length !== 2) {
+      throw new Error(
+        `expected an array of two values for a size, got ${encoded.length}`
+      );
+    }
+    return new LiteralExpression(SizeType, encoded);
   }
-  if (typeHint) {
-    type &= typeHint;
+  if (isType(expectedType, ColorType)) {
+    if (encoded.length === 3) {
+      return new LiteralExpression(ColorType, [...encoded, 1]);
+    }
+    if (encoded.length === 4) {
+      return new LiteralExpression(ColorType, encoded);
+    }
+    throw new Error(
+      `expected an array of 3 or 4 values for a color, got ${encoded.length}`
+    );
   }
-  return new LiteralExpression(type, encoded);
+  if (!includesType(expectedType, NumberArrayType)) {
+    throw new Error(
+      `got an array of numbers, but expected ${typeName(expectedType)}`
+    );
+  }
+  return new LiteralExpression(NumberArrayType, encoded);
 }
 const Ops = {
   Get: "get",
@@ -15709,621 +15783,466 @@ const Ops = {
   ToString: "to-string"
 };
 const parsers = {
-  [Ops.Get]: createParser(
-    ([_2, typeHint]) => {
-      if (typeHint !== void 0) {
-        return getTypeFromHint(
-          /** @type {string} */
-          /** @type {LiteralExpression} */
-          typeHint.value
-        );
-      }
-      return AnyType;
-    },
-    withArgsCount(1, 2),
-    withGetArgs
+  [Ops.Get]: createCallExpressionParser(hasArgsCount(1, Infinity), withGetArgs),
+  [Ops.Var]: createCallExpressionParser(hasArgsCount(1, 1), withVarArgs),
+  [Ops.Id]: createCallExpressionParser(usesFeatureId, withNoArgs),
+  [Ops.Concat]: createCallExpressionParser(
+    hasArgsCount(2, Infinity),
+    withArgsOfType(StringType)
   ),
-  [Ops.Var]: createParser(
-    ([firstArg]) => firstArg.type,
-    withArgsCount(1, 1),
-    withVarArgs
+  [Ops.GeometryType]: createCallExpressionParser(usesGeometryType, withNoArgs),
+  [Ops.Resolution]: createCallExpressionParser(withNoArgs),
+  [Ops.Zoom]: createCallExpressionParser(withNoArgs),
+  [Ops.Time]: createCallExpressionParser(withNoArgs),
+  [Ops.Any]: createCallExpressionParser(
+    hasArgsCount(2, Infinity),
+    withArgsOfType(BooleanType)
   ),
-  [Ops.Id]: createParser(NumberType | StringType, withNoArgs, usesFeatureId),
-  [Ops.Concat]: createParser(
-    StringType,
-    withArgsCount(2, Infinity),
-    parseArgsOfType(AnyType)
+  [Ops.All]: createCallExpressionParser(
+    hasArgsCount(2, Infinity),
+    withArgsOfType(BooleanType)
   ),
-  [Ops.GeometryType]: createParser(StringType, withNoArgs, usesGeometryType),
-  [Ops.Resolution]: createParser(NumberType, withNoArgs),
-  [Ops.Zoom]: createParser(NumberType, withNoArgs),
-  [Ops.Time]: createParser(NumberType, withNoArgs),
-  [Ops.Any]: createParser(
-    BooleanType,
-    withArgsCount(2, Infinity),
-    parseArgsOfType(BooleanType)
+  [Ops.Not]: createCallExpressionParser(
+    hasArgsCount(1, 1),
+    withArgsOfType(BooleanType)
   ),
-  [Ops.All]: createParser(
-    BooleanType,
-    withArgsCount(2, Infinity),
-    parseArgsOfType(BooleanType)
+  [Ops.Equal]: createCallExpressionParser(
+    hasArgsCount(2, 2),
+    withArgsOfType(AnyType)
   ),
-  [Ops.Not]: createParser(
-    BooleanType,
-    withArgsCount(1, 1),
-    parseArgsOfType(BooleanType)
+  [Ops.NotEqual]: createCallExpressionParser(
+    hasArgsCount(2, 2),
+    withArgsOfType(AnyType)
   ),
-  [Ops.Equal]: createParser(
-    BooleanType,
-    withArgsCount(2, 2),
-    parseArgsOfType(AnyType),
-    narrowArgsType
+  [Ops.GreaterThan]: createCallExpressionParser(
+    hasArgsCount(2, 2),
+    withArgsOfType(NumberType)
   ),
-  [Ops.NotEqual]: createParser(
-    BooleanType,
-    withArgsCount(2, 2),
-    parseArgsOfType(AnyType),
-    narrowArgsType
+  [Ops.GreaterThanOrEqualTo]: createCallExpressionParser(
+    hasArgsCount(2, 2),
+    withArgsOfType(NumberType)
   ),
-  [Ops.GreaterThan]: createParser(
-    BooleanType,
-    withArgsCount(2, 2),
-    parseArgsOfType(AnyType),
-    narrowArgsType
+  [Ops.LessThan]: createCallExpressionParser(
+    hasArgsCount(2, 2),
+    withArgsOfType(NumberType)
   ),
-  [Ops.GreaterThanOrEqualTo]: createParser(
-    BooleanType,
-    withArgsCount(2, 2),
-    parseArgsOfType(AnyType),
-    narrowArgsType
+  [Ops.LessThanOrEqualTo]: createCallExpressionParser(
+    hasArgsCount(2, 2),
+    withArgsOfType(NumberType)
   ),
-  [Ops.LessThan]: createParser(
-    BooleanType,
-    withArgsCount(2, 2),
-    parseArgsOfType(AnyType),
-    narrowArgsType
+  [Ops.Multiply]: createCallExpressionParser(
+    hasArgsCount(2, Infinity),
+    withArgsOfReturnType
   ),
-  [Ops.LessThanOrEqualTo]: createParser(
-    BooleanType,
-    withArgsCount(2, 2),
-    parseArgsOfType(AnyType),
-    narrowArgsType
+  [Ops.Coalesce]: createCallExpressionParser(
+    hasArgsCount(2, Infinity),
+    withArgsOfReturnType
   ),
-  [Ops.Multiply]: createParser(
-    (parsedArgs) => {
-      let outputType = NumberType | ColorType;
-      for (let i = 0; i < parsedArgs.length; i++) {
-        outputType &= parsedArgs[i].type;
-      }
-      return outputType;
-    },
-    withArgsCount(2, Infinity),
-    parseArgsOfType(NumberType | ColorType),
-    narrowArgsType
+  [Ops.Divide]: createCallExpressionParser(
+    hasArgsCount(2, 2),
+    withArgsOfType(NumberType)
   ),
-  [Ops.Coalesce]: createParser(
-    (parsedArgs) => {
-      let type = AnyType;
-      for (let i = 1; i < parsedArgs.length; i += 2) {
-        type &= parsedArgs[i].type;
-      }
-      type &= parsedArgs[parsedArgs.length - 1].type;
-      return type;
-    },
-    withArgsCount(2, Infinity),
-    parseArgsOfType(AnyType),
-    narrowArgsType
+  [Ops.Add]: createCallExpressionParser(
+    hasArgsCount(2, Infinity),
+    withArgsOfType(NumberType)
   ),
-  [Ops.Divide]: createParser(
-    NumberType,
-    withArgsCount(2, 2),
-    parseArgsOfType(NumberType)
+  [Ops.Subtract]: createCallExpressionParser(
+    hasArgsCount(2, 2),
+    withArgsOfType(NumberType)
   ),
-  [Ops.Add]: createParser(
-    NumberType,
-    withArgsCount(2, Infinity),
-    parseArgsOfType(NumberType)
+  [Ops.Clamp]: createCallExpressionParser(
+    hasArgsCount(3, 3),
+    withArgsOfType(NumberType)
   ),
-  [Ops.Subtract]: createParser(
-    NumberType,
-    withArgsCount(2, 2),
-    parseArgsOfType(NumberType)
+  [Ops.Mod]: createCallExpressionParser(
+    hasArgsCount(2, 2),
+    withArgsOfType(NumberType)
   ),
-  [Ops.Clamp]: createParser(
-    NumberType,
-    withArgsCount(3, 3),
-    parseArgsOfType(NumberType)
+  [Ops.Pow]: createCallExpressionParser(
+    hasArgsCount(2, 2),
+    withArgsOfType(NumberType)
   ),
-  [Ops.Mod]: createParser(
-    NumberType,
-    withArgsCount(2, 2),
-    parseArgsOfType(NumberType)
+  [Ops.Abs]: createCallExpressionParser(
+    hasArgsCount(1, 1),
+    withArgsOfType(NumberType)
   ),
-  [Ops.Pow]: createParser(
-    NumberType,
-    withArgsCount(2, 2),
-    parseArgsOfType(NumberType)
+  [Ops.Floor]: createCallExpressionParser(
+    hasArgsCount(1, 1),
+    withArgsOfType(NumberType)
   ),
-  [Ops.Abs]: createParser(
-    NumberType,
-    withArgsCount(1, 1),
-    parseArgsOfType(NumberType)
+  [Ops.Ceil]: createCallExpressionParser(
+    hasArgsCount(1, 1),
+    withArgsOfType(NumberType)
   ),
-  [Ops.Floor]: createParser(
-    NumberType,
-    withArgsCount(1, 1),
-    parseArgsOfType(NumberType)
+  [Ops.Round]: createCallExpressionParser(
+    hasArgsCount(1, 1),
+    withArgsOfType(NumberType)
   ),
-  [Ops.Ceil]: createParser(
-    NumberType,
-    withArgsCount(1, 1),
-    parseArgsOfType(NumberType)
+  [Ops.Sin]: createCallExpressionParser(
+    hasArgsCount(1, 1),
+    withArgsOfType(NumberType)
   ),
-  [Ops.Round]: createParser(
-    NumberType,
-    withArgsCount(1, 1),
-    parseArgsOfType(NumberType)
+  [Ops.Cos]: createCallExpressionParser(
+    hasArgsCount(1, 1),
+    withArgsOfType(NumberType)
   ),
-  [Ops.Sin]: createParser(
-    NumberType,
-    withArgsCount(1, 1),
-    parseArgsOfType(NumberType)
+  [Ops.Atan]: createCallExpressionParser(
+    hasArgsCount(1, 2),
+    withArgsOfType(NumberType)
   ),
-  [Ops.Cos]: createParser(
-    NumberType,
-    withArgsCount(1, 1),
-    parseArgsOfType(NumberType)
+  [Ops.Sqrt]: createCallExpressionParser(
+    hasArgsCount(1, 1),
+    withArgsOfType(NumberType)
   ),
-  [Ops.Atan]: createParser(
-    NumberType,
-    withArgsCount(1, 2),
-    parseArgsOfType(NumberType)
+  [Ops.Match]: createCallExpressionParser(
+    hasArgsCount(4, Infinity),
+    hasEvenArgs,
+    withMatchArgs
   ),
-  [Ops.Sqrt]: createParser(
-    NumberType,
-    withArgsCount(1, 1),
-    parseArgsOfType(NumberType)
+  [Ops.Between]: createCallExpressionParser(
+    hasArgsCount(3, 3),
+    withArgsOfType(NumberType)
   ),
-  [Ops.Match]: createParser(
-    (parsedArgs) => {
-      let type = AnyType;
-      for (let i = 2; i < parsedArgs.length; i += 2) {
-        type &= parsedArgs[i].type;
-      }
-      type &= parsedArgs[parsedArgs.length - 1].type;
-      return type;
-    },
-    withArgsCount(4, Infinity),
-    withEvenArgs,
-    parseMatchArgs
+  [Ops.Interpolate]: createCallExpressionParser(
+    hasArgsCount(6, Infinity),
+    hasEvenArgs,
+    withInterpolateArgs
   ),
-  [Ops.Between]: createParser(
-    BooleanType,
-    withArgsCount(3, 3),
-    parseArgsOfType(NumberType)
+  [Ops.Case]: createCallExpressionParser(
+    hasArgsCount(3, Infinity),
+    hasOddArgs,
+    withCaseArgs
   ),
-  [Ops.Interpolate]: createParser(
-    (parsedArgs) => {
-      let type = ColorType | NumberType;
-      for (let i = 3; i < parsedArgs.length; i += 2) {
-        type &= parsedArgs[i].type;
-      }
-      return type;
-    },
-    withArgsCount(6, Infinity),
-    withEvenArgs,
-    parseInterpolateArgs
+  [Ops.In]: createCallExpressionParser(hasArgsCount(2, 2), withInArgs),
+  [Ops.Number]: createCallExpressionParser(
+    hasArgsCount(1, Infinity),
+    withArgsOfType(AnyType)
   ),
-  [Ops.Case]: createParser(
-    (parsedArgs) => {
-      let type = AnyType;
-      for (let i = 1; i < parsedArgs.length; i += 2) {
-        type &= parsedArgs[i].type;
-      }
-      type &= parsedArgs[parsedArgs.length - 1].type;
-      return type;
-    },
-    withArgsCount(3, Infinity),
-    withOddArgs,
-    parseCaseArgs
+  [Ops.String]: createCallExpressionParser(
+    hasArgsCount(1, Infinity),
+    withArgsOfType(AnyType)
   ),
-  [Ops.In]: createParser(BooleanType, withArgsCount(2, 2), parseInArgs),
-  [Ops.Number]: createParser(
-    NumberType,
-    withArgsCount(1, Infinity),
-    parseArgsOfType(AnyType)
+  [Ops.Array]: createCallExpressionParser(
+    hasArgsCount(1, Infinity),
+    withArgsOfType(NumberType)
   ),
-  [Ops.String]: createParser(
-    StringType,
-    withArgsCount(1, Infinity),
-    parseArgsOfType(AnyType)
+  [Ops.Color]: createCallExpressionParser(
+    hasArgsCount(1, 4),
+    withArgsOfType(NumberType)
   ),
-  [Ops.Array]: createParser(
-    (parsedArgs) => {
-      return parsedArgs.length === 2 ? NumberArrayType | SizeType : parsedArgs.length === 3 || parsedArgs.length === 4 ? NumberArrayType | ColorType : NumberArrayType;
-    },
-    withArgsCount(1, Infinity),
-    parseArgsOfType(NumberType)
+  [Ops.Band]: createCallExpressionParser(
+    hasArgsCount(1, 3),
+    withArgsOfType(NumberType)
   ),
-  [Ops.Color]: createParser(
-    ColorType,
-    withArgsCount(1, 4),
-    parseArgsOfType(NumberType)
+  [Ops.Palette]: createCallExpressionParser(
+    hasArgsCount(2, 2),
+    withPaletteArgs
   ),
-  [Ops.Band]: createParser(
-    NumberType,
-    withArgsCount(1, 3),
-    parseArgsOfType(NumberType)
-  ),
-  [Ops.Palette]: createParser(ColorType, withArgsCount(2, 2), parsePaletteArgs),
-  [Ops.ToString]: createParser(
-    StringType,
-    withArgsCount(1, 1),
-    parseArgsOfType(BooleanType | NumberType | StringType | ColorType)
+  [Ops.ToString]: createCallExpressionParser(
+    hasArgsCount(1, 1),
+    withArgsOfType(BooleanType | NumberType | StringType | ColorType)
   )
 };
-function withGetArgs(encoded, context) {
-  const arg = parse(encoded[1], context);
-  if (!(arg instanceof LiteralExpression)) {
-    throw new Error("Expected a literal argument for get operation");
+function withGetArgs(encoded, returnType, context) {
+  const argsCount = encoded.length - 1;
+  const args = new Array(argsCount);
+  for (let i = 0; i < argsCount; ++i) {
+    const key = encoded[i + 1];
+    switch (typeof key) {
+      case "number": {
+        args[i] = new LiteralExpression(NumberType, key);
+        break;
+      }
+      case "string": {
+        args[i] = new LiteralExpression(StringType, key);
+        break;
+      }
+      default: {
+        throw new Error(
+          `expected a string key or numeric array index for a get operation, got ${key}`
+        );
+      }
+    }
+    if (i === 0) {
+      context.properties.add(String(key));
+    }
   }
-  if (typeof arg.value !== "string") {
-    throw new Error("Expected a string argument for get operation");
-  }
-  context.properties.add(arg.value);
-  if (encoded.length === 3) {
-    const hint = parse(encoded[2], context);
-    return [arg, hint];
-  }
-  return [arg];
+  return args;
 }
-function withVarArgs(encoded, context, parsedArgs, typeHint) {
-  const varName = encoded[1];
-  if (typeof varName !== "string") {
-    throw new Error("Expected a string argument for var operation");
+function withVarArgs(encoded, returnType, context) {
+  const name = encoded[1];
+  if (typeof name !== "string") {
+    throw new Error("expected a string argument for var operation");
   }
-  context.variables.add(varName);
-  if (!("variables" in context.style) || context.style.variables[varName] === void 0) {
-    return [new LiteralExpression(AnyType, varName)];
-  }
-  const initialValue = context.style.variables[varName];
-  const arg = (
-    /** @type {LiteralExpression} */
-    parse(initialValue, context)
-  );
-  arg.value = varName;
-  if (typeHint && !overlapsType(typeHint, arg.type)) {
-    throw new Error(
-      `The variable ${varName} has type ${typeName(
-        arg.type
-      )} but the following type was expected: ${typeName(typeHint)}`
-    );
-  }
-  return [arg];
+  context.variables.add(name);
+  return [new LiteralExpression(StringType, name)];
 }
-function usesFeatureId(encoded, context) {
+function usesFeatureId(encoded, returnType, context) {
   context.featureId = true;
 }
-function usesGeometryType(encoded, context) {
+function usesGeometryType(encoded, returnType, context) {
   context.geometryType = true;
 }
-function withNoArgs(encoded, context) {
+function withNoArgs(encoded, returnType, context) {
   const operation = encoded[0];
   if (encoded.length !== 1) {
-    throw new Error(`Expected no arguments for ${operation} operation`);
+    throw new Error(`expected no arguments for ${operation} operation`);
   }
   return [];
 }
-function withArgsCount(minArgs, maxArgs) {
-  return function(encoded, context) {
+function hasArgsCount(minArgs, maxArgs) {
+  return function(encoded, returnType, context) {
     const operation = encoded[0];
     const argCount = encoded.length - 1;
     if (minArgs === maxArgs) {
       if (argCount !== minArgs) {
         const plural = minArgs === 1 ? "" : "s";
         throw new Error(
-          `Expected ${minArgs} argument${plural} for ${operation}, got ${argCount}`
+          `expected ${minArgs} argument${plural} for ${operation}, got ${argCount}`
         );
       }
     } else if (argCount < minArgs || argCount > maxArgs) {
       const range = maxArgs === Infinity ? `${minArgs} or more` : `${minArgs} to ${maxArgs}`;
       throw new Error(
-        `Expected ${range} arguments for ${operation}, got ${argCount}`
+        `expected ${range} arguments for ${operation}, got ${argCount}`
       );
     }
   };
 }
-function parseArgsOfType(argType) {
-  return function(encoded, context) {
-    const operation = encoded[0];
+function withArgsOfReturnType(encoded, returnType, context) {
+  const argCount = encoded.length - 1;
+  const args = new Array(argCount);
+  for (let i = 0; i < argCount; ++i) {
+    const expression = parse(encoded[i + 1], returnType, context);
+    args[i] = expression;
+  }
+  return args;
+}
+function withArgsOfType(argType) {
+  return function(encoded, returnType, context) {
     const argCount = encoded.length - 1;
     const args = new Array(argCount);
     for (let i = 0; i < argCount; ++i) {
-      const expression = parse(encoded[i + 1], context);
-      if (!overlapsType(argType, expression.type)) {
-        const gotType = typeName(argType);
-        const expectedType = typeName(expression.type);
-        throw new Error(
-          `Unexpected type for argument ${i} of ${operation} operation, got ${gotType} but expected ${expectedType}`
-        );
-      }
-      expression.type &= argType;
+      const expression = parse(encoded[i + 1], argType, context);
       args[i] = expression;
     }
     return args;
   };
 }
-function narrowArgsType(encoded, context, parsedArgs) {
-  const operation = encoded[0];
-  const argCount = encoded.length - 1;
-  let sameType = AnyType;
-  for (let i = 0; i < parsedArgs.length; ++i) {
-    sameType &= parsedArgs[i].type;
-  }
-  if (sameType === NoneType) {
-    throw new Error(
-      `No common type could be found for arguments of ${operation} operation`
-    );
-  }
-  const args = new Array(argCount);
-  for (let i = 0; i < argCount; ++i) {
-    args[i] = parse(encoded[i + 1], context, sameType);
-  }
-  return args;
-}
-function withOddArgs(encoded, context) {
+function hasOddArgs(encoded, returnType, context) {
   const operation = encoded[0];
   const argCount = encoded.length - 1;
   if (argCount % 2 === 0) {
     throw new Error(
-      `An odd amount of arguments was expected for operation ${operation}, got ${JSON.stringify(
-        argCount
-      )} instead`
+      `expected an odd number of arguments for ${operation}, got ${argCount} instead`
     );
   }
 }
-function withEvenArgs(encoded, context) {
+function hasEvenArgs(encoded, returnType, context) {
   const operation = encoded[0];
   const argCount = encoded.length - 1;
   if (argCount % 2 === 1) {
     throw new Error(
-      `An even amount of arguments was expected for operation ${operation}, got ${JSON.stringify(
-        argCount
-      )} instead`
+      `expected an even number of arguments for operation ${operation}, got ${argCount} instead`
     );
   }
 }
-function parseMatchArgs(encoded, context, parsedArgs, typeHint) {
+function withMatchArgs(encoded, returnType, context) {
   const argsCount = encoded.length - 1;
-  const input = parse(encoded[1], context);
-  let inputType = input.type;
-  const fallback = parse(encoded[encoded.length - 1], context);
-  let outputType = typeHint !== void 0 ? typeHint & fallback.type : fallback.type;
+  const inputType = StringType | NumberType | BooleanType;
+  const input = parse(encoded[1], inputType, context);
+  const fallback = parse(encoded[encoded.length - 1], returnType, context);
   const args = new Array(argsCount - 2);
   for (let i = 0; i < argsCount - 2; i += 2) {
-    const match = parse(encoded[i + 2], context);
-    const output = parse(encoded[i + 3], context);
-    inputType &= match.type;
-    outputType &= output.type;
-    args[i] = match;
-    args[i + 1] = output;
+    try {
+      const match = parse(encoded[i + 2], input.type, context);
+      args[i] = match;
+    } catch (err) {
+      throw new Error(
+        `failed to parse argument ${i + 1} of match expression: ${err.message}`
+      );
+    }
+    try {
+      const output = parse(encoded[i + 3], fallback.type, context);
+      args[i + 1] = output;
+    } catch (err) {
+      throw new Error(
+        `failed to parse argument ${i + 2} of match expression: ${err.message}`
+      );
+    }
   }
-  const expectedInputType = StringType | NumberType | BooleanType;
-  if (!overlapsType(expectedInputType, inputType)) {
-    throw new Error(
-      `Expected an input of type ${typeName(
-        expectedInputType
-      )} for the interpolate operation, got ${typeName(inputType)} instead`
-    );
-  }
-  inputType &= expectedInputType;
-  if (isType(outputType, NoneType)) {
-    throw new Error(
-      `Could not find a common output type for the following match operation: ` + JSON.stringify(encoded)
-    );
-  }
-  for (let i = 0; i < argsCount - 2; i += 2) {
-    const match = parse(encoded[i + 2], context, inputType);
-    const output = parse(encoded[i + 3], context, outputType);
-    args[i] = match;
-    args[i + 1] = output;
-  }
-  return [
-    parse(encoded[1], context, inputType),
-    ...args,
-    parse(encoded[encoded.length - 1], context, outputType)
-  ];
+  return [input, ...args, fallback];
 }
-function parseInterpolateArgs(encoded, context, parsedArgs, typeHint) {
+function withInterpolateArgs(encoded, returnType, context) {
   const interpolationType = encoded[1];
-  let interpolation;
+  let base;
   switch (interpolationType[0]) {
     case "linear":
-      interpolation = 1;
+      base = 1;
       break;
     case "exponential":
-      interpolation = interpolationType[1];
-      if (typeof interpolation !== "number") {
+      const b2 = interpolationType[1];
+      if (typeof b2 !== "number" || b2 <= 0) {
         throw new Error(
-          `Expected a number base for exponential interpolation, got ${JSON.stringify(interpolation)} instead`
+          `expected a number base for exponential interpolation, got ${JSON.stringify(b2)} instead`
         );
       }
+      base = b2;
       break;
     default:
-      interpolation = null;
+      throw new Error(
+        `invalid interpolation type: ${JSON.stringify(interpolationType)}`
+      );
   }
-  if (!interpolation) {
+  const interpolation = new LiteralExpression(NumberType, base);
+  let input;
+  try {
+    input = parse(encoded[2], NumberType, context);
+  } catch (err) {
     throw new Error(
-      `Invalid interpolation type: ${JSON.stringify(interpolationType)}`
+      `failed to parse argument 1 in interpolate expression: ${err.message}`
     );
   }
-  interpolation = parse(interpolation, context);
-  let input = parse(encoded[2], context);
-  if (!overlapsType(NumberType, input.type)) {
-    throw new Error(
-      `Expected an input of type number for the interpolate operation, got ${typeName(input.type)} instead`
-    );
-  }
-  input = parse(encoded[2], context, NumberType);
   const args = new Array(encoded.length - 3);
   for (let i = 0; i < args.length; i += 2) {
-    let stop = parse(encoded[i + 3], context);
-    if (!overlapsType(NumberType, stop.type)) {
+    try {
+      const stop = parse(encoded[i + 3], NumberType, context);
+      args[i] = stop;
+    } catch (err) {
       throw new Error(
-        `Expected all stop input values in the interpolate operation to be of type number, got ${typeName(stop.type)} at position ${i + 2} instead`
+        `failed to parse argument ${i + 2} for interpolate expression: ${err.message}`
       );
     }
-    let output = parse(encoded[i + 4], context);
-    if (!overlapsType(NumberType | ColorType, output.type)) {
+    try {
+      const output = parse(encoded[i + 4], returnType, context);
+      args[i + 1] = output;
+    } catch (err) {
       throw new Error(
-        `Expected all stop output values in the interpolate operation to be a number or color, got ${typeName(output.type)} at position ${i + 3} instead`
+        `failed to parse argument ${i + 3} for interpolate expression: ${err.message}`
       );
     }
-    stop = parse(encoded[i + 3], context, NumberType);
-    output = parse(encoded[i + 4], context, NumberType | ColorType);
-    args[i] = stop;
-    args[i + 1] = output;
   }
   return [interpolation, input, ...args];
 }
-function parseCaseArgs(encoded, context, parsedArgs, typeHint) {
-  const fallback = parse(encoded[encoded.length - 1], context, typeHint);
-  let outputType = typeHint !== void 0 ? typeHint & fallback.type : fallback.type;
+function withCaseArgs(encoded, returnType, context) {
+  const fallback = parse(encoded[encoded.length - 1], returnType, context);
   const args = new Array(encoded.length - 1);
   for (let i = 0; i < args.length - 1; i += 2) {
-    const condition = parse(encoded[i + 1], context);
-    const output = parse(encoded[i + 2], context, typeHint);
-    if (!overlapsType(BooleanType, condition.type)) {
+    try {
+      const condition = parse(encoded[i + 1], BooleanType, context);
+      args[i] = condition;
+    } catch (err) {
       throw new Error(
-        `Expected all conditions in the case operation to be of type boolean, got ${typeName(condition.type)} at position ${i} instead`
+        `failed to parse argument ${i} of case expression: ${err.message}`
       );
     }
-    outputType &= output.type;
-    args[i] = condition;
-    args[i + 1] = output;
+    try {
+      const output = parse(encoded[i + 2], fallback.type, context);
+      args[i + 1] = output;
+    } catch (err) {
+      throw new Error(
+        `failed to parse argument ${i + 1} of case expression: ${err.message}`
+      );
+    }
   }
-  if (isType(outputType, NoneType)) {
-    throw new Error(
-      `Could not find a common output type for the following case operation: ` + JSON.stringify(encoded)
-    );
-  }
-  for (let i = 0; i < args.length - 1; i += 2) {
-    args[i + 1] = parse(encoded[i + 2], context, outputType);
-  }
-  args[args.length - 1] = parse(
-    encoded[encoded.length - 1],
-    context,
-    outputType
-  );
+  args[args.length - 1] = fallback;
   return args;
 }
-function parseInArgs(encoded, context) {
-  let haystack = (
-    /** @type {any} */
-    encoded[2]
-  );
+function withInArgs(encoded, returnType, context) {
+  let haystack = encoded[2];
   if (!Array.isArray(haystack)) {
     throw new Error(
-      `The "in" operator was provided a literal value which was not an array as second argument.`
+      `the second argument for the "in" operator must be an array`
     );
   }
+  let needleType;
   if (typeof haystack[0] === "string") {
     if (haystack[0] !== "literal") {
       throw new Error(
-        `For the "in" operator, a string array should be wrapped in a "literal" operator to disambiguate from expressions.`
+        `for the "in" operator, a string array should be wrapped in a "literal" operator to disambiguate from expressions`
       );
     }
     if (!Array.isArray(haystack[1])) {
       throw new Error(
-        `The "in" operator was provided a literal value which was not an array as second argument.`
+        `failed to parse "in" expression: the literal operator must be followed by an array`
       );
     }
     haystack = haystack[1];
+    needleType = StringType;
+  } else {
+    needleType = NumberType;
   }
-  let needleType = StringType | NumberType;
   const args = new Array(haystack.length);
   for (let i = 0; i < args.length; i++) {
-    const arg = parse(haystack[i], context);
-    needleType &= arg.type;
-    args[i] = arg;
+    try {
+      const arg = parse(haystack[i], needleType, context);
+      args[i] = arg;
+    } catch (err) {
+      throw new Error(
+        `failed to parse haystack item ${i} for "in" expression: ${err.message}`
+      );
+    }
   }
-  if (isType(needleType, NoneType)) {
-    throw new Error(
-      `Could not find a common type for the following in operation: ` + JSON.stringify(encoded)
-    );
-  }
-  const needle = parse(encoded[1], context, needleType);
+  const needle = parse(encoded[1], needleType, context);
   return [needle, ...args];
 }
-function parsePaletteArgs(encoded, context) {
-  const index = parse(encoded[1], context, NumberType);
-  if (index.type !== NumberType) {
+function withPaletteArgs(encoded, returnType, context) {
+  let index;
+  try {
+    index = parse(encoded[1], NumberType, context);
+  } catch (err) {
     throw new Error(
-      `The first argument of palette must be an number, got ${typeName(
-        index.type
-      )} instead`
+      `failed to parse first argument in palette expression: ${err.message}`
     );
   }
   const colors = encoded[2];
   if (!Array.isArray(colors)) {
-    throw new Error("The second argument of palette must be an array");
+    throw new Error("the second argument of palette must be an array");
   }
   const parsedColors = new Array(colors.length);
   for (let i = 0; i < parsedColors.length; i++) {
-    const color = parse(colors[i], context, ColorType);
-    if (!(color instanceof LiteralExpression)) {
+    let color;
+    try {
+      color = parse(colors[i], ColorType, context);
+    } catch (err) {
       throw new Error(
-        `The palette color at index ${i} must be a literal value`
+        `failed to parse color at index ${i} in palette expression: ${err.message}`
       );
     }
-    if (!overlapsType(color.type, ColorType)) {
+    if (!(color instanceof LiteralExpression)) {
       throw new Error(
-        `The palette color at index ${i} should be of type color, got ${typeName(
-          color.type
-        )} instead`
+        `the palette color at index ${i} must be a literal value`
       );
     }
     parsedColors[i] = color;
   }
   return [index, ...parsedColors];
 }
-function createParser(returnType, ...argValidators) {
-  return function(encoded, context, typeHint) {
+function createCallExpressionParser(...validators) {
+  return function(encoded, returnType, context) {
     const operator = encoded[0];
-    let parsedArgs = [];
-    for (let i = 0; i < argValidators.length; i++) {
-      parsedArgs = argValidators[i](encoded, context, parsedArgs, typeHint) || parsedArgs;
-    }
-    let actualType = typeof returnType === "function" ? returnType(parsedArgs) : returnType;
-    if (typeHint !== void 0) {
-      if (!overlapsType(actualType, typeHint)) {
-        throw new Error(
-          `The following expression was expected to return ${typeName(
-            typeHint
-          )}, but returns ${typeName(actualType)} instead: ${JSON.stringify(
-            encoded
-          )}`
-        );
+    let args;
+    for (let i = 0; i < validators.length; i++) {
+      const parsed = validators[i](encoded, returnType, context);
+      if (i == validators.length - 1) {
+        if (!parsed) {
+          throw new Error(
+            "expected last argument validator to return the parsed args"
+          );
+        }
+        args = parsed;
       }
-      actualType &= typeHint;
     }
-    if (actualType === NoneType) {
-      throw new Error(
-        `No matching type was found for the following expression: ${JSON.stringify(
-          encoded
-        )}`
-      );
-    }
-    return new CallExpression(actualType, operator, ...parsedArgs);
+    return new CallExpression(returnType, operator, ...args);
   };
 }
-function parseCallExpression(encoded, context, typeHint) {
+function parseCallExpression(encoded, returnType, context) {
   const operator = encoded[0];
   const parser = parsers[operator];
   if (!parser) {
-    throw new Error(`Unknown operator: ${operator}`);
+    throw new Error(`unknown operator: ${operator}`);
   }
-  return parser(encoded, context, typeHint);
+  return parser(encoded, returnType, context);
 }
 function computeGeometryType(geometry) {
   if (!geometry) {
@@ -16363,14 +16282,7 @@ function newEvaluationContext() {
   };
 }
 function buildExpression(encoded, type, context) {
-  const expression = parse(encoded, context);
-  if (!overlapsType(type, expression.type)) {
-    const expected = typeName(type);
-    const actual = typeName(expression.type);
-    throw new Error(
-      `Expected expression to be of type ${expected}, got ${actual}`
-    );
-  }
+  const expression = parse(encoded, type, context);
   return compileExpression(expression);
 }
 function compileExpression(expression, context) {
@@ -16505,7 +16417,22 @@ function compileAccessorExpression(expression, context) {
   );
   switch (expression.operator) {
     case Ops.Get: {
-      return (context2) => context2.properties[name];
+      return (context2) => {
+        const args = expression.args;
+        let value = context2.properties[name];
+        for (let i = 1, ii = args.length; i < ii; ++i) {
+          const keyExpression = (
+            /** @type {LiteralExpression} */
+            args[i]
+          );
+          const key = (
+            /** @type {string|number} */
+            keyExpression.value
+          );
+          value = value[key];
+        }
+        return value;
+      };
     }
     case Ops.Var: {
       return (context2) => context2.variables[name];
@@ -16968,6 +16895,9 @@ function buildFill(flatStyle, prefix, context) {
   if (prefix + "fill-pattern-src" in flatStyle) {
     evaluateColor = patternEvaluator(flatStyle, prefix + "fill-", context);
   } else {
+    if (flatStyle[prefix + "fill-color"] === "none") {
+      return (context2) => null;
+    }
     evaluateColor = colorLikeEvaluator(
       flatStyle,
       prefix + "fill-color",
@@ -17497,11 +17427,7 @@ function colorLikeEvaluator(flatStyle, name, context) {
   if (!(name in flatStyle)) {
     return null;
   }
-  const evaluator = buildExpression(
-    flatStyle[name],
-    ColorType | StringType,
-    context
-  );
+  const evaluator = buildExpression(flatStyle[name], ColorType, context);
   return function(context2) {
     return requireColorLike(evaluator(context2), name);
   };
@@ -17688,7 +17614,7 @@ const Property$1 = {
 };
 class BaseVectorLayer extends Layer {
   /**
-   * @param {Options<VectorSourceType>} [options] Options.
+   * @param {Options<FeatureType, VectorSourceType>} [options] Options.
    */
   constructor(options) {
     options = options ? options : {};
@@ -17708,6 +17634,7 @@ class BaseVectorLayer extends Layer {
   }
   /**
    * @return {string} Declutter group.
+   * @override
    */
   getDeclutter() {
     return this.declutter_;
@@ -17725,6 +17652,7 @@ class BaseVectorLayer extends Layer {
    * @param {import("../pixel.js").Pixel} pixel Pixel.
    * @return {Promise<Array<import("../Feature").FeatureLike>>} Promise that resolves with an array of features.
    * @api
+   * @override
    */
   getFeatures(pixel) {
     return super.getFeatures(pixel);
@@ -17780,6 +17708,7 @@ class BaseVectorLayer extends Layer {
    * Render declutter items for this layer
    * @param {import("../Map.js").FrameState} frameState Frame state.
    * @param {import("../layer/Layer.js").State} layerState Layer state.
+   * @override
    */
   renderDeclutter(frameState, layerState) {
     const declutterGroup = this.getDeclutter();
@@ -18078,6 +18007,7 @@ class CompositeMapRenderer extends MapRenderer {
   /**
    * @param {import("../render/EventType.js").default} type Event type.
    * @param {import("../Map.js").FrameState} frameState Frame state.
+   * @override
    */
   dispatchRenderEvent(type, frameState) {
     const map2 = this.getMap();
@@ -18086,14 +18016,18 @@ class CompositeMapRenderer extends MapRenderer {
       map2.dispatchEvent(event);
     }
   }
+  /**
+   * @override
+   */
   disposeInternal() {
     unlistenByKey(this.fontChangeListenerKey_);
-    this.element_.parentNode.removeChild(this.element_);
+    this.element_.remove();
     super.disposeInternal();
   }
   /**
    * Render.
    * @param {?import("../Map.js").FrameState} frameState Frame state.
+   * @override
    */
   renderFrame(frameState) {
     if (!frameState) {
@@ -18105,9 +18039,9 @@ class CompositeMapRenderer extends MapRenderer {
     }
     this.calculateMatrices2D(frameState);
     this.dispatchRenderEvent(RenderEventType.PRECOMPOSE, frameState);
-    const layerStatesArray = frameState.layerStatesArray.sort(function(a2, b2) {
-      return a2.zIndex - b2.zIndex;
-    });
+    const layerStatesArray = frameState.layerStatesArray.sort(
+      (a2, b2) => a2.zIndex - b2.zIndex
+    );
     const declutter = layerStatesArray.some(
       (layerState) => layerState.layer instanceof BaseVectorLayer && layerState.layer.getDeclutter()
     );
@@ -18337,6 +18271,7 @@ class LayerGroup extends BaseLayer {
   /**
    * @param {Array<import("./Layer.js").default>} [array] Array of layers (to be modified in place).
    * @return {Array<import("./Layer.js").default>} Array of layers.
+   * @override
    */
   getLayersArray(array) {
     array = array !== void 0 ? array : [];
@@ -18353,6 +18288,7 @@ class LayerGroup extends BaseLayer {
    * @param {Array<import("./Layer.js").State>} [dest] Optional list
    * of layer states (to be modified in place).
    * @return {Array<import("./Layer.js").State>} List of layer states.
+   * @override
    */
   getLayerStatesArray(dest) {
     const states = dest !== void 0 ? dest : [];
@@ -18397,6 +18333,7 @@ class LayerGroup extends BaseLayer {
   }
   /**
    * @return {import("../source/Source.js").State} Source state.
+   * @override
    */
   getSourceState() {
     return "ready";
@@ -18464,6 +18401,7 @@ class MapBrowserEvent extends MapEvent {
    * Prevents the default browser action.
    * See https://developer.mozilla.org/en-US/docs/Web/API/event.preventDefault.
    * @api
+   * @override
    */
   preventDefault() {
     super.preventDefault();
@@ -18475,6 +18413,7 @@ class MapBrowserEvent extends MapEvent {
    * Prevents further propagation of the current event.
    * See https://developer.mozilla.org/en-US/docs/Web/API/event.stopPropagation.
    * @api
+   * @override
    */
   stopPropagation() {
     super.stopPropagation();
@@ -18790,6 +18729,7 @@ class MapBrowserEventHandler extends Target {
   }
   /**
    * Clean up.
+   * @override
    */
   disposeInternal() {
     if (this.relayedListenerKey_) {
@@ -19089,6 +19029,7 @@ class TileQueue extends PriorityQueue {
   /**
    * @param {Array} element Element.
    * @return {boolean} The element was added to the queue.
+   * @override
    */
   enqueue(element) {
     const added = super.enqueue(element);
@@ -19132,12 +19073,10 @@ class TileQueue extends PriorityQueue {
    */
   loadMoreTiles(maxTotalLoading, maxNewLoads) {
     let newLoads = 0;
-    let state, tile, tileKey;
     while (this.tilesLoading_ < maxTotalLoading && newLoads < maxNewLoads && this.getCount() > 0) {
-      tile = /** @type {import("./Tile.js").default} */
-      this.dequeue()[0];
-      tileKey = tile.getKey();
-      state = tile.getState();
+      const tile = this.dequeue()[0];
+      const tileKey = tile.getKey();
+      const state = tile.getState();
       if (state === TileState.IDLE && !(tileKey in this.tilesLoadingKeys_)) {
         this.tilesLoadingKeys_[tileKey] = true;
         ++this.tilesLoading_;
@@ -19182,9 +19121,11 @@ class Control extends BaseObject {
   }
   /**
    * Clean up.
+   * @override
    */
   disposeInternal() {
-    removeNode(this.element);
+    var _a;
+    (_a = this.element) == null ? void 0 : _a.remove();
     super.disposeInternal();
   }
   /**
@@ -19204,8 +19145,9 @@ class Control extends BaseObject {
    * @api
    */
   setMap(map2) {
+    var _a;
     if (this.map_) {
-      removeNode(this.element);
+      (_a = this.element) == null ? void 0 : _a.remove();
     }
     for (let i = 0, ii = this.listenerKeys.length; i < ii; ++i) {
       unlistenByKey(this.listenerKeys[i]);
@@ -19213,7 +19155,7 @@ class Control extends BaseObject {
     this.listenerKeys.length = 0;
     this.map_ = map2;
     if (map2) {
-      const target = this.target_ ? this.target_ : map2.getOverlayContainerStopEvent();
+      const target = this.target_ ?? map2.getOverlayContainerStopEvent();
       target.appendChild(this.element);
       if (this.render !== VOID) {
         this.listenerKeys.push(
@@ -19312,15 +19254,17 @@ class Attribution extends Control {
    * @private
    */
   collectSourceAttributions_(frameState) {
+    const layers = this.getMap().getAllLayers();
     const visibleAttributions = Array.from(
-      new Set(
-        this.getMap().getAllLayers().flatMap((layer) => layer.getAttributions(frameState))
-      )
-    );
-    const collapsible = !this.getMap().getAllLayers().some(
-      (layer) => layer.getSource() && layer.getSource().getAttributionsCollapsible() === false
+      new Set(layers.flatMap((layer) => layer.getAttributions(frameState)))
     );
     if (!this.overrideCollapsible_) {
+      const collapsible = !layers.some(
+        (layer) => {
+          var _a;
+          return ((_a = layer.getSource()) == null ? void 0 : _a.getAttributionsCollapsible()) === false;
+        }
+      );
       this.setCollapsible(collapsible);
     }
     return visibleAttributions;
@@ -19753,6 +19697,7 @@ class DoubleClickZoom extends Interaction {
    * doubleclick) and eventually zooms the map.
    * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Map browser event.
    * @return {boolean} `false` to stop event propagation.
+   * @override
    */
   handleEvent(mapBrowserEvent) {
     let stopEvent = false;
@@ -19832,6 +19777,7 @@ class PointerInteraction extends Interaction {
    * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Map browser event.
    * @return {boolean} `false` to stop event propagation.
    * @api
+   * @override
    */
   handleEvent(mapBrowserEvent) {
     if (!mapBrowserEvent.originalEvent) {
@@ -20016,6 +19962,7 @@ class DragPan extends PointerInteraction {
   /**
    * Handle pointer drag events.
    * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @override
    */
   handleDragEvent(mapBrowserEvent) {
     const map2 = mapBrowserEvent.map;
@@ -20051,6 +19998,7 @@ class DragPan extends PointerInteraction {
    * Handle pointer up events.
    * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
    * @return {boolean} If the event was consumed.
+   * @override
    */
   handleUpEvent(mapBrowserEvent) {
     const map2 = mapBrowserEvent.map;
@@ -20087,6 +20035,7 @@ class DragPan extends PointerInteraction {
    * Handle pointer down events.
    * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
    * @return {boolean} If the event was consumed.
+   * @override
    */
   handleDownEvent(mapBrowserEvent) {
     if (this.targetPointers.length > 0 && this.condition_(mapBrowserEvent)) {
@@ -20121,6 +20070,7 @@ class DragRotate extends PointerInteraction {
   /**
    * Handle pointer drag events.
    * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @override
    */
   handleDragEvent(mapBrowserEvent) {
     if (!mouseOnly(mapBrowserEvent)) {
@@ -20144,6 +20094,7 @@ class DragRotate extends PointerInteraction {
    * Handle pointer up events.
    * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
    * @return {boolean} If the event was consumed.
+   * @override
    */
   handleUpEvent(mapBrowserEvent) {
     if (!mouseOnly(mapBrowserEvent)) {
@@ -20158,6 +20109,7 @@ class DragRotate extends PointerInteraction {
    * Handle pointer down events.
    * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
    * @return {boolean} If the event was consumed.
+   * @override
    */
   handleDownEvent(mapBrowserEvent) {
     if (!mouseOnly(mapBrowserEvent)) {
@@ -20189,6 +20141,7 @@ class RenderBox extends Disposable {
   }
   /**
    * Clean up.
+   * @override
    */
   disposeInternal() {
     this.setMap(null);
@@ -20348,6 +20301,7 @@ class DragBox extends PointerInteraction {
   /**
    * Handle pointer drag events.
    * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @override
    */
   handleDragEvent(mapBrowserEvent) {
     if (!this.startPixel_) {
@@ -20366,6 +20320,7 @@ class DragBox extends PointerInteraction {
    * Handle pointer up events.
    * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
    * @return {boolean} If the event was consumed.
+   * @override
    */
   handleUpEvent(mapBrowserEvent) {
     if (!this.startPixel_) {
@@ -20393,6 +20348,7 @@ class DragBox extends PointerInteraction {
    * Handle pointer down events.
    * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
    * @return {boolean} If the event was consumed.
+   * @override
    */
   handleDownEvent(mapBrowserEvent) {
     if (this.condition_(mapBrowserEvent)) {
@@ -20421,6 +20377,7 @@ class DragBox extends PointerInteraction {
    * @param {boolean} active Active.
    * @observable
    * @api
+   * @override
    */
   setActive(active) {
     if (!active) {
@@ -20453,6 +20410,7 @@ class DragZoom extends DragBox {
   /**
    * Function to execute just before `onboxend` is fired
    * @param {import("../MapBrowserEvent.js").default} event Event.
+   * @override
    */
   onBoxEnd(event) {
     const map2 = this.getMap();
@@ -20500,6 +20458,7 @@ class KeyboardPan extends Interaction {
    * pressed).
    * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Map browser event.
    * @return {boolean} `false` to stop event propagation.
+   * @override
    */
   handleEvent(mapBrowserEvent) {
     let stopEvent = false;
@@ -20552,6 +20511,7 @@ class KeyboardZoom extends Interaction {
    * key pressed was '+' or '-').
    * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Map browser event.
    * @return {boolean} `false` to stop event propagation.
+   * @override
    */
   handleEvent(mapBrowserEvent) {
     let stopEvent = false;
@@ -20690,6 +20650,7 @@ class MouseWheelZoom extends Interaction {
    * zooms the map.
    * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Map browser event.
    * @return {boolean} `false` to stop event propagation.
+   * @override
    */
   handleEvent(mapBrowserEvent) {
     if (!this.condition_(mapBrowserEvent)) {
@@ -20817,6 +20778,7 @@ class PinchRotate extends PointerInteraction {
   /**
    * Handle pointer drag events.
    * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @override
    */
   handleDragEvent(mapBrowserEvent) {
     let rotationDelta = 0;
@@ -20852,6 +20814,7 @@ class PinchRotate extends PointerInteraction {
    * Handle pointer up events.
    * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
    * @return {boolean} If the event was consumed.
+   * @override
    */
   handleUpEvent(mapBrowserEvent) {
     if (this.targetPointers.length < 2) {
@@ -20866,6 +20829,7 @@ class PinchRotate extends PointerInteraction {
    * Handle pointer down events.
    * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
    * @return {boolean} If the event was consumed.
+   * @override
    */
   handleDownEvent(mapBrowserEvent) {
     if (this.targetPointers.length >= 2) {
@@ -20904,6 +20868,7 @@ class PinchZoom extends PointerInteraction {
   /**
    * Handle pointer drag events.
    * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @override
    */
   handleDragEvent(mapBrowserEvent) {
     let scaleDelta = 1;
@@ -20931,6 +20896,7 @@ class PinchZoom extends PointerInteraction {
    * Handle pointer up events.
    * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
    * @return {boolean} If the event was consumed.
+   * @override
    */
   handleUpEvent(mapBrowserEvent) {
     if (this.targetPointers.length < 2) {
@@ -20946,6 +20912,7 @@ class PinchZoom extends PointerInteraction {
    * Handle pointer down events.
    * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
    * @return {boolean} If the event was consumed.
+   * @override
    */
   handleDownEvent(mapBrowserEvent) {
     if (this.targetPointers.length >= 2) {
@@ -21060,7 +21027,7 @@ let Map$1 = class Map2 extends BaseObject {
     this.once;
     this.un;
     const optionsInternal = createOptionsInternal(options);
-    this.renderComplete_;
+    this.renderComplete_ = false;
     this.loaded_ = true;
     this.boundHandleBrowserEvent_ = this.handleBrowserEvent.bind(this);
     this.maxTilesLoading_ = options.maxTilesLoading !== void 0 ? options.maxTilesLoading : 16;
@@ -21267,6 +21234,7 @@ let Map$1 = class Map2 extends BaseObject {
   /**
    *
    * Clean up.
+   * @override
    */
   disposeInternal() {
     this.controls.clear();
@@ -21762,7 +21730,7 @@ let Map$1 = class Map2 extends BaseObject {
       }
     }
     if (frameState && this.renderer_ && !frameState.animate) {
-      if (this.renderComplete_ === true) {
+      if (this.renderComplete_) {
         if (this.hasListener(RenderEventType.RENDERCOMPLETE)) {
           this.renderer_.dispatchRenderEvent(
             RenderEventType.RENDERCOMPLETE,
@@ -21816,7 +21784,7 @@ let Map$1 = class Map2 extends BaseObject {
       );
       this.mapBrowserEventHandler_.dispose();
       this.mapBrowserEventHandler_ = null;
-      removeNode(this.viewport_);
+      this.viewport_.remove();
     }
     if (this.targetElement_) {
       this.resizeObserver_.unobserve(this.targetElement_);
@@ -22122,7 +22090,7 @@ let Map$1 = class Map2 extends BaseObject {
       }
     }
     this.dispatchEvent(new MapEvent(MapEventType.POSTRENDER, this, frameState));
-    this.renderComplete_ = this.hasListener(MapEventType.LOADSTART) || this.hasListener(MapEventType.LOADEND) || this.hasListener(RenderEventType.RENDERCOMPLETE) ? !this.tileQueue_.getTilesLoading() && !this.tileQueue_.getCount() && !this.getLoadingOrNotReady() : void 0;
+    this.renderComplete_ = (this.hasListener(MapEventType.LOADSTART) || this.hasListener(MapEventType.LOADEND) || this.hasListener(RenderEventType.RENDERCOMPLETE)) && !this.tileQueue_.getTilesLoading() && !this.tileQueue_.getCount() && !this.getLoadingOrNotReady();
     if (!this.postRenderTimeoutHandle_) {
       this.postRenderTimeoutHandle_ = setTimeout(() => {
         this.postRenderTimeoutHandle_ = void 0;
@@ -22195,7 +22163,7 @@ let Map$1 = class Map2 extends BaseObject {
       const width = targetElement.offsetWidth - parseFloat(computedStyle["borderLeftWidth"]) - parseFloat(computedStyle["paddingLeft"]) - parseFloat(computedStyle["paddingRight"]) - parseFloat(computedStyle["borderRightWidth"]);
       const height = targetElement.offsetHeight - parseFloat(computedStyle["borderTopWidth"]) - parseFloat(computedStyle["paddingTop"]) - parseFloat(computedStyle["paddingBottom"]) - parseFloat(computedStyle["borderBottomWidth"]);
       if (!isNaN(width) && !isNaN(height)) {
-        size = [width, height];
+        size = [Math.max(0, width), Math.max(0, height)];
         if (!hasArea(size) && !!(targetElement.offsetWidth || targetElement.offsetHeight || targetElement.getClientRects().length)) {
           warn(
             "No map visible because the map container's width or height are 0."
@@ -22300,7 +22268,6 @@ class Tile extends Target {
     options = options ? options : {};
     this.tileCoord = tileCoord;
     this.state = state;
-    this.interimTile = null;
     this.key = "";
     this.transition_ = options.transition === void 0 ? 250 : options.transition;
     this.transitionStarts_ = {};
@@ -22325,51 +22292,6 @@ class Tile extends Target {
    */
   getKey() {
     return this.key + "/" + this.tileCoord;
-  }
-  /**
-   * Get the interim tile most suitable for rendering using the chain of interim
-   * tiles. This corresponds to the  most recent tile that has been loaded, if no
-   * such tile exists, the original tile is returned.
-   * @return {!Tile} Best tile for rendering.
-   */
-  getInterimTile() {
-    let tile = this.interimTile;
-    if (!tile) {
-      return this;
-    }
-    do {
-      if (tile.getState() == TileState.LOADED) {
-        this.transition_ = 0;
-        return tile;
-      }
-      tile = tile.interimTile;
-    } while (tile);
-    return this;
-  }
-  /**
-   * Goes through the chain of interim tiles and discards sections of the chain
-   * that are no longer relevant.
-   */
-  refreshInterimChain() {
-    let tile = this.interimTile;
-    if (!tile) {
-      return;
-    }
-    let prev = this;
-    do {
-      if (tile.getState() == TileState.LOADED) {
-        tile.interimTile = null;
-        break;
-      }
-      if (tile.getState() == TileState.LOADING) {
-        prev = tile;
-      } else if (tile.getState() == TileState.IDLE) {
-        prev.interimTile = tile.interimTile;
-      } else {
-        prev = tile;
-      }
-      tile = prev.interimTile;
-    } while (tile);
   }
   /**
    * Get the tile coordinate for this tile.
@@ -22558,8 +22480,8 @@ class ImageTile extends Tile {
    *     .catch(() => tile.setState(3)); // error
    * });
    * ```
-   *
    * @api
+   * @override
    */
   load() {
     if (this.state == TileState.ERROR) {
@@ -22991,7 +22913,7 @@ function render(width, height, pixelRatio, sourceResolution, sourceExtent, targe
   let stitchContext;
   const stitchScale = pixelRatio / sourceResolution;
   const inverseScale = (interpolate ? 1 : 1 + Math.pow(2, -24)) / stitchScale;
-  {
+  if (!drawSingle || sources.length !== 1 || gutter !== 0) {
     stitchContext = createCanvasContext2D(
       Math.round(getWidth(sourceDataExtent) * stitchScale),
       Math.round(getHeight(sourceDataExtent) * stitchScale),
@@ -23358,6 +23280,7 @@ class ReprojTile extends Tile {
   }
   /**
    * Load not yet loaded URI.
+   * @override
    */
   load() {
     if (this.state == TileState.IDLE) {
@@ -23369,22 +23292,17 @@ class ReprojTile extends Tile {
         const state = tile.getState();
         if (state == TileState.IDLE || state == TileState.LOADING) {
           leftToLoad++;
-          const sourceListenKey = listen(
-            tile,
-            EventType.CHANGE,
-            function(e) {
-              const state2 = tile.getState();
-              if (state2 == TileState.LOADED || state2 == TileState.ERROR || state2 == TileState.EMPTY) {
-                unlistenByKey(sourceListenKey);
-                leftToLoad--;
-                if (leftToLoad === 0) {
-                  this.unlistenSources_();
-                  this.reproject_();
-                }
+          const sourceListenKey = listen(tile, EventType.CHANGE, (e) => {
+            const state2 = tile.getState();
+            if (state2 == TileState.LOADED || state2 == TileState.ERROR || state2 == TileState.EMPTY) {
+              unlistenByKey(sourceListenKey);
+              leftToLoad--;
+              if (leftToLoad === 0) {
+                this.unlistenSources_();
+                this.reproject_();
               }
-            },
-            this
-          );
+            }
+          });
           this.sourcesListenerKeys_.push(sourceListenKey);
         }
       });
@@ -23409,6 +23327,7 @@ class ReprojTile extends Tile {
   }
   /**
    * Remove from the cache due to expiry
+   * @override
    */
   release() {
     if (this.canvas_) {
@@ -23668,7 +23587,10 @@ function fromKey(key) {
   return key.split("/").map(Number);
 }
 function hash(tileCoord) {
-  return (tileCoord[1] << tileCoord[0]) + tileCoord[2];
+  return hashZXY(tileCoord[0], tileCoord[1], tileCoord[2]);
+}
+function hashZXY(z2, x2, y2) {
+  return (x2 << z2) + y2;
 }
 function withinExtentAndZ(tileCoord, tileGrid) {
   const z2 = tileCoord[0];
@@ -23684,6 +23606,9 @@ function withinExtentAndZ(tileCoord, tileGrid) {
   return tileRange.containsXY(x2, y2);
 }
 class TileCache extends LRUCache {
+  /**
+   * @override
+   */
   clear() {
     while (this.getCount() > 0) {
       this.pop().release();
@@ -23692,6 +23617,7 @@ class TileCache extends LRUCache {
   }
   /**
    * @param {!Object<string, boolean>} usedTiles Used tiles.
+   * @override
    */
   expireCache(usedTiles) {
     while (this.canExpireCache()) {
@@ -23752,7 +23678,7 @@ class Source extends BaseObject {
     super();
     this.projection = get$1(options.projection);
     this.attributions_ = adaptAttributions(options.attributions);
-    this.attributionsCollapsible_ = options.attributionsCollapsible !== void 0 ? options.attributionsCollapsible : true;
+    this.attributionsCollapsible_ = options.attributionsCollapsible ?? true;
     this.loading = false;
     this.state_ = options.state !== void 0 ? options.state : "ready";
     this.wrapX_ = options.wrapX !== void 0 ? options.wrapX : false;
@@ -23852,17 +23778,13 @@ function adaptAttributions(attributionLike) {
   if (!attributionLike) {
     return null;
   }
-  if (Array.isArray(attributionLike)) {
-    return function(frameState) {
-      return attributionLike;
-    };
-  }
   if (typeof attributionLike === "function") {
     return attributionLike;
   }
-  return function(frameState) {
-    return [attributionLike];
-  };
+  if (!Array.isArray(attributionLike)) {
+    attributionLike = [attributionLike];
+  }
+  return (frameState) => attributionLike;
 }
 class TileRange {
   /**
@@ -24539,7 +24461,6 @@ class TileSource extends Source {
     this.on;
     this.once;
     this.un;
-    this.opaque_ = options.opaque !== void 0 ? options.opaque : false;
     this.tilePixelRatio_ = options.tilePixelRatio !== void 0 ? options.tilePixelRatio : 1;
     this.tileGrid = options.tileGrid !== void 0 ? options.tileGrid : null;
     const tileSize = [256, 256];
@@ -24573,41 +24494,6 @@ class TileSource extends Source {
   }
   /**
    * @param {import("../proj/Projection.js").default} projection Projection.
-   * @param {number} z Zoom level.
-   * @param {import("../TileRange.js").default} tileRange Tile range.
-   * @param {function(import("../Tile.js").default):(boolean|void)} callback Called with each
-   *     loaded tile.  If the callback returns `false`, the tile will not be
-   *     considered loaded.
-   * @return {boolean} The tile range is fully covered with loaded tiles.
-   */
-  forEachLoadedTile(projection, z2, tileRange, callback) {
-    const tileCache = this.getTileCacheForProjection(projection);
-    if (!tileCache) {
-      return false;
-    }
-    let covered = true;
-    let tile, tileCoordKey, loaded;
-    for (let x2 = tileRange.minX; x2 <= tileRange.maxX; ++x2) {
-      for (let y2 = tileRange.minY; y2 <= tileRange.maxY; ++y2) {
-        tileCoordKey = getKeyZXY(z2, x2, y2);
-        loaded = false;
-        if (tileCache.containsKey(tileCoordKey)) {
-          tile = /** @type {!import("../Tile.js").default} */
-          tileCache.get(tileCoordKey);
-          loaded = tile.getState() === TileState.LOADED;
-          if (loaded) {
-            loaded = callback(tile) !== false;
-          }
-        }
-        if (!loaded) {
-          covered = false;
-        }
-      }
-    }
-    return covered;
-  }
-  /**
-   * @param {import("../proj/Projection.js").default} projection Projection.
    * @return {number} Gutter.
    */
   getGutterForProjection(projection) {
@@ -24632,15 +24518,9 @@ class TileSource extends Source {
     }
   }
   /**
-   * @param {import("../proj/Projection.js").default} projection Projection.
-   * @return {boolean} Opaque.
-   */
-  getOpaque(projection) {
-    return this.opaque_;
-  }
-  /**
    * @param {import("../proj/Projection").default} [projection] Projection.
    * @return {Array<number>|null} Resolutions.
+   * @override
    */
   getResolutions(projection) {
     const tileGrid = projection ? this.getTileGridForProjection(projection) : this.tileGrid;
@@ -24656,7 +24536,7 @@ class TileSource extends Source {
    * @param {number} y Tile coordinate y.
    * @param {number} pixelRatio Pixel ratio.
    * @param {import("../proj/Projection.js").default} projection Projection.
-   * @return {!import("../Tile.js").default} Tile.
+   * @return {TileType|null} Tile.
    */
   getTile(z2, x2, y2, pixelRatio, projection) {
     return abstract();
@@ -24741,20 +24621,12 @@ class TileSource extends Source {
   clear() {
     this.tileCache.clear();
   }
+  /**
+   * @override
+   */
   refresh() {
     this.clear();
     super.refresh();
-  }
-  /**
-   * Increases the cache size if needed
-   * @param {number} tileCount Minimum number of tiles needed.
-   * @param {import("../proj/Projection.js").default} projection Projection.
-   */
-  updateCacheSize(tileCount, projection) {
-    const tileCache = this.getTileCacheForProjection(projection);
-    if (tileCount > tileCache.highWaterMark) {
-      tileCache.highWaterMark = tileCount;
-    }
   }
   /**
    * Marks a tile coord as being used, without triggering a load.
@@ -24777,11 +24649,44 @@ class TileSourceEvent extends BaseEvent {
     this.tile = tile;
   }
 }
+const zRegEx = /\{z\}/g;
+const xRegEx = /\{x\}/g;
+const yRegEx = /\{y\}/g;
+const dashYRegEx = /\{-y\}/g;
+function renderXYZTemplate(template, z2, x2, y2, maxY) {
+  return template.replace(zRegEx, z2.toString()).replace(xRegEx, x2.toString()).replace(yRegEx, y2.toString()).replace(dashYRegEx, function() {
+    if (maxY === void 0) {
+      throw new Error(
+        "If the URL template has a {-y} placeholder, the grid extent must be known"
+      );
+    }
+    return (maxY - y2).toString();
+  });
+}
+function expandUrl(url) {
+  const urls = [];
+  let match = /\{([a-z])-([a-z])\}/.exec(url);
+  if (match) {
+    const startCharCode = match[1].charCodeAt(0);
+    const stopCharCode = match[2].charCodeAt(0);
+    let charCode;
+    for (charCode = startCharCode; charCode <= stopCharCode; ++charCode) {
+      urls.push(url.replace(match[0], String.fromCharCode(charCode)));
+    }
+    return urls;
+  }
+  match = /\{(\d+)-(\d+)\}/.exec(url);
+  if (match) {
+    const stop = parseInt(match[2], 10);
+    for (let i = parseInt(match[1], 10); i <= stop; i++) {
+      urls.push(url.replace(match[0], i.toString()));
+    }
+    return urls;
+  }
+  urls.push(url);
+  return urls;
+}
 function createFromTemplate(template, tileGrid) {
-  const zRegEx = /\{z\}/g;
-  const xRegEx = /\{x\}/g;
-  const yRegEx = /\{y\}/g;
-  const dashYRegEx = /\{-y\}/g;
   return (
     /**
      * @param {import("./tilecoord.js").TileCoord} tileCoord Tile Coordinate.
@@ -24793,17 +24698,15 @@ function createFromTemplate(template, tileGrid) {
       if (!tileCoord) {
         return void 0;
       }
-      return template.replace(zRegEx, tileCoord[0].toString()).replace(xRegEx, tileCoord[1].toString()).replace(yRegEx, tileCoord[2].toString()).replace(dashYRegEx, function() {
-        const z2 = tileCoord[0];
+      let maxY;
+      const z2 = tileCoord[0];
+      if (tileGrid) {
         const range = tileGrid.getFullTileRange(z2);
-        if (!range) {
-          throw new Error(
-            "The {-y} placeholder requires a tile grid with extent"
-          );
+        if (range) {
+          maxY = range.getHeight() - 1;
         }
-        const y2 = range.getHeight() - tileCoord[2] - 1;
-        return y2.toString();
-      });
+      }
+      return renderXYZTemplate(template, z2, tileCoord[1], tileCoord[2], maxY);
     }
   );
 }
@@ -24836,29 +24739,6 @@ function createFromTileUrlFunctions(tileUrlFunctions) {
     }
   );
 }
-function expandUrl(url) {
-  const urls = [];
-  let match = /\{([a-z])-([a-z])\}/.exec(url);
-  if (match) {
-    const startCharCode = match[1].charCodeAt(0);
-    const stopCharCode = match[2].charCodeAt(0);
-    let charCode;
-    for (charCode = startCharCode; charCode <= stopCharCode; ++charCode) {
-      urls.push(url.replace(match[0], String.fromCharCode(charCode)));
-    }
-    return urls;
-  }
-  match = /\{(\d+)-(\d+)\}/.exec(url);
-  if (match) {
-    const stop = parseInt(match[2], 10);
-    for (let i = parseInt(match[1], 10); i <= stop; i++) {
-      urls.push(url.replace(match[0], i.toString()));
-    }
-    return urls;
-  }
-  urls.push(url);
-  return urls;
-}
 class UrlTile extends TileSource {
   /**
    * @param {Options} options Image tile options.
@@ -24867,7 +24747,6 @@ class UrlTile extends TileSource {
     super({
       attributions: options.attributions,
       cacheSize: options.cacheSize,
-      opaque: options.opaque,
       projection: options.projection,
       state: options.state,
       tileGrid: options.tileGrid,
@@ -24893,6 +24772,7 @@ class UrlTile extends TileSource {
     this.tileLoadingKeys_ = {};
   }
   /**
+   * Deprecated.  Use an ImageTile source instead.
    * Return the tile load function of the source.
    * @return {import("../Tile.js").LoadFunction} TileLoadFunction
    * @api
@@ -24901,6 +24781,7 @@ class UrlTile extends TileSource {
     return this.tileLoadFunction;
   }
   /**
+   * Deprecated.  Use an ImageTile source instead.
    * Return the tile URL function of the source.
    * @return {import("../Tile.js").UrlFunction} TileUrlFunction
    * @api
@@ -24909,6 +24790,7 @@ class UrlTile extends TileSource {
     return Object.getPrototypeOf(this).tileUrlFunction === this.tileUrlFunction ? this.tileUrlFunction.bind(this) : this.tileUrlFunction;
   }
   /**
+   * Deprecated.  Use an ImageTile source instead.
    * Return the URLs used for this source.
    * When a tileUrlFunction is used instead of url or urls,
    * null will be returned.
@@ -24943,6 +24825,7 @@ class UrlTile extends TileSource {
     }
   }
   /**
+   * Deprecated.  Use an ImageTile source instead.
    * Set the tile load function of the source.
    * @param {import("../Tile.js").LoadFunction} tileLoadFunction Tile load function.
    * @api
@@ -24953,6 +24836,7 @@ class UrlTile extends TileSource {
     this.changed();
   }
   /**
+   * Deprecated.  Use an ImageTile source instead.
    * Set the tile URL function of the source.
    * @param {import("../Tile.js").UrlFunction} tileUrlFunction Tile URL function.
    * @param {string} [key] Optional new tile key for the source.
@@ -24978,6 +24862,7 @@ class UrlTile extends TileSource {
     this.setUrls(urls);
   }
   /**
+   * Deprecated.  Use an ImageTile source instead.
    * Set the URLs to use for requests.
    * @param {Array<string>} urls URLs.
    * @api
@@ -25005,6 +24890,7 @@ class UrlTile extends TileSource {
    * @param {number} z Tile coordinate z.
    * @param {number} x Tile coordinate x.
    * @param {number} y Tile coordinate y.
+   * @override
    */
   useTile(z2, x2, y2) {
     const tileCoordKey = getKeyZXY(z2, x2, y2);
@@ -25021,7 +24907,6 @@ class TileImage extends UrlTile {
     super({
       attributions: options.attributions,
       cacheSize: options.cacheSize,
-      opaque: options.opaque,
       projection: options.projection,
       state: options.state,
       tileGrid: options.tileGrid,
@@ -25046,6 +24931,7 @@ class TileImage extends UrlTile {
   }
   /**
    * @return {boolean} Can expire cache.
+   * @override
    */
   canExpireCache() {
     if (this.tileCache.canExpireCache()) {
@@ -25061,6 +24947,7 @@ class TileImage extends UrlTile {
   /**
    * @param {import("../proj/Projection.js").default} projection Projection.
    * @param {!Object<string, boolean>} usedTiles Used tiles.
+   * @override
    */
   expireCache(projection, usedTiles) {
     const usedTileCache = this.getTileCacheForProjection(projection);
@@ -25075,6 +24962,7 @@ class TileImage extends UrlTile {
   /**
    * @param {import("../proj/Projection.js").default} projection Projection.
    * @return {number} Gutter.
+   * @override
    */
   getGutterForProjection(projection) {
     if (this.getProjection() && projection && !equivalent(this.getProjection(), projection)) {
@@ -25091,6 +24979,7 @@ class TileImage extends UrlTile {
   /**
    * Return the key to be used for all tiles in the source.
    * @return {string} The key for all tiles.
+   * @override
    */
   getKey() {
     let key = super.getKey();
@@ -25101,17 +24990,8 @@ class TileImage extends UrlTile {
   }
   /**
    * @param {import("../proj/Projection.js").default} projection Projection.
-   * @return {boolean} Opaque.
-   */
-  getOpaque(projection) {
-    if (this.getProjection() && projection && !equivalent(this.getProjection(), projection)) {
-      return false;
-    }
-    return super.getOpaque(projection);
-  }
-  /**
-   * @param {import("../proj/Projection.js").default} projection Projection.
    * @return {!import("../tilegrid/TileGrid.js").default} Tile grid.
+   * @override
    */
   getTileGridForProjection(projection) {
     const thisProj = this.getProjection();
@@ -25127,6 +25007,7 @@ class TileImage extends UrlTile {
   /**
    * @param {import("../proj/Projection.js").default} projection Projection.
    * @return {import("../TileCache.js").default} Tile cache.
+   * @override
    */
   getTileCacheForProjection(projection) {
     const thisProj = this.getProjection();
@@ -25177,6 +25058,7 @@ class TileImage extends UrlTile {
    * @param {number} pixelRatio Pixel ratio.
    * @param {import("../proj/Projection.js").default} projection Projection.
    * @return {!(ImageTile|ReprojTile)} Tile.
+   * @override
    */
   getTile(z2, x2, y2, pixelRatio, projection) {
     const sourceProjection = this.getProjection();
@@ -25222,8 +25104,6 @@ class TileImage extends UrlTile {
     );
     newTile.key = key;
     if (tile) {
-      newTile.interimTile = tile;
-      newTile.refreshInterimChain();
       cache2.replace(tileCoordKey, newTile);
     } else {
       cache2.set(tileCoordKey, newTile);
@@ -25240,25 +25120,17 @@ class TileImage extends UrlTile {
    * @protected
    */
   getTileInternal(z2, x2, y2, pixelRatio, projection) {
-    let tile = null;
     const tileCoordKey = getKeyZXY(z2, x2, y2);
     const key = this.getKey();
     if (!this.tileCache.containsKey(tileCoordKey)) {
+      const tile2 = this.createTile_(z2, x2, y2, pixelRatio, projection, key);
+      this.tileCache.set(tileCoordKey, tile2);
+      return tile2;
+    }
+    let tile = this.tileCache.get(tileCoordKey);
+    if (tile.key != key) {
       tile = this.createTile_(z2, x2, y2, pixelRatio, projection, key);
-      this.tileCache.set(tileCoordKey, tile);
-    } else {
-      tile = this.tileCache.get(tileCoordKey);
-      if (tile.key != key) {
-        const interimTile = tile;
-        tile = this.createTile_(z2, x2, y2, pixelRatio, projection, key);
-        if (interimTile.getState() == TileState.IDLE) {
-          tile.interimTile = interimTile.interimTile;
-        } else {
-          tile.interimTile = interimTile;
-        }
-        tile.refreshInterimChain();
-        this.tileCache.replace(tileCoordKey, tile);
-      }
+      this.tileCache.replace(tileCoordKey, tile);
     }
     return tile;
   }
@@ -25298,6 +25170,9 @@ class TileImage extends UrlTile {
       }
     }
   }
+  /**
+   * @override
+   */
   clear() {
     super.clear();
     for (const id in this.tileCacheForProjection) {
@@ -25327,7 +25202,6 @@ class XYZ extends TileImage {
       cacheSize: options.cacheSize,
       crossOrigin: options.crossOrigin,
       interpolate: options.interpolate,
-      opaque: options.opaque,
       projection,
       reprojectionErrorThreshold: options.reprojectionErrorThreshold,
       tileGrid,
@@ -25345,6 +25219,7 @@ class XYZ extends TileImage {
   }
   /**
    * @return {number} Gutter.
+   * @override
    */
   getGutter() {
     return this.gutter_;
@@ -25372,7 +25247,6 @@ class OSM extends XYZ {
       crossOrigin,
       interpolate: options.interpolate,
       maxZoom: options.maxZoom !== void 0 ? options.maxZoom : 19,
-      opaque: options.opaque !== void 0 ? options.opaque : true,
       reprojectionErrorThreshold: options.reprojectionErrorThreshold,
       tileLoadFunction: options.tileLoadFunction,
       transition: options.transition,
@@ -25393,16 +25267,26 @@ class BaseTileLayer extends Layer {
   constructor(options) {
     options = options ? options : {};
     const baseOptions = Object.assign({}, options);
+    const cacheSize2 = options.cacheSize;
+    delete options.cacheSize;
     delete baseOptions.preload;
     delete baseOptions.useInterimTilesOnError;
     super(baseOptions);
     this.on;
     this.once;
     this.un;
+    this.cacheSize_ = cacheSize2;
     this.setPreload(options.preload !== void 0 ? options.preload : 0);
     this.setUseInterimTilesOnError(
       options.useInterimTilesOnError !== void 0 ? options.useInterimTilesOnError : true
     );
+  }
+  /**
+   * @return {number|undefined} The suggested cache size
+   * @protected
+   */
+  getCacheSize() {
+    return this.cacheSize_;
   }
   /**
    * Return the level as number to which we will preload tiles up to.
@@ -25426,7 +25310,7 @@ class BaseTileLayer extends Layer {
     this.set(TileProperty.PRELOAD, preload);
   }
   /**
-   * Whether we use interim tiles on error.
+   * Deprecated.  Whether we use interim tiles on error.
    * @return {boolean} Use interim tiles on error.
    * @observable
    * @api
@@ -25438,7 +25322,7 @@ class BaseTileLayer extends Layer {
     );
   }
   /**
-   * Set whether we use interim tiles on error.
+   * Deprecated.  Set whether we use interim tiles on error.
    * @param {boolean} useInterimTilesOnError Use interim tiles on error.
    * @observable
    * @api
@@ -25461,11 +25345,13 @@ class BaseTileLayer extends Layer {
    * @param {import("../pixel").Pixel} pixel Pixel.
    * @return {Uint8ClampedArray|Uint8Array|Float32Array|DataView|null} Pixel data.
    * @api
+   * @override
    */
   getData(pixel) {
     return super.getData(pixel);
   }
 }
+const maxStaleKeys = 5;
 class LayerRenderer extends Observable {
   /**
    * @param {LayerType} layer Layer.
@@ -25475,6 +25361,23 @@ class LayerRenderer extends Observable {
     this.ready = true;
     this.boundHandleImageChange_ = this.handleImageChange_.bind(this);
     this.layer_ = layer;
+    this.staleKeys_ = new Array();
+    this.maxStaleKeys = maxStaleKeys;
+  }
+  /**
+   * @return {Array<string>} Get the list of stale keys.
+   */
+  getStaleKeys() {
+    return this.staleKeys_;
+  }
+  /**
+   * @param {string} key The new stale key.
+   */
+  prependStaleKey(key) {
+    this.staleKeys_.unshift(key);
+    if (this.staleKeys_.length > this.maxStaleKeys) {
+      this.staleKeys_.length = this.maxStaleKeys;
+    }
   }
   /**
    * Asynchronous layer level hit detection.
@@ -25510,41 +25413,6 @@ class LayerRenderer extends Observable {
    */
   renderFrame(frameState, target) {
     return abstract();
-  }
-  /**
-   * @param {Object<number, Object<string, import("../Tile.js").default>>} tiles Lookup of loaded tiles by zoom level.
-   * @param {number} zoom Zoom level.
-   * @param {import("../Tile.js").default} tile Tile.
-   * @return {boolean|void} If `false`, the tile will not be considered loaded.
-   */
-  loadedTileCallback(tiles, zoom, tile) {
-    if (!tiles[zoom]) {
-      tiles[zoom] = {};
-    }
-    tiles[zoom][tile.tileCoord.toString()] = tile;
-    return void 0;
-  }
-  /**
-   * Create a function that adds loaded tiles to the tile lookup.
-   * @param {import("../source/Tile.js").default} source Tile source.
-   * @param {import("../proj/Projection.js").default} projection Projection of the tiles.
-   * @param {Object<number, Object<string, import("../Tile.js").default>>} tiles Lookup of loaded tiles by zoom level.
-   * @return {function(number, import("../TileRange.js").default):boolean} A function that can be
-   *     called with a zoom level and a tile range to add loaded tiles to the lookup.
-   * @protected
-   */
-  createLoadedTileFinder(source2, projection, tiles) {
-    return (
-      /**
-       * @param {number} zoom Zoom level.
-       * @param {import("../TileRange.js").default} tileRange Tile range.
-       * @return {boolean} The tile range is fully loaded.
-       */
-      (zoom, tileRange) => {
-        const callback = this.loadedTileCallback.bind(this, tiles, zoom);
-        return source2.forEachLoadedTile(projection, zoom, tileRange, callback);
-      }
-    );
   }
   /**
    * @abstract
@@ -25619,6 +25487,7 @@ class LayerRenderer extends Observable {
   }
   /**
    * Clean up.
+   * @override
    */
   disposeInternal() {
     delete this.layer_;
@@ -25738,7 +25607,6 @@ class CanvasLayerRenderer extends LayerRenderer {
     this.context = null;
     this.deferredContext_ = null;
     this.containerReused = false;
-    this.pixelContext_ = null;
     this.frameState = null;
   }
   /**
@@ -26002,65 +25870,617 @@ class CanvasLayerRenderer extends LayerRenderer {
   }
   /**
    * Clean up.
+   * @override
    */
   disposeInternal() {
     delete this.frameState;
     super.disposeInternal();
   }
 }
+function asImageLike(data) {
+  return data instanceof Image || data instanceof HTMLCanvasElement || data instanceof HTMLVideoElement || data instanceof ImageBitmap ? data : null;
+}
+function asArrayLike(data) {
+  return data instanceof Uint8Array || data instanceof Uint8ClampedArray || data instanceof Float32Array || data instanceof DataView ? data : null;
+}
+const disposedError = new Error("disposed");
+let sharedContext = null;
+function toArray(image) {
+  if (!sharedContext) {
+    sharedContext = createCanvasContext2D(
+      image.width,
+      image.height,
+      void 0,
+      { willReadFrequently: true }
+    );
+  }
+  const canvas = sharedContext.canvas;
+  const width = image.width;
+  if (canvas.width !== width) {
+    canvas.width = width;
+  }
+  const height = image.height;
+  if (canvas.height !== height) {
+    canvas.height = height;
+  }
+  sharedContext.clearRect(0, 0, width, height);
+  sharedContext.drawImage(image, 0, 0);
+  return sharedContext.getImageData(0, 0, width, height).data;
+}
+const defaultSize = [256, 256];
+class DataTile extends Tile {
+  /**
+   * @param {Options} options Tile options.
+   */
+  constructor(options) {
+    const state = TileState.IDLE;
+    super(options.tileCoord, state, {
+      transition: options.transition,
+      interpolate: options.interpolate
+    });
+    this.loader_ = options.loader;
+    this.data_ = null;
+    this.error_ = null;
+    this.size_ = options.size || null;
+    this.controller_ = options.controller || null;
+  }
+  /**
+   * Get the tile size.
+   * @return {import('./size.js').Size} Tile size.
+   */
+  getSize() {
+    if (this.size_) {
+      return this.size_;
+    }
+    const imageData = asImageLike(this.data_);
+    if (imageData) {
+      return [imageData.width, imageData.height];
+    }
+    return defaultSize;
+  }
+  /**
+   * Get the data for the tile.
+   * @return {Data} Tile data.
+   * @api
+   */
+  getData() {
+    return this.data_;
+  }
+  /**
+   * Get any loading error.
+   * @return {Error} Loading error.
+   * @api
+   */
+  getError() {
+    return this.error_;
+  }
+  /**
+   * Load the tile data.
+   * @api
+   * @override
+   */
+  load() {
+    if (this.state !== TileState.IDLE && this.state !== TileState.ERROR) {
+      return;
+    }
+    this.state = TileState.LOADING;
+    this.changed();
+    const self2 = this;
+    this.loader_().then(function(data) {
+      self2.data_ = data;
+      self2.state = TileState.LOADED;
+      self2.changed();
+    }).catch(function(error) {
+      self2.error_ = error;
+      self2.state = TileState.ERROR;
+      self2.changed();
+    });
+  }
+  /**
+   * Clean up.
+   * @override
+   */
+  disposeInternal() {
+    if (this.controller_) {
+      this.controller_.abort(disposedError);
+      this.controller_ = null;
+    }
+    super.disposeInternal();
+  }
+}
+class ReprojDataTile extends DataTile {
+  /**
+   * @param {Options} options Tile options.
+   */
+  constructor(options) {
+    super({
+      tileCoord: options.tileCoord,
+      loader: () => Promise.resolve(new Uint8ClampedArray(4)),
+      interpolate: options.interpolate,
+      transition: options.transition
+    });
+    this.pixelRatio_ = options.pixelRatio;
+    this.gutter_ = options.gutter;
+    this.reprojData_ = null;
+    this.reprojError_ = null;
+    this.reprojSize_ = void 0;
+    this.sourceTileGrid_ = options.sourceTileGrid;
+    this.targetTileGrid_ = options.targetTileGrid;
+    this.wrappedTileCoord_ = options.wrappedTileCoord || options.tileCoord;
+    this.sourceTiles_ = [];
+    this.sourcesListenerKeys_ = null;
+    this.sourceZ_ = 0;
+    const sourceProj = options.sourceProj;
+    const sourceProjExtent = sourceProj.getExtent();
+    const sourceTileGridExtent = options.sourceTileGrid.getExtent();
+    this.clipExtent_ = sourceProj.canWrapX() ? sourceTileGridExtent ? getIntersection(sourceProjExtent, sourceTileGridExtent) : sourceProjExtent : sourceTileGridExtent;
+    const targetExtent = this.targetTileGrid_.getTileCoordExtent(
+      this.wrappedTileCoord_
+    );
+    const maxTargetExtent = this.targetTileGrid_.getExtent();
+    let maxSourceExtent = this.sourceTileGrid_.getExtent();
+    const limitedTargetExtent = maxTargetExtent ? getIntersection(targetExtent, maxTargetExtent) : targetExtent;
+    if (getArea(limitedTargetExtent) === 0) {
+      this.state = TileState.EMPTY;
+      return;
+    }
+    if (sourceProjExtent) {
+      if (!maxSourceExtent) {
+        maxSourceExtent = sourceProjExtent;
+      } else {
+        maxSourceExtent = getIntersection(maxSourceExtent, sourceProjExtent);
+      }
+    }
+    const targetResolution = this.targetTileGrid_.getResolution(
+      this.wrappedTileCoord_[0]
+    );
+    const targetProj = options.targetProj;
+    const sourceResolution = calculateSourceExtentResolution(
+      sourceProj,
+      targetProj,
+      limitedTargetExtent,
+      targetResolution
+    );
+    if (!isFinite(sourceResolution) || sourceResolution <= 0) {
+      this.state = TileState.EMPTY;
+      return;
+    }
+    const errorThresholdInPixels = options.errorThreshold !== void 0 ? options.errorThreshold : ERROR_THRESHOLD;
+    this.triangulation_ = new Triangulation(
+      sourceProj,
+      targetProj,
+      limitedTargetExtent,
+      maxSourceExtent,
+      sourceResolution * errorThresholdInPixels,
+      targetResolution
+    );
+    if (this.triangulation_.getTriangles().length === 0) {
+      this.state = TileState.EMPTY;
+      return;
+    }
+    this.sourceZ_ = this.sourceTileGrid_.getZForResolution(sourceResolution);
+    let sourceExtent = this.triangulation_.calculateSourceExtent();
+    if (maxSourceExtent) {
+      if (sourceProj.canWrapX()) {
+        sourceExtent[1] = clamp(
+          sourceExtent[1],
+          maxSourceExtent[1],
+          maxSourceExtent[3]
+        );
+        sourceExtent[3] = clamp(
+          sourceExtent[3],
+          maxSourceExtent[1],
+          maxSourceExtent[3]
+        );
+      } else {
+        sourceExtent = getIntersection(sourceExtent, maxSourceExtent);
+      }
+    }
+    if (!getArea(sourceExtent)) {
+      this.state = TileState.EMPTY;
+    } else {
+      let worldWidth = 0;
+      let worldsAway = 0;
+      if (sourceProj.canWrapX()) {
+        worldWidth = getWidth(sourceProjExtent);
+        worldsAway = Math.floor(
+          (sourceExtent[0] - sourceProjExtent[0]) / worldWidth
+        );
+      }
+      const sourceExtents = wrapAndSliceX(
+        sourceExtent.slice(),
+        sourceProj,
+        true
+      );
+      sourceExtents.forEach((extent) => {
+        const sourceRange = this.sourceTileGrid_.getTileRangeForExtentAndZ(
+          extent,
+          this.sourceZ_
+        );
+        const getTile = options.getTileFunction;
+        for (let srcX = sourceRange.minX; srcX <= sourceRange.maxX; srcX++) {
+          for (let srcY = sourceRange.minY; srcY <= sourceRange.maxY; srcY++) {
+            const tile = getTile(this.sourceZ_, srcX, srcY, this.pixelRatio_);
+            if (tile) {
+              const offset2 = worldsAway * worldWidth;
+              this.sourceTiles_.push({ tile, offset: offset2 });
+            }
+          }
+        }
+        ++worldsAway;
+      });
+      if (this.sourceTiles_.length === 0) {
+        this.state = TileState.EMPTY;
+      }
+    }
+  }
+  /**
+   * Get the tile size.
+   * @return {import('../size.js').Size} Tile size.
+   * @override
+   */
+  getSize() {
+    return this.reprojSize_;
+  }
+  /**
+   * Get the data for the tile.
+   * @return {import("../DataTile.js").Data} Tile data.
+   * @override
+   */
+  getData() {
+    return this.reprojData_;
+  }
+  /**
+   * Get any loading error.
+   * @return {Error} Loading error.
+   * @override
+   */
+  getError() {
+    return this.reprojError_;
+  }
+  /**
+   * @private
+   */
+  reproject_() {
+    const dataSources = [];
+    let imageLike = false;
+    this.sourceTiles_.forEach((source2) => {
+      var _a;
+      const tile = source2.tile;
+      if (!tile || tile.getState() !== TileState.LOADED) {
+        return;
+      }
+      const size2 = tile.getSize();
+      const gutter = this.gutter_;
+      let tileData;
+      const arrayData = asArrayLike(tile.getData());
+      if (arrayData) {
+        tileData = arrayData;
+      } else {
+        imageLike = true;
+        tileData = toArray(asImageLike(tile.getData()));
+      }
+      const pixelSize = [size2[0] + 2 * gutter, size2[1] + 2 * gutter];
+      const isFloat = tileData instanceof Float32Array;
+      const pixelCount = pixelSize[0] * pixelSize[1];
+      const DataType = isFloat ? Float32Array : Uint8ClampedArray;
+      const tileDataR = new DataType(tileData.buffer);
+      const bytesPerElement = DataType.BYTES_PER_ELEMENT;
+      const bytesPerPixel2 = bytesPerElement * tileDataR.length / pixelCount;
+      const bytesPerRow = tileDataR.byteLength / pixelSize[1];
+      const bandCount = Math.floor(
+        bytesPerRow / bytesPerElement / pixelSize[0]
+      );
+      const packedLength = pixelCount * bandCount;
+      let packedData = tileDataR;
+      if (tileDataR.length !== packedLength) {
+        packedData = new DataType(packedLength);
+        let dataIndex = 0;
+        let rowOffset = 0;
+        const colCount = pixelSize[0] * bandCount;
+        for (let rowIndex = 0; rowIndex < pixelSize[1]; ++rowIndex) {
+          for (let colIndex = 0; colIndex < colCount; ++colIndex) {
+            packedData[dataIndex++] = tileDataR[rowOffset + colIndex];
+          }
+          rowOffset += bytesPerRow / bytesPerElement;
+        }
+      }
+      const extent = this.sourceTileGrid_.getTileCoordExtent(tile.tileCoord);
+      extent[0] += source2.offset;
+      extent[2] += source2.offset;
+      const clipExtent = (_a = this.clipExtent_) == null ? void 0 : _a.slice();
+      if (clipExtent) {
+        clipExtent[0] += source2.offset;
+        clipExtent[2] += source2.offset;
+      }
+      dataSources.push({
+        extent,
+        clipExtent,
+        data: new Uint8ClampedArray(packedData.buffer),
+        dataType: DataType,
+        bytesPerPixel: bytesPerPixel2,
+        pixelSize
+      });
+    });
+    this.sourceTiles_.length = 0;
+    if (dataSources.length === 0) {
+      this.state = TileState.ERROR;
+      this.changed();
+      return;
+    }
+    const z2 = this.wrappedTileCoord_[0];
+    const size = this.targetTileGrid_.getTileSize(z2);
+    const targetWidth = typeof size === "number" ? size : size[0];
+    const targetHeight = typeof size === "number" ? size : size[1];
+    const targetResolution = this.targetTileGrid_.getResolution(z2);
+    const sourceResolution = this.sourceTileGrid_.getResolution(this.sourceZ_);
+    const targetExtent = this.targetTileGrid_.getTileCoordExtent(
+      this.wrappedTileCoord_
+    );
+    let dataR, dataU;
+    const bytesPerPixel = dataSources[0].bytesPerPixel;
+    const reprojs = Math.ceil(bytesPerPixel / 3);
+    for (let reproj = reprojs - 1; reproj >= 0; --reproj) {
+      const sources = [];
+      for (let i = 0, len = dataSources.length; i < len; ++i) {
+        const dataSource = dataSources[i];
+        const buffer2 = dataSource.data;
+        const pixelSize = dataSource.pixelSize;
+        const width = pixelSize[0];
+        const height = pixelSize[1];
+        const context2 = createCanvasContext2D(width, height, canvasPool$1);
+        const imageData2 = context2.createImageData(width, height);
+        const data2 = imageData2.data;
+        let offset3 = reproj * 3;
+        for (let j = 0, len2 = data2.length; j < len2; j += 4) {
+          data2[j] = buffer2[offset3];
+          data2[j + 1] = buffer2[offset3 + 1];
+          data2[j + 2] = buffer2[offset3 + 2];
+          data2[j + 3] = 255;
+          offset3 += bytesPerPixel;
+        }
+        context2.putImageData(imageData2, 0, 0);
+        sources.push({
+          extent: dataSource.extent,
+          clipExtent: dataSource.clipExtent,
+          image: context2.canvas
+        });
+      }
+      const canvas = render(
+        targetWidth,
+        targetHeight,
+        this.pixelRatio_,
+        sourceResolution,
+        this.sourceTileGrid_.getExtent(),
+        targetResolution,
+        targetExtent,
+        this.triangulation_,
+        sources,
+        this.gutter_,
+        false,
+        false,
+        false
+      );
+      for (let i = 0, len = sources.length; i < len; ++i) {
+        const canvas2 = sources[i].image;
+        const context2 = canvas2.getContext("2d");
+        releaseCanvas(context2);
+        canvasPool$1.push(context2.canvas);
+      }
+      const context = canvas.getContext("2d");
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      releaseCanvas(context);
+      canvasPool$1.push(canvas);
+      if (!dataR) {
+        dataU = new Uint8ClampedArray(
+          bytesPerPixel * imageData.width * imageData.height
+        );
+        dataR = new dataSources[0].dataType(dataU.buffer);
+      }
+      const data = imageData.data;
+      let offset2 = reproj * 3;
+      for (let i = 0, len = data.length; i < len; i += 4) {
+        if (data[i + 3] === 255) {
+          dataU[offset2] = data[i];
+          dataU[offset2 + 1] = data[i + 1];
+          dataU[offset2 + 2] = data[i + 2];
+        } else {
+          dataU[offset2] = 0;
+          dataU[offset2 + 1] = 0;
+          dataU[offset2 + 2] = 0;
+        }
+        offset2 += bytesPerPixel;
+      }
+    }
+    if (imageLike) {
+      const context = createCanvasContext2D(targetWidth, targetHeight);
+      const imageData = new ImageData(dataR, targetWidth);
+      context.putImageData(imageData, 0, 0);
+      this.reprojData_ = context.canvas;
+    } else {
+      this.reprojData_ = dataR;
+    }
+    this.reprojSize_ = [
+      Math.round(targetWidth * this.pixelRatio_),
+      Math.round(targetHeight * this.pixelRatio_)
+    ];
+    this.state = TileState.LOADED;
+    this.changed();
+  }
+  /**
+   * Load not yet loaded URI.
+   * @override
+   */
+  load() {
+    if (this.state !== TileState.IDLE && this.state !== TileState.ERROR) {
+      return;
+    }
+    this.state = TileState.LOADING;
+    this.changed();
+    let leftToLoad = 0;
+    this.sourcesListenerKeys_ = [];
+    this.sourceTiles_.forEach(({ tile }) => {
+      const state = tile.getState();
+      if (state !== TileState.IDLE && state !== TileState.LOADING) {
+        return;
+      }
+      leftToLoad++;
+      const sourceListenKey = listen(tile, EventType.CHANGE, () => {
+        const state2 = tile.getState();
+        if (state2 == TileState.LOADED || state2 == TileState.ERROR || state2 == TileState.EMPTY) {
+          unlistenByKey(sourceListenKey);
+          leftToLoad--;
+          if (leftToLoad === 0) {
+            this.unlistenSources_();
+            this.reproject_();
+          }
+        }
+      });
+      this.sourcesListenerKeys_.push(sourceListenKey);
+    });
+    if (leftToLoad === 0) {
+      setTimeout(this.reproject_.bind(this), 0);
+    } else {
+      this.sourceTiles_.forEach(function({ tile }) {
+        const state = tile.getState();
+        if (state == TileState.IDLE) {
+          tile.load();
+        }
+      });
+    }
+  }
+  /**
+   * @private
+   */
+  unlistenSources_() {
+    this.sourcesListenerKeys_.forEach(unlistenByKey);
+    this.sourcesListenerKeys_ = null;
+  }
+}
+function getCacheKey(sourceKey, z2, x2, y2) {
+  return `${sourceKey},${getKeyZXY(z2, x2, y2)}`;
+}
+function addTileToLookup(tilesByZ, tile, z2) {
+  if (!(z2 in tilesByZ)) {
+    tilesByZ[z2] = /* @__PURE__ */ new Set([tile]);
+    return true;
+  }
+  const set = tilesByZ[z2];
+  const existing = set.has(tile);
+  if (!existing) {
+    set.add(tile);
+  }
+  return !existing;
+}
+function removeTileFromLookup(tilesByZ, tile, z2) {
+  const set = tilesByZ[z2];
+  if (set) {
+    return set.delete(tile);
+  }
+  return false;
+}
+function getRenderExtent(frameState, extent) {
+  const layerState = frameState.layerStatesArray[frameState.layerIndex];
+  if (layerState.extent) {
+    extent = getIntersection(
+      extent,
+      fromUserExtent(layerState.extent, frameState.viewState.projection)
+    );
+  }
+  const source2 = (
+    /** @type {import("../../source/Tile.js").default} */
+    layerState.layer.getRenderSource()
+  );
+  if (!source2.getWrapX()) {
+    const gridExtent = source2.getTileGridForProjection(frameState.viewState.projection).getExtent();
+    if (gridExtent) {
+      extent = getIntersection(extent, gridExtent);
+    }
+  }
+  return extent;
+}
 class CanvasTileLayerRenderer extends CanvasLayerRenderer {
   /**
    * @param {LayerType} tileLayer Tile layer.
+   * @param {Options} [options] Options.
    */
-  constructor(tileLayer) {
+  constructor(tileLayer, options) {
     super(tileLayer);
+    options = options || {};
     this.extentChanged = true;
+    this.renderComplete = false;
     this.renderedExtent_ = null;
     this.renderedPixelRatio;
     this.renderedProjection = null;
     this.renderedRevision;
     this.renderedTiles = [];
-    this.newTiles_ = false;
-    this.tmpExtent = createEmpty();
-    this.tmpTileRange_ = new TileRange(0, 0, 0, 0);
+    this.renderedSourceKey_;
+    this.renderedSourceRevision_;
+    this.tempExtent = createEmpty();
+    this.tempTileRange_ = new TileRange(0, 0, 0, 0);
+    this.tempTileCoord_ = createOrUpdate$1(0, 0, 0);
+    const cacheSize2 = options.cacheSize !== void 0 ? options.cacheSize : 512;
+    this.tileCache_ = new LRUCache(cacheSize2);
+    this.maxStaleKeys = cacheSize2 * 0.5;
   }
   /**
-   * @protected
-   * @param {import("../../Tile.js").default} tile Tile.
-   * @return {boolean} Tile is drawable.
+   * @return {LRUCache} Tile cache.
    */
-  isDrawableTile(tile) {
+  getTileCache() {
+    return this.tileCache_;
+  }
+  /**
+   * Get a tile from the cache or create one if needed.
+   *
+   * @param {number} z Tile coordinate z.
+   * @param {number} x Tile coordinate x.
+   * @param {number} y Tile coordinate y.
+   * @param {import("../../Map.js").FrameState} frameState Frame state.
+   * @return {import("../../Tile.js").default|null} Tile (or null if outside source extent).
+   * @protected
+   */
+  getOrCreateTile(z2, x2, y2, frameState) {
+    const tileCache = this.tileCache_;
     const tileLayer = this.getLayer();
-    const tileState = tile.getState();
-    const useInterimTilesOnError = tileLayer.getUseInterimTilesOnError();
-    return tileState == TileState.LOADED || tileState == TileState.EMPTY || tileState == TileState.ERROR && !useInterimTilesOnError;
+    const tileSource = tileLayer.getSource();
+    const cacheKey = getCacheKey(tileSource.getKey(), z2, x2, y2);
+    let tile;
+    if (tileCache.containsKey(cacheKey)) {
+      tile = tileCache.get(cacheKey);
+    } else {
+      tile = tileSource.getTile(
+        z2,
+        x2,
+        y2,
+        frameState.pixelRatio,
+        frameState.viewState.projection
+      );
+      if (!tile) {
+        return null;
+      }
+      tileCache.set(cacheKey, tile);
+    }
+    return tile;
   }
   /**
    * @param {number} z Tile coordinate z.
    * @param {number} x Tile coordinate x.
    * @param {number} y Tile coordinate y.
    * @param {import("../../Map.js").FrameState} frameState Frame state.
-   * @return {!import("../../Tile.js").default} Tile.
+   * @return {import("../../Tile.js").default|null} Tile (or null if outside source extent).
+   * @protected
    */
   getTile(z2, x2, y2, frameState) {
-    const pixelRatio = frameState.pixelRatio;
-    const projection = frameState.viewState.projection;
-    const tileLayer = this.getLayer();
-    const tileSource = tileLayer.getSource();
-    let tile = tileSource.getTile(z2, x2, y2, pixelRatio, projection);
-    if (tile.getState() == TileState.ERROR) {
-      if (tileLayer.getUseInterimTilesOnError() && tileLayer.getPreload() > 0) {
-        this.newTiles_ = true;
-      }
-    }
-    if (!this.isDrawableTile(tile)) {
-      tile = tile.getInterimTile();
+    const tile = this.getOrCreateTile(z2, x2, y2, frameState);
+    if (!tile) {
+      return null;
     }
     return tile;
   }
   /**
    * @param {import("../../pixel.js").Pixel} pixel Pixel.
    * @return {Uint8ClampedArray} Data at the pixel location.
+   * @override
    */
   getData(pixel) {
     const frameState = this.frameState;
@@ -26078,30 +26498,30 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
         return null;
       }
     }
-    const pixelRatio = frameState.pixelRatio;
-    const projection = frameState.viewState.projection;
     const viewState = frameState.viewState;
     const source2 = layer.getRenderSource();
     const tileGrid = source2.getTileGridForProjection(viewState.projection);
     const tilePixelRatio = source2.getTilePixelRatio(frameState.pixelRatio);
     for (let z2 = tileGrid.getZForResolution(viewState.resolution); z2 >= tileGrid.getMinZoom(); --z2) {
       const tileCoord = tileGrid.getTileCoordForCoordAndZ(coordinate, z2);
-      const tile = source2.getTile(
-        z2,
-        tileCoord[1],
-        tileCoord[2],
-        pixelRatio,
-        projection
-      );
-      if (!(tile instanceof ImageTile || tile instanceof ReprojTile) || tile instanceof ReprojTile && tile.getState() === TileState.EMPTY) {
-        return null;
-      }
-      if (tile.getState() !== TileState.LOADED) {
+      const tile = this.getTile(z2, tileCoord[1], tileCoord[2], frameState);
+      if (!tile || tile.getState() !== TileState.LOADED) {
         continue;
       }
       const tileOrigin = tileGrid.getOrigin(z2);
       const tileSize = toSize(tileGrid.getTileSize(z2));
       const tileResolution = tileGrid.getResolution(z2);
+      let image;
+      if (tile instanceof ImageTile) {
+        image = tile.getImage();
+      } else if (tile instanceof DataTile) {
+        image = asImageLike(tile.getData());
+        if (!image) {
+          continue;
+        }
+      } else {
+        continue;
+      }
       const col = Math.floor(
         tilePixelRatio * ((coordinate[0] - tileOrigin[0]) / tileResolution - tileCoord[1] * tileSize[0])
       );
@@ -26111,43 +26531,184 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
       const gutter = Math.round(
         tilePixelRatio * source2.getGutterForProjection(viewState.projection)
       );
-      return this.getImageData(tile.getImage(), col + gutter, row + gutter);
+      return this.getImageData(image, col + gutter, row + gutter);
     }
     return null;
-  }
-  /**
-   * @param {Object<number, Object<string, import("../../Tile.js").default>>} tiles Lookup of loaded tiles by zoom level.
-   * @param {number} zoom Zoom level.
-   * @param {import("../../Tile.js").default} tile Tile.
-   * @return {boolean|void} If `false`, the tile will not be considered loaded.
-   */
-  loadedTileCallback(tiles, zoom, tile) {
-    if (this.isDrawableTile(tile)) {
-      return super.loadedTileCallback(tiles, zoom, tile);
-    }
-    return false;
   }
   /**
    * Determine whether render should be called.
    * @param {import("../../Map.js").FrameState} frameState Frame state.
    * @return {boolean} Layer is ready to be rendered.
+   * @override
    */
   prepareFrame(frameState) {
-    return !!this.getLayer().getSource();
+    const source2 = this.getLayer().getSource();
+    if (!source2) {
+      return false;
+    }
+    const sourceRevision = this.getLayer().getSource().getRevision();
+    if (!this.renderedRevision_) {
+      this.renderedRevision_ = sourceRevision;
+    } else if (this.renderedRevision_ !== sourceRevision) {
+      this.renderedRevision_ = sourceRevision;
+      if (this.renderedSourceKey_ === source2.getKey()) {
+        this.tileCache_.clear();
+      }
+    }
+    return true;
+  }
+  /**
+   * @param {import("../../Map.js").FrameState} frameState Frame state.
+   * @param {import("../../extent.js").Extent} extent The extent to be rendered.
+   * @param {number} initialZ The zoom level.
+   * @param {TileLookup} tilesByZ Lookup of tiles by zoom level.
+   * @param {number} preload Number of additional levels to load.
+   */
+  enqueueTiles(frameState, extent, initialZ, tilesByZ, preload) {
+    const viewState = frameState.viewState;
+    const tileLayer = this.getLayer();
+    const tileSource = tileLayer.getRenderSource();
+    const tileGrid = tileSource.getTileGridForProjection(viewState.projection);
+    const tileSourceKey = getUid(tileSource);
+    if (!(tileSourceKey in frameState.wantedTiles)) {
+      frameState.wantedTiles[tileSourceKey] = {};
+    }
+    const wantedTiles = frameState.wantedTiles[tileSourceKey];
+    const map2 = tileLayer.getMapInternal();
+    const minZ = Math.max(
+      initialZ - preload,
+      tileGrid.getMinZoom(),
+      tileGrid.getZForResolution(
+        Math.min(
+          tileLayer.getMaxResolution(),
+          map2 ? map2.getView().getResolutionForZoom(Math.max(tileLayer.getMinZoom(), 0)) : tileGrid.getResolution(0)
+        ),
+        tileSource.zDirection
+      )
+    );
+    for (let z2 = initialZ; z2 >= minZ; --z2) {
+      const tileRange = tileGrid.getTileRangeForExtentAndZ(
+        extent,
+        z2,
+        this.tempTileRange_
+      );
+      const tileResolution = tileGrid.getResolution(z2);
+      for (let x2 = tileRange.minX; x2 <= tileRange.maxX; ++x2) {
+        for (let y2 = tileRange.minY; y2 <= tileRange.maxY; ++y2) {
+          const tile = this.getTile(z2, x2, y2, frameState);
+          if (!tile) {
+            continue;
+          }
+          const added = addTileToLookup(tilesByZ, tile, z2);
+          if (!added) {
+            continue;
+          }
+          const tileQueueKey = tile.getKey();
+          wantedTiles[tileQueueKey] = true;
+          if (tile.getState() === TileState.IDLE) {
+            if (!frameState.tileQueue.isKeyQueued(tileQueueKey)) {
+              const tileCoord = createOrUpdate$1(z2, x2, y2, this.tempTileCoord_);
+              frameState.tileQueue.enqueue([
+                tile,
+                tileSourceKey,
+                tileGrid.getTileCoordCenter(tileCoord),
+                tileResolution
+              ]);
+            }
+          }
+        }
+      }
+    }
+  }
+  /**
+   * Look for tiles covering the provided tile coordinate at an alternate
+   * zoom level.  Loaded tiles will be added to the provided tile texture lookup.
+   * @param {import("../../tilecoord.js").TileCoord} tileCoord The target tile coordinate.
+   * @param {TileLookup} tilesByZ Lookup of tiles by zoom level.
+   * @return {boolean} The tile coordinate is covered by loaded tiles at the alternate zoom level.
+   * @private
+   */
+  findStaleTile_(tileCoord, tilesByZ) {
+    const tileCache = this.tileCache_;
+    const z2 = tileCoord[0];
+    const x2 = tileCoord[1];
+    const y2 = tileCoord[2];
+    const staleKeys = this.getStaleKeys();
+    for (let i = 0; i < staleKeys.length; ++i) {
+      const cacheKey = getCacheKey(staleKeys[i], z2, x2, y2);
+      if (tileCache.containsKey(cacheKey)) {
+        const tile = tileCache.get(cacheKey);
+        if (tile.getState() === TileState.LOADED) {
+          tile.endTransition(getUid(this));
+          addTileToLookup(tilesByZ, tile, z2);
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  /**
+   * Look for tiles covering the provided tile coordinate at an alternate
+   * zoom level.  Loaded tiles will be added to the provided tile texture lookup.
+   * @param {import("../../tilegrid/TileGrid.js").default} tileGrid The tile grid.
+   * @param {import("../../tilecoord.js").TileCoord} tileCoord The target tile coordinate.
+   * @param {number} altZ The alternate zoom level.
+   * @param {TileLookup} tilesByZ Lookup of tiles by zoom level.
+   * @return {boolean} The tile coordinate is covered by loaded tiles at the alternate zoom level.
+   * @private
+   */
+  findAltTiles_(tileGrid, tileCoord, altZ, tilesByZ) {
+    const tileRange = tileGrid.getTileRangeForTileCoordAndZ(
+      tileCoord,
+      altZ,
+      this.tempTileRange_
+    );
+    if (!tileRange) {
+      return false;
+    }
+    let covered = true;
+    const tileCache = this.tileCache_;
+    const source2 = this.getLayer().getRenderSource();
+    const sourceKey = source2.getKey();
+    for (let x2 = tileRange.minX; x2 <= tileRange.maxX; ++x2) {
+      for (let y2 = tileRange.minY; y2 <= tileRange.maxY; ++y2) {
+        const cacheKey = getCacheKey(sourceKey, altZ, x2, y2);
+        let loaded = false;
+        if (tileCache.containsKey(cacheKey)) {
+          const tile = tileCache.get(cacheKey);
+          if (tile.getState() === TileState.LOADED) {
+            addTileToLookup(tilesByZ, tile, altZ);
+            loaded = true;
+          }
+        }
+        if (!loaded) {
+          covered = false;
+        }
+      }
+    }
+    return covered;
   }
   /**
    * Render the layer.
+   *
+   * The frame rendering logic has three parts:
+   *
+   *  1. Enqueue tiles
+   *  2. Find alt tiles for those that are not yet loaded
+   *  3. Render loaded tiles
+   *
    * @param {import("../../Map.js").FrameState} frameState Frame state.
    * @param {HTMLElement} target Target that may be used to render content to.
    * @return {HTMLElement} The rendered element.
+   * @override
    */
   renderFrame(frameState, target) {
+    this.renderComplete = true;
     const layerState = frameState.layerStatesArray[frameState.layerIndex];
     const viewState = frameState.viewState;
     const projection = viewState.projection;
     const viewResolution = viewState.resolution;
     const viewCenter = viewState.center;
-    const rotation = viewState.rotation;
     const pixelRatio = frameState.pixelRatio;
     const tileLayer = this.getLayer();
     const tileSource = tileLayer.getSource();
@@ -26155,16 +26716,22 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
     const tileGrid = tileSource.getTileGridForProjection(projection);
     const z2 = tileGrid.getZForResolution(viewResolution, tileSource.zDirection);
     const tileResolution = tileGrid.getResolution(z2);
-    let extent = frameState.extent;
-    const resolution = frameState.viewState.resolution;
+    const sourceKey = tileSource.getKey();
+    if (!this.renderedSourceKey_) {
+      this.renderedSourceKey_ = sourceKey;
+    } else if (this.renderedSourceKey_ !== sourceKey) {
+      this.prependStaleKey(this.renderedSourceKey_);
+      this.renderedSourceKey_ = sourceKey;
+    }
+    let frameExtent = frameState.extent;
     const tilePixelRatio = tileSource.getTilePixelRatio(pixelRatio);
     this.prepareContainer(frameState, target);
     const width = this.context.canvas.width;
     const height = this.context.canvas.height;
     const layerExtent = layerState.extent && fromUserExtent(layerState.extent, projection);
     if (layerExtent) {
-      extent = getIntersection(
-        extent,
+      frameExtent = getIntersection(
+        frameExtent,
         fromUserExtent(layerState.extent, projection)
       );
     }
@@ -26176,62 +26743,70 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
       viewCenter[0] + dx,
       viewCenter[1] + dy
     ];
-    const tileRange = tileGrid.getTileRangeForExtentAndZ(extent, z2);
-    const tilesToDrawByZ = {};
-    tilesToDrawByZ[z2] = {};
-    const findLoadedTiles = this.createLoadedTileFinder(
-      tileSource,
-      projection,
-      tilesToDrawByZ
-    );
-    const tmpExtent2 = this.tmpExtent;
-    const tmpTileRange = this.tmpTileRange_;
-    this.newTiles_ = false;
-    const viewport2 = rotation ? getRotatedViewport(
-      viewState.center,
-      resolution,
-      rotation,
-      frameState.size
-    ) : void 0;
-    for (let x2 = tileRange.minX; x2 <= tileRange.maxX; ++x2) {
-      for (let y2 = tileRange.minY; y2 <= tileRange.maxY; ++y2) {
-        if (rotation && !tileGrid.tileCoordIntersectsViewport([z2, x2, y2], viewport2)) {
+    const tilesByZ = {};
+    const preload = tileLayer.getPreload();
+    if (frameState.nextExtent) {
+      const targetZ = tileGrid.getZForResolution(
+        viewState.nextResolution,
+        tileSource.zDirection
+      );
+      const nextExtent = getRenderExtent(frameState, frameState.nextExtent);
+      this.enqueueTiles(frameState, nextExtent, targetZ, tilesByZ, preload);
+    }
+    const renderExtent = getRenderExtent(frameState, frameExtent);
+    this.enqueueTiles(frameState, renderExtent, z2, tilesByZ, 0);
+    if (preload > 0) {
+      setTimeout(() => {
+        this.enqueueTiles(
+          frameState,
+          renderExtent,
+          z2 - 1,
+          tilesByZ,
+          preload - 1
+        );
+      }, 0);
+    }
+    const uid = getUid(this);
+    const time = frameState.time;
+    for (const tile of tilesByZ[z2]) {
+      const tileState = tile.getState();
+      if ((tile instanceof ReprojTile || tile instanceof ReprojDataTile) && tileState === TileState.EMPTY) {
+        continue;
+      }
+      const tileCoord = tile.tileCoord;
+      if (tileState === TileState.LOADED) {
+        const alpha = tile.getAlpha(uid, time);
+        if (alpha === 1) {
+          tile.endTransition(uid);
           continue;
         }
-        const tile = this.getTile(z2, x2, y2, frameState);
-        if (this.isDrawableTile(tile)) {
-          const uid = getUid(this);
-          if (tile.getState() == TileState.LOADED) {
-            tilesToDrawByZ[z2][tile.tileCoord.toString()] = tile;
-            let inTransition = tile.inTransition(uid);
-            if (inTransition && layerState.opacity !== 1) {
-              tile.endTransition(uid);
-              inTransition = false;
-            }
-            if (!this.newTiles_ && (inTransition || !this.renderedTiles.includes(tile))) {
-              this.newTiles_ = true;
-            }
-          }
-          if (tile.getAlpha(uid, frameState.time) === 1) {
-            continue;
-          }
-        }
-        const childTileRange = tileGrid.getTileCoordChildTileRange(
-          tile.tileCoord,
-          tmpTileRange,
-          tmpExtent2
+      }
+      this.renderComplete = false;
+      const hasStaleTile = this.findStaleTile_(tileCoord, tilesByZ);
+      if (hasStaleTile) {
+        removeTileFromLookup(tilesByZ, tile, z2);
+        frameState.animate = true;
+        continue;
+      }
+      const coveredByChildren = this.findAltTiles_(
+        tileGrid,
+        tileCoord,
+        z2 + 1,
+        tilesByZ
+      );
+      if (coveredByChildren) {
+        continue;
+      }
+      const minZoom = tileGrid.getMinZoom();
+      for (let parentZ = z2 - 1; parentZ >= minZoom; --parentZ) {
+        const coveredByParent = this.findAltTiles_(
+          tileGrid,
+          tileCoord,
+          parentZ,
+          tilesByZ
         );
-        let covered = false;
-        if (childTileRange) {
-          covered = findLoadedTiles(z2 + 1, childTileRange);
-        }
-        if (!covered) {
-          tileGrid.forEachTileCoordParentTileRange(
-            tile.tileCoord,
-            findLoadedTiles,
-            tmpTileRange,
-            tmpExtent2
-          );
+        if (coveredByParent) {
+          break;
         }
       }
     }
@@ -26247,7 +26822,7 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
       -width / 2,
       -height / 2
     );
-    if (layerExtent) {
+    if (layerState.extent) {
       this.clipUnrotated(context, frameState, layerExtent);
     }
     if (!tileSource.getInterpolate()) {
@@ -26255,15 +26830,11 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
     }
     this.preRender(context, frameState);
     this.renderedTiles.length = 0;
-    let zs = Object.keys(tilesToDrawByZ).map(Number);
+    const zs = Object.keys(tilesByZ).map(Number);
     zs.sort(ascending);
-    let clips, clipZs, currentClip;
-    if (layerState.opacity === 1 && (!this.containerReused || tileSource.getOpaque(frameState.viewState.projection))) {
-      zs = zs.reverse();
-    } else {
-      clips = [];
-      clipZs = [];
-    }
+    let currentClip;
+    const clips = [];
+    const clipZs = [];
     for (let i = zs.length - 1; i >= 0; --i) {
       const currentZ = zs[i];
       const currentTilePixelSize = tileSource.getTilePixelSize(
@@ -26285,12 +26856,10 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
         tilePixelRatio * (canvasExtent[3] - originTileExtent[3]) / tileResolution
       ]);
       const tileGutter = tilePixelRatio * tileSource.getGutterForProjection(projection);
-      const tilesToDraw = tilesToDrawByZ[currentZ];
-      for (const tileCoordKey in tilesToDraw) {
-        const tile = (
-          /** @type {import("../../ImageTile.js").default} */
-          tilesToDraw[tileCoordKey]
-        );
+      for (const tile of tilesByZ[currentZ]) {
+        if (tile.getState() !== TileState.LOADED) {
+          continue;
+        }
         const tileCoord = tile.tileCoord;
         const xIndex = originTileCoord[1] - tileCoord[1];
         const nextX = Math.round(origin[0] - (xIndex - 1) * dx2);
@@ -26300,60 +26869,40 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
         const y2 = Math.round(origin[1] - yIndex * dy2);
         const w2 = nextX - x2;
         const h = nextY - y2;
-        const transition = z2 === currentZ;
-        const inTransition = transition && tile.getAlpha(getUid(this), frameState.time) !== 1;
+        const transition = zs.length === 1;
         let contextSaved = false;
-        if (!inTransition) {
-          if (clips) {
-            currentClip = [x2, y2, x2 + w2, y2, x2 + w2, y2 + h, x2, y2 + h];
-            for (let i2 = 0, ii = clips.length; i2 < ii; ++i2) {
-              if (z2 !== currentZ && currentZ < clipZs[i2]) {
-                const clip = clips[i2];
-                if (intersects$1(
-                  [x2, y2, x2 + w2, y2 + h],
-                  [clip[0], clip[3], clip[4], clip[7]]
-                )) {
-                  if (!contextSaved) {
-                    context.save();
-                    contextSaved = true;
-                  }
-                  context.beginPath();
-                  context.moveTo(currentClip[0], currentClip[1]);
-                  context.lineTo(currentClip[2], currentClip[3]);
-                  context.lineTo(currentClip[4], currentClip[5]);
-                  context.lineTo(currentClip[6], currentClip[7]);
-                  context.moveTo(clip[6], clip[7]);
-                  context.lineTo(clip[4], clip[5]);
-                  context.lineTo(clip[2], clip[3]);
-                  context.lineTo(clip[0], clip[1]);
-                  context.clip();
-                }
+        currentClip = [x2, y2, x2 + w2, y2, x2 + w2, y2 + h, x2, y2 + h];
+        for (let i2 = 0, ii = clips.length; i2 < ii; ++i2) {
+          if (!transition && currentZ < clipZs[i2]) {
+            const clip = clips[i2];
+            if (intersects$1(
+              [x2, y2, x2 + w2, y2 + h],
+              [clip[0], clip[3], clip[4], clip[7]]
+            )) {
+              if (!contextSaved) {
+                context.save();
+                contextSaved = true;
               }
+              context.beginPath();
+              context.moveTo(currentClip[0], currentClip[1]);
+              context.lineTo(currentClip[2], currentClip[3]);
+              context.lineTo(currentClip[4], currentClip[5]);
+              context.lineTo(currentClip[6], currentClip[7]);
+              context.moveTo(clip[6], clip[7]);
+              context.lineTo(clip[4], clip[5]);
+              context.lineTo(clip[2], clip[3]);
+              context.lineTo(clip[0], clip[1]);
+              context.clip();
             }
-            clips.push(currentClip);
-            clipZs.push(currentZ);
-          } else {
-            context.clearRect(x2, y2, w2, h);
           }
         }
-        this.drawTileImage(
-          tile,
-          frameState,
-          x2,
-          y2,
-          w2,
-          h,
-          tileGutter,
-          transition
-        );
-        if (clips && !inTransition) {
-          if (contextSaved) {
-            context.restore();
-          }
-          this.renderedTiles.unshift(tile);
-        } else {
-          this.renderedTiles.push(tile);
+        clips.push(currentClip);
+        clipZs.push(currentZ);
+        this.drawTile(tile, frameState, x2, y2, w2, h, tileGutter, transition);
+        if (contextSaved) {
+          context.restore();
         }
+        this.renderedTiles.unshift(tile);
         this.updateUsedTiles(frameState.usedTiles, tileSource, tile);
       }
     }
@@ -26363,26 +26912,33 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
     this.renderedExtent_ = canvasExtent;
     this.renderedPixelRatio = pixelRatio;
     this.renderedProjection = projection;
-    this.manageTilePyramid(
-      frameState,
-      tileSource,
-      tileGrid,
-      pixelRatio,
-      projection,
-      extent,
-      z2,
-      tileLayer.getPreload()
-    );
-    this.scheduleExpireCache(frameState, tileSource);
     this.postRender(this.context, frameState);
     if (layerState.extent) {
       context.restore();
     }
     context.imageSmoothingEnabled = true;
+    const postRenderFunction = (map2, frameState2) => {
+      const tileSourceKey = getUid(tileSource);
+      const wantedTiles = frameState2.wantedTiles[tileSourceKey];
+      const tilesCount = wantedTiles ? Object.keys(wantedTiles).length : 0;
+      this.updateCacheSize(tilesCount);
+      this.tileCache_.expireCache();
+    };
+    frameState.postRenderFunctions.push(postRenderFunction);
     return this.container;
   }
   /**
-   * @param {import("../../ImageTile.js").default} tile Tile.
+   * Increases the cache size if needed
+   * @param {number} tileCount Minimum number of tiles needed.
+   */
+  updateCacheSize(tileCount) {
+    this.tileCache_.highWaterMark = Math.max(
+      this.tileCache_.highWaterMark,
+      tileCount * 2
+    );
+  }
+  /**
+   * @param {import("../../Tile.js").default} tile Tile.
    * @param {import("../../Map.js").FrameState} frameState Frame state.
    * @param {number} x Left of the tile.
    * @param {number} y Top of the tile.
@@ -26390,9 +26946,21 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
    * @param {number} h Height of the tile.
    * @param {number} gutter Tile gutter.
    * @param {boolean} transition Apply an alpha transition.
+   * @protected
    */
-  drawTileImage(tile, frameState, x2, y2, w2, h, gutter, transition) {
-    const image = this.getTileImage(tile);
+  drawTile(tile, frameState, x2, y2, w2, h, gutter, transition) {
+    let image;
+    if (tile instanceof DataTile) {
+      image = asImageLike(tile.getData());
+      if (!image) {
+        throw new Error("Rendering array data is not yet supported");
+      }
+    } else {
+      image = this.getTileImage(
+        /** @type {import("../../ImageTile.js").default} */
+        tile
+      );
+    }
     if (!image) {
       return;
     }
@@ -26442,28 +27010,6 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
     return tile.getImage();
   }
   /**
-   * @param {import("../../Map.js").FrameState} frameState Frame state.
-   * @param {import("../../source/Tile.js").default} tileSource Tile source.
-   * @protected
-   */
-  scheduleExpireCache(frameState, tileSource) {
-    if (tileSource.canExpireCache()) {
-      const postRenderFunction = (function(tileSource2, map2, frameState2) {
-        const tileSourceKey = getUid(tileSource2);
-        if (tileSourceKey in frameState2.usedTiles) {
-          tileSource2.expireCache(
-            frameState2.viewState.projection,
-            frameState2.usedTiles[tileSourceKey]
-          );
-        }
-      }).bind(null, tileSource);
-      frameState.postRenderFunctions.push(
-        /** @type {import("../../Map.js").PostRenderFunction} */
-        postRenderFunction
-      );
-    }
-  }
-  /**
    * @param {!Object<string, !Object<string, boolean>>} usedTiles Used tiles.
    * @param {import("../../source/Tile.js").default} tileSource Tile source.
    * @param {import('../../Tile.js').default} tile Tile.
@@ -26476,74 +27022,6 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
     }
     usedTiles[tileSourceKey][tile.getKey()] = true;
   }
-  /**
-   * Manage tile pyramid.
-   * This function performs a number of functions related to the tiles at the
-   * current zoom and lower zoom levels:
-   * - registers idle tiles in frameState.wantedTiles so that they are not
-   *   discarded by the tile queue
-   * - enqueues missing tiles
-   * @param {import("../../Map.js").FrameState} frameState Frame state.
-   * @param {import("../../source/Tile.js").default} tileSource Tile source.
-   * @param {import("../../tilegrid/TileGrid.js").default} tileGrid Tile grid.
-   * @param {number} pixelRatio Pixel ratio.
-   * @param {import("../../proj/Projection.js").default} projection Projection.
-   * @param {import("../../extent.js").Extent} extent Extent.
-   * @param {number} currentZ Current Z.
-   * @param {number} preload Load low resolution tiles up to `preload` levels.
-   * @param {function(import("../../Tile.js").default):void} [tileCallback] Tile callback.
-   * @protected
-   */
-  manageTilePyramid(frameState, tileSource, tileGrid, pixelRatio, projection, extent, currentZ, preload, tileCallback) {
-    const tileSourceKey = getUid(tileSource);
-    if (!(tileSourceKey in frameState.wantedTiles)) {
-      frameState.wantedTiles[tileSourceKey] = {};
-    }
-    const wantedTiles = frameState.wantedTiles[tileSourceKey];
-    const tileQueue = frameState.tileQueue;
-    const minZoom = tileGrid.getMinZoom();
-    const rotation = frameState.viewState.rotation;
-    const viewport2 = rotation ? getRotatedViewport(
-      frameState.viewState.center,
-      frameState.viewState.resolution,
-      rotation,
-      frameState.size
-    ) : void 0;
-    let tileCount = 0;
-    let tile, tileRange, tileResolution, x2, y2, z2;
-    for (z2 = minZoom; z2 <= currentZ; ++z2) {
-      tileRange = tileGrid.getTileRangeForExtentAndZ(extent, z2, tileRange);
-      tileResolution = tileGrid.getResolution(z2);
-      for (x2 = tileRange.minX; x2 <= tileRange.maxX; ++x2) {
-        for (y2 = tileRange.minY; y2 <= tileRange.maxY; ++y2) {
-          if (rotation && !tileGrid.tileCoordIntersectsViewport([z2, x2, y2], viewport2)) {
-            continue;
-          }
-          if (currentZ - z2 <= preload) {
-            ++tileCount;
-            tile = tileSource.getTile(z2, x2, y2, pixelRatio, projection);
-            if (tile.getState() == TileState.IDLE) {
-              wantedTiles[tile.getKey()] = true;
-              if (!tileQueue.isKeyQueued(tile.getKey())) {
-                tileQueue.enqueue([
-                  tile,
-                  tileSourceKey,
-                  tileGrid.getTileCoordCenter(tile.tileCoord),
-                  tileResolution
-                ]);
-              }
-            }
-            if (tileCallback !== void 0) {
-              tileCallback(tile);
-            }
-          } else {
-            tileSource.useTile(z2, x2, y2, projection);
-          }
-        }
-      }
-    }
-    tileSource.updateCacheSize(tileCount, projection);
-  }
 }
 class TileLayer extends BaseTileLayer {
   /**
@@ -26552,8 +27030,13 @@ class TileLayer extends BaseTileLayer {
   constructor(options) {
     super(options);
   }
+  /**
+   * @override
+   */
   createRenderer() {
-    return new CanvasTileLayerRenderer(this);
+    return new CanvasTileLayerRenderer(this, {
+      cacheSize: this.getCacheSize()
+    });
   }
 }
 class VectorContext {
@@ -26919,6 +27402,7 @@ class CanvasImmediateRenderer extends VectorContext {
    *
    * @param {import("../../geom/Circle.js").default} geometry Circle geometry.
    * @api
+   * @override
    */
   drawCircle(geometry) {
     if (this.squaredTolerance_) {
@@ -26972,6 +27456,7 @@ class CanvasImmediateRenderer extends VectorContext {
    *
    * @param {import("../../style/Style.js").default} style The rendering style.
    * @api
+   * @override
    */
   setStyle(style) {
     this.setFillStrokeStyle(style.getFill(), style.getStroke());
@@ -26990,6 +27475,7 @@ class CanvasImmediateRenderer extends VectorContext {
    *
    * @param {import("../../geom/Geometry.js").default|import("../Feature.js").default} geometry The geometry to render.
    * @api
+   * @override
    */
   drawGeometry(geometry) {
     const type = geometry.getType();
@@ -27053,6 +27539,7 @@ class CanvasImmediateRenderer extends VectorContext {
    * @param {import("../../Feature.js").default} feature Feature.
    * @param {import("../../style/Style.js").default} style Style.
    * @api
+   * @override
    */
   drawFeature(feature, style) {
     const geometry = style.getGeometryFunction()(feature);
@@ -27067,6 +27554,7 @@ class CanvasImmediateRenderer extends VectorContext {
    * uses the current styles appropriate for each geometry in the collection.
    *
    * @param {import("../../geom/GeometryCollection.js").default} geometry Geometry collection.
+   * @override
    */
   drawGeometryCollection(geometry) {
     const geometries = geometry.getGeometriesArray();
@@ -27079,6 +27567,7 @@ class CanvasImmediateRenderer extends VectorContext {
    * the current style.
    *
    * @param {import("../../geom/Point.js").default|import("../Feature.js").default} geometry Point geometry.
+   * @override
    */
   drawPoint(geometry) {
     if (this.squaredTolerance_) {
@@ -27102,6 +27591,7 @@ class CanvasImmediateRenderer extends VectorContext {
    * uses the current style.
    *
    * @param {import("../../geom/MultiPoint.js").default|import("../Feature.js").default} geometry MultiPoint geometry.
+   * @override
    */
   drawMultiPoint(geometry) {
     if (this.squaredTolerance_) {
@@ -27125,6 +27615,7 @@ class CanvasImmediateRenderer extends VectorContext {
    * the current style.
    *
    * @param {import("../../geom/LineString.js").default|import("../Feature.js").default} geometry LineString geometry.
+   * @override
    */
   drawLineString(geometry) {
     if (this.squaredTolerance_) {
@@ -27161,6 +27652,7 @@ class CanvasImmediateRenderer extends VectorContext {
    * and uses the current style.
    *
    * @param {import("../../geom/MultiLineString.js").default|import("../Feature.js").default} geometry MultiLineString geometry.
+   * @override
    */
   drawMultiLineString(geometry) {
     if (this.squaredTolerance_) {
@@ -27206,6 +27698,7 @@ class CanvasImmediateRenderer extends VectorContext {
    * the current style.
    *
    * @param {import("../../geom/Polygon.js").default|import("../Feature.js").default} geometry Polygon geometry.
+   * @override
    */
   drawPolygon(geometry) {
     if (this.squaredTolerance_) {
@@ -27250,6 +27743,7 @@ class CanvasImmediateRenderer extends VectorContext {
    * Render MultiPolygon geometry into the canvas.  Rendering is immediate and
    * uses the current style.
    * @param {import("../../geom/MultiPolygon.js").default} geometry MultiPolygon geometry.
+   * @override
    */
   drawMultiPolygon(geometry) {
     if (this.squaredTolerance_) {
@@ -27404,6 +27898,7 @@ class CanvasImmediateRenderer extends VectorContext {
    *
    * @param {import("../../style/Fill.js").default} fillStyle Fill style.
    * @param {import("../../style/Stroke.js").default} strokeStyle Stroke style.
+   * @override
    */
   setFillStrokeStyle(fillStyle, strokeStyle) {
     if (!fillStyle) {
@@ -27445,6 +27940,7 @@ class CanvasImmediateRenderer extends VectorContext {
    * the image style.
    *
    * @param {import("../../style/Image.js").default} imageStyle Image style.
+   * @override
    */
   setImageStyle(imageStyle) {
     let imageSize;
@@ -27476,6 +27972,7 @@ class CanvasImmediateRenderer extends VectorContext {
    * remove the text style.
    *
    * @param {import("../../style/Text.js").default} textStyle Text style.
+   * @override
    */
   setTextStyle(textStyle) {
     if (!textStyle) {
@@ -28242,6 +28739,7 @@ class Link extends Interaction {
   }
   /**
    * @param {import("../Map.js").default|null} map Map.
+   * @override
    */
   setMap(map2) {
     const oldMap = this.getMap();
@@ -28597,6 +29095,7 @@ class FullScreen extends Control {
    * the map here.
    * @param {import("../Map.js").default|null} map Map.
    * @api
+   * @override
    */
   setMap(map2) {
     const oldMap = this.getMap();
@@ -28825,6 +29324,7 @@ class CanvasBuilder extends VectorContext {
    * @param {Function} renderer Renderer.
    * @param {Function} hitDetectionRenderer Renderer.
    * @param {number} [index] Render order index.
+   * @override
    */
   drawCustom(geometry, feature, renderer, hitDetectionRenderer, index) {
     this.beginGeometry(geometry, feature, index);
@@ -29048,6 +29548,7 @@ class CanvasBuilder extends VectorContext {
   /**
    * @param {import("../../style/Fill.js").default} fillStyle Fill style.
    * @param {import("../../style/Stroke.js").default} strokeStyle Stroke style.
+   * @override
    */
   setFillStrokeStyle(fillStyle, strokeStyle) {
     const state = this.state;
@@ -29222,6 +29723,7 @@ class CanvasImageBuilder extends CanvasBuilder {
    * @param {import("../../geom/Point.js").default|import("../Feature.js").default} pointGeometry Point geometry.
    * @param {import("../../Feature.js").FeatureLike} feature Feature.
    * @param {number} [index] Render order index.
+   * @override
    */
   drawPoint(pointGeometry, feature, index) {
     if (!this.image_ || this.maxExtent && !containsCoordinate(this.maxExtent, pointGeometry.getFlatCoordinates())) {
@@ -29279,6 +29781,7 @@ class CanvasImageBuilder extends CanvasBuilder {
    * @param {import("../../geom/MultiPoint.js").default|import("../Feature.js").default} multiPointGeometry MultiPoint geometry.
    * @param {import("../../Feature.js").FeatureLike} feature Feature.
    * @param {number} [index] Render order index.
+   * @override
    */
   drawMultiPoint(multiPointGeometry, feature, index) {
     if (!this.image_) {
@@ -29342,6 +29845,7 @@ class CanvasImageBuilder extends CanvasBuilder {
   }
   /**
    * @return {import("../canvas.js").SerializableInstructions} the serializable instructions.
+   * @override
    */
   finish() {
     this.reverseHitDetectionInstructions();
@@ -29363,6 +29867,7 @@ class CanvasImageBuilder extends CanvasBuilder {
   /**
    * @param {import("../../style/Image.js").default} imageStyle Image style.
    * @param {Object} [sharedData] Shared data.
+   * @override
    */
   setImageStyle(imageStyle, sharedData) {
     const anchor = imageStyle.getAnchor();
@@ -29426,6 +29931,7 @@ class CanvasLineStringBuilder extends CanvasBuilder {
    * @param {import("../../geom/LineString.js").default|import("../Feature.js").default} lineStringGeometry Line string geometry.
    * @param {import("../../Feature.js").FeatureLike} feature Feature.
    * @param {number} [index] Render order index.
+   * @override
    */
   drawLineString(lineStringGeometry, feature, index) {
     const state = this.state;
@@ -29464,6 +29970,7 @@ class CanvasLineStringBuilder extends CanvasBuilder {
    * @param {import("../../geom/MultiLineString.js").default|import("../Feature.js").default} multiLineStringGeometry MultiLineString geometry.
    * @param {import("../../Feature.js").FeatureLike} feature Feature.
    * @param {number} [index] Render order index.
+   * @override
    */
   drawMultiLineString(multiLineStringGeometry, feature, index) {
     const state = this.state;
@@ -29505,6 +30012,7 @@ class CanvasLineStringBuilder extends CanvasBuilder {
   }
   /**
    * @return {import("../canvas.js").SerializableInstructions} the serializable instructions.
+   * @override
    */
   finish() {
     const state = this.state;
@@ -29517,6 +30025,7 @@ class CanvasLineStringBuilder extends CanvasBuilder {
   }
   /**
    * @param {import("../canvas.js").FillStrokeState} state State.
+   * @override
    */
   applyStroke(state) {
     if (state.lastStroke != void 0 && state.lastStroke != this.coordinates.length) {
@@ -29591,6 +30100,7 @@ class CanvasPolygonBuilder extends CanvasBuilder {
    * @param {import("../../geom/Circle.js").default} circleGeometry Circle geometry.
    * @param {import("../../Feature.js").default} feature Feature.
    * @param {number} [index] Render order index.
+   * @override
    */
   drawCircle(circleGeometry, feature, index) {
     const state = this.state;
@@ -29647,6 +30157,7 @@ class CanvasPolygonBuilder extends CanvasBuilder {
    * @param {import("../../geom/Polygon.js").default|import("../Feature.js").default} polygonGeometry Polygon geometry.
    * @param {import("../../Feature.js").FeatureLike} feature Feature.
    * @param {number} [index] Render order index.
+   * @override
    */
   drawPolygon(polygonGeometry, feature, index) {
     const state = this.state;
@@ -29691,6 +30202,7 @@ class CanvasPolygonBuilder extends CanvasBuilder {
    * @param {import("../../geom/MultiPolygon.js").default} multiPolygonGeometry MultiPolygon geometry.
    * @param {import("../../Feature.js").FeatureLike} feature Feature.
    * @param {number} [index] Render order index.
+   * @override
    */
   drawMultiPolygon(multiPolygonGeometry, feature, index) {
     const state = this.state;
@@ -29735,6 +30247,7 @@ class CanvasPolygonBuilder extends CanvasBuilder {
   }
   /**
    * @return {import("../canvas.js").SerializableInstructions} the serializable instructions.
+   * @override
    */
   finish() {
     this.reverseHitDetectionInstructions();
@@ -29887,6 +30400,7 @@ class CanvasTextBuilder extends CanvasBuilder {
   }
   /**
    * @return {import("../canvas.js").SerializableInstructions} the serializable instructions.
+   * @override
    */
   finish() {
     const instructions = super.finish();
@@ -29899,6 +30413,7 @@ class CanvasTextBuilder extends CanvasBuilder {
    * @param {import("../../geom/SimpleGeometry.js").default|import("../Feature.js").default} geometry Geometry.
    * @param {import("../../Feature.js").FeatureLike} feature Feature.
    * @param {number} [index] Render order index.
+   * @override
    */
   drawText(geometry, feature, index) {
     const fillState = this.textFillState_;
@@ -30237,6 +30752,7 @@ class CanvasTextBuilder extends CanvasBuilder {
   /**
    * @param {import("../../style/Text.js").default} textStyle Text style.
    * @param {Object} [sharedData] Shared data.
+   * @override
    */
   setTextStyle(textStyle, sharedData) {
     let textState, fillState, strokeState;
@@ -30569,13 +31085,12 @@ class Executor {
       textState.scale[0] * pixelRatio,
       textState.scale[1] * pixelRatio
     ];
-    const textIsArray = Array.isArray(text);
     const align = textState.justify ? TEXT_ALIGN[textState.justify] : horizontalTextAlign(
       Array.isArray(text) ? text[0] : text,
       textState.textAlign || defaultTextAlign
     );
     const strokeWidth = strokeKey && strokeState.lineWidth ? strokeState.lineWidth : 0;
-    const chunks = textIsArray ? text : text.split("\n").reduce(createTextChunks, []);
+    const chunks = Array.isArray(text) ? text : String(text).split("\n").reduce(createTextChunks, []);
     const { width, height, widths, heights, lineWidths } = getTextDimensions(
       textState,
       chunks
@@ -30907,7 +31422,7 @@ class Executor {
    * @param {FeatureCallback<T>} [featureCallback] Feature callback.
    * @param {import("../../extent.js").Extent} [hitExtent] Only check
    *     features that intersect this extent.
-   * @param {import("rbush").default} [declutterTree] Declutter tree.
+   * @param {import("rbush").default<DeclutterEntry>} [declutterTree] Declutter tree.
    * @return {T|undefined} Callback result.
    * @template T
    */
@@ -31503,7 +32018,7 @@ class Executor {
    * @param {import("../../transform.js").Transform} transform Transform.
    * @param {number} viewRotation View rotation.
    * @param {boolean} snapToPixel Snap point symbols and text to integer pixels.
-   * @param {import("rbush").default} [declutterTree] Declutter tree.
+   * @param {import("rbush").default<DeclutterEntry>} [declutterTree] Declutter tree.
    */
   execute(context, scaledCanvasSize, transform2, viewRotation, snapToPixel, declutterTree) {
     this.viewRotation_ = viewRotation;
@@ -31765,7 +32280,7 @@ class ExecutorGroup {
    * @param {boolean} snapToPixel Snap point symbols and test to integer pixel.
    * @param {Array<import("../canvas.js").BuilderType>} [builderTypes] Ordered replay types to replay.
    *     Default is {@link module:ol/render/replay~ALL}
-   * @param {import("rbush").default|null} [declutterTree] Declutter tree.
+   * @param {import("rbush").default<import('./Executor.js').DeclutterEntry>|null} [declutterTree] Declutter tree.
    *     When set to null, no decluttering is done, even when the executor group has a `ZIndexContext`.
    */
   execute(targetContext, scaledCanvasSize, transform2, viewRotation, snapToPixel, builderTypes, declutterTree) {
@@ -32147,6 +32662,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
   /**
    * Render deferred instructions.
    * @param {import("../../Map.js").FrameState} frameState Frame state.
+   * @override
    */
   renderDeferredInternal(frameState) {
     if (!this.replayGroup_) {
@@ -32163,6 +32679,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
    * @param {import("../../Map.js").FrameState} frameState Frame state.
    * @param {HTMLElement|null} target Target that may be used to render content to.
    * @return {HTMLElement|null} The rendered element.
+   * @override
    */
   renderFrame(frameState, target) {
     const layerState = frameState.layerStatesArray[frameState.layerIndex];
@@ -32215,6 +32732,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
    * @param {import("../../pixel.js").Pixel} pixel Pixel.
    * @return {Promise<Array<import("../../Feature").default>>} Promise
    * that resolves with an array of features.
+   * @override
    */
   getFeatures(pixel) {
     return new Promise((resolve) => {
@@ -32308,6 +32826,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
    * @param {Array<import("../Map.js").HitMatch<T>>} matches The hit detected matches with tolerance.
    * @return {T|undefined} Callback result.
    * @template T
+   * @override
    */
   forEachFeatureAtCoordinate(coordinate, frameState, hitTolerance, callback, matches) {
     if (!this.replayGroup_) {
@@ -32362,6 +32881,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
   }
   /**
    * Perform action necessary to get the layer rendered after new fonts have loaded
+   * @override
    */
   handleFontsChanged() {
     const layer = this.getLayer();
@@ -32381,6 +32901,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
    * Determine whether render should be called.
    * @param {import("../../Map.js").FrameState} frameState Frame state.
    * @return {boolean} Layer is ready to be rendered.
+   * @override
    */
   prepareFrame(frameState) {
     const vectorLayer = this.getLayer();
@@ -32579,11 +33100,14 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
 }
 class VectorLayer extends BaseVectorLayer {
   /**
-   * @param {Options<FeatureType>} [options] Options.
+   * @param {Options<VectorSourceType, FeatureType>} [options] Options.
    */
   constructor(options) {
     super(options);
   }
+  /**
+   * @override
+   */
   createRenderer() {
     return new CanvasVectorLayerRenderer(this);
   }
@@ -32746,7 +33270,7 @@ class RBush2 {
     return createOrUpdate$2(data.minX, data.minY, data.maxX, data.maxY, extent);
   }
   /**
-   * @param {RBush} rbush R-Tree.
+   * @param {RBush<T>} rbush R-Tree.
    */
   concat(rbush) {
     this.rbush_.load(rbush.rbush_.all());
@@ -33476,8 +34000,8 @@ function xhr(url, format) {
 class VectorSourceEvent extends BaseEvent {
   /**
    * @param {string} type Type.
-   * @param {FeatureClass} [feature] Feature.
-   * @param {Array<FeatureClass>} [features] Features.
+   * @param {FeatureType} [feature] Feature.
+   * @param {Array<FeatureType>} [features] Features.
    */
   constructor(type, feature, features) {
     super(type);
@@ -33502,7 +34026,7 @@ class VectorSource extends Source {
     this.once;
     this.un;
     this.loader_ = VOID;
-    this.format_ = options.format;
+    this.format_ = options.format || null;
     this.overlaps_ = options.overlaps === void 0 ? true : options.overlaps;
     this.url_ = options.url;
     if (options.loader !== void 0) {
@@ -33545,7 +34069,7 @@ class VectorSource extends Source {
    * instead. A feature will not be added to the source if feature with
    * the same id is already there. The reason for this behavior is to avoid
    * feature duplication when using bbox or tile loading strategies.
-   * Note: this also applies if an {@link module:ol/Collection~Collection} is used for features,
+   * Note: this also applies if a {@link module:ol/Collection~Collection} is used for features,
    * meaning that if a feature with a duplicate id is added in the collection, it will
    * be removed from it right away.
    * @param {FeatureType} feature Feature to add.
@@ -33893,7 +34417,7 @@ class VectorSource extends Source {
   /**
    * Get the features collection associated with this source. Will be `null`
    * unless the source was configured with `useSpatialIndex` set to `false`, or
-   * with an {@link module:ol/Collection~Collection} as `features`.
+   * with a {@link module:ol/Collection~Collection} as `features`.
    * @return {Collection<FeatureType>|null} The collection of features.
    * @api
    */
@@ -34050,7 +34574,7 @@ class VectorSource extends Source {
   /**
    * Get the format associated with this source.
    *
-   * @return {import("../format/Feature.js").default<import('../format/Feature.js').FeatureToFeatureClass<FeatureType>>|undefined} The feature format.
+   * @return {import("../format/Feature.js").default<FeatureType>|null}} The feature format.
    * @api
    */
   getFormat() {
@@ -34195,6 +34719,9 @@ class VectorSource extends Source {
     }
     this.loading = this.loader_.length < 4 ? false : this.loadingExtentsCount_ > 0;
   }
+  /**
+   * @override
+   */
   refresh() {
     this.clear(true);
     this.loadedExtentsRtree_.clear();
@@ -34226,15 +34753,11 @@ class VectorSource extends Source {
    * @api
    */
   removeFeatures(features) {
-    const removedFeatures = [];
+    let removed = false;
     for (let i = 0, ii = features.length; i < ii; ++i) {
-      const feature = features[i];
-      const removedFeature = this.removeFeatureInternal(feature);
-      if (removedFeature) {
-        removedFeatures.push(removedFeature);
-      }
+      removed = this.removeFeatureInternal(features[i]) || removed;
     }
-    if (removedFeatures.length > 0) {
+    if (removed) {
       this.changed();
     }
   }
@@ -34249,22 +34772,21 @@ class VectorSource extends Source {
     if (!feature) {
       return;
     }
-    const result = this.removeFeatureInternal(feature);
-    if (result) {
+    const removed = this.removeFeatureInternal(feature);
+    if (removed) {
       this.changed();
     }
   }
   /**
    * Remove feature without firing a `change` event.
    * @param {FeatureType} feature Feature.
-   * @return {FeatureType|undefined} The removed feature
-   *     (or undefined if the feature was not found).
+   * @return {boolean} True if the feature was removed, false if it was not found.
    * @protected
    */
   removeFeatureInternal(feature) {
     const featureKey = getUid(feature);
     if (!(featureKey in this.uidIndex_)) {
-      return;
+      return false;
     }
     if (featureKey in this.nullGeometryFeatures_) {
       delete this.nullGeometryFeatures_[featureKey];
@@ -34295,28 +34817,21 @@ class VectorSource extends Source {
         new VectorSourceEvent(VectorEventType.REMOVEFEATURE, feature)
       );
     }
-    return feature;
+    return true;
   }
   /**
    * Remove a feature from the id index.  Called internally when the feature id
    * may have changed.
    * @param {FeatureType} feature The feature.
-   * @return {boolean} Removed the feature from the index.
    * @private
    */
   removeFromIdIndex_(feature) {
-    let removed = false;
     for (const id in this.idIndex_) {
-      const indexedFeature = this.idIndex_[id];
-      if (feature instanceof RenderFeature && Array.isArray(indexedFeature) && indexedFeature.includes(feature)) {
-        indexedFeature.splice(indexedFeature.indexOf(feature), 1);
-      } else if (this.idIndex_[id] === feature) {
+      if (this.idIndex_[id] === feature) {
         delete this.idIndex_[id];
-        removed = true;
         break;
       }
     }
-    return removed;
   }
   /**
    * Set the new loader of the source. The next render cycle will use the

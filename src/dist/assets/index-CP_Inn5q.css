@@ -291,6 +291,9 @@
 .ol-overviewmap .ol-overviewmap-box:hover {
   cursor: move;
 }
+.ol-overviewmap .ol-viewport:hover {
+  cursor: pointer;
+}
 /*!
   * ol-contextmenu - v5.4.0
   * https://github.com/jonataswalker/ol-contextmenu
