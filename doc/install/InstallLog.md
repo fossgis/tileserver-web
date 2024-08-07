@@ -17,18 +17,25 @@ https://www.npmjs.com/package/vite-plugin-favicons-inject
 
 ## Importdaten
 
+Am Ende der Datei `ansibel_openstreetmap.de/roles/tile/templates/expire-tiles.j2`
+
 ```bash
-sudo -u _tirex psql -d osm -t -c "SELECT url, TO_CHAR(importdate,'dd.mm.yyyy hh:mm') FROM planet_osm_replication_status" > /srv/tile/site/textimport/importdate.txt
-sudo -u _tirex psql -d osm -t -c "SELECT name, TO_CHAR(TO_DATE(last_modified, 'Dy, DD Mon YYYY HH24:MI:SS "GMT"'), 'dd.mm.yyyy') FROM external_data" >> /srv/tile/site/importdate.txt
-cat /srv/tile/site/importdate.txt
+psql -d osm -t -c "SELECT url, TO_CHAR(importdate, 'DD.MM.YYYY HH24:MI:SS TZ') FROM planet_osm_replication_status" > "$FILE"
+psql -d osm -t -c "SELECT name, TO_CHAR(TO_DATE(last_modified, 'Dy, DD Mon YYYY HH24:MI:SS \"GMT\"'), 'DD.MM.YYYY') FROM external_data" >> "$FILE"
+date "+Letzter Aufruf von 'Expire': %d.%m.%y %H:%M:%S (UTC)" >> "$FILE"
 ```
 
-```txt
- http://download.geofabrik.de/europe/germany/brandenburg-updates | 15.06.2024 10:06
+In diesem Repo in der Datei `osm-server/tileserver-web/src/js/main.js`
 
- simplified_water_polygons           | 30.05.2024
- water_polygons                      | 30.05.2024
- icesheet_polygons                   | 30.05.2024
- icesheet_outlines                   | 30.05.2024
- ne_110m_admin_0_boundary_lines_land | 13.05.2022
+```js
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const response = await fetch('/textimport/importdate.txt');
+        const text = await response.text();
+        document.getElementById('db-import-dates').innerText =
+            text.trim().replace(/\n\n|\r/g, "; ").replace(/\n|\r/g, "; ").replace(/[\|]/g, "-");
+    } catch (error) {
+        console.error('Fehler beim Laden der Textdatei (/textimport/importdate.txt):', error);
+    }
+});
 ```
