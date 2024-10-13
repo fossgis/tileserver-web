@@ -5238,13 +5238,12 @@ class Projection {
     return this.getPointResolutionFunc_;
   }
 }
-const Projection$1 = Projection;
 const RADIUS$1 = 6378137;
 const HALF_SIZE = Math.PI * RADIUS$1;
 const EXTENT$1 = [-HALF_SIZE, -HALF_SIZE, HALF_SIZE, HALF_SIZE];
 const WORLD_EXTENT = [-180, -85, 180, 85];
 const MAX_SAFE_Y = RADIUS$1 * Math.log(Math.tan(Math.PI / 2));
-class EPSG3857Projection extends Projection$1 {
+class EPSG3857Projection extends Projection {
   /**
    * @param {string} code Code.
    */
@@ -5269,9 +5268,10 @@ const PROJECTIONS$1 = [
   new EPSG3857Projection("http://www.opengis.net/def/crs/EPSG/0/3857"),
   new EPSG3857Projection("http://www.opengis.net/gml/srs/epsg.xml#3857")
 ];
-function fromEPSG4326(input, output, dimension) {
+function fromEPSG4326(input, output, dimension, stride) {
   const length = input.length;
   dimension = dimension > 1 ? dimension : 2;
+  stride = stride ?? dimension;
   if (output === void 0) {
     if (dimension > 2) {
       output = input.slice();
@@ -5279,7 +5279,7 @@ function fromEPSG4326(input, output, dimension) {
       output = new Array(length);
     }
   }
-  for (let i = 0; i < length; i += dimension) {
+  for (let i = 0; i < length; i += stride) {
     output[i] = HALF_SIZE * input[i] / 180;
     let y2 = RADIUS$1 * Math.log(Math.tan(Math.PI * (+input[i + 1] + 90) / 360));
     if (y2 > MAX_SAFE_Y) {
@@ -5291,9 +5291,10 @@ function fromEPSG4326(input, output, dimension) {
   }
   return output;
 }
-function toEPSG4326(input, output, dimension) {
+function toEPSG4326(input, output, dimension, stride) {
   const length = input.length;
   dimension = dimension > 1 ? dimension : 2;
+  stride = stride ?? dimension;
   if (output === void 0) {
     if (dimension > 2) {
       output = input.slice();
@@ -5301,7 +5302,7 @@ function toEPSG4326(input, output, dimension) {
       output = new Array(length);
     }
   }
-  for (let i = 0; i < length; i += dimension) {
+  for (let i = 0; i < length; i += stride) {
     output[i] = 180 * input[i] / HALF_SIZE;
     output[i + 1] = 360 * Math.atan(Math.exp(input[i + 1] / RADIUS$1)) / Math.PI - 90;
   }
@@ -5310,7 +5311,7 @@ function toEPSG4326(input, output, dimension) {
 const RADIUS = 6378137;
 const EXTENT = [-180, -90, 180, 90];
 const METERS_PER_UNIT = Math.PI * RADIUS / 180;
-class EPSG4326Projection extends Projection$1 {
+class EPSG4326Projection extends Projection {
   /**
    * @param {string} code Code.
    * @param {string} [axisOrientation] Axis orientation.
@@ -6077,17 +6078,19 @@ function createTransformFromCoordinateTransform(coordTransform) {
     /**
      * @param {Array<number>} input Input.
      * @param {Array<number>} [output] Output.
-     * @param {number} [dimension] Dimension.
+     * @param {number} [dimension] Dimensions that should be transformed.
+     * @param {number} [stride] Stride.
      * @return {Array<number>} Output.
      */
-    function(input, output, dimension) {
+    function(input, output, dimension, stride) {
       const length = input.length;
       dimension = dimension !== void 0 ? dimension : 2;
+      stride = stride ?? dimension;
       output = output !== void 0 ? output : new Array(length);
-      for (let i = 0; i < length; i += dimension) {
+      for (let i = 0; i < length; i += stride) {
         const point = coordTransform(input.slice(i, i + dimension));
         const pointLength = point.length;
-        for (let j = 0, jj = dimension; j < jj; ++j) {
+        for (let j = 0, jj = stride; j < jj; ++j) {
           output[i + j] = j >= pointLength ? input[i + j] : point[j];
         }
       }
@@ -6265,7 +6268,7 @@ addCommon();
 const proj = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   METERS_PER_UNIT: METERS_PER_UNIT$1,
-  Projection: Projection$1,
+  Projection,
   addCommon,
   addCoordinateTransforms,
   addEquivalentProjections,
@@ -7938,14 +7941,18 @@ function toString$1(mat) {
   ).join(", ") + ")";
   return transformString;
 }
-function transform2D(flatCoordinates, offset2, end2, stride, transform2, dest) {
+function transform2D(flatCoordinates, offset2, end2, stride, transform2, dest, destinationStride) {
   dest = dest ? dest : [];
+  destinationStride = destinationStride ? destinationStride : 2;
   let i = 0;
   for (let j = offset2; j < end2; j += stride) {
     const x2 = flatCoordinates[j];
     const y2 = flatCoordinates[j + 1];
     dest[i++] = transform2[0] * x2 + transform2[2] * y2 + transform2[4];
     dest[i++] = transform2[1] * x2 + transform2[3] * y2 + transform2[5];
+    for (let k2 = 2; k2 < destinationStride; k2++) {
+      dest[i++] = flatCoordinates[j + k2];
+    }
   }
   if (dest && dest.length != i) {
     dest.length = i;
@@ -8404,7 +8411,12 @@ class SimpleGeometry extends Geometry {
    */
   applyTransform(transformFn) {
     if (this.flatCoordinates) {
-      transformFn(this.flatCoordinates, this.flatCoordinates, this.stride);
+      transformFn(
+        this.flatCoordinates,
+        this.flatCoordinates,
+        this.layout.startsWith("XYZ") ? 3 : 2,
+        this.stride
+      );
       this.changed();
     }
   }
@@ -10678,9 +10690,10 @@ class View extends BaseObject {
    * @api
    */
   getResolutionForZoom(zoom) {
-    if (this.resolutions_) {
-      if (this.resolutions_.length <= 1) {
-        return 0;
+    var _a;
+    if ((_a = this.resolutions_) == null ? void 0 : _a.length) {
+      if (this.resolutions_.length === 1) {
+        return this.resolutions_[0];
       }
       const baseLevel = clamp(
         Math.floor(zoom),
@@ -11652,25 +11665,30 @@ class Layer extends BaseLayer {
       this.mapPrecomposeKey_ = listen(
         map2,
         RenderEventType.PRECOMPOSE,
-        (evt) => {
-          const renderEvent = (
-            /** @type {import("../render/Event.js").default} */
-            evt
-          );
-          const layerStatesArray = renderEvent.frameState.layerStatesArray;
-          const layerState = this.getLayerState(false);
-          assert(
-            !layerStatesArray.some(function(arrayLayerState) {
-              return arrayLayerState.layer === layerState.layer;
-            }),
-            "A layer can only be added to the map once. Use either `layer.setMap()` or `map.addLayer()`, not both."
-          );
-          layerStatesArray.push(layerState);
-        }
+        this.handlePrecompose_,
+        this
       );
       this.mapRenderKey_ = listen(this, EventType.CHANGE, map2.render, map2);
       this.changed();
     }
+  }
+  /**
+   * @param {import("../events/Event.js").default} renderEvent Render event
+   * @private
+   */
+  handlePrecompose_(renderEvent) {
+    const layerStatesArray = (
+      /** @type {import("../render/Event.js").default} */
+      renderEvent.frameState.layerStatesArray
+    );
+    const layerState = this.getLayerState(false);
+    assert(
+      !layerStatesArray.some(
+        (arrayLayerState) => arrayLayerState.layer === layerState.layer
+      ),
+      "A layer can only be added to the map once. Use either `layer.setMap()` or `map.addLayer()`, not both."
+    );
+    layerStatesArray.push(layerState);
   }
   /**
    * Set the layer source.
@@ -12869,6 +12887,7 @@ function rgba(color) {
   values.push(Math.min(Math.max(parsed.alpha, 0), 1));
   return values;
 }
+const NO_COLOR = [NaN, NaN, NaN, 0];
 function asString(color) {
   if (typeof color === "string") {
     return color;
@@ -12897,6 +12916,9 @@ function lchaToRgba(color) {
   return output;
 }
 function fromString(s) {
+  if (s === "none") {
+    return NO_COLOR;
+  }
   if (cache.hasOwnProperty(s)) {
     return cache[s];
   }
@@ -13383,10 +13405,11 @@ class IconImage extends Target {
       return;
     }
     const image = this.image_;
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.ceil(image.width * pixelRatio);
-    canvas.height = Math.ceil(image.height * pixelRatio);
-    const ctx = canvas.getContext("2d");
+    const ctx = createCanvasContext2D(
+      Math.ceil(image.width * pixelRatio),
+      Math.ceil(image.height * pixelRatio)
+    );
+    const canvas = ctx.canvas;
     ctx.scale(pixelRatio, pixelRatio);
     ctx.drawImage(image, 0, 0);
     ctx.globalCompositeOperation = "multiply";
@@ -15740,6 +15763,7 @@ const Ops = {
   Var: "var",
   Concat: "concat",
   GeometryType: "geometry-type",
+  LineMetric: "line-metric",
   Any: "any",
   All: "all",
   Not: "!",
@@ -15780,17 +15804,20 @@ const Ops = {
   Id: "id",
   Band: "band",
   Palette: "palette",
-  ToString: "to-string"
+  ToString: "to-string",
+  Has: "has"
 };
 const parsers = {
   [Ops.Get]: createCallExpressionParser(hasArgsCount(1, Infinity), withGetArgs),
   [Ops.Var]: createCallExpressionParser(hasArgsCount(1, 1), withVarArgs),
+  [Ops.Has]: createCallExpressionParser(hasArgsCount(1, Infinity), withGetArgs),
   [Ops.Id]: createCallExpressionParser(usesFeatureId, withNoArgs),
   [Ops.Concat]: createCallExpressionParser(
     hasArgsCount(2, Infinity),
     withArgsOfType(StringType)
   ),
   [Ops.GeometryType]: createCallExpressionParser(usesGeometryType, withNoArgs),
+  [Ops.LineMetric]: createCallExpressionParser(withNoArgs),
   [Ops.Resolution]: createCallExpressionParser(withNoArgs),
   [Ops.Zoom]: createCallExpressionParser(withNoArgs),
   [Ops.Time]: createCallExpressionParser(withNoArgs),
@@ -16305,7 +16332,8 @@ function compileExpression(expression, context) {
       return compileAssertionExpression(expression);
     }
     case Ops.Get:
-    case Ops.Var: {
+    case Ops.Var:
+    case Ops.Has: {
       return compileAccessorExpression(expression);
     }
     case Ops.Id: {
@@ -16436,6 +16464,30 @@ function compileAccessorExpression(expression, context) {
     }
     case Ops.Var: {
       return (context2) => context2.variables[name];
+    }
+    case Ops.Has: {
+      return (context2) => {
+        const args = expression.args;
+        if (!(name in context2.properties)) {
+          return false;
+        }
+        let value = context2.properties[name];
+        for (let i = 1, ii = args.length; i < ii; ++i) {
+          const keyExpression = (
+            /** @type {LiteralExpression} */
+            args[i]
+          );
+          const key = (
+            /** @type {string|number} */
+            keyExpression.value
+          );
+          if (!value || !Object.hasOwn(value, key)) {
+            return false;
+          }
+          value = value[key];
+        }
+        return true;
+      };
     }
     default: {
       throw new Error(`Unsupported accessor operator ${expression.operator}`);
@@ -16910,7 +16962,7 @@ function buildFill(flatStyle, prefix, context) {
   const fill = new Fill();
   return function(context2) {
     const color = evaluateColor(context2);
-    if (color === "none") {
+    if (color === NO_COLOR) {
       return null;
     }
     fill.setColor(color);
@@ -16960,7 +17012,7 @@ function buildStroke(flatStyle, prefix, context) {
   return function(context2) {
     if (evaluateColor) {
       const color = evaluateColor(context2);
-      if (color === "none") {
+      if (color === NO_COLOR) {
         return null;
       }
       stroke.setColor(color);
@@ -17990,7 +18042,8 @@ class CompositeMapRenderer extends MapRenderer {
     this.fontChangeListenerKey_ = listen(
       checkedFonts,
       ObjectEventType.PROPERTYCHANGE,
-      map2.redrawText.bind(map2)
+      map2.redrawText,
+      map2
     );
     this.element_ = document.createElement("div");
     const style = this.element_.style;
@@ -19208,6 +19261,7 @@ class Attribution extends Control {
     if (!this.collapsible_) {
       this.collapsed_ = false;
     }
+    this.attributions_ = options.attributions;
     const className = options.className !== void 0 ? options.className : "ol-attribution";
     const tipLabel = options.tipLabel !== void 0 ? options.tipLabel : "Attributions";
     const expandClassName = options.expandClassName !== void 0 ? options.expandClassName : className + "-expand";
@@ -19255,9 +19309,12 @@ class Attribution extends Control {
    */
   collectSourceAttributions_(frameState) {
     const layers = this.getMap().getAllLayers();
-    const visibleAttributions = Array.from(
-      new Set(layers.flatMap((layer) => layer.getAttributions(frameState)))
+    const visibleAttributions = new Set(
+      layers.flatMap((layer) => layer.getAttributions(frameState))
     );
+    if (this.attributions_ !== void 0) {
+      Array.isArray(this.attributions_) ? this.attributions_.forEach((item) => visibleAttributions.add(item)) : visibleAttributions.add(this.attributions_);
+    }
     if (!this.overrideCollapsible_) {
       const collapsible = !layers.some(
         (layer) => {
@@ -19267,7 +19324,7 @@ class Attribution extends Control {
       );
       this.setCollapsible(collapsible);
     }
-    return visibleAttributions;
+    return Array.from(visibleAttributions);
   }
   /**
    * @private
@@ -19871,11 +19928,15 @@ const altShiftKeysOnly = function(mapBrowserEvent) {
 };
 const focus = function(event) {
   const targetElement = event.map.getTargetElement();
+  const rootNode = targetElement.getRootNode();
   const activeElement = event.map.getOwnerDocument().activeElement;
-  return targetElement.contains(activeElement);
+  return rootNode instanceof ShadowRoot ? rootNode.host.contains(activeElement) : targetElement.contains(activeElement);
 };
 const focusWithTabindex = function(event) {
-  return event.map.getTargetElement().hasAttribute("tabindex") ? focus(event) : true;
+  const targetElement = event.map.getTargetElement();
+  const rootNode = targetElement.getRootNode();
+  const tabIndexCandidate = rootNode instanceof ShadowRoot ? rootNode.host : targetElement;
+  return tabIndexCandidate.hasAttribute("tabindex") ? focus(event) : true;
 };
 const always = TRUE;
 const mouseActionButton = function(mapBrowserEvent) {
@@ -20266,15 +20327,15 @@ class DragBox extends PointerInteraction {
     this.on;
     this.once;
     this.un;
-    options = options ? options : {};
+    options = options ?? {};
     this.box_ = new RenderBox(options.className || "ol-dragbox");
-    this.minArea_ = options.minArea !== void 0 ? options.minArea : 64;
+    this.minArea_ = options.minArea ?? 64;
     if (options.onBoxEnd) {
       this.onBoxEnd = options.onBoxEnd;
     }
     this.startPixel_ = null;
-    this.condition_ = options.condition ? options.condition : mouseActionButton;
-    this.boxEndCondition_ = options.boxEndCondition ? options.boxEndCondition : this.defaultBoxEndCondition;
+    this.condition_ = options.condition ?? mouseActionButton;
+    this.boxEndCondition_ = options.boxEndCondition ?? this.defaultBoxEndCondition;
   }
   /**
    * The default condition for determining whether the boxend event
@@ -20326,7 +20387,6 @@ class DragBox extends PointerInteraction {
     if (!this.startPixel_) {
       return false;
     }
-    this.box_.setMap(null);
     const completeBox = this.boxEndCondition_(
       mapBrowserEvent,
       this.startPixel_,
@@ -20342,6 +20402,8 @@ class DragBox extends PointerInteraction {
         mapBrowserEvent
       )
     );
+    this.box_.setMap(null);
+    this.startPixel_ = null;
     return false;
   }
   /**
@@ -20390,6 +20452,23 @@ class DragBox extends PointerInteraction {
       }
     }
     super.setActive(active);
+  }
+  /**
+   * @param {import("../Map.js").default|null} map Map.
+   * @override
+   */
+  setMap(map2) {
+    const oldMap = this.getMap();
+    if (oldMap) {
+      this.box_.setMap(null);
+      if (this.startPixel_) {
+        this.dispatchEvent(
+          new DragBoxEvent(DragBoxEventType.BOXCANCEL, this.startPixel_, null)
+        );
+        this.startPixel_ = null;
+      }
+    }
+    super.setMap(map2);
   }
 }
 class DragZoom extends DragBox {
@@ -20642,7 +20721,7 @@ class MouseWheelZoom extends Interaction {
     view.endInteraction(
       void 0,
       this.lastDelta_ ? this.lastDelta_ > 0 ? 1 : -1 : 0,
-      this.lastAnchor_
+      this.lastAnchor_ ? map2.getCoordinateFromPixel(this.lastAnchor_) : null
     );
   }
   /**
@@ -20667,7 +20746,7 @@ class MouseWheelZoom extends Interaction {
     );
     wheelEvent.preventDefault();
     if (this.useAnchor_) {
-      this.lastAnchor_ = mapBrowserEvent.coordinate;
+      this.lastAnchor_ = mapBrowserEvent.pixel;
     }
     let delta;
     if (mapBrowserEvent.type == EventType.WHEEL) {
@@ -20704,7 +20783,10 @@ class MouseWheelZoom extends Interaction {
         this.endInteraction_.bind(this),
         this.timeout_
       );
-      view.adjustZoom(-delta / this.deltaPerZoom_, this.lastAnchor_);
+      view.adjustZoom(
+        -delta / this.deltaPerZoom_,
+        this.lastAnchor_ ? map2.getCoordinateFromPixel(this.lastAnchor_) : null
+      );
       this.startTime_ = now;
       return false;
     }
@@ -20734,7 +20816,12 @@ class MouseWheelZoom extends Interaction {
     if (view.getConstrainResolution() || this.constrainResolution_) {
       delta = delta ? delta > 0 ? 1 : -1 : 0;
     }
-    zoomByDelta(view, delta, this.lastAnchor_, this.duration_);
+    zoomByDelta(
+      view,
+      delta,
+      this.lastAnchor_ ? map2.getCoordinateFromPixel(this.lastAnchor_) : null,
+      this.duration_
+    );
     this.mode_ = void 0;
     this.totalDelta_ = 0;
     this.lastAnchor_ = null;
@@ -21680,6 +21767,7 @@ let Map$1 = class Map2 extends BaseObject {
         /** @type {Node} */
         originalEvent.target
       );
+      const currentDoc = rootNode instanceof ShadowRoot ? rootNode.host === target ? rootNode.host.ownerDocument : rootNode : rootNode === doc ? doc.documentElement : rootNode;
       if (
         // Abort if the target is a child of the container for elements whose events are not meant
         // to be handled by map interactions.
@@ -21687,7 +21775,7 @@ let Map$1 = class Map2 extends BaseObject {
         // It's possible for the target to no longer be in the page if it has been removed in an
         // event listener, this might happen in a Control that recreates it's content based on
         // user interaction either manually or via a render in something like https://reactjs.org/
-        !(rootNode === doc ? doc.documentElement : rootNode).contains(target)
+        !currentDoc.contains(target)
       ) {
         return;
       }
@@ -21834,7 +21922,14 @@ let Map$1 = class Map2 extends BaseObject {
         this.boundHandleBrowserEvent_,
         PASSIVE_EVENT_LISTENERS ? { passive: false } : false
       );
-      const keyboardEventTarget = !this.keyboardEventTarget_ ? targetElement : this.keyboardEventTarget_;
+      let keyboardEventTarget;
+      if (!this.keyboardEventTarget_) {
+        const targetRoot = targetElement.getRootNode();
+        const targetCandidate = targetRoot instanceof ShadowRoot ? targetRoot.host : targetElement;
+        keyboardEventTarget = targetCandidate;
+      } else {
+        keyboardEventTarget = this.keyboardEventTarget_;
+      }
       this.targetChangeHandlerKeys_ = [
         listen(
           keyboardEventTarget,
@@ -22122,6 +22217,9 @@ let Map$1 = class Map2 extends BaseObject {
   }
   /**
    * Set the target element to render this map into.
+   * For accessibility (focus and keyboard events for map navigation), the `target` element must have a
+   *  properly configured `tabindex` attribute. If the `target` element is inside a Shadow DOM, the
+   *  `tabindex` atribute must be set on the custom element's host element.
    * @param {HTMLElement|string} [target] The Element or id of the Element
    *     that the map is rendered in.
    * @observable
@@ -22377,6 +22475,13 @@ class Tile extends Target {
       this.transitionStarts_[id] = -1;
     }
   }
+  /**
+   * @override
+   */
+  disposeInternal() {
+    this.release();
+    super.disposeInternal();
+  }
 }
 class ImageTile extends Tile {
   /**
@@ -22512,6 +22617,14 @@ class ImageTile extends Tile {
       this.unlisten_();
       this.unlisten_ = null;
     }
+  }
+  /**
+   * @override
+   */
+  disposeInternal() {
+    this.unlistenImage_();
+    this.image_ = null;
+    super.disposeInternal();
   }
 }
 function getBlankImage() {
@@ -23338,315 +23451,6 @@ class ReprojTile extends Tile {
     super.release();
   }
 }
-class LRUCache {
-  /**
-   * @param {number} [highWaterMark] High water mark.
-   */
-  constructor(highWaterMark) {
-    this.highWaterMark = highWaterMark !== void 0 ? highWaterMark : 2048;
-    this.count_ = 0;
-    this.entries_ = {};
-    this.oldest_ = null;
-    this.newest_ = null;
-  }
-  /**
-   * @return {boolean} Can expire cache.
-   */
-  canExpireCache() {
-    return this.highWaterMark > 0 && this.getCount() > this.highWaterMark;
-  }
-  /**
-   * Expire the cache.
-   * @param {!Object<string, boolean>} [keep] Keys to keep. To be implemented by subclasses.
-   */
-  expireCache(keep) {
-    while (this.canExpireCache()) {
-      this.pop();
-    }
-  }
-  /**
-   * FIXME empty description for jsdoc
-   */
-  clear() {
-    this.count_ = 0;
-    this.entries_ = {};
-    this.oldest_ = null;
-    this.newest_ = null;
-  }
-  /**
-   * @param {string} key Key.
-   * @return {boolean} Contains key.
-   */
-  containsKey(key) {
-    return this.entries_.hasOwnProperty(key);
-  }
-  /**
-   * @param {function(T, string, LRUCache<T>): ?} f The function
-   *     to call for every entry from the oldest to the newer. This function takes
-   *     3 arguments (the entry value, the entry key and the LRUCache object).
-   *     The return value is ignored.
-   */
-  forEach(f) {
-    let entry = this.oldest_;
-    while (entry) {
-      f(entry.value_, entry.key_, this);
-      entry = entry.newer;
-    }
-  }
-  /**
-   * @param {string} key Key.
-   * @param {*} [options] Options (reserved for subclasses).
-   * @return {T} Value.
-   */
-  get(key, options) {
-    const entry = this.entries_[key];
-    assert(
-      entry !== void 0,
-      "Tried to get a value for a key that does not exist in the cache"
-    );
-    if (entry === this.newest_) {
-      return entry.value_;
-    }
-    if (entry === this.oldest_) {
-      this.oldest_ = /** @type {Entry} */
-      this.oldest_.newer;
-      this.oldest_.older = null;
-    } else {
-      entry.newer.older = entry.older;
-      entry.older.newer = entry.newer;
-    }
-    entry.newer = null;
-    entry.older = this.newest_;
-    this.newest_.newer = entry;
-    this.newest_ = entry;
-    return entry.value_;
-  }
-  /**
-   * Remove an entry from the cache.
-   * @param {string} key The entry key.
-   * @return {T} The removed entry.
-   */
-  remove(key) {
-    const entry = this.entries_[key];
-    assert(
-      entry !== void 0,
-      "Tried to get a value for a key that does not exist in the cache"
-    );
-    if (entry === this.newest_) {
-      this.newest_ = /** @type {Entry} */
-      entry.older;
-      if (this.newest_) {
-        this.newest_.newer = null;
-      }
-    } else if (entry === this.oldest_) {
-      this.oldest_ = /** @type {Entry} */
-      entry.newer;
-      if (this.oldest_) {
-        this.oldest_.older = null;
-      }
-    } else {
-      entry.newer.older = entry.older;
-      entry.older.newer = entry.newer;
-    }
-    delete this.entries_[key];
-    --this.count_;
-    return entry.value_;
-  }
-  /**
-   * @return {number} Count.
-   */
-  getCount() {
-    return this.count_;
-  }
-  /**
-   * @return {Array<string>} Keys.
-   */
-  getKeys() {
-    const keys = new Array(this.count_);
-    let i = 0;
-    let entry;
-    for (entry = this.newest_; entry; entry = entry.older) {
-      keys[i++] = entry.key_;
-    }
-    return keys;
-  }
-  /**
-   * @return {Array<T>} Values.
-   */
-  getValues() {
-    const values = new Array(this.count_);
-    let i = 0;
-    let entry;
-    for (entry = this.newest_; entry; entry = entry.older) {
-      values[i++] = entry.value_;
-    }
-    return values;
-  }
-  /**
-   * @return {T} Last value.
-   */
-  peekLast() {
-    return this.oldest_.value_;
-  }
-  /**
-   * @return {string} Last key.
-   */
-  peekLastKey() {
-    return this.oldest_.key_;
-  }
-  /**
-   * Get the key of the newest item in the cache.  Throws if the cache is empty.
-   * @return {string} The newest key.
-   */
-  peekFirstKey() {
-    return this.newest_.key_;
-  }
-  /**
-   * Return an entry without updating least recently used time.
-   * @param {string} key Key.
-   * @return {T|undefined} Value.
-   */
-  peek(key) {
-    var _a;
-    return (_a = this.entries_[key]) == null ? void 0 : _a.value_;
-  }
-  /**
-   * @return {T} value Value.
-   */
-  pop() {
-    const entry = this.oldest_;
-    delete this.entries_[entry.key_];
-    if (entry.newer) {
-      entry.newer.older = null;
-    }
-    this.oldest_ = /** @type {Entry} */
-    entry.newer;
-    if (!this.oldest_) {
-      this.newest_ = null;
-    }
-    --this.count_;
-    return entry.value_;
-  }
-  /**
-   * @param {string} key Key.
-   * @param {T} value Value.
-   */
-  replace(key, value) {
-    this.get(key);
-    this.entries_[key].value_ = value;
-  }
-  /**
-   * @param {string} key Key.
-   * @param {T} value Value.
-   */
-  set(key, value) {
-    assert(
-      !(key in this.entries_),
-      "Tried to set a value for a key that is used already"
-    );
-    const entry = {
-      key_: key,
-      newer: null,
-      older: this.newest_,
-      value_: value
-    };
-    if (!this.newest_) {
-      this.oldest_ = entry;
-    } else {
-      this.newest_.newer = entry;
-    }
-    this.newest_ = entry;
-    this.entries_[key] = entry;
-    ++this.count_;
-  }
-  /**
-   * Set a maximum number of entries for the cache.
-   * @param {number} size Cache size.
-   * @api
-   */
-  setSize(size) {
-    this.highWaterMark = size;
-  }
-}
-function createOrUpdate$1(z2, x2, y2, tileCoord) {
-  if (tileCoord !== void 0) {
-    tileCoord[0] = z2;
-    tileCoord[1] = x2;
-    tileCoord[2] = y2;
-    return tileCoord;
-  }
-  return [z2, x2, y2];
-}
-function getKeyZXY(z2, x2, y2) {
-  return z2 + "/" + x2 + "/" + y2;
-}
-function getKey(tileCoord) {
-  return getKeyZXY(tileCoord[0], tileCoord[1], tileCoord[2]);
-}
-function fromKey(key) {
-  return key.split("/").map(Number);
-}
-function hash(tileCoord) {
-  return hashZXY(tileCoord[0], tileCoord[1], tileCoord[2]);
-}
-function hashZXY(z2, x2, y2) {
-  return (x2 << z2) + y2;
-}
-function withinExtentAndZ(tileCoord, tileGrid) {
-  const z2 = tileCoord[0];
-  const x2 = tileCoord[1];
-  const y2 = tileCoord[2];
-  if (tileGrid.getMinZoom() > z2 || z2 > tileGrid.getMaxZoom()) {
-    return false;
-  }
-  const tileRange = tileGrid.getFullTileRange(z2);
-  if (!tileRange) {
-    return true;
-  }
-  return tileRange.containsXY(x2, y2);
-}
-class TileCache extends LRUCache {
-  /**
-   * @override
-   */
-  clear() {
-    while (this.getCount() > 0) {
-      this.pop().release();
-    }
-    super.clear();
-  }
-  /**
-   * @param {!Object<string, boolean>} usedTiles Used tiles.
-   * @override
-   */
-  expireCache(usedTiles) {
-    while (this.canExpireCache()) {
-      const tile = this.peekLast();
-      if (tile.getKey() in usedTiles) {
-        break;
-      } else {
-        this.pop().release();
-      }
-    }
-  }
-  /**
-   * Prune all tiles from the cache that don't have the same z as the newest tile.
-   */
-  pruneExceptNewestZ() {
-    if (this.getCount() === 0) {
-      return;
-    }
-    const key = this.peekFirstKey();
-    const tileCoord = fromKey(key);
-    const z2 = tileCoord[0];
-    this.forEach((tile) => {
-      if (tile.tileCoord[0] !== z2) {
-        this.remove(getKey(tile.tileCoord));
-        tile.release();
-      }
-    });
-  }
-}
 const TileEventType = {
   /**
    * Triggered when a tile starts loading.
@@ -23871,7 +23675,7 @@ class TileRange {
     return this.minX <= tileRange.maxX && this.maxX >= tileRange.minX && this.minY <= tileRange.maxY && this.maxY >= tileRange.minY;
   }
 }
-function createOrUpdate(minX, maxX, minY, maxY, tileRange) {
+function createOrUpdate$1(minX, maxX, minY, maxY, tileRange) {
   if (tileRange !== void 0) {
     tileRange.minX = minX;
     tileRange.maxX = maxX;
@@ -23880,6 +23684,37 @@ function createOrUpdate(minX, maxX, minY, maxY, tileRange) {
     return tileRange;
   }
   return new TileRange(minX, maxX, minY, maxY);
+}
+function createOrUpdate(z2, x2, y2, tileCoord) {
+  if (tileCoord !== void 0) {
+    tileCoord[0] = z2;
+    tileCoord[1] = x2;
+    tileCoord[2] = y2;
+    return tileCoord;
+  }
+  return [z2, x2, y2];
+}
+function getKeyZXY(z2, x2, y2) {
+  return z2 + "/" + x2 + "/" + y2;
+}
+function hash(tileCoord) {
+  return hashZXY(tileCoord[0], tileCoord[1], tileCoord[2]);
+}
+function hashZXY(z2, x2, y2) {
+  return (x2 << z2) + y2;
+}
+function withinExtentAndZ(tileCoord, tileGrid) {
+  const z2 = tileCoord[0];
+  const x2 = tileCoord[1];
+  const y2 = tileCoord[2];
+  if (tileGrid.getMinZoom() > z2 || z2 > tileGrid.getMaxZoom()) {
+    return false;
+  }
+  const tileRange = tileGrid.getFullTileRange(z2);
+  if (!tileRange) {
+    return true;
+  }
+  return tileRange.containsXY(x2, y2);
 }
 const tmpTileCoord = [0, 0, 0];
 const DECIMALS = 5;
@@ -24009,7 +23844,7 @@ class TileGrid {
       if (x2 !== void 0 && y2 !== void 0) {
         x2 = Math.floor(x2 / 2);
         y2 = Math.floor(y2 / 2);
-        tileRange = createOrUpdate(x2, x2, y2, y2, tempTileRange);
+        tileRange = createOrUpdate$1(x2, x2, y2, y2, tempTileRange);
       } else {
         tileRange = this.getTileRangeForExtentAndZ(
           tileCoordExtent,
@@ -24088,7 +23923,7 @@ class TileGrid {
       if (this.zoomFactor_ === 2) {
         const minX = tileCoord[1] * 2;
         const minY = tileCoord[2] * 2;
-        return createOrUpdate(
+        return createOrUpdate$1(
           minX,
           minX + 1,
           minY,
@@ -24122,7 +23957,7 @@ class TileGrid {
     const tileCoordX = tileCoord[1];
     const tileCoordY = tileCoord[2];
     if (z2 === tileCoordZ) {
-      return createOrUpdate(
+      return createOrUpdate$1(
         tileCoordX,
         tileCoordY,
         tileCoordX,
@@ -24135,11 +23970,11 @@ class TileGrid {
       const minX = Math.floor(tileCoordX * factor);
       const minY = Math.floor(tileCoordY * factor);
       if (z2 < tileCoordZ) {
-        return createOrUpdate(minX, minX, minY, minY, tempTileRange);
+        return createOrUpdate$1(minX, minX, minY, minY, tempTileRange);
       }
       const maxX = Math.floor(factor * (tileCoordX + 1)) - 1;
       const maxY = Math.floor(factor * (tileCoordY + 1)) - 1;
-      return createOrUpdate(minX, maxX, minY, maxY, tempTileRange);
+      return createOrUpdate$1(minX, maxX, minY, maxY, tempTileRange);
     }
     const tileCoordExtent = this.getTileCoordExtent(tileCoord, this.tmpExtent_);
     return this.getTileRangeForExtentAndZ(tileCoordExtent, z2, tempTileRange);
@@ -24158,7 +23993,7 @@ class TileGrid {
     this.getTileCoordForXYAndZ_(extent[2], extent[1], z2, true, tmpTileCoord);
     const maxX = tmpTileCoord[1];
     const maxY = tmpTileCoord[2];
-    return createOrUpdate(minX, maxX, minY, maxY, tempTileRange);
+    return createOrUpdate$1(minX, maxX, minY, maxY, tempTileRange);
   }
   /**
    * @param {import("../tilecoord.js").TileCoord} tileCoord Tile coordinate.
@@ -24238,7 +24073,7 @@ class TileGrid {
       tileCoordX = floor(tileCoordX, DECIMALS);
       tileCoordY = floor(tileCoordY, DECIMALS);
     }
-    return createOrUpdate$1(z2, tileCoordX, tileCoordY, opt_tileCoord);
+    return createOrUpdate(z2, tileCoordX, tileCoordY, opt_tileCoord);
   }
   /**
    * Although there is repetition between this method and `getTileCoordForXYAndResolution_`,
@@ -24268,7 +24103,7 @@ class TileGrid {
       tileCoordX = floor(tileCoordX, DECIMALS);
       tileCoordY = floor(tileCoordY, DECIMALS);
     }
-    return createOrUpdate$1(z2, tileCoordX, tileCoordY, opt_tileCoord);
+    return createOrUpdate(z2, tileCoordX, tileCoordY, opt_tileCoord);
   }
   /**
    * Get a tile coordinate given a map coordinate and zoom level.
@@ -24467,30 +24302,13 @@ class TileSource extends Source {
     if (this.tileGrid) {
       toSize(this.tileGrid.getTileSize(this.tileGrid.getMinZoom()), tileSize);
     }
-    this.tileCache = new TileCache(options.cacheSize || 0);
     this.tmpSize = [0, 0];
-    this.key_ = options.key || "";
+    this.key_ = options.key || getUid(this);
     this.tileOptions = {
       transition: options.transition,
       interpolate: options.interpolate
     };
     this.zDirection = options.zDirection ? options.zDirection : 0;
-  }
-  /**
-   * @return {boolean} Can expire cache.
-   */
-  canExpireCache() {
-    return this.tileCache.canExpireCache();
-  }
-  /**
-   * @param {import("../proj/Projection.js").default} projection Projection.
-   * @param {!Object<string, boolean>} usedTiles Used tiles.
-   */
-  expireCache(projection, usedTiles) {
-    const tileCache = this.getTileCacheForProjection(projection);
-    if (tileCache) {
-      tileCache.expireCache(usedTiles);
-    }
   }
   /**
    * @param {import("../proj/Projection.js").default} projection Projection.
@@ -24560,19 +24378,6 @@ class TileSource extends Source {
     return this.tileGrid;
   }
   /**
-   * @param {import("../proj/Projection.js").default} projection Projection.
-   * @return {import("../TileCache.js").default} Tile cache.
-   * @protected
-   */
-  getTileCacheForProjection(projection) {
-    const sourceProjection = this.getProjection();
-    assert(
-      sourceProjection === null || equivalent(sourceProjection, projection),
-      "A VectorTile source can only be rendered if it has a projection compatible with the view projection."
-    );
-    return this.tileCache;
-  }
-  /**
    * Get the tile pixel ratio for this source. Subclasses may override this
    * method, which is meant to return a supported pixel ratio that matches the
    * provided `pixelRatio` as close as possible.
@@ -24615,11 +24420,10 @@ class TileSource extends Source {
     return withinExtentAndZ(tileCoord, tileGrid) ? tileCoord : null;
   }
   /**
-   * Remove all cached tiles from the source. The next render cycle will fetch new tiles.
+   * Remove all cached reprojected tiles from the source. The next render cycle will create new tiles.
    * @api
    */
   clear() {
-    this.tileCache.clear();
   }
   /**
    * @override
@@ -24627,16 +24431,6 @@ class TileSource extends Source {
   refresh() {
     this.clear();
     super.refresh();
-  }
-  /**
-   * Marks a tile coord as being used, without triggering a load.
-   * @abstract
-   * @param {number} z Tile coordinate z.
-   * @param {number} x Tile coordinate x.
-   * @param {number} y Tile coordinate y.
-   * @param {import("../proj/Projection.js").default} projection Projection.
-   */
-  useTile(z2, x2, y2, projection) {
   }
 }
 class TileSourceEvent extends BaseEvent {
@@ -24831,7 +24625,6 @@ class UrlTile extends TileSource {
    * @api
    */
   setTileLoadFunction(tileLoadFunction) {
-    this.tileCache.clear();
     this.tileLoadFunction = tileLoadFunction;
     this.changed();
   }
@@ -24844,7 +24637,6 @@ class UrlTile extends TileSource {
    */
   setTileUrlFunction(tileUrlFunction, key) {
     this.tileUrlFunction = tileUrlFunction;
-    this.tileCache.pruneExceptNewestZ();
     if (typeof key !== "undefined") {
       this.setKey(key);
     } else {
@@ -24885,19 +24677,6 @@ class UrlTile extends TileSource {
   tileUrlFunction(tileCoord, pixelRatio, projection) {
     return void 0;
   }
-  /**
-   * Marks a tile coord as being used, without triggering a load.
-   * @param {number} z Tile coordinate z.
-   * @param {number} x Tile coordinate x.
-   * @param {number} y Tile coordinate y.
-   * @override
-   */
-  useTile(z2, x2, y2) {
-    const tileCoordKey = getKeyZXY(z2, x2, y2);
-    if (this.tileCache.containsKey(tileCoordKey)) {
-      this.tileCache.get(tileCoordKey);
-    }
-  }
 }
 class TileImage extends UrlTile {
   /**
@@ -24924,40 +24703,9 @@ class TileImage extends UrlTile {
     });
     this.crossOrigin = options.crossOrigin !== void 0 ? options.crossOrigin : null;
     this.tileClass = options.tileClass !== void 0 ? options.tileClass : ImageTile;
-    this.tileCacheForProjection = {};
     this.tileGridForProjection = {};
     this.reprojectionErrorThreshold_ = options.reprojectionErrorThreshold;
     this.renderReprojectionEdges_ = false;
-  }
-  /**
-   * @return {boolean} Can expire cache.
-   * @override
-   */
-  canExpireCache() {
-    if (this.tileCache.canExpireCache()) {
-      return true;
-    }
-    for (const key in this.tileCacheForProjection) {
-      if (this.tileCacheForProjection[key].canExpireCache()) {
-        return true;
-      }
-    }
-    return false;
-  }
-  /**
-   * @param {import("../proj/Projection.js").default} projection Projection.
-   * @param {!Object<string, boolean>} usedTiles Used tiles.
-   * @override
-   */
-  expireCache(projection, usedTiles) {
-    const usedTileCache = this.getTileCacheForProjection(projection);
-    this.tileCache.expireCache(
-      this.tileCache == usedTileCache ? usedTiles : {}
-    );
-    for (const id in this.tileCacheForProjection) {
-      const tileCache = this.tileCacheForProjection[id];
-      tileCache.expireCache(tileCache == usedTileCache ? usedTiles : {});
-    }
   }
   /**
    * @param {import("../proj/Projection.js").default} projection Projection.
@@ -25003,24 +24751,6 @@ class TileImage extends UrlTile {
       this.tileGridForProjection[projKey] = getForProjection(projection);
     }
     return this.tileGridForProjection[projKey];
-  }
-  /**
-   * @param {import("../proj/Projection.js").default} projection Projection.
-   * @return {import("../TileCache.js").default} Tile cache.
-   * @override
-   */
-  getTileCacheForProjection(projection) {
-    const thisProj = this.getProjection();
-    if (!thisProj || equivalent(thisProj, projection)) {
-      return this.tileCache;
-    }
-    const projKey = getUid(projection);
-    if (!(projKey in this.tileCacheForProjection)) {
-      this.tileCacheForProjection[projKey] = new TileCache(
-        this.tileCache.highWaterMark
-      );
-    }
-    return this.tileCacheForProjection[projKey];
   }
   /**
    * @param {number} z Tile coordinate z.
@@ -25071,24 +24801,15 @@ class TileImage extends UrlTile {
         sourceProjection || projection
       );
     }
-    const cache2 = this.getTileCacheForProjection(projection);
     const tileCoord = [z2, x2, y2];
-    let tile;
-    const tileCoordKey = getKey(tileCoord);
-    if (cache2.containsKey(tileCoordKey)) {
-      tile = cache2.get(tileCoordKey);
-    }
     const key = this.getKey();
-    if (tile && tile.key == key) {
-      return tile;
-    }
     const sourceTileGrid = this.getTileGridForProjection(sourceProjection);
     const targetTileGrid = this.getTileGridForProjection(projection);
     const wrappedTileCoord = this.getTileCoordForTileUrlFunction(
       tileCoord,
       projection
     );
-    const newTile = new ReprojTile(
+    const tile = new ReprojTile(
       sourceProjection,
       sourceTileGrid,
       projection,
@@ -25102,13 +24823,8 @@ class TileImage extends UrlTile {
       this.renderReprojectionEdges_,
       this.tileOptions
     );
-    newTile.key = key;
-    if (tile) {
-      cache2.replace(tileCoordKey, newTile);
-    } else {
-      cache2.set(tileCoordKey, newTile);
-    }
-    return newTile;
+    tile.key = key;
+    return tile;
   }
   /**
    * @param {number} z Tile coordinate z.
@@ -25120,19 +24836,8 @@ class TileImage extends UrlTile {
    * @protected
    */
   getTileInternal(z2, x2, y2, pixelRatio, projection) {
-    const tileCoordKey = getKeyZXY(z2, x2, y2);
     const key = this.getKey();
-    if (!this.tileCache.containsKey(tileCoordKey)) {
-      const tile2 = this.createTile_(z2, x2, y2, pixelRatio, projection, key);
-      this.tileCache.set(tileCoordKey, tile2);
-      return tile2;
-    }
-    let tile = this.tileCache.get(tileCoordKey);
-    if (tile.key != key) {
-      tile = this.createTile_(z2, x2, y2, pixelRatio, projection, key);
-      this.tileCache.replace(tileCoordKey, tile);
-    }
-    return tile;
+    return this.createTile_(z2, x2, y2, pixelRatio, projection, key);
   }
   /**
    * Sets whether to render reprojection edges or not (usually for debugging).
@@ -25144,9 +24849,6 @@ class TileImage extends UrlTile {
       return;
     }
     this.renderReprojectionEdges_ = render2;
-    for (const id in this.tileCacheForProjection) {
-      this.tileCacheForProjection[id].clear();
-    }
     this.changed();
   }
   /**
@@ -25168,15 +24870,6 @@ class TileImage extends UrlTile {
       if (!(projKey in this.tileGridForProjection)) {
         this.tileGridForProjection[projKey] = tilegrid;
       }
-    }
-  }
-  /**
-   * @override
-   */
-  clear() {
-    super.clear();
-    for (const id in this.tileCacheForProjection) {
-      this.tileCacheForProjection[id].clear();
     }
   }
 }
@@ -25988,6 +25681,240 @@ class DataTile extends Tile {
     super.disposeInternal();
   }
 }
+class LRUCache {
+  /**
+   * @param {number} [highWaterMark] High water mark.
+   */
+  constructor(highWaterMark) {
+    this.highWaterMark = highWaterMark !== void 0 ? highWaterMark : 2048;
+    this.count_ = 0;
+    this.entries_ = {};
+    this.oldest_ = null;
+    this.newest_ = null;
+  }
+  /**
+   * @return {boolean} Can expire cache.
+   */
+  canExpireCache() {
+    return this.highWaterMark > 0 && this.getCount() > this.highWaterMark;
+  }
+  /**
+   * Expire the cache. When the cache entry is a {@link module:ol/Disposable~Disposable},
+   * the entry will be disposed.
+   * @param {!Object<string, boolean>} [keep] Keys to keep. To be implemented by subclasses.
+   */
+  expireCache(keep) {
+    while (this.canExpireCache()) {
+      const entry = this.pop();
+      if (entry instanceof Disposable) {
+        entry.dispose();
+      }
+    }
+  }
+  /**
+   * FIXME empty description for jsdoc
+   */
+  clear() {
+    this.count_ = 0;
+    this.entries_ = {};
+    this.oldest_ = null;
+    this.newest_ = null;
+  }
+  /**
+   * @param {string} key Key.
+   * @return {boolean} Contains key.
+   */
+  containsKey(key) {
+    return this.entries_.hasOwnProperty(key);
+  }
+  /**
+   * @param {function(T, string, LRUCache<T>): ?} f The function
+   *     to call for every entry from the oldest to the newer. This function takes
+   *     3 arguments (the entry value, the entry key and the LRUCache object).
+   *     The return value is ignored.
+   */
+  forEach(f) {
+    let entry = this.oldest_;
+    while (entry) {
+      f(entry.value_, entry.key_, this);
+      entry = entry.newer;
+    }
+  }
+  /**
+   * @param {string} key Key.
+   * @param {*} [options] Options (reserved for subclasses).
+   * @return {T} Value.
+   */
+  get(key, options) {
+    const entry = this.entries_[key];
+    assert(
+      entry !== void 0,
+      "Tried to get a value for a key that does not exist in the cache"
+    );
+    if (entry === this.newest_) {
+      return entry.value_;
+    }
+    if (entry === this.oldest_) {
+      this.oldest_ = /** @type {Entry} */
+      this.oldest_.newer;
+      this.oldest_.older = null;
+    } else {
+      entry.newer.older = entry.older;
+      entry.older.newer = entry.newer;
+    }
+    entry.newer = null;
+    entry.older = this.newest_;
+    this.newest_.newer = entry;
+    this.newest_ = entry;
+    return entry.value_;
+  }
+  /**
+   * Remove an entry from the cache.
+   * @param {string} key The entry key.
+   * @return {T} The removed entry.
+   */
+  remove(key) {
+    const entry = this.entries_[key];
+    assert(
+      entry !== void 0,
+      "Tried to get a value for a key that does not exist in the cache"
+    );
+    if (entry === this.newest_) {
+      this.newest_ = /** @type {Entry} */
+      entry.older;
+      if (this.newest_) {
+        this.newest_.newer = null;
+      }
+    } else if (entry === this.oldest_) {
+      this.oldest_ = /** @type {Entry} */
+      entry.newer;
+      if (this.oldest_) {
+        this.oldest_.older = null;
+      }
+    } else {
+      entry.newer.older = entry.older;
+      entry.older.newer = entry.newer;
+    }
+    delete this.entries_[key];
+    --this.count_;
+    return entry.value_;
+  }
+  /**
+   * @return {number} Count.
+   */
+  getCount() {
+    return this.count_;
+  }
+  /**
+   * @return {Array<string>} Keys.
+   */
+  getKeys() {
+    const keys = new Array(this.count_);
+    let i = 0;
+    let entry;
+    for (entry = this.newest_; entry; entry = entry.older) {
+      keys[i++] = entry.key_;
+    }
+    return keys;
+  }
+  /**
+   * @return {Array<T>} Values.
+   */
+  getValues() {
+    const values = new Array(this.count_);
+    let i = 0;
+    let entry;
+    for (entry = this.newest_; entry; entry = entry.older) {
+      values[i++] = entry.value_;
+    }
+    return values;
+  }
+  /**
+   * @return {T} Last value.
+   */
+  peekLast() {
+    return this.oldest_.value_;
+  }
+  /**
+   * @return {string} Last key.
+   */
+  peekLastKey() {
+    return this.oldest_.key_;
+  }
+  /**
+   * Get the key of the newest item in the cache.  Throws if the cache is empty.
+   * @return {string} The newest key.
+   */
+  peekFirstKey() {
+    return this.newest_.key_;
+  }
+  /**
+   * Return an entry without updating least recently used time.
+   * @param {string} key Key.
+   * @return {T|undefined} Value.
+   */
+  peek(key) {
+    var _a;
+    return (_a = this.entries_[key]) == null ? void 0 : _a.value_;
+  }
+  /**
+   * @return {T} value Value.
+   */
+  pop() {
+    const entry = this.oldest_;
+    delete this.entries_[entry.key_];
+    if (entry.newer) {
+      entry.newer.older = null;
+    }
+    this.oldest_ = /** @type {Entry} */
+    entry.newer;
+    if (!this.oldest_) {
+      this.newest_ = null;
+    }
+    --this.count_;
+    return entry.value_;
+  }
+  /**
+   * @param {string} key Key.
+   * @param {T} value Value.
+   */
+  replace(key, value) {
+    this.get(key);
+    this.entries_[key].value_ = value;
+  }
+  /**
+   * @param {string} key Key.
+   * @param {T} value Value.
+   */
+  set(key, value) {
+    assert(
+      !(key in this.entries_),
+      "Tried to set a value for a key that is used already"
+    );
+    const entry = {
+      key_: key,
+      newer: null,
+      older: this.newest_,
+      value_: value
+    };
+    if (!this.newest_) {
+      this.oldest_ = entry;
+    } else {
+      this.newest_.newer = entry;
+    }
+    this.newest_ = entry;
+    this.entries_[key] = entry;
+    ++this.count_;
+  }
+  /**
+   * Set a maximum number of entries for the cache.
+   * @param {number} size Cache size.
+   * @api
+   */
+  setSize(size) {
+    this.highWaterMark = size;
+  }
+}
 class ReprojDataTile extends DataTile {
   /**
    * @param {Options} options Tile options.
@@ -26418,9 +26345,10 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
     this.renderedSourceRevision_;
     this.tempExtent = createEmpty();
     this.tempTileRange_ = new TileRange(0, 0, 0, 0);
-    this.tempTileCoord_ = createOrUpdate$1(0, 0, 0);
+    this.tempTileCoord_ = createOrUpdate(0, 0, 0);
     const cacheSize2 = options.cacheSize !== void 0 ? options.cacheSize : 512;
     this.tileCache_ = new LRUCache(cacheSize2);
+    this.renderedProjection_ = void 0;
     this.maxStaleKeys = cacheSize2 * 0.5;
   }
   /**
@@ -26512,7 +26440,7 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
       const tileSize = toSize(tileGrid.getTileSize(z2));
       const tileResolution = tileGrid.getResolution(z2);
       let image;
-      if (tile instanceof ImageTile) {
+      if (tile instanceof ImageTile || tile instanceof ReprojTile) {
         image = tile.getImage();
       } else if (tile instanceof DataTile) {
         image = asImageLike(tile.getData());
@@ -26542,11 +26470,17 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
    * @override
    */
   prepareFrame(frameState) {
+    if (!this.renderedProjection_) {
+      this.renderedProjection_ = frameState.viewState.projection;
+    } else if (frameState.viewState.projection !== this.renderedProjection_) {
+      this.tileCache_.clear();
+      this.renderedProjection_ = frameState.viewState.projection;
+    }
     const source2 = this.getLayer().getSource();
     if (!source2) {
       return false;
     }
-    const sourceRevision = this.getLayer().getSource().getRevision();
+    const sourceRevision = source2.getRevision();
     if (!this.renderedRevision_) {
       this.renderedRevision_ = sourceRevision;
     } else if (this.renderedRevision_ !== sourceRevision) {
@@ -26607,7 +26541,7 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
           wantedTiles[tileQueueKey] = true;
           if (tile.getState() === TileState.IDLE) {
             if (!frameState.tileQueue.isKeyQueued(tileQueueKey)) {
-              const tileCoord = createOrUpdate$1(z2, x2, y2, this.tempTileCoord_);
+              const tileCoord = createOrUpdate(z2, x2, y2, this.tempTileCoord_);
               frameState.tileQueue.enqueue([
                 tile,
                 tileSourceKey,
@@ -26744,6 +26678,7 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
       viewCenter[1] + dy
     ];
     const tilesByZ = {};
+    this.renderedTiles.length = 0;
     const preload = tileLayer.getPreload();
     if (frameState.nextExtent) {
       const targetZ = tileGrid.getZForResolution(
@@ -26765,6 +26700,9 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
           preload - 1
         );
       }, 0);
+    }
+    if (!(z2 in tilesByZ)) {
+      return this.container;
     }
     const uid = getUid(this);
     const time = frameState.time;
@@ -26829,7 +26767,6 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
       context.imageSmoothingEnabled = false;
     }
     this.preRender(context, frameState);
-    this.renderedTiles.length = 0;
     const zs = Object.keys(tilesByZ).map(Number);
     zs.sort(ascending);
     let currentClip;
@@ -28277,13 +28214,13 @@ function getRenderPixel(event, pixel) {
   return apply(event.inversePixelTransform, pixel.slice(0));
 }
 /*!
-  * ol-contextmenu - v5.4.0
+  * ol-contextmenu - v5.5.0
   * https://github.com/jonataswalker/ol-contextmenu
-  * Built: Fri Mar 08 2024 12:11:47 GMT+0000 (Coordinated Universal Time)
+  * Built: Wed Aug 07 2024 12:29:18 GMT+0000 (Coordinated Universal Time)
   */
 var k = Object.defineProperty;
 var I = (n, t, e) => t in n ? k(n, t, { enumerable: true, configurable: true, writable: true, value: e }) : n[t] = e;
-var a = (n, t, e) => (I(n, typeof t != "symbol" ? t + "" : t, e), e);
+var a = (n, t, e) => I(n, typeof t != "symbol" ? t + "" : t, e);
 var S = { exports: {} };
 function x() {
 }
@@ -28443,8 +28380,7 @@ function M({
   });
 }
 function b(n, t) {
-  if (!n)
-    throw new Error(t);
+  if (!n) throw new Error(t);
 }
 class R extends Control {
   constructor(e = {}) {
@@ -28628,8 +28564,7 @@ class R extends Control {
     var _a;
     e.preventDefault(), e.stopPropagation();
     const s = e.currentTarget, o = this.menuEntries.get(s.id);
-    if (!o)
-      return;
+    if (!o) return;
     const i = {
       data: o.data,
       coordinate: this.coordinate

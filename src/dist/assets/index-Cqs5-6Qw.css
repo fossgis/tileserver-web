@@ -295,9 +295,9 @@
   cursor: pointer;
 }
 /*!
-  * ol-contextmenu - v5.4.0
+  * ol-contextmenu - v5.5.0
   * https://github.com/jonataswalker/ol-contextmenu
-  * Built: Fri Mar 08 2024 12:11:47 GMT+0000 (Coordinated Universal Time)
+  * Built: Wed Aug 07 2024 12:29:18 GMT+0000 (Coordinated Universal Time)
   */
 .ol-ctx-menu-container{position:absolute;padding:8px;background:#fff;color:#222;font-size:13px;border-radius:5px;box-shadow:#0003 3px 3px 5px;box-sizing:border-box}
 .ol-ctx-menu-container div,.ol-ctx-menu-container span,.ol-ctx-menu-container a,.ol-ctx-menu-container img,.ol-ctx-menu-container ul,.ol-ctx-menu-container li{margin:0;padding:0;border:0;font:inherit;font-size:100%;vertical-align:baseline}
@@ -1302,6 +1302,29 @@ progress {
 }
 .blockquote-footer::before {
   content: "— ";
+}
+.img-fluid {
+  max-width: 100%;
+  height: auto;
+}
+.img-thumbnail {
+  padding: 0.25rem;
+  background-color: var(--bs-body-bg);
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  max-width: 100%;
+  height: auto;
+}
+.figure {
+  display: inline-block;
+}
+.figure-img {
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+.figure-caption {
+  font-size: 0.875em;
+  color: var(--bs-secondary-color);
 }
 .container,
 .container-fluid,
