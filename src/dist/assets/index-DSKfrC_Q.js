@@ -5186,9 +5186,9 @@ class Projection {
    * @param {boolean} global Whether the projection is global.
    * @api
    */
-  setGlobal(global2) {
-    this.global_ = global2;
-    this.canWrapX_ = !!(global2 && this.extent_);
+  setGlobal(global) {
+    this.global_ = global;
+    this.canWrapX_ = !!(global && this.extent_);
   }
   /**
    * @return {import("../tilegrid/TileGrid.js").default} The default tile grid.
@@ -5372,11 +5372,10 @@ function add$1(source2, destination, transformFn) {
   transforms[sourceCode][destinationCode] = transformFn;
 }
 function get$2(sourceCode, destinationCode) {
-  let transform2;
   if (sourceCode in transforms && destinationCode in transforms[sourceCode]) {
-    transform2 = transforms[sourceCode][destinationCode];
+    return transforms[sourceCode][destinationCode];
   }
-  return transform2;
+  return null;
 }
 const Relationship = {
   UNKNOWN: 0,
@@ -5868,6 +5867,9 @@ function solveLinearSystem(mat) {
   }
   return x2;
 }
+function toDegrees(angleInRadians) {
+  return angleInRadians * 180 / Math.PI;
+}
 function toRadians(angleInDegrees) {
   return angleInDegrees * Math.PI / 180;
 }
@@ -5887,6 +5889,13 @@ function floor(n, decimals) {
 }
 function ceil(n, decimals) {
   return Math.ceil(toFixed(n, decimals));
+}
+function wrap(n, min2, max2) {
+  if (n >= min2 && n < max2) {
+    return n;
+  }
+  const range = max2 - min2;
+  return ((n - min2) % range + range) % range + min2;
 }
 function add(coordinate, delta) {
   coordinate[0] += +delta[0];
@@ -5912,7 +5921,7 @@ function rotate$1(coordinate, angle) {
   coordinate[1] = y2;
   return coordinate;
 }
-function scale$2(coordinate, scale2) {
+function scale$3(coordinate, scale2) {
   coordinate[0] *= scale2;
   coordinate[1] *= scale2;
   return coordinate;
@@ -5948,9 +5957,172 @@ function getDistance(c1, c2, radius) {
   const a2 = Math.sin(deltaLatBy2) * Math.sin(deltaLatBy2) + Math.sin(deltaLonBy2) * Math.sin(deltaLonBy2) * Math.cos(lat1) * Math.cos(lat2);
   return 2 * radius * Math.atan2(Math.sqrt(a2), Math.sqrt(1 - a2));
 }
+const K0 = 0.9996;
+const E = 669438e-8;
+const E2 = E * E;
+const E3 = E2 * E;
+const E_P2 = E / (1 - E);
+const SQRT_E = Math.sqrt(1 - E);
+const _E = (1 - SQRT_E) / (1 + SQRT_E);
+const _E2 = _E * _E;
+const _E3 = _E2 * _E;
+const _E4 = _E3 * _E;
+const _E5 = _E4 * _E;
+const M1 = 1 - E / 4 - 3 * E2 / 64 - 5 * E3 / 256;
+const M2 = 3 * E / 8 + 3 * E2 / 32 + 45 * E3 / 1024;
+const M3 = 15 * E2 / 256 + 45 * E3 / 1024;
+const M4 = 35 * E3 / 3072;
+const P2 = 3 / 2 * _E - 27 / 32 * _E3 + 269 / 512 * _E5;
+const P3 = 21 / 16 * _E2 - 55 / 32 * _E4;
+const P4 = 151 / 96 * _E3 - 417 / 128 * _E5;
+const P5 = 1097 / 512 * _E4;
+const R$1 = 6378137;
+function toLonLat$1(easting, northing, zone) {
+  const x2 = easting - 5e5;
+  const y2 = zone.north ? northing : northing - 1e7;
+  const m = y2 / K0;
+  const mu = m / (R$1 * M1);
+  const pRad = mu + P2 * Math.sin(2 * mu) + P3 * Math.sin(4 * mu) + P4 * Math.sin(6 * mu) + P5 * Math.sin(8 * mu);
+  const pSin = Math.sin(pRad);
+  const pSin2 = pSin * pSin;
+  const pCos = Math.cos(pRad);
+  const pTan = pSin / pCos;
+  const pTan2 = pTan * pTan;
+  const pTan4 = pTan2 * pTan2;
+  const epSin = 1 - E * pSin2;
+  const epSinSqrt = Math.sqrt(1 - E * pSin2);
+  const n = R$1 / epSinSqrt;
+  const r2 = (1 - E) / epSin;
+  const c = E_P2 * pCos ** 2;
+  const c2 = c * c;
+  const d2 = x2 / (n * K0);
+  const d22 = d2 * d2;
+  const d3 = d22 * d2;
+  const d4 = d3 * d2;
+  const d5 = d4 * d2;
+  const d6 = d5 * d2;
+  const latitude = pRad - pTan / r2 * (d22 / 2 - d4 / 24 * (5 + 3 * pTan2 + 10 * c - 4 * c2 - 9 * E_P2)) + d6 / 720 * (61 + 90 * pTan2 + 298 * c + 45 * pTan4 - 252 * E_P2 - 3 * c2);
+  let longitude = (d2 - d3 / 6 * (1 + 2 * pTan2 + c) + d5 / 120 * (5 - 2 * c + 28 * pTan2 - 3 * c2 + 8 * E_P2 + 24 * pTan4)) / pCos;
+  longitude = wrap(
+    longitude + toRadians(zoneToCentralLongitude(zone.number)),
+    -Math.PI,
+    Math.PI
+  );
+  return [toDegrees(longitude), toDegrees(latitude)];
+}
+const MIN_LATITUDE = -80;
+const MAX_LATITUDE = 84;
+const MIN_LONGITUDE = -180;
+const MAX_LONGITUDE = 180;
+function fromLonLat$1(longitude, latitude, zone) {
+  longitude = wrap(longitude, MIN_LONGITUDE, MAX_LONGITUDE);
+  if (latitude < MIN_LATITUDE) {
+    latitude = MIN_LATITUDE;
+  } else if (latitude > MAX_LATITUDE) {
+    latitude = MAX_LATITUDE;
+  }
+  const latRad = toRadians(latitude);
+  const latSin = Math.sin(latRad);
+  const latCos = Math.cos(latRad);
+  const latTan = latSin / latCos;
+  const latTan2 = latTan * latTan;
+  const latTan4 = latTan2 * latTan2;
+  const lonRad = toRadians(longitude);
+  const centralLon = zoneToCentralLongitude(zone.number);
+  const centralLonRad = toRadians(centralLon);
+  const n = R$1 / Math.sqrt(1 - E * latSin ** 2);
+  const c = E_P2 * latCos ** 2;
+  const a2 = latCos * wrap(lonRad - centralLonRad, -Math.PI, Math.PI);
+  const a22 = a2 * a2;
+  const a3 = a22 * a2;
+  const a4 = a3 * a2;
+  const a5 = a4 * a2;
+  const a6 = a5 * a2;
+  const m = R$1 * (M1 * latRad - M2 * Math.sin(2 * latRad) + M3 * Math.sin(4 * latRad) - M4 * Math.sin(6 * latRad));
+  const easting = K0 * n * (a2 + a3 / 6 * (1 - latTan2 + c) + a5 / 120 * (5 - 18 * latTan2 + latTan4 + 72 * c - 58 * E_P2)) + 5e5;
+  let northing = K0 * (m + n * latTan * (a22 / 2 + a4 / 24 * (5 - latTan2 + 9 * c + 4 * c ** 2) + a6 / 720 * (61 - 58 * latTan2 + latTan4 + 600 * c - 330 * E_P2)));
+  if (!zone.north) {
+    northing += 1e7;
+  }
+  return [easting, northing];
+}
+function zoneToCentralLongitude(zone) {
+  return (zone - 1) * 6 - 180 + 3;
+}
+const epsgRegExes = [
+  /^EPSG:(\d+)$/,
+  /^urn:ogc:def:crs:EPSG::(\d+)$/,
+  /^http:\/\/www\.opengis\.net\/def\/crs\/EPSG\/0\/(\d+)$/
+];
+function zoneFromCode(code) {
+  let epsgId = 0;
+  for (const re of epsgRegExes) {
+    const match = code.match(re);
+    if (match) {
+      epsgId = parseInt(match[1]);
+      break;
+    }
+  }
+  if (!epsgId) {
+    return null;
+  }
+  let number = 0;
+  let north = false;
+  if (epsgId > 32700 && epsgId < 32761) {
+    number = epsgId - 32700;
+  } else if (epsgId > 32600 && epsgId < 32661) {
+    north = true;
+    number = epsgId - 32600;
+  }
+  if (!number) {
+    return null;
+  }
+  return { number, north };
+}
+function makeTransformFunction(transformer, zone) {
+  return function(input, output, dimension, stride) {
+    const length = input.length;
+    dimension = dimension > 1 ? dimension : 2;
+    stride = stride ?? dimension;
+    if (!output) {
+      if (dimension > 2) {
+        output = input.slice();
+      } else {
+        output = new Array(length);
+      }
+    }
+    for (let i = 0; i < length; i += stride) {
+      const x2 = input[i];
+      const y2 = input[i + 1];
+      const coord = transformer(x2, y2, zone);
+      output[i] = coord[0];
+      output[i + 1] = coord[1];
+    }
+    return output;
+  };
+}
+function makeProjection(code) {
+  const zone = zoneFromCode(code);
+  if (!zone) {
+    return null;
+  }
+  return new Projection({ code, units: "m" });
+}
+function makeTransforms(projection) {
+  const zone = zoneFromCode(projection.getCode());
+  if (!zone) {
+    return null;
+  }
+  return {
+    forward: makeTransformFunction(fromLonLat$1, zone),
+    inverse: makeTransformFunction(toLonLat$1, zone)
+  };
+}
 function warn(...args) {
   console.warn(...args);
 }
+const transformFactories = [makeTransforms];
+const projectionFactories = [makeProjection];
 let showCoordinateWarning = true;
 function disableCoordinateWarning(disable2) {
   const hide2 = disable2 === void 0 ? true : disable2;
@@ -5984,13 +6156,20 @@ function addProjections(projections) {
   projections.forEach(addProjection);
 }
 function get$1(projectionLike) {
-  return typeof projectionLike === "string" ? get$3(
-    /** @type {string} */
-    projectionLike
-  ) : (
-    /** @type {Projection} */
-    projectionLike || null
-  );
+  if (!(typeof projectionLike === "string")) {
+    return projectionLike;
+  }
+  const projection = get$3(projectionLike);
+  if (projection) {
+    return projection;
+  }
+  for (const makeProjection2 of projectionFactories) {
+    const projection2 = makeProjection2(projectionLike);
+    if (projection2) {
+      return projection2;
+    }
+  }
+  return null;
 }
 function getPointResolution(projection, resolution, point, units) {
   projection = get$1(projection);
@@ -6013,7 +6192,7 @@ function getPointResolution(projection, resolution, point, units) {
         projection,
         get$1("EPSG:4326")
       );
-      if (toEPSG43262 === identityTransform && projUnits !== "degrees") {
+      if (!toEPSG43262 && projUnits !== "degrees") {
         pointResolution = resolution * projection.getMetersPerUnit();
       } else {
         let vertices = [
@@ -6143,14 +6322,61 @@ function equivalent(projection1, projection2) {
   const transformFunc = getTransformFromProjections(projection1, projection2);
   return transformFunc === cloneTransform && equalUnits;
 }
-function getTransformFromProjections(sourceProjection, destinationProjection) {
-  const sourceCode = sourceProjection.getCode();
-  const destinationCode = destinationProjection.getCode();
+function getTransformFromProjections(source2, destination) {
+  const sourceCode = source2.getCode();
+  const destinationCode = destination.getCode();
   let transformFunc = get$2(sourceCode, destinationCode);
-  if (!transformFunc) {
-    transformFunc = identityTransform;
+  if (transformFunc) {
+    return transformFunc;
+  }
+  let sourceTransforms = null;
+  let destinationTransforms = null;
+  for (const makeTransforms2 of transformFactories) {
+    if (!sourceTransforms) {
+      sourceTransforms = makeTransforms2(source2);
+    }
+    if (!destinationTransforms) {
+      destinationTransforms = makeTransforms2(destination);
+    }
+  }
+  if (!sourceTransforms && !destinationTransforms) {
+    return null;
+  }
+  const intermediateCode = "EPSG:4326";
+  if (!destinationTransforms) {
+    const toDestination = get$2(intermediateCode, destinationCode);
+    if (toDestination) {
+      transformFunc = composeTransformFuncs(
+        sourceTransforms.inverse,
+        toDestination
+      );
+    }
+  } else if (!sourceTransforms) {
+    const fromSource = get$2(sourceCode, intermediateCode);
+    if (fromSource) {
+      transformFunc = composeTransformFuncs(
+        fromSource,
+        destinationTransforms.forward
+      );
+    }
+  } else {
+    transformFunc = composeTransformFuncs(
+      sourceTransforms.inverse,
+      destinationTransforms.forward
+    );
+  }
+  if (transformFunc) {
+    addProjection(source2);
+    addProjection(destination);
+    add$1(source2, destination, transformFunc);
   }
   return transformFunc;
+}
+function composeTransformFuncs(t1, t2) {
+  return function(input, output, dimensions, stride) {
+    output = t1(input, output, dimensions, stride);
+    return t2(output, output, dimensions, stride);
+  };
 }
 function getTransform(source2, destination) {
   const sourceProjection = get$1(source2);
@@ -6159,6 +6385,13 @@ function getTransform(source2, destination) {
 }
 function transform(coordinate, source2, destination) {
   const transformFunc = getTransform(source2, destination);
+  if (!transformFunc) {
+    const sourceCode = get$1(source2).getCode();
+    const destinationCode = get$1(destination).getCode();
+    throw new Error(
+      `No transform available between ${sourceCode} and ${destinationCode}`
+    );
+  }
   return transformFunc(coordinate, void 0, coordinate.length);
 }
 function transformExtent(extent, source2, destination, stops) {
@@ -6441,6 +6674,9 @@ function binarySearch(haystack, needle, comparator) {
 }
 function ascending(a2, b2) {
   return a2 > b2 ? 1 : a2 < b2 ? -1 : 0;
+}
+function descending(a2, b2) {
+  return a2 < b2 ? 1 : a2 > b2 ? -1 : 0;
 }
 function linearFindNearest(arr, target, direction) {
   if (arr[0] <= target) {
@@ -7884,7 +8120,7 @@ function linear(t) {
   return t;
 }
 new Array(6);
-function create() {
+function create$1() {
   return [1, 0, 0, 1, 0, 0];
 }
 function setFromArray(transform1, transform2) {
@@ -7980,7 +8216,7 @@ function rotate(flatCoordinates, offset2, end2, stride, angle, anchor, dest) {
   }
   return dest;
 }
-function scale$1(flatCoordinates, offset2, end2, stride, sx, sy, anchor, dest) {
+function scale$2(flatCoordinates, offset2, end2, stride, sx, sy, anchor, dest) {
   dest = dest ? dest : [];
   const anchorX = anchor[0];
   const anchorY = anchor[1];
@@ -7999,7 +8235,7 @@ function scale$1(flatCoordinates, offset2, end2, stride, sx, sy, anchor, dest) {
   }
   return dest;
 }
-function translate(flatCoordinates, offset2, end2, stride, deltaX, deltaY, dest) {
+function translate$1(flatCoordinates, offset2, end2, stride, deltaX, deltaY, dest) {
   dest = dest ? dest : [];
   let i = 0;
   for (let j = offset2; j < end2; j += stride) {
@@ -8014,7 +8250,7 @@ function translate(flatCoordinates, offset2, end2, stride, deltaX, deltaY, dest)
   }
   return dest;
 }
-const tmpTransform$1 = create();
+const tmpTransform$1 = create$1();
 class Geometry extends BaseObject {
   constructor() {
     super();
@@ -8241,7 +8477,7 @@ class Geometry extends BaseObject {
         0,
         0
       );
-      transform2D(
+      const transformed = transform2D(
         inCoordinates,
         0,
         inCoordinates.length,
@@ -8249,11 +8485,11 @@ class Geometry extends BaseObject {
         tmpTransform$1,
         outCoordinates
       );
-      return getTransform(sourceProj, destination)(
-        inCoordinates,
-        outCoordinates,
-        stride
-      );
+      const projTransform = getTransform(sourceProj, destination);
+      if (projTransform) {
+        return projTransform(transformed, transformed, stride);
+      }
+      return transformed;
     } : getTransform(sourceProj, destination);
     this.applyTransform(transformFn);
     return this;
@@ -8464,7 +8700,7 @@ class SimpleGeometry extends Geometry {
     const flatCoordinates = this.getFlatCoordinates();
     if (flatCoordinates) {
       const stride = this.getStride();
-      scale$1(
+      scale$2(
         flatCoordinates,
         0,
         flatCoordinates.length,
@@ -8489,7 +8725,7 @@ class SimpleGeometry extends Geometry {
     const flatCoordinates = this.getFlatCoordinates();
     if (flatCoordinates) {
       const stride = this.getStride();
-      translate(
+      translate$1(
         flatCoordinates,
         0,
         flatCoordinates.length,
@@ -11549,6 +11785,9 @@ class Layer extends BaseLayer {
       layerState = frameState.layerStatesArray.find(
         (layerState2) => layerState2.layer === this
       );
+      if (!layerState) {
+        return false;
+      }
     } else {
       layerState = this.getLayerState();
     }
@@ -11724,14 +11963,20 @@ class Layer extends BaseLayer {
     return null;
   }
   /**
-   * Clean up.
-   * @override
+   * This will clear the renderer so that a new one can be created next time it is needed
    */
-  disposeInternal() {
+  clearRenderer() {
     if (this.renderer_) {
       this.renderer_.dispose();
       delete this.renderer_;
     }
+  }
+  /**
+   * Clean up.
+   * @override
+   */
+  disposeInternal() {
+    this.clearRenderer();
     this.setSource(null);
     super.disposeInternal();
   }
@@ -11932,22 +12177,22 @@ let RBush$1 = class RBush {
   }
   _build(items, left2, right2, height) {
     const N2 = right2 - left2 + 1;
-    let M2 = this._maxEntries;
+    let M5 = this._maxEntries;
     let node;
-    if (N2 <= M2) {
+    if (N2 <= M5) {
       node = createNode(items.slice(left2, right2 + 1));
       calcBBox(node, this.toBBox);
       return node;
     }
     if (!height) {
-      height = Math.ceil(Math.log(N2) / Math.log(M2));
-      M2 = Math.ceil(N2 / Math.pow(M2, height - 1));
+      height = Math.ceil(Math.log(N2) / Math.log(M5));
+      M5 = Math.ceil(N2 / Math.pow(M5, height - 1));
     }
     node = createNode([]);
     node.leaf = false;
     node.height = height;
-    const N22 = Math.ceil(N2 / M2);
-    const N1 = N22 * Math.ceil(Math.sqrt(M2));
+    const N22 = Math.ceil(N2 / M5);
+    const N1 = N22 * Math.ceil(Math.sqrt(M5));
     multiSelect(items, left2, right2, N1, this.compareMinX);
     for (let i = left2; i <= right2; i += N1) {
       const right22 = Math.min(i + N1 - 1, right2);
@@ -12003,10 +12248,10 @@ let RBush$1 = class RBush {
   // split overflowed node into two
   _split(insertPath, level) {
     const node = insertPath[level];
-    const M2 = node.children.length;
+    const M5 = node.children.length;
     const m = this._minEntries;
-    this._chooseSplitAxis(node, m, M2);
-    const splitIndex = this._chooseSplitIndex(node, m, M2);
+    this._chooseSplitAxis(node, m, M5);
+    const splitIndex = this._chooseSplitIndex(node, m, M5);
     const newNode = createNode(node.children.splice(splitIndex, node.children.length - splitIndex));
     newNode.height = node.height;
     newNode.leaf = node.leaf;
@@ -12021,13 +12266,13 @@ let RBush$1 = class RBush {
     this.data.leaf = false;
     calcBBox(this.data, this.toBBox);
   }
-  _chooseSplitIndex(node, m, M2) {
+  _chooseSplitIndex(node, m, M5) {
     let index;
     let minOverlap = Infinity;
     let minArea = Infinity;
-    for (let i = m; i <= M2 - m; i++) {
+    for (let i = m; i <= M5 - m; i++) {
       const bbox1 = distBBox(node, 0, i, this.toBBox);
-      const bbox2 = distBBox(node, i, M2, this.toBBox);
+      const bbox2 = distBBox(node, i, M5, this.toBBox);
       const overlap = intersectionArea(bbox1, bbox2);
       const area = bboxArea(bbox1) + bboxArea(bbox2);
       if (overlap < minOverlap) {
@@ -12041,29 +12286,29 @@ let RBush$1 = class RBush {
         }
       }
     }
-    return index || M2 - m;
+    return index || M5 - m;
   }
   // sorts node children by the best axis for split
-  _chooseSplitAxis(node, m, M2) {
+  _chooseSplitAxis(node, m, M5) {
     const compareMinX = node.leaf ? this.compareMinX : compareNodeMinX;
     const compareMinY = node.leaf ? this.compareMinY : compareNodeMinY;
-    const xMargin = this._allDistMargin(node, m, M2, compareMinX);
-    const yMargin = this._allDistMargin(node, m, M2, compareMinY);
+    const xMargin = this._allDistMargin(node, m, M5, compareMinX);
+    const yMargin = this._allDistMargin(node, m, M5, compareMinY);
     if (xMargin < yMargin) node.children.sort(compareMinX);
   }
   // total margin of all possible split distributions where each node is at least m full
-  _allDistMargin(node, m, M2, compare) {
+  _allDistMargin(node, m, M5, compare) {
     node.children.sort(compare);
     const toBBox = this.toBBox;
     const leftBBox = distBBox(node, 0, m, toBBox);
-    const rightBBox = distBBox(node, M2 - m, M2, toBBox);
+    const rightBBox = distBBox(node, M5 - m, M5, toBBox);
     let margin = bboxMargin(leftBBox) + bboxMargin(rightBBox);
-    for (let i = m; i < M2 - m; i++) {
+    for (let i = m; i < M5 - m; i++) {
       const child = node.children[i];
       extend(leftBBox, node.leaf ? toBBox(child) : child);
       margin += bboxMargin(leftBBox);
     }
-    for (let i = M2 - m - 1; i >= m; i--) {
+    for (let i = M5 - m - 1; i >= m; i--) {
       const child = node.children[i];
       extend(rightBBox, node.leaf ? toBBox(child) : child);
       margin += bboxMargin(rightBBox);
@@ -12172,250 +12417,6 @@ const ImageState = {
   ERROR: 3,
   EMPTY: 4
 };
-function hasArea(size) {
-  return size[0] > 0 && size[1] > 0;
-}
-function scale(size, ratio, dest) {
-  if (dest === void 0) {
-    dest = [0, 0];
-  }
-  dest[0] = size[0] * ratio + 0.5 | 0;
-  dest[1] = size[1] * ratio + 0.5 | 0;
-  return dest;
-}
-function toSize(size, dest) {
-  if (Array.isArray(size)) {
-    return size;
-  }
-  if (dest === void 0) {
-    dest = [size, size];
-  } else {
-    dest[0] = size;
-    dest[1] = size;
-  }
-  return dest;
-}
-class ImageStyle {
-  /**
-   * @param {Options} options Options.
-   */
-  constructor(options) {
-    this.opacity_ = options.opacity;
-    this.rotateWithView_ = options.rotateWithView;
-    this.rotation_ = options.rotation;
-    this.scale_ = options.scale;
-    this.scaleArray_ = toSize(options.scale);
-    this.displacement_ = options.displacement;
-    this.declutterMode_ = options.declutterMode;
-  }
-  /**
-   * Clones the style.
-   * @return {ImageStyle} The cloned style.
-   * @api
-   */
-  clone() {
-    const scale2 = this.getScale();
-    return new ImageStyle({
-      opacity: this.getOpacity(),
-      scale: Array.isArray(scale2) ? scale2.slice() : scale2,
-      rotation: this.getRotation(),
-      rotateWithView: this.getRotateWithView(),
-      displacement: this.getDisplacement().slice(),
-      declutterMode: this.getDeclutterMode()
-    });
-  }
-  /**
-   * Get the symbolizer opacity.
-   * @return {number} Opacity.
-   * @api
-   */
-  getOpacity() {
-    return this.opacity_;
-  }
-  /**
-   * Determine whether the symbolizer rotates with the map.
-   * @return {boolean} Rotate with map.
-   * @api
-   */
-  getRotateWithView() {
-    return this.rotateWithView_;
-  }
-  /**
-   * Get the symoblizer rotation.
-   * @return {number} Rotation.
-   * @api
-   */
-  getRotation() {
-    return this.rotation_;
-  }
-  /**
-   * Get the symbolizer scale.
-   * @return {number|import("../size.js").Size} Scale.
-   * @api
-   */
-  getScale() {
-    return this.scale_;
-  }
-  /**
-   * Get the symbolizer scale array.
-   * @return {import("../size.js").Size} Scale array.
-   */
-  getScaleArray() {
-    return this.scaleArray_;
-  }
-  /**
-   * Get the displacement of the shape
-   * @return {Array<number>} Shape's center displacement
-   * @api
-   */
-  getDisplacement() {
-    return this.displacement_;
-  }
-  /**
-   * Get the declutter mode of the shape
-   * @return {import("./Style.js").DeclutterMode} Shape's declutter mode
-   * @api
-   */
-  getDeclutterMode() {
-    return this.declutterMode_;
-  }
-  /**
-   * Get the anchor point in pixels. The anchor determines the center point for the
-   * symbolizer.
-   * @abstract
-   * @return {Array<number>} Anchor.
-   */
-  getAnchor() {
-    return abstract();
-  }
-  /**
-   * Get the image element for the symbolizer.
-   * @abstract
-   * @param {number} pixelRatio Pixel ratio.
-   * @return {import('../DataTile.js').ImageLike} Image element.
-   */
-  getImage(pixelRatio) {
-    return abstract();
-  }
-  /**
-   * @abstract
-   * @return {import('../DataTile.js').ImageLike} Image element.
-   */
-  getHitDetectionImage() {
-    return abstract();
-  }
-  /**
-   * Get the image pixel ratio.
-   * @param {number} pixelRatio Pixel ratio.
-   * @return {number} Pixel ratio.
-   */
-  getPixelRatio(pixelRatio) {
-    return 1;
-  }
-  /**
-   * @abstract
-   * @return {import("../ImageState.js").default} Image state.
-   */
-  getImageState() {
-    return abstract();
-  }
-  /**
-   * @abstract
-   * @return {import("../size.js").Size} Image size.
-   */
-  getImageSize() {
-    return abstract();
-  }
-  /**
-   * Get the origin of the symbolizer.
-   * @abstract
-   * @return {Array<number>} Origin.
-   */
-  getOrigin() {
-    return abstract();
-  }
-  /**
-   * Get the size of the symbolizer (in pixels).
-   * @abstract
-   * @return {import("../size.js").Size} Size.
-   */
-  getSize() {
-    return abstract();
-  }
-  /**
-   * Set the displacement.
-   *
-   * @param {Array<number>} displacement Displacement.
-   * @api
-   */
-  setDisplacement(displacement) {
-    this.displacement_ = displacement;
-  }
-  /**
-   * Set the opacity.
-   *
-   * @param {number} opacity Opacity.
-   * @api
-   */
-  setOpacity(opacity) {
-    this.opacity_ = opacity;
-  }
-  /**
-   * Set whether to rotate the style with the view.
-   *
-   * @param {boolean} rotateWithView Rotate with map.
-   * @api
-   */
-  setRotateWithView(rotateWithView) {
-    this.rotateWithView_ = rotateWithView;
-  }
-  /**
-   * Set the rotation.
-   *
-   * @param {number} rotation Rotation.
-   * @api
-   */
-  setRotation(rotation) {
-    this.rotation_ = rotation;
-  }
-  /**
-   * Set the scale.
-   *
-   * @param {number|import("../size.js").Size} scale Scale.
-   * @api
-   */
-  setScale(scale2) {
-    this.scale_ = scale2;
-    this.scaleArray_ = toSize(scale2);
-  }
-  /**
-   * @abstract
-   * @param {function(import("../events/Event.js").default): void} listener Listener function.
-   */
-  listenImageChange(listener) {
-    abstract();
-  }
-  /**
-   * Load not yet loaded URI.
-   * @abstract
-   */
-  load() {
-    abstract();
-  }
-  /**
-   * @abstract
-   * @param {function(import("../events/Event.js").default): void} listener Listener function.
-   */
-  unlistenImageChange(listener) {
-    abstract();
-  }
-  /**
-   * @return {Promise<void>} `false` or Promise that resolves when the style is ready to use.
-   */
-  ready() {
-    return Promise.resolve();
-  }
-}
 const rgb = {
   name: "rgb",
   min: [0, 0, 0],
@@ -13137,7 +13138,7 @@ class IconImageCache {
     this.cache_ = {};
     this.patternCache_ = {};
     this.cacheSize_ = 0;
-    this.maxCacheSize_ = 32;
+    this.maxCacheSize_ = 1024;
   }
   /**
    * FIXME empty description for jsdoc
@@ -13223,8 +13224,8 @@ class IconImageCache {
     }
   }
   /**
-   * Set the cache size of the icon cache. Default is `32`. Change this value when
-   * your map uses more than 32 different icon images and you are not caching icon
+   * Set the cache size of the icon cache. Default is `1024`. Change this value when
+   * your map uses more than 1024 different icon images and you are not caching icon
    * styles on the application level.
    * @param {number} maxCacheSize Cache max size.
    * @api
@@ -13457,6 +13458,250 @@ function get(image, cacheKey, crossOrigin, imageState, color, pattern) {
     shared.set(cacheKey, crossOrigin, color, iconImage, pattern);
   }
   return iconImage;
+}
+function hasArea(size) {
+  return size[0] > 0 && size[1] > 0;
+}
+function scale$1(size, ratio, dest) {
+  if (dest === void 0) {
+    dest = [0, 0];
+  }
+  dest[0] = size[0] * ratio + 0.5 | 0;
+  dest[1] = size[1] * ratio + 0.5 | 0;
+  return dest;
+}
+function toSize(size, dest) {
+  if (Array.isArray(size)) {
+    return size;
+  }
+  if (dest === void 0) {
+    dest = [size, size];
+  } else {
+    dest[0] = size;
+    dest[1] = size;
+  }
+  return dest;
+}
+class ImageStyle {
+  /**
+   * @param {Options} options Options.
+   */
+  constructor(options) {
+    this.opacity_ = options.opacity;
+    this.rotateWithView_ = options.rotateWithView;
+    this.rotation_ = options.rotation;
+    this.scale_ = options.scale;
+    this.scaleArray_ = toSize(options.scale);
+    this.displacement_ = options.displacement;
+    this.declutterMode_ = options.declutterMode;
+  }
+  /**
+   * Clones the style.
+   * @return {ImageStyle} The cloned style.
+   * @api
+   */
+  clone() {
+    const scale2 = this.getScale();
+    return new ImageStyle({
+      opacity: this.getOpacity(),
+      scale: Array.isArray(scale2) ? scale2.slice() : scale2,
+      rotation: this.getRotation(),
+      rotateWithView: this.getRotateWithView(),
+      displacement: this.getDisplacement().slice(),
+      declutterMode: this.getDeclutterMode()
+    });
+  }
+  /**
+   * Get the symbolizer opacity.
+   * @return {number} Opacity.
+   * @api
+   */
+  getOpacity() {
+    return this.opacity_;
+  }
+  /**
+   * Determine whether the symbolizer rotates with the map.
+   * @return {boolean} Rotate with map.
+   * @api
+   */
+  getRotateWithView() {
+    return this.rotateWithView_;
+  }
+  /**
+   * Get the symoblizer rotation.
+   * @return {number} Rotation.
+   * @api
+   */
+  getRotation() {
+    return this.rotation_;
+  }
+  /**
+   * Get the symbolizer scale.
+   * @return {number|import("../size.js").Size} Scale.
+   * @api
+   */
+  getScale() {
+    return this.scale_;
+  }
+  /**
+   * Get the symbolizer scale array.
+   * @return {import("../size.js").Size} Scale array.
+   */
+  getScaleArray() {
+    return this.scaleArray_;
+  }
+  /**
+   * Get the displacement of the shape
+   * @return {Array<number>} Shape's center displacement
+   * @api
+   */
+  getDisplacement() {
+    return this.displacement_;
+  }
+  /**
+   * Get the declutter mode of the shape
+   * @return {import("./Style.js").DeclutterMode} Shape's declutter mode
+   * @api
+   */
+  getDeclutterMode() {
+    return this.declutterMode_;
+  }
+  /**
+   * Get the anchor point in pixels. The anchor determines the center point for the
+   * symbolizer.
+   * @abstract
+   * @return {Array<number>} Anchor.
+   */
+  getAnchor() {
+    return abstract();
+  }
+  /**
+   * Get the image element for the symbolizer.
+   * @abstract
+   * @param {number} pixelRatio Pixel ratio.
+   * @return {import('../DataTile.js').ImageLike} Image element.
+   */
+  getImage(pixelRatio) {
+    return abstract();
+  }
+  /**
+   * @abstract
+   * @return {import('../DataTile.js').ImageLike} Image element.
+   */
+  getHitDetectionImage() {
+    return abstract();
+  }
+  /**
+   * Get the image pixel ratio.
+   * @param {number} pixelRatio Pixel ratio.
+   * @return {number} Pixel ratio.
+   */
+  getPixelRatio(pixelRatio) {
+    return 1;
+  }
+  /**
+   * @abstract
+   * @return {import("../ImageState.js").default} Image state.
+   */
+  getImageState() {
+    return abstract();
+  }
+  /**
+   * @abstract
+   * @return {import("../size.js").Size} Image size.
+   */
+  getImageSize() {
+    return abstract();
+  }
+  /**
+   * Get the origin of the symbolizer.
+   * @abstract
+   * @return {Array<number>} Origin.
+   */
+  getOrigin() {
+    return abstract();
+  }
+  /**
+   * Get the size of the symbolizer (in pixels).
+   * @abstract
+   * @return {import("../size.js").Size} Size.
+   */
+  getSize() {
+    return abstract();
+  }
+  /**
+   * Set the displacement.
+   *
+   * @param {Array<number>} displacement Displacement.
+   * @api
+   */
+  setDisplacement(displacement) {
+    this.displacement_ = displacement;
+  }
+  /**
+   * Set the opacity.
+   *
+   * @param {number} opacity Opacity.
+   * @api
+   */
+  setOpacity(opacity) {
+    this.opacity_ = opacity;
+  }
+  /**
+   * Set whether to rotate the style with the view.
+   *
+   * @param {boolean} rotateWithView Rotate with map.
+   * @api
+   */
+  setRotateWithView(rotateWithView) {
+    this.rotateWithView_ = rotateWithView;
+  }
+  /**
+   * Set the rotation.
+   *
+   * @param {number} rotation Rotation.
+   * @api
+   */
+  setRotation(rotation) {
+    this.rotation_ = rotation;
+  }
+  /**
+   * Set the scale.
+   *
+   * @param {number|import("../size.js").Size} scale Scale.
+   * @api
+   */
+  setScale(scale2) {
+    this.scale_ = scale2;
+    this.scaleArray_ = toSize(scale2);
+  }
+  /**
+   * @abstract
+   * @param {function(import("../events/Event.js").default): void} listener Listener function.
+   */
+  listenImageChange(listener) {
+    abstract();
+  }
+  /**
+   * Load not yet loaded URI.
+   * @abstract
+   */
+  load() {
+    abstract();
+  }
+  /**
+   * @abstract
+   * @param {function(import("../events/Event.js").default): void} listener Listener function.
+   */
+  unlistenImageChange(listener) {
+    abstract();
+  }
+  /**
+   * @return {Promise<void>} `false` or Promise that resolves when the style is ready to use.
+   */
+  ready() {
+    return Promise.resolve();
+  }
 }
 function asColorLike(color) {
   if (!color) {
@@ -13811,7 +14056,6 @@ class RegularShape extends ImageStyle {
       displacement: options.displacement !== void 0 ? options.displacement : [0, 0],
       declutterMode: options.declutterMode
     });
-    this.canvases_;
     this.hitDetectionCanvas_ = null;
     this.fill_ = options.fill !== void 0 ? options.fill : null;
     this.origin_ = [0, 0];
@@ -13913,16 +14157,25 @@ class RegularShape extends ImageStyle {
    * @override
    */
   getImage(pixelRatio) {
-    let image = this.canvases_[pixelRatio];
+    var _a, _b;
+    const fillKey = (_a = this.fill_) == null ? void 0 : _a.getKey();
+    const cacheKey = `${pixelRatio},${this.angle_},${this.radius},${this.radius2_},${this.points_},${fillKey}` + Object.values(this.renderOptions_).join(",");
+    let image = (
+      /** @type {HTMLCanvasElement} */
+      (_b = shared.get(cacheKey, null, null)) == null ? void 0 : _b.getImage(1)
+    );
     if (!image) {
       const renderOptions = this.renderOptions_;
-      const context = createCanvasContext2D(
-        renderOptions.size * pixelRatio,
-        renderOptions.size * pixelRatio
-      );
+      const size = Math.ceil(renderOptions.size * pixelRatio);
+      const context = createCanvasContext2D(size, size);
       this.draw_(renderOptions, context, pixelRatio);
       image = context.canvas;
-      this.canvases_[pixelRatio] = image;
+      shared.set(
+        cacheKey,
+        null,
+        null,
+        new IconImage(image, void 0, null, ImageState.LOADED, null)
+      );
     }
     return image;
   }
@@ -14114,7 +14367,6 @@ class RegularShape extends ImageStyle {
   render() {
     this.renderOptions_ = this.createRenderOptions();
     const size = this.renderOptions_.size;
-    this.canvases_ = {};
     this.hitDetectionCanvas_ = null;
     this.size_ = [size, size];
   }
@@ -14335,6 +14587,16 @@ class Fill {
       }
     }
     this.color_ = color;
+  }
+  /**
+   * @return {string} Key of the fill for cache lookup.
+   */
+  getKey() {
+    const fill = this.getColor();
+    if (!fill) {
+      return "";
+    }
+    return fill instanceof CanvasPattern || fill instanceof CanvasGradient ? getUid(fill) : typeof fill === "object" && "src" in fill ? fill.src + ":" + fill.offset : asArray(fill).toString();
   }
   /**
    * @return {boolean} The fill style is loading an image pattern.
@@ -15213,6 +15475,7 @@ class Text {
     this.font_ = options.font;
     this.rotation_ = options.rotation;
     this.rotateWithView_ = options.rotateWithView;
+    this.keepUpright_ = options.keepUpright;
     this.scale_ = options.scale;
     this.scaleArray_ = toSize(options.scale !== void 0 ? options.scale : 1);
     this.text_ = options.text;
@@ -15247,6 +15510,7 @@ class Text {
       overflow: this.getOverflow(),
       rotation: this.getRotation(),
       rotateWithView: this.getRotateWithView(),
+      keepUpright: this.getKeepUpright(),
       scale: Array.isArray(scale2) ? scale2.slice() : scale2,
       text: this.getText(),
       textAlign: this.getTextAlign(),
@@ -15333,6 +15597,14 @@ class Text {
    */
   getRotateWithView() {
     return this.rotateWithView_;
+  }
+  /**
+   * Determine whether the text can be rendered upside down.
+   * @return {boolean|undefined} Keep text upright.
+   * @api
+   */
+  getKeepUpright() {
+    return this.keepUpright_;
   }
   /**
    * Get the text rotation.
@@ -15499,6 +15771,15 @@ class Text {
    */
   setRotateWithView(rotateWithView) {
     this.rotateWithView_ = rotateWithView;
+  }
+  /**
+   * Set whether the text can be rendered upside down.
+   *
+   * @param {boolean} keepUpright Keep text upright.
+   * @api
+   */
+  setKeepUpright(keepUpright) {
+    this.keepUpright_ = keepUpright;
   }
   /**
    * Set the fill.
@@ -17113,6 +17394,11 @@ function buildText(flatStyle, context) {
     prefix + "baseline",
     context
   );
+  const evaluateKeepUpright = booleanEvaluator(
+    flatStyle,
+    prefix + "keep-upright",
+    context
+  );
   const evaluatePadding = numberArrayEvaluator(
     flatStyle,
     prefix + "padding",
@@ -17198,6 +17484,9 @@ function buildText(flatStyle, context) {
     }
     if (evaluatePadding) {
       text.setPadding(evaluatePadding(context2));
+    }
+    if (evaluateKeepUpright) {
+      text.setKeepUpright(evaluateKeepUpright(context2));
     }
     return text;
   };
@@ -17801,6 +18090,14 @@ class BaseVectorLayer extends Layer {
     this.style_ = style === void 0 ? createDefaultStyle : style;
     const styleLike = toStyleLike(style);
     this.styleFunction_ = style === null ? void 0 : toFunction(styleLike);
+    this.changed();
+  }
+  /**
+   * @param {boolean|string|number} declutter Declutter images and text.
+   * @api
+   */
+  setDeclutter(declutter) {
+    this.declutter_ = declutter ? String(declutter) : void 0;
     this.changed();
   }
 }
@@ -19209,7 +19506,9 @@ class Control extends BaseObject {
     this.map_ = map2;
     if (map2) {
       const target = this.target_ ?? map2.getOverlayContainerStopEvent();
-      target.appendChild(this.element);
+      if (this.element) {
+        target.appendChild(this.element);
+      }
       if (this.render !== VOID) {
         this.listenerKeys.push(
           listen(map2, MapEventType.POSTRENDER, this.render, this)
@@ -20044,7 +20343,7 @@ class DragPan extends PointerInteraction {
         ];
         const map3 = mapBrowserEvent.map;
         const view = map3.getView();
-        scale$2(delta, view.getResolution());
+        scale$3(delta, view.getResolution());
         rotate$1(delta, view.getRotation());
         view.adjustCenterInternal(delta);
       }
@@ -21122,8 +21421,8 @@ let Map$1 = class Map2 extends BaseObject {
     this.postRenderTimeoutHandle_;
     this.animationDelayKey_;
     this.animationDelay_ = this.animationDelay_.bind(this);
-    this.coordinateToPixelTransform_ = create();
-    this.pixelToCoordinateTransform_ = create();
+    this.coordinateToPixelTransform_ = create$1();
+    this.pixelToCoordinateTransform_ = create$1();
     this.frameIndex_ = 0;
     this.frameState_ = null;
     this.previousExtent_ = null;
@@ -21839,8 +22138,10 @@ let Map$1 = class Map2 extends BaseObject {
       }
     }
     const postRenderFunctions = this.postRenderFunctions_;
-    for (let i = 0, ii = postRenderFunctions.length; i < ii; ++i) {
-      postRenderFunctions[i](this, frameState);
+    if (frameState) {
+      for (let i = 0, ii = postRenderFunctions.length; i < ii; ++i) {
+        postRenderFunctions[i](this, frameState);
+      }
     }
     postRenderFunctions.length = 0;
   }
@@ -22644,12 +22945,18 @@ class Triangulation {
    * @param {import("../extent.js").Extent} maxSourceExtent Maximal source extent that can be used.
    * @param {number} errorThreshold Acceptable error (in source units).
    * @param {?number} destinationResolution The (optional) resolution of the destination.
+   * @param {import("../transform.js").Transform} [sourceMatrix] Source transform matrix.
    */
-  constructor(sourceProj, targetProj, targetExtent, maxSourceExtent, errorThreshold, destinationResolution) {
+  constructor(sourceProj, targetProj, targetExtent, maxSourceExtent, errorThreshold, destinationResolution, sourceMatrix) {
     this.sourceProj_ = sourceProj;
     this.targetProj_ = targetProj;
     let transformInvCache = {};
-    const transformInv = getTransform(this.targetProj_, this.sourceProj_);
+    const transformInv = sourceMatrix ? createTransformFromCoordinateTransform(
+      (input) => apply(
+        sourceMatrix,
+        transform(input, this.targetProj_, this.sourceProj_)
+      )
+    ) : getTransform(this.targetProj_, this.sourceProj_);
     this.transformInv_ = function(c) {
       const key = c[0] + "/" + c[1];
       if (!transformInvCache[key]) {
@@ -23002,7 +23309,7 @@ function calculateSourceExtentResolution(sourceProj, targetProj, targetExtent, t
   }
   return sourceResolution;
 }
-function render(width, height, pixelRatio, sourceResolution, sourceExtent, targetResolution, targetExtent, triangulation, sources, gutter, renderEdges, interpolate, drawSingle, clipExtent) {
+function render$1(width, height, pixelRatio, sourceResolution, sourceExtent, targetResolution, targetExtent, triangulation, sources, gutter, renderEdges, interpolate, drawSingle, clipExtent) {
   const context = createCanvasContext2D(
     Math.round(pixelRatio * width),
     Math.round(pixelRatio * height),
@@ -23026,7 +23333,7 @@ function render(width, height, pixelRatio, sourceResolution, sourceExtent, targe
   let stitchContext;
   const stitchScale = pixelRatio / sourceResolution;
   const inverseScale = (interpolate ? 1 : 1 + Math.pow(2, -24)) / stitchScale;
-  if (!drawSingle || sources.length !== 1 || gutter !== 0) {
+  {
     stitchContext = createCanvasContext2D(
       Math.round(getWidth(sourceDataExtent) * stitchScale),
       Math.round(getHeight(sourceDataExtent) * stitchScale),
@@ -23373,7 +23680,7 @@ class ReprojTile extends Tile {
       const targetExtent = this.targetTileGrid_.getTileCoordExtent(
         this.wrappedTileCoord_
       );
-      this.canvas_ = render(
+      this.canvas_ = render$1(
         width,
         height,
         this.pixelRatio_,
@@ -24400,7 +24707,7 @@ class TileSource extends Source {
     if (tilePixelRatio == 1) {
       return tileSize;
     }
-    return scale(tileSize, tilePixelRatio, this.tmpSize);
+    return scale$1(tileSize, tilePixelRatio, this.tmpSize);
   }
   /**
    * Returns a tile coordinate wrapped around the x-axis. When the tile coordinate
@@ -24412,10 +24719,10 @@ class TileSource extends Source {
    *     null if no tile URL should be created for the passed `tileCoord`.
    */
   getTileCoordForTileUrlFunction(tileCoord, projection) {
-    projection = projection !== void 0 ? projection : this.getProjection();
-    const tileGrid = this.getTileGridForProjection(projection);
-    if (this.getWrapX() && projection.isGlobal()) {
-      tileCoord = wrapX(tileGrid, tileCoord, projection);
+    const gridProjection = projection !== void 0 ? projection : this.getProjection();
+    const tileGrid = projection !== void 0 ? this.getTileGridForProjection(gridProjection) : this.tileGrid || this.getTileGridForProjection(gridProjection);
+    if (this.getWrapX() && gridProjection.isGlobal()) {
+      tileCoord = wrapX(tileGrid, tileCoord, gridProjection);
     }
     return withinExtentAndZ(tileCoord, tileGrid) ? tileCoord : null;
   }
@@ -25294,9 +25601,9 @@ class CanvasLayerRenderer extends LayerRenderer {
     super(layer);
     this.container = null;
     this.renderedResolution;
-    this.tempTransform = create();
-    this.pixelTransform = create();
-    this.inversePixelTransform = create();
+    this.tempTransform = create$1();
+    this.pixelTransform = create$1();
+    this.inversePixelTransform = create$1();
     this.context = null;
     this.deferredContext_ = null;
     this.containerReused = false;
@@ -25692,6 +25999,12 @@ class LRUCache {
     this.oldest_ = null;
     this.newest_ = null;
   }
+  deleteOldest() {
+    const entry = this.pop();
+    if (entry instanceof Disposable) {
+      entry.dispose();
+    }
+  }
   /**
    * @return {boolean} Can expire cache.
    */
@@ -25705,20 +26018,16 @@ class LRUCache {
    */
   expireCache(keep) {
     while (this.canExpireCache()) {
-      const entry = this.pop();
-      if (entry instanceof Disposable) {
-        entry.dispose();
-      }
+      this.deleteOldest();
     }
   }
   /**
    * FIXME empty description for jsdoc
    */
   clear() {
-    this.count_ = 0;
-    this.entries_ = {};
-    this.oldest_ = null;
-    this.newest_ = null;
+    while (this.oldest_) {
+      this.deleteOldest();
+    }
   }
   /**
    * @param {string} key Key.
@@ -25915,6 +26224,586 @@ class LRUCache {
     this.highWaterMark = size;
   }
 }
+function create() {
+  return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+}
+function orthographic(left2, right2, bottom2, top2, near, far, out) {
+  out = out ?? create();
+  const lr = 1 / (left2 - right2), bt = 1 / (bottom2 - top2), nf = 1 / (near - far);
+  out[0] = -2 * lr;
+  out[1] = 0;
+  out[2] = 0;
+  out[3] = 0;
+  out[4] = 0;
+  out[5] = -2 * bt;
+  out[6] = 0;
+  out[7] = 0;
+  out[8] = 0;
+  out[9] = 0;
+  out[10] = 2 * nf;
+  out[11] = 0;
+  out[12] = (left2 + right2) * lr;
+  out[13] = (top2 + bottom2) * bt;
+  out[14] = (far + near) * nf;
+  out[15] = 1;
+  return out;
+}
+function scale(m, x2, y2, z2, out) {
+  out = out ?? create();
+  out[0] = m[0] * x2;
+  out[1] = m[1] * x2;
+  out[2] = m[2] * x2;
+  out[3] = m[3] * x2;
+  out[4] = m[4] * y2;
+  out[5] = m[5] * y2;
+  out[6] = m[6] * y2;
+  out[7] = m[7] * y2;
+  out[8] = m[8] * z2;
+  out[9] = m[9] * z2;
+  out[10] = m[10] * z2;
+  out[11] = m[11] * z2;
+  out[12] = m[12];
+  out[13] = m[13];
+  out[14] = m[14];
+  out[15] = m[15];
+  return out;
+}
+function translate(m, x2, y2, z2, out) {
+  out = out ?? create();
+  let a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23;
+  if (m === out) {
+    out[12] = m[0] * x2 + m[4] * y2 + m[8] * z2 + m[12];
+    out[13] = m[1] * x2 + m[5] * y2 + m[9] * z2 + m[13];
+    out[14] = m[2] * x2 + m[6] * y2 + m[10] * z2 + m[14];
+    out[15] = m[3] * x2 + m[7] * y2 + m[11] * z2 + m[15];
+  } else {
+    a00 = m[0];
+    a01 = m[1];
+    a02 = m[2];
+    a03 = m[3];
+    a10 = m[4];
+    a11 = m[5];
+    a12 = m[6];
+    a13 = m[7];
+    a20 = m[8];
+    a21 = m[9];
+    a22 = m[10];
+    a23 = m[11];
+    out[0] = a00;
+    out[1] = a01;
+    out[2] = a02;
+    out[3] = a03;
+    out[4] = a10;
+    out[5] = a11;
+    out[6] = a12;
+    out[7] = a13;
+    out[8] = a20;
+    out[9] = a21;
+    out[10] = a22;
+    out[11] = a23;
+    out[12] = a00 * x2 + a10 * y2 + a20 * z2 + m[12];
+    out[13] = a01 * x2 + a11 * y2 + a21 * z2 + m[13];
+    out[14] = a02 * x2 + a12 * y2 + a22 * z2 + m[14];
+    out[15] = a03 * x2 + a13 * y2 + a23 * z2 + m[15];
+  }
+  return out;
+}
+function translation(x2, y2, z2, out) {
+  out = out ?? create();
+  out[0] = 1;
+  out[1] = 0;
+  out[2] = 0;
+  out[3] = 0;
+  out[4] = 0;
+  out[5] = 1;
+  out[6] = 0;
+  out[7] = 0;
+  out[8] = 0;
+  out[9] = 0;
+  out[10] = 1;
+  out[11] = 0;
+  out[12] = x2;
+  out[13] = y2;
+  out[14] = z2;
+  out[15] = 1;
+  return out;
+}
+const VERTEX_SHADER = `
+  attribute vec4 a_position;
+  attribute vec4 a_texcoord;
+
+  uniform mat4 u_matrix;
+  uniform mat4 u_textureMatrix;
+
+  varying vec2 v_texcoord;
+
+  void main() {
+    gl_Position = u_matrix * a_position;
+    vec2 texcoord = (u_textureMatrix * a_texcoord).xy;
+    v_texcoord = texcoord;
+  }
+`;
+const FRAGMENT_SHADER = `
+  precision mediump float;
+
+  varying vec2 v_texcoord;
+
+  uniform sampler2D u_texture;
+
+  void main() {
+    if (
+      v_texcoord.x < 0.0 ||
+      v_texcoord.y < 0.0 ||
+      v_texcoord.x > 1.0 ||
+      v_texcoord.y > 1.0
+    ) {
+      discard;
+    }
+    gl_FragColor = texture2D(u_texture, v_texcoord);
+  }
+`;
+class Canvas {
+  /**
+   * @param {WebGLRenderingContext} gl Context to render in.
+   */
+  constructor(gl) {
+    this.gl_ = gl;
+    this.program_ = createProgram(gl, FRAGMENT_SHADER, VERTEX_SHADER);
+    this.positionLocation = gl.getAttribLocation(this.program_, "a_position");
+    this.texcoordLocation = gl.getAttribLocation(this.program_, "a_texcoord");
+    this.matrixLocation = gl.getUniformLocation(this.program_, "u_matrix");
+    this.textureMatrixLocation = gl.getUniformLocation(
+      this.program_,
+      "u_textureMatrix"
+    );
+    this.textureLocation = gl.getUniformLocation(this.program_, "u_texture");
+    this.positionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
+    this.positions = [0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1];
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array(this.positions),
+      gl.STATIC_DRAW
+    );
+    this.texcoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.texcoordBuffer);
+    this.texcoords = [0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1];
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array(this.texcoords),
+      gl.STATIC_DRAW
+    );
+  }
+  /**
+   * 2dContext drawImage call implemented in webgl.
+   * Unlike images, textures do not have a width and height associated
+   * with them so we'll pass in the width and height of the texture.
+   *
+   * @param {WebGLTexture} tex Image to draw.
+   * @param {number} texWidth Image width.
+   * @param {number} texHeight Image height.
+   * @param {number} srcX Top-left x-point to read src image.
+   * @param {number} srcY Top-left y-point to read src image.
+   * @param {number} [srcWidth] Width of source to read.
+   * @param {number} [srcHeight] Height of source to read.
+   * @param {number} [dstX] Top-left x-point of destination.
+   * @param {number} [dstY] Top-left y-point of destination.
+   * @param {number} [dstWidth] Width of written image in destination.
+   * @param {number} [dstHeight] Height of written image in destination.
+   * @param {number} [width] Width of canvas.
+   * @param {number} [height] Height of canvas.
+   */
+  drawImage(tex, texWidth, texHeight, srcX, srcY, srcWidth, srcHeight, dstX, dstY, dstWidth, dstHeight, width, height) {
+    const gl = this.gl_;
+    if (dstX === void 0) {
+      dstX = srcX;
+    }
+    if (dstY === void 0) {
+      dstY = srcY;
+    }
+    if (srcWidth === void 0) {
+      srcWidth = texWidth;
+    }
+    if (srcHeight === void 0) {
+      srcHeight = texHeight;
+    }
+    if (dstWidth === void 0) {
+      dstWidth = srcWidth;
+    }
+    if (dstHeight === void 0) {
+      dstHeight = srcHeight;
+    }
+    if (width === void 0) {
+      width = gl.canvas.width;
+    }
+    if (height === void 0) {
+      height = gl.canvas.height;
+    }
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.useProgram(this.program_);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
+    gl.enableVertexAttribArray(this.positionLocation);
+    gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.texcoordBuffer);
+    gl.enableVertexAttribArray(this.texcoordLocation);
+    gl.vertexAttribPointer(this.texcoordLocation, 2, gl.FLOAT, false, 0, 0);
+    let matrix = orthographic(0, width, 0, height, -1, 1);
+    matrix = translate(matrix, dstX, dstY, 0);
+    matrix = scale(matrix, dstWidth, dstHeight, 1);
+    gl.uniformMatrix4fv(this.matrixLocation, false, matrix);
+    let texMatrix = translation(srcX / texWidth, srcY / texHeight, 0);
+    texMatrix = scale(
+      texMatrix,
+      srcWidth / texWidth,
+      srcHeight / texHeight,
+      1
+    );
+    gl.uniformMatrix4fv(this.textureMatrixLocation, false, texMatrix);
+    gl.uniform1i(this.textureLocation, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, this.positions.length / 2);
+  }
+}
+function createShader(gl, type, source2) {
+  const shader = gl.createShader(type);
+  if (shader === null) {
+    throw new Error("Shader compilation failed");
+  }
+  gl.shaderSource(shader, source2);
+  gl.compileShader(shader);
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    const log = gl.getShaderInfoLog(shader);
+    if (log === null) {
+      throw new Error("Shader info log creation failed");
+    }
+    throw new Error(log);
+  }
+  return shader;
+}
+function createProgram(gl, fragmentSource, vertexSource) {
+  const program = gl.createProgram();
+  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexSource);
+  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
+  if (program === null) {
+    throw new Error("Program creation failed");
+  }
+  gl.attachShader(program, vertexShader);
+  gl.attachShader(program, fragmentShader);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    const log = gl.getProgramInfoLog(program);
+    if (log === null) {
+      throw new Error("Program info log creation failed");
+    }
+    throw new Error();
+  }
+  return program;
+}
+const EDGE_VERTEX_SHADER = `
+  attribute vec4 a_position;
+
+  uniform mat4 u_matrix;
+
+  void main() {
+     gl_Position = u_matrix * a_position;
+  }
+`;
+const EDGE_FRAGMENT_SHADER = `
+  precision mediump float;
+
+  uniform vec4 u_val;
+  void main() {
+     gl_FragColor = u_val;
+  }
+`;
+const TRIANGLE_VERTEX_SHADER = `
+  attribute vec4 a_position;
+  attribute vec2 a_texcoord;
+
+  varying vec2 v_texcoord;
+
+  uniform mat4 u_matrix;
+
+  void main() {
+     gl_Position = u_matrix * a_position;
+     v_texcoord = a_texcoord;
+  }
+`;
+const TRIANGLE_FRAGMENT_SHADER = `
+  precision mediump float;
+
+  varying vec2 v_texcoord;
+
+  uniform sampler2D u_texture;
+
+  void main() {
+    if (v_texcoord.x < 0.0 || v_texcoord.x > 1.0 || v_texcoord.y < 0.0 || v_texcoord.y > 1.0) {
+      discard;
+    }
+    gl_FragColor = texture2D(u_texture, v_texcoord);
+  }
+`;
+function createCanvasContextWebGL(width, height, canvasPool2, settings) {
+  let canvas;
+  if (canvasPool2 && canvasPool2.length) {
+    canvas = /** @type {HTMLCanvasElement} */
+    canvasPool2.shift();
+  } else if (WORKER_OFFSCREEN_CANVAS) {
+    canvas = new OffscreenCanvas(width || 300, height || 300);
+  } else {
+    canvas = document.createElement("canvas");
+  }
+  if (width) {
+    canvas.width = width;
+  }
+  if (height) {
+    canvas.height = height;
+  }
+  return (
+    /** @type {WebGLRenderingContext} */
+    canvas.getContext("webgl", settings)
+  );
+}
+function releaseGLCanvas(gl) {
+  const canvas = gl.canvas;
+  canvas.width = 1;
+  canvas.height = 1;
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+}
+const canvasGLPool = [];
+function render(gl, width_, height_, pixelRatio, sourceResolution, targetResolution, targetExtent, triangulation, sources, gutter, dataType, renderEdges, interpolate, drawSingle) {
+  const width = Math.round(pixelRatio * width_);
+  const height = Math.round(pixelRatio * height_);
+  gl.canvas.width = width;
+  gl.canvas.height = height;
+  let resultFrameBuffer;
+  let resultTexture;
+  {
+    resultTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, resultTexture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    if (interpolate) {
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    } else {
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    }
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      width,
+      height,
+      0,
+      gl.RGBA,
+      dataType,
+      null
+    );
+    resultFrameBuffer = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, resultFrameBuffer);
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      gl.COLOR_ATTACHMENT0,
+      gl.TEXTURE_2D,
+      resultTexture,
+      0
+    );
+  }
+  if (resultFrameBuffer === null) {
+    throw new Error("Could not create framebuffer");
+  }
+  if (resultTexture === null) {
+    throw new Error("Could not create texture");
+  }
+  if (sources.length === 0) {
+    return {
+      width,
+      height,
+      framebuffer: resultFrameBuffer,
+      texture: resultTexture
+    };
+  }
+  const sourceDataExtent = createEmpty();
+  sources.forEach(function(src, i, arr) {
+    extend$2(sourceDataExtent, src.extent);
+  });
+  let stitchTexture;
+  let stitchWidth;
+  let stitchHeight;
+  const stitchScale = 1 / sourceResolution;
+  {
+    stitchTexture = gl.createTexture();
+    if (resultTexture === null) {
+      throw new Error("Could not create texture");
+    }
+    stitchWidth = Math.round(getWidth(sourceDataExtent) * stitchScale);
+    stitchHeight = Math.round(getHeight(sourceDataExtent) * stitchScale);
+    const maxTexSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+    const largeSide = Math.max(stitchWidth, stitchHeight);
+    const scaleFactor = largeSide > maxTexSize ? maxTexSize / largeSide : 1;
+    const stitchWidthFixed = Math.round(stitchWidth * scaleFactor);
+    const stitchHeightFixed = Math.round(stitchHeight * scaleFactor);
+    gl.bindTexture(gl.TEXTURE_2D, stitchTexture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    if (interpolate) {
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    } else {
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    }
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      stitchWidthFixed,
+      stitchHeightFixed,
+      0,
+      gl.RGBA,
+      dataType,
+      null
+    );
+    const fb = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      gl.COLOR_ATTACHMENT0,
+      gl.TEXTURE_2D,
+      stitchTexture,
+      0
+    );
+    const webGLCanvas = new Canvas(gl);
+    sources.forEach(function(src, i, arr) {
+      const xPos = (src.extent[0] - sourceDataExtent[0]) * stitchScale * scaleFactor;
+      const yPos = -(src.extent[3] - sourceDataExtent[3]) * stitchScale * scaleFactor;
+      const srcWidth = getWidth(src.extent) * stitchScale * scaleFactor;
+      const srcHeight = getHeight(src.extent) * stitchScale * scaleFactor;
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+      gl.viewport(0, 0, stitchWidthFixed, stitchHeightFixed);
+      if (src.clipExtent) {
+        const xPos2 = (src.clipExtent[0] - sourceDataExtent[0]) * stitchScale * scaleFactor;
+        const yPos2 = -(src.clipExtent[3] - sourceDataExtent[3]) * stitchScale * scaleFactor;
+        const width2 = getWidth(src.clipExtent) * stitchScale * scaleFactor;
+        const height2 = getHeight(src.clipExtent) * stitchScale * scaleFactor;
+        gl.enable(gl.SCISSOR_TEST);
+        gl.scissor(
+          interpolate ? xPos2 : Math.round(xPos2),
+          interpolate ? yPos2 : Math.round(yPos2),
+          interpolate ? width2 : Math.round(xPos2 + width2) - Math.round(xPos2),
+          interpolate ? height2 : Math.round(yPos2 + height2) - Math.round(yPos2)
+        );
+      }
+      webGLCanvas.drawImage(
+        src.texture,
+        src.width,
+        src.height,
+        gutter,
+        gutter,
+        src.width - 2 * gutter,
+        src.height - 2 * gutter,
+        interpolate ? xPos : Math.round(xPos),
+        interpolate ? yPos : Math.round(yPos),
+        interpolate ? srcWidth : Math.round(xPos + srcWidth) - Math.round(xPos),
+        interpolate ? srcHeight : Math.round(yPos + srcHeight) - Math.round(yPos),
+        stitchWidthFixed,
+        stitchHeightFixed
+      );
+      gl.disable(gl.SCISSOR_TEST);
+    });
+    gl.deleteFramebuffer(fb);
+  }
+  const targetTopLeft = getTopLeft(targetExtent);
+  const sourceTopLeft = getTopLeft(sourceDataExtent);
+  const getUVs = (target) => {
+    const u0 = (target[0][0] - targetTopLeft[0]) / targetResolution * pixelRatio;
+    const v0 = -(target[0][1] - targetTopLeft[1]) / targetResolution * pixelRatio;
+    const u1 = (target[1][0] - targetTopLeft[0]) / targetResolution * pixelRatio;
+    const v1 = -(target[1][1] - targetTopLeft[1]) / targetResolution * pixelRatio;
+    const u2 = (target[2][0] - targetTopLeft[0]) / targetResolution * pixelRatio;
+    const v2 = -(target[2][1] - targetTopLeft[1]) / targetResolution * pixelRatio;
+    return { u1, v1, u0, v0, u2, v2 };
+  };
+  gl.bindFramebuffer(gl.FRAMEBUFFER, resultFrameBuffer);
+  gl.viewport(0, 0, width, height);
+  {
+    const vertices = [];
+    const texcoords = [];
+    const triProgram = createProgram(
+      gl,
+      TRIANGLE_FRAGMENT_SHADER,
+      TRIANGLE_VERTEX_SHADER
+    );
+    gl.useProgram(triProgram);
+    const textureLocation = gl.getUniformLocation(triProgram, "u_texture");
+    gl.bindTexture(gl.TEXTURE_2D, stitchTexture);
+    gl.uniform1i(textureLocation, 0);
+    triangulation.getTriangles().forEach(function(triangle, i, arr) {
+      const source2 = triangle.source;
+      const target = triangle.target;
+      const { u1, v1, u0, v0, u2, v2 } = getUVs(target);
+      const su0 = (source2[0][0] - sourceTopLeft[0]) / sourceResolution / stitchWidth;
+      const sv0 = -(source2[0][1] - sourceTopLeft[1]) / sourceResolution / stitchHeight;
+      const su1 = (source2[1][0] - sourceTopLeft[0]) / sourceResolution / stitchWidth;
+      const sv1 = -(source2[1][1] - sourceTopLeft[1]) / sourceResolution / stitchHeight;
+      const su2 = (source2[2][0] - sourceTopLeft[0]) / sourceResolution / stitchWidth;
+      const sv2 = -(source2[2][1] - sourceTopLeft[1]) / sourceResolution / stitchHeight;
+      vertices.push(u1, v1, u0, v0, u2, v2);
+      texcoords.push(su1, sv1, su0, sv0, su2, sv2);
+    });
+    const matrix = orthographic(0, width, height, 0, -1, 1);
+    const matrixLocation = gl.getUniformLocation(triProgram, "u_matrix");
+    gl.uniformMatrix4fv(matrixLocation, false, matrix);
+    const positionLocation = gl.getAttribLocation(triProgram, "a_position");
+    const positionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(positionLocation);
+    const texcoordLocation = gl.getAttribLocation(triProgram, "a_texcoord");
+    const texcoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, texcoordBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texcoords), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(texcoordLocation, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(texcoordLocation);
+    gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2);
+  }
+  if (renderEdges) {
+    const edgeProgram = createProgram(
+      gl,
+      EDGE_FRAGMENT_SHADER,
+      EDGE_VERTEX_SHADER
+    );
+    gl.useProgram(edgeProgram);
+    const matrix = orthographic(0, width, height, 0, -1, 1);
+    const matrixLocation = gl.getUniformLocation(edgeProgram, "u_matrix");
+    gl.uniformMatrix4fv(matrixLocation, false, matrix);
+    const burnval = Array.isArray(renderEdges) ? renderEdges : [0, 0, 0, 255];
+    const burnvalLocation = gl.getUniformLocation(edgeProgram, "u_val");
+    {
+      gl.uniform4fv(burnvalLocation, burnval);
+    }
+    const positionLocation = gl.getAttribLocation(edgeProgram, "a_position");
+    const positionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(positionLocation);
+    const lines = triangulation.getTriangles().reduce(function(lines2, triangle) {
+      const target = triangle.target;
+      const { u1, v1, u0, v0, u2, v2 } = getUVs(target);
+      return lines2.concat([u1, v1, u0, v0, u0, v0, u2, v2, u2, v2, u1, v1]);
+    }, []);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lines), gl.STATIC_DRAW);
+    gl.drawArrays(gl.LINES, 0, lines.length / 2);
+  }
+  return {
+    width,
+    height,
+    framebuffer: resultFrameBuffer,
+    texture: resultTexture
+  };
+}
 class ReprojDataTile extends DataTile {
   /**
    * @param {Options} options Tile options.
@@ -25926,6 +26815,7 @@ class ReprojDataTile extends DataTile {
       interpolate: options.interpolate,
       transition: options.transition
     });
+    this.renderEdges_ = options.renderEdges !== void 0 ? options.renderEdges : false;
     this.pixelRatio_ = options.pixelRatio;
     this.gutter_ = options.gutter;
     this.reprojData_ = null;
@@ -25979,7 +26869,8 @@ class ReprojDataTile extends DataTile {
       limitedTargetExtent,
       maxSourceExtent,
       sourceResolution * errorThresholdInPixels,
-      targetResolution
+      targetResolution,
+      options.transformMatrix
     );
     if (this.triangulation_.getTriangles().length === 0) {
       this.state = TileState.EMPTY;
@@ -26093,25 +26984,11 @@ class ReprojDataTile extends DataTile {
       const DataType = isFloat ? Float32Array : Uint8ClampedArray;
       const tileDataR = new DataType(tileData.buffer);
       const bytesPerElement = DataType.BYTES_PER_ELEMENT;
-      const bytesPerPixel2 = bytesPerElement * tileDataR.length / pixelCount;
+      const bytesPerPixel = bytesPerElement * tileDataR.length / pixelCount;
       const bytesPerRow = tileDataR.byteLength / pixelSize[1];
-      const bandCount = Math.floor(
+      const bandCount2 = Math.floor(
         bytesPerRow / bytesPerElement / pixelSize[0]
       );
-      const packedLength = pixelCount * bandCount;
-      let packedData = tileDataR;
-      if (tileDataR.length !== packedLength) {
-        packedData = new DataType(packedLength);
-        let dataIndex = 0;
-        let rowOffset = 0;
-        const colCount = pixelSize[0] * bandCount;
-        for (let rowIndex = 0; rowIndex < pixelSize[1]; ++rowIndex) {
-          for (let colIndex = 0; colIndex < colCount; ++colIndex) {
-            packedData[dataIndex++] = tileDataR[rowOffset + colIndex];
-          }
-          rowOffset += bytesPerRow / bytesPerElement;
-        }
-      }
       const extent = this.sourceTileGrid_.getTileCoordExtent(tile.tileCoord);
       extent[0] += source2.offset;
       extent[2] += source2.offset;
@@ -26123,10 +27000,11 @@ class ReprojDataTile extends DataTile {
       dataSources.push({
         extent,
         clipExtent,
-        data: new Uint8ClampedArray(packedData.buffer),
+        data: tileDataR,
         dataType: DataType,
-        bytesPerPixel: bytesPerPixel2,
-        pixelSize
+        bytesPerPixel,
+        pixelSize,
+        bandCount: bandCount2
       });
     });
     this.sourceTiles_.length = 0;
@@ -26139,86 +27017,115 @@ class ReprojDataTile extends DataTile {
     const size = this.targetTileGrid_.getTileSize(z2);
     const targetWidth = typeof size === "number" ? size : size[0];
     const targetHeight = typeof size === "number" ? size : size[1];
+    const outWidth = targetWidth * this.pixelRatio_;
+    const outHeight = targetHeight * this.pixelRatio_;
     const targetResolution = this.targetTileGrid_.getResolution(z2);
     const sourceResolution = this.sourceTileGrid_.getResolution(this.sourceZ_);
     const targetExtent = this.targetTileGrid_.getTileCoordExtent(
       this.wrappedTileCoord_
     );
-    let dataR, dataU;
-    const bytesPerPixel = dataSources[0].bytesPerPixel;
-    const reprojs = Math.ceil(bytesPerPixel / 3);
+    const bandCount = dataSources[0].bandCount;
+    const dataR = new dataSources[0].dataType(bandCount * outWidth * outHeight);
+    const gl = createCanvasContextWebGL(outWidth, outHeight, canvasGLPool, {
+      premultipliedAlpha: false,
+      antialias: false
+    });
+    let willInterpolate;
+    const format = gl.RGBA;
+    let textureType;
+    if (dataSources[0].dataType == Float32Array) {
+      textureType = gl.FLOAT;
+      gl.getExtension("WEBGL_color_buffer_float");
+      gl.getExtension("OES_texture_float");
+      gl.getExtension("EXT_float_blend");
+      const extension = gl.getExtension("OES_texture_float_linear");
+      const canInterpolate = extension !== null;
+      willInterpolate = canInterpolate && this.interpolate;
+    } else {
+      textureType = gl.UNSIGNED_BYTE;
+      willInterpolate = this.interpolate;
+    }
+    const BANDS_PR_REPROJ = 4;
+    const reprojs = Math.ceil(bandCount / BANDS_PR_REPROJ);
     for (let reproj = reprojs - 1; reproj >= 0; --reproj) {
       const sources = [];
       for (let i = 0, len = dataSources.length; i < len; ++i) {
         const dataSource = dataSources[i];
-        const buffer2 = dataSource.data;
         const pixelSize = dataSource.pixelSize;
-        const width = pixelSize[0];
-        const height = pixelSize[1];
-        const context2 = createCanvasContext2D(width, height, canvasPool$1);
-        const imageData2 = context2.createImageData(width, height);
-        const data2 = imageData2.data;
-        let offset3 = reproj * 3;
-        for (let j = 0, len2 = data2.length; j < len2; j += 4) {
-          data2[j] = buffer2[offset3];
-          data2[j + 1] = buffer2[offset3 + 1];
-          data2[j + 2] = buffer2[offset3 + 2];
-          data2[j + 3] = 255;
-          offset3 += bytesPerPixel;
+        const width2 = pixelSize[0];
+        const height2 = pixelSize[1];
+        const data2 = new dataSource.dataType(BANDS_PR_REPROJ * width2 * height2);
+        const dataS = dataSource.data;
+        let offset3 = reproj * BANDS_PR_REPROJ;
+        for (let j = 0, len2 = data2.length; j < len2; j += BANDS_PR_REPROJ) {
+          data2[j] = dataS[offset3];
+          data2[j + 1] = dataS[offset3 + 1];
+          data2[j + 2] = dataS[offset3 + 2];
+          data2[j + 3] = dataS[offset3 + 3];
+          offset3 += bandCount;
         }
-        context2.putImageData(imageData2, 0, 0);
+        const texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        if (willInterpolate) {
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        } else {
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        }
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texImage2D(
+          gl.TEXTURE_2D,
+          0,
+          format,
+          width2,
+          height2,
+          0,
+          format,
+          textureType,
+          data2
+        );
         sources.push({
           extent: dataSource.extent,
           clipExtent: dataSource.clipExtent,
-          image: context2.canvas
+          texture,
+          width: width2,
+          height: height2
         });
       }
-      const canvas = render(
+      const { framebuffer, width, height } = render(
+        gl,
         targetWidth,
         targetHeight,
         this.pixelRatio_,
         sourceResolution,
-        this.sourceTileGrid_.getExtent(),
         targetResolution,
         targetExtent,
         this.triangulation_,
         sources,
         this.gutter_,
-        false,
-        false,
-        false
+        textureType,
+        this.renderEdges_,
+        willInterpolate
       );
-      for (let i = 0, len = sources.length; i < len; ++i) {
-        const canvas2 = sources[i].image;
-        const context2 = canvas2.getContext("2d");
-        releaseCanvas(context2);
-        canvasPool$1.push(context2.canvas);
-      }
-      const context = canvas.getContext("2d");
-      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-      releaseCanvas(context);
-      canvasPool$1.push(canvas);
-      if (!dataR) {
-        dataU = new Uint8ClampedArray(
-          bytesPerPixel * imageData.width * imageData.height
-        );
-        dataR = new dataSources[0].dataType(dataU.buffer);
-      }
-      const data = imageData.data;
-      let offset2 = reproj * 3;
-      for (let i = 0, len = data.length; i < len; i += 4) {
-        if (data[i + 3] === 255) {
-          dataU[offset2] = data[i];
-          dataU[offset2 + 1] = data[i + 1];
-          dataU[offset2 + 2] = data[i + 2];
-        } else {
-          dataU[offset2] = 0;
-          dataU[offset2 + 1] = 0;
-          dataU[offset2 + 2] = 0;
-        }
-        offset2 += bytesPerPixel;
+      const rows = width;
+      const cols = height * BANDS_PR_REPROJ;
+      const data = new dataSources[0].dataType(rows * cols);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+      gl.readPixels(0, 0, width, height, gl.RGBA, textureType, data);
+      let offset2 = reproj * BANDS_PR_REPROJ;
+      for (let i = 0, len = data.length; i < len; i += BANDS_PR_REPROJ) {
+        const flipY = (rows - 1 - (i / cols | 0)) * cols + i % cols;
+        dataR[offset2] = data[flipY];
+        dataR[offset2 + 1] = data[flipY + 1];
+        dataR[offset2 + 2] = data[flipY + 2];
+        dataR[offset2 + 3] = data[flipY + 3];
+        offset2 += bandCount;
       }
     }
+    releaseGLCanvas(gl);
+    canvasGLPool.push(gl.canvas);
     if (imageLike) {
       const context = createCanvasContext2D(targetWidth, targetHeight);
       const imageData = new ImageData(dataR, targetWidth);
@@ -26227,10 +27134,7 @@ class ReprojDataTile extends DataTile {
     } else {
       this.reprojData_ = dataR;
     }
-    this.reprojSize_ = [
-      Math.round(targetWidth * this.pixelRatio_),
-      Math.round(targetHeight * this.pixelRatio_)
-    ];
+    this.reprojSize_ = [Math.round(outWidth), Math.round(outHeight)];
     this.state = TileState.LOADED;
     this.changed();
   }
@@ -26348,7 +27252,6 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
     this.tempTileCoord_ = createOrUpdate(0, 0, 0);
     const cacheSize2 = options.cacheSize !== void 0 ? options.cacheSize : 512;
     this.tileCache_ = new LRUCache(cacheSize2);
-    this.renderedProjection_ = void 0;
     this.maxStaleKeys = cacheSize2 * 0.5;
   }
   /**
@@ -26470,11 +27373,11 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
    * @override
    */
   prepareFrame(frameState) {
-    if (!this.renderedProjection_) {
-      this.renderedProjection_ = frameState.viewState.projection;
-    } else if (frameState.viewState.projection !== this.renderedProjection_) {
+    if (!this.renderedProjection) {
+      this.renderedProjection = frameState.viewState.projection;
+    } else if (frameState.viewState.projection !== this.renderedProjection) {
       this.tileCache_.clear();
-      this.renderedProjection_ = frameState.viewState.projection;
+      this.renderedProjection = frameState.viewState.projection;
     }
     const source2 = this.getLayer().getSource();
     if (!source2) {
@@ -26637,6 +27540,7 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
    * @override
    */
   renderFrame(frameState, target) {
+    let allTilesIdle = true;
     this.renderComplete = true;
     const layerState = frameState.layerStatesArray[frameState.layerIndex];
     const viewState = frameState.viewState;
@@ -26719,7 +27623,12 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
           continue;
         }
       }
-      this.renderComplete = false;
+      if (tileState !== TileState.IDLE) {
+        allTilesIdle = false;
+      }
+      if (tileState !== TileState.ERROR) {
+        this.renderComplete = false;
+      }
       const hasStaleTile = this.findStaleTile_(tileCoord, tilesByZ);
       if (hasStaleTile) {
         removeTileFromLookup(tilesByZ, tile, z2);
@@ -26848,20 +27757,24 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
     this.extentChanged = !this.renderedExtent_ || !equals$2(this.renderedExtent_, canvasExtent);
     this.renderedExtent_ = canvasExtent;
     this.renderedPixelRatio = pixelRatio;
-    this.renderedProjection = projection;
     this.postRender(this.context, frameState);
     if (layerState.extent) {
       context.restore();
     }
     context.imageSmoothingEnabled = true;
-    const postRenderFunction = (map2, frameState2) => {
-      const tileSourceKey = getUid(tileSource);
-      const wantedTiles = frameState2.wantedTiles[tileSourceKey];
-      const tilesCount = wantedTiles ? Object.keys(wantedTiles).length : 0;
-      this.updateCacheSize(tilesCount);
-      this.tileCache_.expireCache();
-    };
-    frameState.postRenderFunctions.push(postRenderFunction);
+    if (this.renderComplete) {
+      const postRenderFunction = (map2, frameState2) => {
+        const tileSourceKey = getUid(tileSource);
+        const wantedTiles = frameState2.wantedTiles[tileSourceKey];
+        const tilesCount = wantedTiles ? Object.keys(wantedTiles).length : 0;
+        this.updateCacheSize(tilesCount);
+        this.tileCache_.expireCache();
+      };
+      frameState.postRenderFunctions.push(postRenderFunction);
+    }
+    if (!this.renderComplete && !allTilesIdle) {
+      frameState.animate = true;
+    }
     return this.container;
   }
   /**
@@ -27137,7 +28050,7 @@ class CanvasImmediateRenderer extends VectorContext {
     this.textStrokeState_ = null;
     this.textState_ = null;
     this.pixelCoordinates_ = [];
-    this.tmpLocalTransform_ = create();
+    this.tmpLocalTransform_ = create$1();
   }
   /**
    * @param {Array<number>} flatCoordinates Flat coordinates.
@@ -28326,7 +29239,7 @@ function N({
 }) {
   const i = `_${Math.random().toString(36).slice(2, 11)}`;
   if (typeof t != "string" && "text" in t) {
-    const E = `<span>${t.text}</span>`, m = y(E), u = document.createElement("li");
+    const E4 = `<span>${t.text}</span>`, m = y(E4), u = document.createElement("li");
     t.classname = t.classname || "", t.icon && (t.classname === "" ? t.classname = r.icon : t.classname.includes(r.icon) === false && (t.classname += ` ${r.icon}`), u.setAttribute("style", `background-image:url(${t.icon})`)), u.id = i, u.className = t.classname, u.append(m), n.append(u);
     const v = {
       id: i,
@@ -28541,12 +29454,12 @@ class R extends Control {
       h: Math.round(this.lineHeight * o)
     }, l = s.w >= i.w ? this.pixel[0] + 5 : this.pixel[0] - i.w;
     this.container.style.left = `${l}px`, this.container.style.top = s.h >= i.h ? `${this.pixel[1] - 10}px` : `${this.pixel[1] - i.h}px`, this.container.style.right = "auto", this.container.style.bottom = "auto", s.w -= i.w;
-    const c = (E) => Array.from(E.children).filter(
+    const c = (E4) => Array.from(E4.children).filter(
       (m) => m.tagName === "LI" && m.classList.contains(r.submenu)
     );
     let f = 0;
-    const g = (E, m) => {
-      f += 1, c(E).forEach((v) => {
+    const g = (E4, m) => {
+      f += 1, c(E4).forEach((v) => {
         const A = m >= i.w ? i.w - 8 : (i.w + 8) * -1, h = v.querySelector(
           `ul.${r.container}`
         ), $ = Math.round(
@@ -30318,6 +31231,7 @@ class CanvasTextBuilder extends CanvasBuilder {
     this.textOffsetX_ = 0;
     this.textOffsetY_ = 0;
     this.textRotateWithView_ = void 0;
+    this.textKeepUpright_ = void 0;
     this.textRotation_ = 0;
     this.textFillState_ = null;
     this.fillStates = {};
@@ -30664,7 +31578,8 @@ class CanvasTextBuilder extends CanvasBuilder {
       text,
       textKey,
       1,
-      this.declutterMode_
+      this.declutterMode_,
+      this.textKeepUpright_
     ]);
     this.hitDetectionInstructions.push([
       Instruction.DRAW_CHARS,
@@ -30681,7 +31596,8 @@ class CanvasTextBuilder extends CanvasBuilder {
       text,
       textKey,
       1 / pixelRatio,
-      this.declutterMode_
+      this.declutterMode_,
+      this.textKeepUpright_
     ]);
   }
   /**
@@ -30753,11 +31669,13 @@ class CanvasTextBuilder extends CanvasBuilder {
       const textOffsetX = textStyle.getOffsetX();
       const textOffsetY = textStyle.getOffsetY();
       const textRotateWithView = textStyle.getRotateWithView();
+      const textKeepUpright = textStyle.getKeepUpright();
       const textRotation = textStyle.getRotation();
       this.text_ = textStyle.getText() || "";
       this.textOffsetX_ = textOffsetX === void 0 ? 0 : textOffsetX;
       this.textOffsetY_ = textOffsetY === void 0 ? 0 : textOffsetY;
       this.textRotateWithView_ = textRotateWithView === void 0 ? false : textRotateWithView;
+      this.textKeepUpright_ = textKeepUpright === void 0 ? true : textKeepUpright;
       this.textRotation_ = textRotation === void 0 ? 0 : textRotation;
       this.strokeKey_ = strokeState ? (typeof strokeState.strokeStyle == "string" ? strokeState.strokeStyle : getUid(strokeState.strokeStyle)) + strokeState.lineCap + strokeState.lineDashOffset + "|" + strokeState.lineWidth + strokeState.lineJoin + strokeState.miterLimit + "[" + strokeState.lineDash.join() + "]" : "";
       this.textKey_ = textState.font + textState.scale + (textState.textAlign || "?") + (textState.repeat || "?") + (textState.justify || "?") + (textState.textBaseline || "?");
@@ -30830,7 +31748,7 @@ class BuilderGroup {
     return replay;
   }
 }
-function drawTextOnPath(flatCoordinates, offset2, end2, stride, text, startM, maxAngle, scale2, measureAndCacheTextWidth2, font, cache2, rotation) {
+function drawTextOnPath(flatCoordinates, offset2, end2, stride, text, startM, maxAngle, scale2, measureAndCacheTextWidth2, font, cache2, rotation, keepUpright = true) {
   let x2 = flatCoordinates[offset2];
   let y2 = flatCoordinates[offset2 + 1];
   let x1 = 0;
@@ -30861,13 +31779,15 @@ function drawTextOnPath(flatCoordinates, offset2, end2, stride, text, startM, ma
   interpolate = segmentLength === 0 ? 0 : (endM - segmentM) / segmentLength;
   const endX = lerp(x1, x2, interpolate);
   const endY = lerp(y1, y2, interpolate);
-  let reverse;
-  if (rotation) {
-    const flat = [beginX, beginY, endX, endY];
-    rotate(flat, 0, 4, 2, rotation, flat, flat);
-    reverse = flat[0] > flat[2];
-  } else {
-    reverse = beginX > endX;
+  let reverse = false;
+  if (keepUpright) {
+    if (rotation) {
+      const flat = [beginX, beginY, endX, endY];
+      rotate(flat, 0, 4, 2, rotation, flat, flat);
+      reverse = flat[0] > flat[2];
+    } else {
+      reverse = beginX > endX;
+    }
   }
   const PI = Math.PI;
   const result = [];
@@ -30983,7 +31903,7 @@ class Executor {
     this.instructions = instructions.instructions;
     this.coordinates = instructions.coordinates;
     this.coordinateCache_ = {};
-    this.renderedTransform_ = create();
+    this.renderedTransform_ = create$1();
     this.hitDetectionInstructions = instructions.hitDetectionInstructions;
     this.pixelCoordinates_ = null;
     this.viewRotation_ = 0;
@@ -31178,7 +32098,7 @@ class Executor {
     let transform2;
     if (rotation !== 0) {
       transform2 = compose(
-        create(),
+        create$1(),
         centerX,
         centerY,
         1,
@@ -31726,6 +32646,10 @@ class Executor {
             instruction[13]
           ];
           declutterMode = instruction[14] || "declutter";
+          const textKeepUpright = (
+            /** @type {boolean} */
+            instruction[15]
+          );
           const textState = this.textStates[textKey];
           const font = textState.font;
           const textScale = [
@@ -31756,7 +32680,8 @@ class Executor {
               measureAndCacheTextWidth,
               font,
               cachedWidths,
-              viewRotationFromTransform ? 0 : this.viewRotation_
+              viewRotationFromTransform ? 0 : this.viewRotation_,
+              textKeepUpright
             );
             drawChars: if (parts) {
               const replayImageOrLabelArgs = [];
@@ -32025,7 +32950,7 @@ class ExecutorGroup {
     this.renderBuffer_ = renderBuffer;
     this.executorsByZIndex_ = {};
     this.hitDetectionContext_ = null;
-    this.hitDetectionTransform_ = create();
+    this.hitDetectionTransform_ = create$1();
     this.renderedContext_ = null;
     this.deferredZIndexContexts_ = {};
     this.createExecutors_(allInstructions, deferredRendering);
@@ -32220,17 +33145,13 @@ class ExecutorGroup {
    */
   execute(targetContext, scaledCanvasSize, transform2, viewRotation, snapToPixel, builderTypes, declutterTree) {
     const zs = Object.keys(this.executorsByZIndex_).map(Number);
-    zs.sort(ascending);
+    zs.sort(declutterTree ? descending : ascending);
     builderTypes = builderTypes ? builderTypes : ALL;
     const maxBuilderTypes = ALL.length;
-    let i, ii, j, jj, replays;
-    if (declutterTree) {
-      zs.reverse();
-    }
-    for (i = 0, ii = zs.length; i < ii; ++i) {
+    for (let i = 0, ii = zs.length; i < ii; ++i) {
       const zIndexKey = zs[i].toString();
-      replays = this.executorsByZIndex_[zIndexKey];
-      for (j = 0, jj = builderTypes.length; j < jj; ++j) {
+      const replays = this.executorsByZIndex_[zIndexKey];
+      for (let j = 0, jj = builderTypes.length; j < jj; ++j) {
         const builderType = builderTypes[j];
         const replay = replays[builderType];
         if (replay !== void 0) {
@@ -32799,20 +33720,15 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
       }
       return void 0;
     };
-    let result;
-    const executorGroups = [this.replayGroup_];
     const declutter = this.getLayer().getDeclutter();
-    executorGroups.some((executorGroup) => {
-      return result = executorGroup.forEachFeatureAtCoordinate(
-        coordinate,
-        resolution,
-        rotation,
-        hitTolerance,
-        featureCallback,
-        declutter && frameState.declutter[declutter] ? frameState.declutter[declutter].all().map((item) => item.value) : null
-      );
-    });
-    return result;
+    return this.replayGroup_.forEachFeatureAtCoordinate(
+      coordinate,
+      resolution,
+      rotation,
+      hitTolerance,
+      featureCallback,
+      declutter ? frameState.declutter[declutter].all().map((item) => item.value) : null
+    );
   }
   /**
    * Perform action necessary to get the layer rendered after new fonts have loaded
@@ -33152,8 +34068,9 @@ class RBush2 {
    * Calls a callback function with each value in the tree.
    * If the callback returns a truthy value, this value is returned without
    * checking the rest of the tree.
-   * @param {function(T): *} callback Callback.
-   * @return {*} Callback return value.
+   * @param {function(T): R} callback Callback.
+   * @return {R|undefined} Callback return value.
+   * @template R
    */
   forEach(callback) {
     return this.forEach_(this.getAll(), callback);
@@ -33161,17 +34078,19 @@ class RBush2 {
   /**
    * Calls a callback function with each value in the provided extent.
    * @param {import("../extent.js").Extent} extent Extent.
-   * @param {function(T): *} callback Callback.
-   * @return {*} Callback return value.
+   * @param {function(T): R} callback Callback.
+   * @return {R|undefined} Callback return value.
+   * @template R
    */
   forEachInExtent(extent, callback) {
     return this.forEach_(this.getInExtent(extent), callback);
   }
   /**
    * @param {Array<T>} values Values.
-   * @param {function(T): *} callback Callback.
+   * @param {function(T): R} callback Callback.
+   * @return {R|undefined} Callback return value.
+   * @template R
    * @private
-   * @return {*} Callback return value.
    */
   forEach_(values, callback) {
     let result;
@@ -33480,7 +34399,7 @@ function linearRingss(flatCoordinates, offset2, endss, stride) {
   }
   return flatCenters;
 }
-const tmpTransform = create();
+const tmpTransform = create$1();
 class RenderFeature {
   /**
    * @param {Type} type Geometry type.
@@ -34077,12 +34996,10 @@ class VectorSource extends Source {
         const indexedFeature = this.idIndex_[id];
         if (!(indexedFeature instanceof RenderFeature)) {
           valid = false;
+        } else if (!Array.isArray(indexedFeature)) {
+          this.idIndex_[id] = [indexedFeature, feature];
         } else {
-          if (!Array.isArray(indexedFeature)) {
-            this.idIndex_[id] = [indexedFeature, feature];
-          } else {
-            indexedFeature.push(feature);
-          }
+          indexedFeature.push(feature);
         }
       } else {
         valid = false;
@@ -34224,10 +35141,9 @@ class VectorSource extends Source {
       }
     } else {
       if (this.featuresRtree_) {
-        const removeAndIgnoreReturn = (feature) => {
+        this.featuresRtree_.forEach((feature) => {
           this.removeFeatureInternal(feature);
-        };
-        this.featuresRtree_.forEach(removeAndIgnoreReturn);
+        });
         for (const id in this.nullGeometryFeatures_) {
           this.removeFeatureInternal(this.nullGeometryFeatures_[id]);
         }
@@ -34380,7 +35296,7 @@ class VectorSource extends Source {
   /**
    * Get all features whose geometry intersects the provided coordinate.
    * @param {import("../coordinate.js").Coordinate} coordinate Coordinate.
-   * @return {Array<import("../Feature.js").default>} Features.
+   * @return {Array<FeatureType>} Features.
    * @api
    */
   getFeaturesAtCoordinate(coordinate) {
@@ -34632,6 +35548,9 @@ class VectorSource extends Source {
           extentToLoad,
           resolution,
           projection,
+          /**
+           * @param {Array<FeatureType>} features Loaded features
+           */
           (features) => {
             --this.loadingExtentsCount_;
             this.dispatchEvent(
@@ -34669,11 +35588,9 @@ class VectorSource extends Source {
    */
   removeLoadedExtent(extent) {
     const loadedExtentsRtree = this.loadedExtentsRtree_;
-    let obj;
-    loadedExtentsRtree.forEachInExtent(extent, function(object) {
+    const obj = loadedExtentsRtree.forEachInExtent(extent, function(object) {
       if (equals$2(object.extent, extent)) {
-        obj = object;
-        return true;
+        return object;
       }
     });
     if (obj) {
@@ -34787,13 +35704,19 @@ class VectorSource extends Source {
     this.url_ = url;
     this.setLoader(xhr(url, this.format_));
   }
+  /**
+   * @param {boolean} overlaps The source can have overlapping geometries.
+   */
+  setOverlaps(overlaps) {
+    this.overlaps_ = overlaps;
+    this.changed();
+  }
 }
 const Vector = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   VectorSourceEvent,
   default: VectorSource
 }, Symbol.toStringTag, { value: "Module" }));
-var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
 function getDefaultExportFromCjs(x2) {
   return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
 }
@@ -34821,7 +35744,7 @@ function getAugmentedNamespace(n) {
   });
   return a2;
 }
-var olGeocoder = { exports: {} };
+var olGeocoder$1 = { exports: {} };
 const require$$0 = /* @__PURE__ */ getAugmentedNamespace(Control$1);
 const require$$1 = /* @__PURE__ */ getAugmentedNamespace(Style$1);
 const require$$2 = /* @__PURE__ */ getAugmentedNamespace(Icon$1);
@@ -34836,120 +35759,125 @@ const require$$7 = /* @__PURE__ */ getAugmentedNamespace(proj);
  * https://github.com/Dominique92/ol-geocoder
  * Built: 15/03/2024 08:57:04
  */
-(function(module, exports) {
-  !function(e, t) {
-    module.exports = t(require$$0, require$$1, require$$2, require$$3, require$$4, require$$5, require$$6, require$$7);
-  }(commonjsGlobal, function(e, t, s, r2, n, o, a2, i) {
-    function l(e2) {
-      return e2 && "object" == typeof e2 && "default" in e2 ? e2 : { default: e2 };
-    }
-    function c(e2) {
-      if (e2 && e2.__esModule) return e2;
-      var t2 = /* @__PURE__ */ Object.create(null);
-      return e2 && Object.keys(e2).forEach(function(s2) {
-        if ("default" !== s2) {
-          var r3 = Object.getOwnPropertyDescriptor(e2, s2);
-          Object.defineProperty(t2, s2, r3.get ? r3 : { enumerable: true, get: function() {
-            return e2[s2];
-          } });
-        }
-      }), t2.default = e2, Object.freeze(t2);
-    }
-    var d2 = l(e), u = l(t), p5 = l(s), h = l(r2), g = l(n), m = l(o), y2 = l(a2), f = c(i), b2 = "gcd-container", v = "gcd-button-control", w2 = "gcd-input-query", x2 = "gcd-input-label", $ = "gcd-input-search", k2 = { namespace: "ol-geocoder", spin: "gcd-pseudo-rotate", hidden: "gcd-hidden", address: "gcd-address", country: "gcd-country", city: "gcd-city", road: "gcd-road", olControl: "ol-control", glass: { container: "gcd-gl-container", control: "gcd-gl-control", button: "gcd-gl-btn", input: "gcd-gl-input", expanded: "gcd-gl-expanded", search: "gcd-gl-search", result: "gcd-gl-result" }, inputText: { container: "gcd-txt-container", control: "gcd-txt-control", label: "gcd-txt-label", input: "gcd-txt-input", search: "gcd-txt-search", icon: "gcd-txt-glass", result: "gcd-txt-result" } }, S2 = { containerId: b2, buttonControlId: v, inputQueryId: w2, inputLabelId: x2, inputSearchId: $, cssClasses: k2 };
-    const q = Object.freeze({ __proto__: null, containerId: b2, buttonControlId: v, inputQueryId: w2, inputLabelId: x2, inputSearchId: $, cssClasses: k2, default: S2 }), L2 = "addresschosen", C2 = "nominatim", E = "reverse", T = "glass-button", j = "text-input", I2 = "bing", N2 = "mapquest", P2 = "opencage", A = "osm", R2 = "photon", F = "https://dev.virtualearth.net/REST/v1/Locations", _2 = "https://nominatim.openstreetmap.org/search", M2 = "https://api.opencagedata.com/geocode/v1/json?", O = "https://nominatim.openstreetmap.org/search", D = "https://photon.komoot.io/api/", V = { provider: A, label: "", placeholder: "Search for an address", featureStyle: null, targetType: T, lang: "en-US", limit: 5, keepOpen: false, preventDefault: false, preventPanning: false, preventMarker: false, defaultFlyResolution: 10, debug: false };
-    function B(e2, t2 = "Assertion failed") {
-      if (!e2) {
-        if ("undefined" != typeof Error) throw new Error(t2);
-        throw t2;
+var olGeocoder = olGeocoder$1.exports;
+var hasRequiredOlGeocoder;
+function requireOlGeocoder() {
+  if (hasRequiredOlGeocoder) return olGeocoder$1.exports;
+  hasRequiredOlGeocoder = 1;
+  (function(module, exports) {
+    !function(e, t) {
+      module.exports = t(require$$0, require$$1, require$$2, require$$3, require$$4, require$$5, require$$6, require$$7);
+    }(olGeocoder, function(e, t, s, r2, n, o, a2, i) {
+      function l(e2) {
+        return e2 && "object" == typeof e2 && "default" in e2 ? e2 : { default: e2 };
       }
-    }
-    function U(e2) {
-      const t2 = function() {
-        if ("performance" in window == 0 && (window.performance = {}), "now" in window.performance == 0) {
-          let e3 = Date.now();
-          performance.timing && performance.timing.navigationStart && (e3 = performance.timing.navigationStart), window.performance.now = () => Date.now() - e3;
-        }
-        return window.performance.now();
-      }().toString(36);
-      return e2 ? e2 + t2 : t2;
-    }
-    function Q(e2, t2, s2) {
-      if (Array.isArray(e2)) return void e2.forEach((e3) => Q(e3, t2));
-      const r3 = Array.isArray(t2) ? t2 : t2.split(/\s+/u);
-      let n2 = r3.length;
-      for (; n2--; ) H(e2, r3[n2]) || Y(e2, r3[n2]);
-    }
-    function z2(e2, t2, s2) {
-      if (Array.isArray(e2)) return void e2.forEach((e3) => z2(e3, t2));
-      const r3 = Array.isArray(t2) ? t2 : t2.split(/\s+/u);
-      let n2 = r3.length;
-      for (; n2--; ) H(e2, r3[n2]) && Z(e2, r3[n2]);
-    }
-    function H(e2, t2) {
-      return e2.classList ? e2.classList.contains(t2) : X(t2).test(e2.className);
-    }
-    function K(e2) {
-      for (; e2.firstChild; ) e2.firstChild.remove();
-    }
-    function J(e2, t2) {
-      return e2.replace(/\{\s*([\w-]+)\s*\}/gu, (e3, s2) => {
-        const r3 = void 0 === t2[s2] ? "" : t2[s2];
-        return String(r3).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
-      });
-    }
-    function W(e2, t2) {
-      let s2;
-      if (Array.isArray(e2)) {
-        if (s2 = document.createElement(e2[0]), e2[1].id && (s2.id = e2[1].id), e2[1].classname && (s2.className = e2[1].classname), e2[1].attr) {
-          const { attr: t3 } = e2[1];
-          if (Array.isArray(t3)) {
-            let e3 = -1;
-            for (; ++e3 < t3.length; ) s2.setAttribute(t3[e3].name, t3[e3].value);
-          } else s2.setAttribute(t3.name, t3.value);
-        }
-      } else s2 = document.createElement(e2);
-      s2.innerHTML = t2;
-      const r3 = document.createDocumentFragment();
-      for (; s2.childNodes[0]; ) r3.append(s2.childNodes[0]);
-      return s2.append(r3), s2;
-    }
-    function X(e2) {
-      return new RegExp(`(^|\\s+) ${e2} (\\s+|$)`, "u");
-    }
-    function Y(e2, t2, s2) {
-      e2.classList ? e2.classList.add(t2) : e2.className = `${e2.className} ${t2}`.trim();
-    }
-    function Z(e2, t2, s2) {
-      e2.classList ? e2.classList.remove(t2) : e2.className = e2.className.replace(X(t2), " ").trim();
-    }
-    const ee = q.cssClasses;
-    class te {
-      constructor(e2) {
-        this.options = e2, this.els = this.createControl();
+      function c(e2) {
+        if (e2 && e2.__esModule) return e2;
+        var t2 = /* @__PURE__ */ Object.create(null);
+        return e2 && Object.keys(e2).forEach(function(s2) {
+          if ("default" !== s2) {
+            var r3 = Object.getOwnPropertyDescriptor(e2, s2);
+            Object.defineProperty(t2, s2, r3.get ? r3 : { enumerable: true, get: function() {
+              return e2[s2];
+            } });
+          }
+        }), t2.default = e2, Object.freeze(t2);
       }
-      createControl() {
-        let e2, t2, s2;
-        return this.options.targetType === j ? (t2 = `${ee.namespace} ${ee.inputText.container}`, e2 = W(["div", { id: q.containerId, classname: t2 }], te.input), s2 = { container: e2, control: e2.querySelector(`.${ee.inputText.control}`), label: e2.querySelector(`.${ee.inputText.label}`), input: e2.querySelector(`.${ee.inputText.input}`), search: e2.querySelector(`.${ee.inputText.search}`), result: e2.querySelector(`.${ee.inputText.result}`) }, s2.label.innerHTML = this.options.label) : (t2 = `${ee.namespace} ${ee.glass.container}`, e2 = W(["div", { id: q.containerId, classname: t2 }], te.glass), s2 = { container: e2, control: e2.querySelector(`.${ee.glass.control}`), button: e2.querySelector(`.${ee.glass.button}`), input: e2.querySelector(`.${ee.glass.input}`), search: e2.querySelector(`.${ee.glass.search}`), result: e2.querySelector(`.${ee.glass.result}`) }), s2.input.placeholder = this.options.placeholder, s2;
+      var d2 = l(e), u = l(t), p5 = l(s), h = l(r2), g = l(n), m = l(o), y2 = l(a2), f = c(i), b2 = "gcd-container", v = "gcd-button-control", w2 = "gcd-input-query", x2 = "gcd-input-label", $ = "gcd-input-search", k2 = { namespace: "ol-geocoder", spin: "gcd-pseudo-rotate", hidden: "gcd-hidden", address: "gcd-address", country: "gcd-country", city: "gcd-city", road: "gcd-road", olControl: "ol-control", glass: { container: "gcd-gl-container", control: "gcd-gl-control", button: "gcd-gl-btn", input: "gcd-gl-input", expanded: "gcd-gl-expanded", search: "gcd-gl-search", result: "gcd-gl-result" }, inputText: { container: "gcd-txt-container", control: "gcd-txt-control", label: "gcd-txt-label", input: "gcd-txt-input", search: "gcd-txt-search", icon: "gcd-txt-glass", result: "gcd-txt-result" } }, S2 = { containerId: b2, buttonControlId: v, inputQueryId: w2, inputLabelId: x2, inputSearchId: $, cssClasses: k2 };
+      const q = Object.freeze({ __proto__: null, containerId: b2, buttonControlId: v, inputQueryId: w2, inputLabelId: x2, inputSearchId: $, cssClasses: k2, default: S2 }), L2 = "addresschosen", C2 = "nominatim", E4 = "reverse", T = "glass-button", j = "text-input", I2 = "bing", N2 = "mapquest", P6 = "opencage", A = "osm", R2 = "photon", F = "https://dev.virtualearth.net/REST/v1/Locations", _2 = "https://nominatim.openstreetmap.org/search", M5 = "https://api.opencagedata.com/geocode/v1/json?", O = "https://nominatim.openstreetmap.org/search", D = "https://photon.komoot.io/api/", V = { provider: A, label: "", placeholder: "Search for an address", featureStyle: null, targetType: T, lang: "en-US", limit: 5, keepOpen: false, preventDefault: false, preventPanning: false, preventMarker: false, defaultFlyResolution: 10, debug: false };
+      function B(e2, t2 = "Assertion failed") {
+        if (!e2) {
+          if ("undefined" != typeof Error) throw new Error(t2);
+          throw t2;
+        }
       }
-    }
-    function se(e2) {
-      return new Promise((t2, s2) => {
-        const r3 = function(e3, t3) {
-          t3 && "object" == typeof t3 && (e3 += (/\?/u.test(e3) ? "&" : "?") + re(t3));
-          return e3;
-        }(e2.url, e2.data), n2 = { method: "GET", mode: "cors", credentials: "same-origin" };
-        e2.jsonp ? function(e3, t3, s3) {
-          const { head: r4 } = document, n3 = document.createElement("script"), o2 = `f${Math.round(Math.random() * Date.now())}`;
-          n3.setAttribute("src", `${e3 + (e3.indexOf("?") > 0 ? "&" : "?") + t3}=${o2}`), window[o2] = (e4) => {
-            window[o2] = void 0, setTimeout(() => r4.removeChild(n3), 0), s3(e4);
-          }, r4.append(n3);
-        }(r3, e2.callbackName, t2) : fetch(r3, n2).then((e3) => e3.json()).then(t2).catch(s2);
-      });
-    }
-    function re(e2) {
-      return Object.keys(e2).reduce((t2, s2) => (t2.push("object" == typeof e2[s2] ? re(e2[s2]) : `${encodeURIComponent(s2)}=${encodeURIComponent(e2[s2])}`), t2), []).join("&");
-    }
-    te.glass = `
+      function U(e2) {
+        const t2 = function() {
+          if ("performance" in window == 0 && (window.performance = {}), "now" in window.performance == 0) {
+            let e3 = Date.now();
+            performance.timing && performance.timing.navigationStart && (e3 = performance.timing.navigationStart), window.performance.now = () => Date.now() - e3;
+          }
+          return window.performance.now();
+        }().toString(36);
+        return e2 ? e2 + t2 : t2;
+      }
+      function Q(e2, t2, s2) {
+        if (Array.isArray(e2)) return void e2.forEach((e3) => Q(e3, t2));
+        const r3 = Array.isArray(t2) ? t2 : t2.split(/\s+/u);
+        let n2 = r3.length;
+        for (; n2--; ) H(e2, r3[n2]) || Y(e2, r3[n2]);
+      }
+      function z2(e2, t2, s2) {
+        if (Array.isArray(e2)) return void e2.forEach((e3) => z2(e3, t2));
+        const r3 = Array.isArray(t2) ? t2 : t2.split(/\s+/u);
+        let n2 = r3.length;
+        for (; n2--; ) H(e2, r3[n2]) && Z(e2, r3[n2]);
+      }
+      function H(e2, t2) {
+        return e2.classList ? e2.classList.contains(t2) : X(t2).test(e2.className);
+      }
+      function K(e2) {
+        for (; e2.firstChild; ) e2.firstChild.remove();
+      }
+      function J(e2, t2) {
+        return e2.replace(/\{\s*([\w-]+)\s*\}/gu, (e3, s2) => {
+          const r3 = void 0 === t2[s2] ? "" : t2[s2];
+          return String(r3).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+        });
+      }
+      function W(e2, t2) {
+        let s2;
+        if (Array.isArray(e2)) {
+          if (s2 = document.createElement(e2[0]), e2[1].id && (s2.id = e2[1].id), e2[1].classname && (s2.className = e2[1].classname), e2[1].attr) {
+            const { attr: t3 } = e2[1];
+            if (Array.isArray(t3)) {
+              let e3 = -1;
+              for (; ++e3 < t3.length; ) s2.setAttribute(t3[e3].name, t3[e3].value);
+            } else s2.setAttribute(t3.name, t3.value);
+          }
+        } else s2 = document.createElement(e2);
+        s2.innerHTML = t2;
+        const r3 = document.createDocumentFragment();
+        for (; s2.childNodes[0]; ) r3.append(s2.childNodes[0]);
+        return s2.append(r3), s2;
+      }
+      function X(e2) {
+        return new RegExp(`(^|\\s+) ${e2} (\\s+|$)`, "u");
+      }
+      function Y(e2, t2, s2) {
+        e2.classList ? e2.classList.add(t2) : e2.className = `${e2.className} ${t2}`.trim();
+      }
+      function Z(e2, t2, s2) {
+        e2.classList ? e2.classList.remove(t2) : e2.className = e2.className.replace(X(t2), " ").trim();
+      }
+      const ee = q.cssClasses;
+      class te {
+        constructor(e2) {
+          this.options = e2, this.els = this.createControl();
+        }
+        createControl() {
+          let e2, t2, s2;
+          return this.options.targetType === j ? (t2 = `${ee.namespace} ${ee.inputText.container}`, e2 = W(["div", { id: q.containerId, classname: t2 }], te.input), s2 = { container: e2, control: e2.querySelector(`.${ee.inputText.control}`), label: e2.querySelector(`.${ee.inputText.label}`), input: e2.querySelector(`.${ee.inputText.input}`), search: e2.querySelector(`.${ee.inputText.search}`), result: e2.querySelector(`.${ee.inputText.result}`) }, s2.label.innerHTML = this.options.label) : (t2 = `${ee.namespace} ${ee.glass.container}`, e2 = W(["div", { id: q.containerId, classname: t2 }], te.glass), s2 = { container: e2, control: e2.querySelector(`.${ee.glass.control}`), button: e2.querySelector(`.${ee.glass.button}`), input: e2.querySelector(`.${ee.glass.input}`), search: e2.querySelector(`.${ee.glass.search}`), result: e2.querySelector(`.${ee.glass.result}`) }), s2.input.placeholder = this.options.placeholder, s2;
+        }
+      }
+      function se(e2) {
+        return new Promise((t2, s2) => {
+          const r3 = function(e3, t3) {
+            t3 && "object" == typeof t3 && (e3 += (/\?/u.test(e3) ? "&" : "?") + re(t3));
+            return e3;
+          }(e2.url, e2.data), n2 = { method: "GET", mode: "cors", credentials: "same-origin" };
+          e2.jsonp ? function(e3, t3, s3) {
+            const { head: r4 } = document, n3 = document.createElement("script"), o2 = `f${Math.round(Math.random() * Date.now())}`;
+            n3.setAttribute("src", `${e3 + (e3.indexOf("?") > 0 ? "&" : "?") + t3}=${o2}`), window[o2] = (e4) => {
+              window[o2] = void 0, setTimeout(() => r4.removeChild(n3), 0), s3(e4);
+            }, r4.append(n3);
+          }(r3, e2.callbackName, t2) : fetch(r3, n2).then((e3) => e3.json()).then(t2).catch(s2);
+        });
+      }
+      function re(e2) {
+        return Object.keys(e2).reduce((t2, s2) => (t2.push("object" == typeof e2[s2] ? re(e2[s2]) : `${encodeURIComponent(s2)}=${encodeURIComponent(e2[s2])}`), t2), []).join("&");
+      }
+      te.glass = `
   <div class="${ee.glass.control} ${ee.olControl}">
     <button type="button" id="${q.buttonControlId}" class="${ee.glass.button}"></button>
     <input type="text" id="${q.inputQueryId}" class="${ee.glass.input}" autocomplete="off" placeholder="Search ...">
@@ -34965,200 +35893,202 @@ const require$$7 = /* @__PURE__ */ getAugmentedNamespace(proj);
   </div>
   <ul class="${ee.inputText.result}"></ul>
 `;
-    class ne {
-      constructor() {
-        this.settings = { url: D, params: { q: "", limit: 10, lang: "en" }, langs: ["de", "it", "fr", "en"] };
+      class ne {
+        constructor() {
+          this.settings = { url: D, params: { q: "", limit: 10, lang: "en" }, langs: ["de", "it", "fr", "en"] };
+        }
+        getParameters(e2) {
+          return e2.lang = e2.lang.toLowerCase(), { url: this.settings.url, params: { q: e2.query, limit: e2.limit || this.settings.params.limit, lang: this.settings.langs.includes(e2.lang) ? e2.lang : this.settings.params.lang } };
+        }
+        handleResponse(e2) {
+          return 0 === e2.features.length ? [] : e2.features.map((e3) => ({ lon: e3.geometry.coordinates[0], lat: e3.geometry.coordinates[1], address: { name: e3.properties.name, postcode: e3.properties.postcode, city: e3.properties.city, state: e3.properties.state, country: e3.properties.country }, original: { formatted: e3.properties.name, details: e3.properties } }));
+        }
       }
-      getParameters(e2) {
-        return e2.lang = e2.lang.toLowerCase(), { url: this.settings.url, params: { q: e2.query, limit: e2.limit || this.settings.params.limit, lang: this.settings.langs.includes(e2.lang) ? e2.lang : this.settings.params.lang } };
+      class oe {
+        constructor(e2) {
+          this.settings = { url: O, ...e2, params: { q: "", format: "json", addressdetails: 1, limit: 10, countrycodes: "", viewbox: "", "accept-language": "en-US" } };
+        }
+        getParameters(e2) {
+          return { url: this.settings.url, params: { q: e2.query, format: this.settings.params.format, addressdetails: this.settings.params.addressdetails, limit: e2.limit || this.settings.params.limit, countrycodes: e2.countrycodes || this.settings.params.countrycodes, viewbox: e2.viewbox || this.settings.params.viewbox, "accept-language": e2.lang || this.settings.params["accept-language"] } };
+        }
+        handleResponse(e2) {
+          return 0 === e2.length ? [] : e2.map((e3) => ({ lon: e3.lon, lat: e3.lat, bbox: e3.boundingbox, address: { name: e3.display_name, road: e3.address.road || "", houseNumber: e3.address.house_number || "", postcode: e3.address.postcode, city: e3.address.city || e3.address.town, state: e3.address.state, country: e3.address.country }, original: { formatted: e3.display_name, details: e3.address } }));
+        }
       }
-      handleResponse(e2) {
-        return 0 === e2.features.length ? [] : e2.features.map((e3) => ({ lon: e3.geometry.coordinates[0], lat: e3.geometry.coordinates[1], address: { name: e3.properties.name, postcode: e3.properties.postcode, city: e3.properties.city, state: e3.properties.state, country: e3.properties.country }, original: { formatted: e3.properties.name, details: e3.properties } }));
+      class ae {
+        constructor() {
+          this.settings = { url: _2, params: { q: "", key: "", format: "json", addressdetails: 1, limit: 10, countrycodes: "", "accept-language": "en-US" } };
+        }
+        getParameters(e2) {
+          return { url: this.settings.url, params: { q: e2.query, key: e2.key, format: "json", addressdetails: 1, limit: e2.limit || this.settings.params.limit, countrycodes: e2.countrycodes || this.settings.params.countrycodes, "accept-language": e2.lang || this.settings.params["accept-language"] } };
+        }
+        handleResponse(e2) {
+          return 0 === e2.length ? [] : e2.map((e3) => ({ lon: e3.lon, lat: e3.lat, address: { name: e3.address.neighbourhood || "", road: e3.address.road || "", postcode: e3.address.postcode, city: e3.address.city || e3.address.town, state: e3.address.state, country: e3.address.country }, original: { formatted: e3.display_name, details: e3.address } }));
+        }
       }
-    }
-    class oe {
-      constructor(e2) {
-        this.settings = { url: O, ...e2, params: { q: "", format: "json", addressdetails: 1, limit: 10, countrycodes: "", viewbox: "", "accept-language": "en-US" } };
+      class ie {
+        constructor() {
+          this.settings = { url: F, callbackName: "jsonp", params: { query: "", key: "", includeNeighborhood: 0, maxResults: 10 } };
+        }
+        getParameters(e2) {
+          return { url: this.settings.url, callbackName: this.settings.callbackName, params: { query: e2.query, key: e2.key, includeNeighborhood: e2.includeNeighborhood || this.settings.params.includeNeighborhood, maxResults: e2.maxResults || this.settings.params.maxResults } };
+        }
+        handleResponse(e2) {
+          const { resources: t2 } = e2.resourceSets[0];
+          return 0 === t2.length ? [] : t2.map((e3) => ({ lon: e3.point.coordinates[1], lat: e3.point.coordinates[0], address: { name: e3.name }, original: { formatted: e3.address.formattedAddress, details: e3.address } }));
+        }
       }
-      getParameters(e2) {
-        return { url: this.settings.url, params: { q: e2.query, format: this.settings.params.format, addressdetails: this.settings.params.addressdetails, limit: e2.limit || this.settings.params.limit, countrycodes: e2.countrycodes || this.settings.params.countrycodes, viewbox: e2.viewbox || this.settings.params.viewbox, "accept-language": e2.lang || this.settings.params["accept-language"] } };
+      class le {
+        constructor() {
+          this.settings = { url: M5, params: { q: "", key: "", limit: 10, countrycode: "", pretty: 1, no_annotations: 1 } };
+        }
+        getParameters(e2) {
+          return { url: this.settings.url, params: { q: e2.query, key: e2.key, limit: e2.limit || this.settings.params.limit, countrycode: e2.countrycodes || this.settings.params.countrycodes } };
+        }
+        handleResponse(e2) {
+          return 0 === e2.results.length ? [] : e2.results.map((e3) => ({ lon: e3.geometry.lng, lat: e3.geometry.lat, address: { name: e3.components.house_number || "", road: e3.components.road || "", postcode: e3.components.postcode, city: e3.components.city || e3.components.town, state: e3.components.state, country: e3.components.country }, original: { formatted: e3.formatted, details: e3.components } }));
+        }
       }
-      handleResponse(e2) {
-        return 0 === e2.length ? [] : e2.map((e3) => ({ lon: e3.lon, lat: e3.lat, bbox: e3.boundingbox, address: { name: e3.display_name, road: e3.address.road || "", houseNumber: e3.address.house_number || "", postcode: e3.address.postcode, city: e3.address.city || e3.address.town, state: e3.address.state, country: e3.address.country }, original: { formatted: e3.display_name, details: e3.address } }));
-      }
-    }
-    class ae {
-      constructor() {
-        this.settings = { url: _2, params: { q: "", key: "", format: "json", addressdetails: 1, limit: 10, countrycodes: "", "accept-language": "en-US" } };
-      }
-      getParameters(e2) {
-        return { url: this.settings.url, params: { q: e2.query, key: e2.key, format: "json", addressdetails: 1, limit: e2.limit || this.settings.params.limit, countrycodes: e2.countrycodes || this.settings.params.countrycodes, "accept-language": e2.lang || this.settings.params["accept-language"] } };
-      }
-      handleResponse(e2) {
-        return 0 === e2.length ? [] : e2.map((e3) => ({ lon: e3.lon, lat: e3.lat, address: { name: e3.address.neighbourhood || "", road: e3.address.road || "", postcode: e3.address.postcode, city: e3.address.city || e3.address.town, state: e3.address.state, country: e3.address.country }, original: { formatted: e3.display_name, details: e3.address } }));
-      }
-    }
-    class ie {
-      constructor() {
-        this.settings = { url: F, callbackName: "jsonp", params: { query: "", key: "", includeNeighborhood: 0, maxResults: 10 } };
-      }
-      getParameters(e2) {
-        return { url: this.settings.url, callbackName: this.settings.callbackName, params: { query: e2.query, key: e2.key, includeNeighborhood: e2.includeNeighborhood || this.settings.params.includeNeighborhood, maxResults: e2.maxResults || this.settings.params.maxResults } };
-      }
-      handleResponse(e2) {
-        const { resources: t2 } = e2.resourceSets[0];
-        return 0 === t2.length ? [] : t2.map((e3) => ({ lon: e3.point.coordinates[1], lat: e3.point.coordinates[0], address: { name: e3.name }, original: { formatted: e3.address.formattedAddress, details: e3.address } }));
-      }
-    }
-    class le {
-      constructor() {
-        this.settings = { url: M2, params: { q: "", key: "", limit: 10, countrycode: "", pretty: 1, no_annotations: 1 } };
-      }
-      getParameters(e2) {
-        return { url: this.settings.url, params: { q: e2.query, key: e2.key, limit: e2.limit || this.settings.params.limit, countrycode: e2.countrycodes || this.settings.params.countrycodes } };
-      }
-      handleResponse(e2) {
-        return 0 === e2.results.length ? [] : e2.results.map((e3) => ({ lon: e3.geometry.lng, lat: e3.geometry.lat, address: { name: e3.components.house_number || "", road: e3.components.road || "", postcode: e3.components.postcode, city: e3.components.city || e3.components.town, state: e3.components.state, country: e3.components.country }, original: { formatted: e3.formatted, details: e3.components } }));
-      }
-    }
-    const ce = q.cssClasses;
-    class de {
-      constructor(e2, t2) {
-        this.Base = e2, this.layerName = U("geocoder-layer-"), this.layer = new h.default({ background: "transparent", name: this.layerName, source: new g.default(), displayInLayerSwitcher: false }), this.options = e2.options, this.options.provider = "string" == typeof this.options.provider ? this.options.provider.toLowerCase() : this.options.provider, this.provider = this.newProvider(), this.els = t2, this.container = this.els.container, this.registeredListeners = { mapClick: false }, this.setListeners();
-      }
-      setListeners() {
-        const e2 = (e3) => {
-          e3.stopPropagation(), H(this.els.control, ce.glass.expanded) ? this.collapse() : this.expand();
-        };
-        this.els.input.addEventListener("keypress", (e3) => {
-          const t2 = e3.target.value.trim();
-          (e3.key ? "Enter" === e3.key : e3.which ? 13 === e3.which : !!e3.keyCode && 13 === e3.keyCode) && (e3.preventDefault(), this.query(t2));
-        }, false), this.els.input.addEventListener("click", (e3) => e3.stopPropagation(), false), this.els.input.addEventListener("input", (e3) => {
-          0 !== e3.target.value.trim().length ? z2(this.els.search, ce.hidden) : Q(this.els.search, ce.hidden);
-        }, false), this.els.search.addEventListener("click", () => {
-          this.els.input.focus(), this.query(this.els.input.value);
-        }, false), this.options.targetType === T && this.els.button.addEventListener("click", e2, false);
-      }
-      query(e2) {
-        this.provider || (this.provider = this.newProvider());
-        const t2 = this.provider.getParameters({ query: e2, key: this.options.key, lang: this.options.lang, countrycodes: this.options.countrycodes, viewbox: this.options.viewbox, limit: this.options.limit });
-        this.clearResults(false === this.options.keepOpen), Q(this.els.search, ce.spin);
-        const s2 = { url: t2.url, data: t2.params };
-        t2.callbackName && (s2.jsonp = true, s2.callbackName = t2.callbackName), se(s2).then((e3) => {
-          this.options.debug && console.info(e3), z2(this.els.search, ce.spin);
-          const t3 = this.provider.handleResponse(e3);
-          t3 && (this.createList(t3), this.listenMapClick());
-        }).catch(() => {
-          z2(this.els.search, ce.spin);
-          const e3 = W("li", "<h5>Error! No internet connection?</h5>");
-          this.els.result.append(e3);
-        });
-      }
-      createList(e2) {
-        const t2 = this.els.result;
-        e2.forEach((s2) => {
-          let r3;
-          if (this.options.provider === A) r3 = `<span class="${ce.road}">${s2.address.name}</span>`;
-          else r3 = this.addressTemplate(s2.address);
-          if (1 == e2.length) this.chosen(s2, r3, s2.address, s2.original);
+      const ce = q.cssClasses;
+      class de {
+        constructor(e2, t2) {
+          this.Base = e2, this.layerName = U("geocoder-layer-"), this.layer = new h.default({ background: "transparent", name: this.layerName, source: new g.default(), displayInLayerSwitcher: false }), this.options = e2.options, this.options.provider = "string" == typeof this.options.provider ? this.options.provider.toLowerCase() : this.options.provider, this.provider = this.newProvider(), this.els = t2, this.container = this.els.container, this.registeredListeners = { mapClick: false }, this.setListeners();
+        }
+        setListeners() {
+          const e2 = (e3) => {
+            e3.stopPropagation(), H(this.els.control, ce.glass.expanded) ? this.collapse() : this.expand();
+          };
+          this.els.input.addEventListener("keypress", (e3) => {
+            const t2 = e3.target.value.trim();
+            (e3.key ? "Enter" === e3.key : e3.which ? 13 === e3.which : !!e3.keyCode && 13 === e3.keyCode) && (e3.preventDefault(), this.query(t2));
+          }, false), this.els.input.addEventListener("click", (e3) => e3.stopPropagation(), false), this.els.input.addEventListener("input", (e3) => {
+            0 !== e3.target.value.trim().length ? z2(this.els.search, ce.hidden) : Q(this.els.search, ce.hidden);
+          }, false), this.els.search.addEventListener("click", () => {
+            this.els.input.focus(), this.query(this.els.input.value);
+          }, false), this.options.targetType === T && this.els.button.addEventListener("click", e2, false);
+        }
+        query(e2) {
+          this.provider || (this.provider = this.newProvider());
+          const t2 = this.provider.getParameters({ query: e2, key: this.options.key, lang: this.options.lang, countrycodes: this.options.countrycodes, viewbox: this.options.viewbox, limit: this.options.limit });
+          this.clearResults(false === this.options.keepOpen), Q(this.els.search, ce.spin);
+          const s2 = { url: t2.url, data: t2.params };
+          t2.callbackName && (s2.jsonp = true, s2.callbackName = t2.callbackName), se(s2).then((e3) => {
+            this.options.debug && console.info(e3), z2(this.els.search, ce.spin);
+            const t3 = this.provider.handleResponse(e3);
+            t3 && (this.createList(t3), this.listenMapClick());
+          }).catch(() => {
+            z2(this.els.search, ce.spin);
+            const e3 = W("li", "<h5>Error! No internet connection?</h5>");
+            this.els.result.append(e3);
+          });
+        }
+        createList(e2) {
+          const t2 = this.els.result;
+          e2.forEach((s2) => {
+            let r3;
+            if (this.options.provider === A) r3 = `<span class="${ce.road}">${s2.address.name}</span>`;
+            else r3 = this.addressTemplate(s2.address);
+            if (1 == e2.length) this.chosen(s2, r3, s2.address, s2.original);
+            else {
+              const e3 = W("li", `<a href="#">${r3}</a>`);
+              e3.addEventListener("click", (e4) => {
+                e4.preventDefault(), this.chosen(s2, r3, s2.address, s2.original);
+              }, false), t2.append(e3);
+            }
+          });
+        }
+        chosen(e2, t2, s2, r3) {
+          const n2 = this.Base.getMap(), o2 = [Number.parseFloat(e2.lon), Number.parseFloat(e2.lat)], a3 = n2.getView().getProjection(), i2 = f.transform(o2, "EPSG:4326", a3);
+          let { bbox: l2 } = e2;
+          l2 && (l2 = f.transformExtent([parseFloat(l2[2]), parseFloat(l2[0]), parseFloat(l2[3]), parseFloat(l2[1])], "EPSG:4326", a3));
+          const c2 = { formatted: t2, details: s2, original: r3 };
+          if (this.clearResults(true), true === this.options.preventDefault || true === this.options.preventMarker) this.Base.dispatchEvent({ type: L2, address: c2, coordinate: i2, bbox: l2, place: e2 });
           else {
-            const e3 = W("li", `<a href="#">${r3}</a>`);
-            e3.addEventListener("click", (e4) => {
-              e4.preventDefault(), this.chosen(s2, r3, s2.address, s2.original);
-            }, false), t2.append(e3);
+            const t3 = this.createFeature(i2, c2);
+            this.Base.dispatchEvent({ type: L2, address: c2, feature: t3, coordinate: i2, bbox: l2, place: e2 });
           }
-        });
-      }
-      chosen(e2, t2, s2, r3) {
-        const n2 = this.Base.getMap(), o2 = [Number.parseFloat(e2.lon), Number.parseFloat(e2.lat)], a3 = n2.getView().getProjection(), i2 = f.transform(o2, "EPSG:4326", a3);
-        let { bbox: l2 } = e2;
-        l2 && (l2 = f.transformExtent([parseFloat(l2[2]), parseFloat(l2[0]), parseFloat(l2[3]), parseFloat(l2[1])], "EPSG:4326", a3));
-        const c2 = { formatted: t2, details: s2, original: r3 };
-        if (this.clearResults(true), true === this.options.preventDefault || true === this.options.preventMarker) this.Base.dispatchEvent({ type: L2, address: c2, coordinate: i2, bbox: l2, place: e2 });
-        else {
-          const t3 = this.createFeature(i2, c2);
-          this.Base.dispatchEvent({ type: L2, address: c2, feature: t3, coordinate: i2, bbox: l2, place: e2 });
+          true !== this.options.preventDefault && true !== this.options.preventPanning && (l2 ? n2.getView().fit(l2, { duration: 500 }) : n2.getView().animate({ center: i2, resolution: this.options.defaultFlyResolution, duration: 500 }));
         }
-        true !== this.options.preventDefault && true !== this.options.preventPanning && (l2 ? n2.getView().fit(l2, { duration: 500 }) : n2.getView().animate({ center: i2, resolution: this.options.defaultFlyResolution, duration: 500 }));
-      }
-      createFeature(e2) {
-        const t2 = new y2.default(new m.default(e2));
-        return this.addLayer(), t2.setStyle(this.options.featureStyle), t2.setId(U("geocoder-ft-")), this.getSource().addFeature(t2), t2;
-      }
-      addressTemplate(e2) {
-        const t2 = [];
-        return e2.name && t2.push(['<span class="', ce.road, '">{name}</span>'].join("")), (e2.road || e2.building || e2.house_number) && t2.push(['<span class="', ce.road, '">{building} {road} {house_number}</span>'].join("")), (e2.city || e2.town || e2.village) && t2.push(['<span class="', ce.city, '">{postcode} {city} {town} {village}</span>'].join("")), (e2.state || e2.country) && t2.push(['<span class="', ce.country, '">{state} {country}</span>'].join("")), J(t2.join("<br>"), e2);
-      }
-      newProvider() {
-        switch (this.options.provider) {
-          case A:
-            return new oe(this.options);
-          case N2:
-            return new ae();
-          case R2:
-            return new ne();
-          case I2:
-            return new ie();
-          case P2:
-            return new le();
-          default:
-            return this.options.provider;
+        createFeature(e2) {
+          const t2 = new y2.default(new m.default(e2));
+          return this.addLayer(), t2.setStyle(this.options.featureStyle), t2.setId(U("geocoder-ft-")), this.getSource().addFeature(t2), t2;
+        }
+        addressTemplate(e2) {
+          const t2 = [];
+          return e2.name && t2.push(['<span class="', ce.road, '">{name}</span>'].join("")), (e2.road || e2.building || e2.house_number) && t2.push(['<span class="', ce.road, '">{building} {road} {house_number}</span>'].join("")), (e2.city || e2.town || e2.village) && t2.push(['<span class="', ce.city, '">{postcode} {city} {town} {village}</span>'].join("")), (e2.state || e2.country) && t2.push(['<span class="', ce.country, '">{state} {country}</span>'].join("")), J(t2.join("<br>"), e2);
+        }
+        newProvider() {
+          switch (this.options.provider) {
+            case A:
+              return new oe(this.options);
+            case N2:
+              return new ae();
+            case R2:
+              return new ne();
+            case I2:
+              return new ie();
+            case P6:
+              return new le();
+            default:
+              return this.options.provider;
+          }
+        }
+        expand() {
+          z2(this.els.input, ce.spin), Q(this.els.control, ce.glass.expanded), window.setTimeout(() => this.els.input.focus(), 100), this.listenMapClick();
+        }
+        collapse() {
+          this.els.input.value = "", this.els.input.blur(), Q(this.els.search, ce.hidden), z2(this.els.control, ce.glass.expanded), K(this.els.result);
+        }
+        listenMapClick() {
+          if (this.registeredListeners.mapClick) return;
+          const e2 = this, t2 = this.Base.getMap().getTargetElement();
+          this.registeredListeners.mapClick = true, t2.addEventListener("click", { handleEvent(s2) {
+            t2.removeEventListener(s2.type, this, false), e2.registeredListeners.mapClick = false;
+          } }, false);
+        }
+        clearResults(e2) {
+          e2 && this.options.targetType === T ? this.collapse() : K(this.els.result);
+        }
+        getSource() {
+          return this.layer.getSource();
+        }
+        addLayer() {
+          let e2 = false;
+          const t2 = this.Base.getMap();
+          t2.getLayers().forEach((t3) => {
+            t3 === this.layer && (e2 = true);
+          }), e2 || t2.addLayer(this.layer);
         }
       }
-      expand() {
-        z2(this.els.input, ce.spin), Q(this.els.control, ce.glass.expanded), window.setTimeout(() => this.els.input.focus(), 100), this.listenMapClick();
+      class ue extends d2.default {
+        constructor(e2 = C2, t2) {
+          B("string" == typeof e2, "@param `type` should be string!"), B(e2 === C2 || e2 === E4, `@param 'type' should be '${C2}'
+      or '${E4}'!`);
+          const s2 = { ...V, featureStyle: [new u.default({ image: new p5.default({ anchor: [0.5, 1], src: 'data:image/svg+xml;charset=utf-8,<svg width="26" height="42" viewBox="0 0 26 42" xmlns="http://www.w3.org/2000/svg"><polygon points="1,18 14,42 25,18" fill="rgb(75,75,75)" /><ellipse cx="13" cy="13" rx="13" ry="13" fill="rgb(75,75,75)" /><ellipse cx="13" cy="14" rx="6" ry="6" fill="yellow" /></svg>' }) })], ...t2 };
+          let r3, n2;
+          const o2 = new te(s2);
+          if (e2 === C2 && (r3 = o2.els.container), super({ element: r3, ...s2 }), !(this instanceof ue)) return new ue();
+          this.options = s2, this.container = r3, e2 === C2 && (n2 = new de(this, o2.els), this.layer = n2.layer);
+        }
+        getLayer() {
+          return this.layer;
+        }
+        getSource() {
+          return this.getLayer().getSource();
+        }
+        setProvider(e2) {
+          this.options.provider = e2;
+        }
+        setProviderKey(e2) {
+          this.options.key = e2;
+        }
       }
-      collapse() {
-        this.els.input.value = "", this.els.input.blur(), Q(this.els.search, ce.hidden), z2(this.els.control, ce.glass.expanded), K(this.els.result);
-      }
-      listenMapClick() {
-        if (this.registeredListeners.mapClick) return;
-        const e2 = this, t2 = this.Base.getMap().getTargetElement();
-        this.registeredListeners.mapClick = true, t2.addEventListener("click", { handleEvent(s2) {
-          t2.removeEventListener(s2.type, this, false), e2.registeredListeners.mapClick = false;
-        } }, false);
-      }
-      clearResults(e2) {
-        e2 && this.options.targetType === T ? this.collapse() : K(this.els.result);
-      }
-      getSource() {
-        return this.layer.getSource();
-      }
-      addLayer() {
-        let e2 = false;
-        const t2 = this.Base.getMap();
-        t2.getLayers().forEach((t3) => {
-          t3 === this.layer && (e2 = true);
-        }), e2 || t2.addLayer(this.layer);
-      }
-    }
-    class ue extends d2.default {
-      constructor(e2 = C2, t2) {
-        B("string" == typeof e2, "@param `type` should be string!"), B(e2 === C2 || e2 === E, `@param 'type' should be '${C2}'
-      or '${E}'!`);
-        const s2 = { ...V, featureStyle: [new u.default({ image: new p5.default({ anchor: [0.5, 1], src: 'data:image/svg+xml;charset=utf-8,<svg width="26" height="42" viewBox="0 0 26 42" xmlns="http://www.w3.org/2000/svg"><polygon points="1,18 14,42 25,18" fill="rgb(75,75,75)" /><ellipse cx="13" cy="13" rx="13" ry="13" fill="rgb(75,75,75)" /><ellipse cx="13" cy="14" rx="6" ry="6" fill="yellow" /></svg>' }) })], ...t2 };
-        let r3, n2;
-        const o2 = new te(s2);
-        if (e2 === C2 && (r3 = o2.els.container), super({ element: r3, ...s2 }), !(this instanceof ue)) return new ue();
-        this.options = s2, this.container = r3, e2 === C2 && (n2 = new de(this, o2.els), this.layer = n2.layer);
-      }
-      getLayer() {
-        return this.layer;
-      }
-      getSource() {
-        return this.getLayer().getSource();
-      }
-      setProvider(e2) {
-        this.options.provider = e2;
-      }
-      setProviderKey(e2) {
-        this.options.key = e2;
-      }
-    }
-    return ue;
-  });
-})(olGeocoder);
-var olGeocoderExports = olGeocoder.exports;
+      return ue;
+    });
+  })(olGeocoder$1);
+  return olGeocoder$1.exports;
+}
+var olGeocoderExports = requireOlGeocoder();
 const Geocoder = /* @__PURE__ */ getDefaultExportFromCjs(olGeocoderExports);
 const HOSTNAME = "VITE_HOSTNAME";
 const OSML10N_VERSION = "VITE_OSML10N_VERSION";
