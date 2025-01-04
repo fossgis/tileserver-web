@@ -20,7 +20,7 @@ https://www.npmjs.com/package/vite-plugin-favicons-inject
 Am Ende der Datei `ansibel_openstreetmap.de/roles/tile/templates/expire-tiles.j2`
 
 ```bash
-psql -d osm -t -c "SELECT url, TO_CHAR(importdate, 'DD.MM.YYYY HH24:MI:SS TZ') FROM planet_osm_replication_status" > "$FILE"
+psql -d osm -t -c "SELECT CASE WHEN property = 'replication_timestamp' THEN TO_CHAR(value::timestamp, 'DD.MM.YYYY HH24:MI:SS TZ') ELSE value END AS value FROM osm2pgsql_properties WHERE property IN ('replication_base_url',  'replication_timestamp');" > "$FILE"
 psql -d osm -t -c "SELECT name, TO_CHAR(TO_DATE(last_modified, 'Dy, DD Mon YYYY HH24:MI:SS \"GMT\"'), 'DD.MM.YYYY') FROM external_data" >> "$FILE"
 date "+Letzter Aufruf von 'Expire': %d.%m.%y %H:%M:%S (UTC)" >> "$FILE"
 ```
