@@ -16,6 +16,17 @@ import VectorSource from 'ol/source/Vector';
 import Geocoder from 'ol-geocoder';
 import 'ol-geocoder/dist/ol-geocoder.min.css';
 
+import proj4 from 'proj4';
+import { register } from 'ol/proj/proj4';
+import { get as getProjection } from 'ol/proj';
+
+// Projektion definieren (Equal Earth - EPSG:8857)
+proj4.defs("EPSG:8857", "+proj=eqearth +datum=WGS84 +no_defs");
+register(proj4);
+
+// Projektion registrieren und Extent setzen
+const projection = getProjection('EPSG:8857');
+projection.setExtent([-17367530, -7346360, 17367530, 7346360]);
 
 const HOSTNAME = import.meta.env.VITE_HOSTNAME || 'tile';
 const OSML10N_VERSION = import.meta.env.VITE_OSML10N_VERSION || '1.0';
@@ -109,6 +120,7 @@ const defaultStyle = new TileLayer({
             '| © sobuskutkowacy pola OpenStreetMap. | © OpenStreetMap Mitwirkende.',
         ],
         url: tileUrl,
+        projection: 'EPSG:8857',
         maxZoom: 20,
     }),
 });
@@ -119,7 +131,7 @@ const map = new Map({
     target: 'map',
     view: new View({
         center: fromLonLat([10.33649, 51.006271]),
-        projection: 'EPSG:3857',
+        projection: projection,
         zoom: 6,
         maxZoom: 20,
         minZoom: 0,
