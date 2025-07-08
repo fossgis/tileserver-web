@@ -65,13 +65,24 @@ a {
 }
 
 div.ol-full-screen {
-  top: 4em;
+  top: 5em;
   right: .5em;
   left: auto;
+  width: 30px;
 }
 
 div.ol-zoom {
   top: .5em;
   right: .5em;
   left: auto;
+  width: 30px;
+}
+
+.ol-control button {
+  width: 30px;
+  height: 30px;
+}
+
+.ol-control button:focus {
+  outline: 3px solid #ff6347;
 }

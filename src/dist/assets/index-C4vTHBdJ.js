@@ -1,38 +1,27 @@
-var __defProp = Object.defineProperty;
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 (function polyfill() {
   const relList = document.createElement("link").relList;
-  if (relList && relList.supports && relList.supports("modulepreload")) {
-    return;
-  }
-  for (const link2 of document.querySelectorAll('link[rel="modulepreload"]')) {
-    processPreload(link2);
-  }
+  if (relList && relList.supports && relList.supports("modulepreload")) return;
+  for (const link2 of document.querySelectorAll('link[rel="modulepreload"]')) processPreload(link2);
   new MutationObserver((mutations) => {
     for (const mutation of mutations) {
-      if (mutation.type !== "childList") {
-        continue;
-      }
-      for (const node of mutation.addedNodes) {
-        if (node.tagName === "LINK" && node.rel === "modulepreload")
-          processPreload(node);
-      }
+      if (mutation.type !== "childList") continue;
+      for (const node of mutation.addedNodes) if (node.tagName === "LINK" && node.rel === "modulepreload") processPreload(node);
     }
-  }).observe(document, { childList: true, subtree: true });
+  }).observe(document, {
+    childList: true,
+    subtree: true
+  });
   function getFetchOpts(link2) {
     const fetchOpts = {};
     if (link2.integrity) fetchOpts.integrity = link2.integrity;
     if (link2.referrerPolicy) fetchOpts.referrerPolicy = link2.referrerPolicy;
-    if (link2.crossOrigin === "use-credentials")
-      fetchOpts.credentials = "include";
+    if (link2.crossOrigin === "use-credentials") fetchOpts.credentials = "include";
     else if (link2.crossOrigin === "anonymous") fetchOpts.credentials = "omit";
     else fetchOpts.credentials = "same-origin";
     return fetchOpts;
   }
   function processPreload(link2) {
-    if (link2.ep)
-      return;
+    if (link2.ep) return;
     link2.ep = true;
     const fetchOpts = getFetchOpts(link2);
     fetch(link2.href, fetchOpts);
@@ -775,7 +764,6 @@ function detectOverflow(state, options) {
   var popperOffsets2 = computeOffsets({
     reference: referenceClientRect,
     element: popperRect,
-    strategy: "absolute",
     placement
   });
   var popperClientRect = rectToClientRect(Object.assign({}, popperRect, popperOffsets2));
@@ -821,8 +809,8 @@ function computeAutoPlacement(state, options) {
     })[getBasePlacement(placement2)];
     return acc;
   }, {});
-  return Object.keys(overflows).sort(function(a2, b2) {
-    return overflows[a2] - overflows[b2];
+  return Object.keys(overflows).sort(function(a3, b3) {
+    return overflows[a3] - overflows[b3];
   });
 }
 function getExpandedFallbackPlacements(placement) {
@@ -1022,7 +1010,6 @@ function popperOffsets(_ref) {
   state.modifiersData[name] = computeOffsets({
     reference: state.rects.reference,
     element: state.rects.popper,
-    strategy: "absolute",
     placement: state.placement
   });
 }
@@ -1433,8 +1420,8 @@ const Popper = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProper
   write
 }, Symbol.toStringTag, { value: "Module" }));
 /*!
-  * Bootstrap v5.3.3 (https://getbootstrap.com/)
-  * Copyright 2011-2024 The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)
+  * Bootstrap v5.3.7 (https://getbootstrap.com/)
+  * Copyright 2011-2025 The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)
   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
   */
 const elementMap = /* @__PURE__ */ new Map();
@@ -1617,7 +1604,7 @@ const defineJQueryPlugin = (plugin) => {
   });
 };
 const execute = (possibleCallback, args = [], defaultValue = possibleCallback) => {
-  return typeof possibleCallback === "function" ? possibleCallback(...args) : defaultValue;
+  return typeof possibleCallback === "function" ? possibleCallback.call(...args) : defaultValue;
 };
 const executeAfterTransition = (callback, transitionElement, waitForTransition = true) => {
   if (!waitForTransition) {
@@ -1894,7 +1881,7 @@ const Manipulator = {
     const bsKeys = Object.keys(element.dataset).filter((key) => key.startsWith("bs") && !key.startsWith("bsConfig"));
     for (const key of bsKeys) {
       let pureKey = key.replace(/^bs/, "");
-      pureKey = pureKey.charAt(0).toLowerCase() + pureKey.slice(1, pureKey.length);
+      pureKey = pureKey.charAt(0).toLowerCase() + pureKey.slice(1);
       attributes[pureKey] = normalizeData(element.dataset[key]);
     }
     return attributes;
@@ -1942,7 +1929,7 @@ class Config {
     }
   }
 }
-const VERSION = "5.3.3";
+const VERSION = "5.3.7";
 class BaseComponent extends Config {
   constructor(element, config) {
     super();
@@ -1962,6 +1949,7 @@ class BaseComponent extends Config {
       this[propertyName] = null;
     }
   }
+  // Private
   _queueCallback(callback, element, isAnimated = true) {
     executeAfterTransition(callback, element, isAnimated);
   }
@@ -2714,10 +2702,10 @@ class Collapse extends BaseComponent {
     this._element.style[dimension] = "";
     this._queueCallback(complete, this._element, true);
   }
+  // Private
   _isShown(element = this._element) {
     return element.classList.contains(CLASS_NAME_SHOW$7);
   }
-  // Private
   _configAfterMerge(config) {
     config.toggle = Boolean(config.toggle);
     config.parent = getElement(config.parent);
@@ -2916,6 +2904,7 @@ class Dropdown extends BaseComponent {
     this._element.setAttribute("aria-expanded", "false");
     Manipulator.removeDataAttribute(this._menu, "popper");
     EventHandler.trigger(this._element, EVENT_HIDDEN$5, relatedTarget);
+    this._element.focus();
   }
   _getConfig(config) {
     config = super._getConfig(config);
@@ -2926,7 +2915,7 @@ class Dropdown extends BaseComponent {
   }
   _createPopper() {
     if (typeof Popper === "undefined") {
-      throw new TypeError("Bootstrap's dropdowns require Popper (https://popper.js.org)");
+      throw new TypeError("Bootstrap's dropdowns require Popper (https://popper.js.org/docs/v2/)");
     }
     let referenceElement = this._element;
     if (this._config.reference === "parent") {
@@ -3001,7 +2990,7 @@ class Dropdown extends BaseComponent {
     }
     return {
       ...defaultBsPopperConfig,
-      ...execute(this._config.popperConfig, [defaultBsPopperConfig])
+      ...execute(this._config.popperConfig, [void 0, defaultBsPopperConfig])
     };
   }
   _selectMenuItem({
@@ -3982,7 +3971,7 @@ class TemplateFactory extends Config {
     return this._config.sanitize ? sanitizeHtml(arg, this._config.allowList, this._config.sanitizeFn) : arg;
   }
   _resolvePossibleFunction(arg) {
-    return execute(arg, [this]);
+    return execute(arg, [void 0, this]);
   }
   _putElementInTemplate(element, templateElement) {
     if (this._config.html) {
@@ -4063,7 +4052,7 @@ const DefaultType$3 = {
 class Tooltip extends BaseComponent {
   constructor(element, config) {
     if (typeof Popper === "undefined") {
-      throw new TypeError("Bootstrap's tooltips require Popper (https://popper.js.org)");
+      throw new TypeError("Bootstrap's tooltips require Popper (https://popper.js.org/docs/v2/)");
     }
     super(element, config);
     this._isEnabled = true;
@@ -4103,7 +4092,6 @@ class Tooltip extends BaseComponent {
     if (!this._isEnabled) {
       return;
     }
-    this._activeTrigger.click = !this._activeTrigger.click;
     if (this._isShown()) {
       this._leave();
       return;
@@ -4275,7 +4263,7 @@ class Tooltip extends BaseComponent {
     return offset2;
   }
   _resolvePossibleFunction(arg) {
-    return execute(arg, [this._element]);
+    return execute(arg, [this._element, this._element]);
   }
   _getPopperConfig(attachment) {
     const defaultBsPopperConfig = {
@@ -4311,7 +4299,7 @@ class Tooltip extends BaseComponent {
     };
     return {
       ...defaultBsPopperConfig,
-      ...execute(this._config.popperConfig, [defaultBsPopperConfig])
+      ...execute(this._config.popperConfig, [void 0, defaultBsPopperConfig])
     };
   }
   _setListeners() {
@@ -4320,6 +4308,7 @@ class Tooltip extends BaseComponent {
       if (trigger === "click") {
         EventHandler.on(this._element, this.constructor.eventName(EVENT_CLICK$1), this._config.selector, (event) => {
           const context = this._initializeOnDelegatedTarget(event);
+          context._activeTrigger[TRIGGER_CLICK] = !(context._isShown() && context._activeTrigger[TRIGGER_CLICK]);
           context.toggle();
         });
       } else if (trigger !== TRIGGER_MANUAL) {
@@ -5086,296 +5075,8 @@ class Toast extends BaseComponent {
 }
 enableDismissTrigger(Toast);
 defineJQueryPlugin(Toast);
-const METERS_PER_UNIT$1 = {
-  // use the radius of the Normal sphere
-  "radians": 6370997 / (2 * Math.PI),
-  "degrees": 2 * Math.PI * 6370997 / 360,
-  "ft": 0.3048,
-  "m": 1,
-  "us-ft": 1200 / 3937
-};
-class Projection {
-  /**
-   * @param {Options} options Projection options.
-   */
-  constructor(options) {
-    this.code_ = options.code;
-    this.units_ = /** @type {import("./Units.js").Units} */
-    options.units;
-    this.extent_ = options.extent !== void 0 ? options.extent : null;
-    this.worldExtent_ = options.worldExtent !== void 0 ? options.worldExtent : null;
-    this.axisOrientation_ = options.axisOrientation !== void 0 ? options.axisOrientation : "enu";
-    this.global_ = options.global !== void 0 ? options.global : false;
-    this.canWrapX_ = !!(this.global_ && this.extent_);
-    this.getPointResolutionFunc_ = options.getPointResolution;
-    this.defaultTileGrid_ = null;
-    this.metersPerUnit_ = options.metersPerUnit;
-  }
-  /**
-   * @return {boolean} The projection is suitable for wrapping the x-axis
-   */
-  canWrapX() {
-    return this.canWrapX_;
-  }
-  /**
-   * Get the code for this projection, e.g. 'EPSG:4326'.
-   * @return {string} Code.
-   * @api
-   */
-  getCode() {
-    return this.code_;
-  }
-  /**
-   * Get the validity extent for this projection.
-   * @return {import("../extent.js").Extent} Extent.
-   * @api
-   */
-  getExtent() {
-    return this.extent_;
-  }
-  /**
-   * Get the units of this projection.
-   * @return {import("./Units.js").Units} Units.
-   * @api
-   */
-  getUnits() {
-    return this.units_;
-  }
-  /**
-   * Get the amount of meters per unit of this projection.  If the projection is
-   * not configured with `metersPerUnit` or a units identifier, the return is
-   * `undefined`.
-   * @return {number|undefined} Meters.
-   * @api
-   */
-  getMetersPerUnit() {
-    return this.metersPerUnit_ || METERS_PER_UNIT$1[this.units_];
-  }
-  /**
-   * Get the world extent for this projection.
-   * @return {import("../extent.js").Extent} Extent.
-   * @api
-   */
-  getWorldExtent() {
-    return this.worldExtent_;
-  }
-  /**
-   * Get the axis orientation of this projection.
-   * Example values are:
-   * enu - the default easting, northing, elevation.
-   * neu - northing, easting, up - useful for "lat/long" geographic coordinates,
-   *     or south orientated transverse mercator.
-   * wnu - westing, northing, up - some planetary coordinate systems have
-   *     "west positive" coordinate systems
-   * @return {string} Axis orientation.
-   * @api
-   */
-  getAxisOrientation() {
-    return this.axisOrientation_;
-  }
-  /**
-   * Is this projection a global projection which spans the whole world?
-   * @return {boolean} Whether the projection is global.
-   * @api
-   */
-  isGlobal() {
-    return this.global_;
-  }
-  /**
-   * Set if the projection is a global projection which spans the whole world
-   * @param {boolean} global Whether the projection is global.
-   * @api
-   */
-  setGlobal(global) {
-    this.global_ = global;
-    this.canWrapX_ = !!(global && this.extent_);
-  }
-  /**
-   * @return {import("../tilegrid/TileGrid.js").default} The default tile grid.
-   */
-  getDefaultTileGrid() {
-    return this.defaultTileGrid_;
-  }
-  /**
-   * @param {import("../tilegrid/TileGrid.js").default} tileGrid The default tile grid.
-   */
-  setDefaultTileGrid(tileGrid) {
-    this.defaultTileGrid_ = tileGrid;
-  }
-  /**
-   * Set the validity extent for this projection.
-   * @param {import("../extent.js").Extent} extent Extent.
-   * @api
-   */
-  setExtent(extent) {
-    this.extent_ = extent;
-    this.canWrapX_ = !!(this.global_ && extent);
-  }
-  /**
-   * Set the world extent for this projection.
-   * @param {import("../extent.js").Extent} worldExtent World extent
-   *     [minlon, minlat, maxlon, maxlat].
-   * @api
-   */
-  setWorldExtent(worldExtent) {
-    this.worldExtent_ = worldExtent;
-  }
-  /**
-   * Set the getPointResolution function (see {@link module:ol/proj.getPointResolution}
-   * for this projection.
-   * @param {function(number, import("../coordinate.js").Coordinate):number} func Function
-   * @api
-   */
-  setGetPointResolution(func) {
-    this.getPointResolutionFunc_ = func;
-  }
-  /**
-   * Get the custom point resolution function for this projection (if set).
-   * @return {function(number, import("../coordinate.js").Coordinate):number|undefined} The custom point
-   * resolution function (if set).
-   */
-  getPointResolutionFunc() {
-    return this.getPointResolutionFunc_;
-  }
-}
-const RADIUS$1 = 6378137;
-const HALF_SIZE = Math.PI * RADIUS$1;
-const EXTENT$1 = [-HALF_SIZE, -HALF_SIZE, HALF_SIZE, HALF_SIZE];
-const WORLD_EXTENT = [-180, -85, 180, 85];
-const MAX_SAFE_Y = RADIUS$1 * Math.log(Math.tan(Math.PI / 2));
-class EPSG3857Projection extends Projection {
-  /**
-   * @param {string} code Code.
-   */
-  constructor(code) {
-    super({
-      code,
-      units: "m",
-      extent: EXTENT$1,
-      global: true,
-      worldExtent: WORLD_EXTENT,
-      getPointResolution: function(resolution, point) {
-        return resolution / Math.cosh(point[1] / RADIUS$1);
-      }
-    });
-  }
-}
-const PROJECTIONS$1 = [
-  new EPSG3857Projection("EPSG:3857"),
-  new EPSG3857Projection("EPSG:102100"),
-  new EPSG3857Projection("EPSG:102113"),
-  new EPSG3857Projection("EPSG:900913"),
-  new EPSG3857Projection("http://www.opengis.net/def/crs/EPSG/0/3857"),
-  new EPSG3857Projection("http://www.opengis.net/gml/srs/epsg.xml#3857")
-];
-function fromEPSG4326(input, output, dimension, stride) {
-  const length = input.length;
-  dimension = dimension > 1 ? dimension : 2;
-  stride = stride ?? dimension;
-  if (output === void 0) {
-    if (dimension > 2) {
-      output = input.slice();
-    } else {
-      output = new Array(length);
-    }
-  }
-  for (let i = 0; i < length; i += stride) {
-    output[i] = HALF_SIZE * input[i] / 180;
-    let y2 = RADIUS$1 * Math.log(Math.tan(Math.PI * (+input[i + 1] + 90) / 360));
-    if (y2 > MAX_SAFE_Y) {
-      y2 = MAX_SAFE_Y;
-    } else if (y2 < -MAX_SAFE_Y) {
-      y2 = -MAX_SAFE_Y;
-    }
-    output[i + 1] = y2;
-  }
-  return output;
-}
-function toEPSG4326(input, output, dimension, stride) {
-  const length = input.length;
-  dimension = dimension > 1 ? dimension : 2;
-  stride = stride ?? dimension;
-  if (output === void 0) {
-    if (dimension > 2) {
-      output = input.slice();
-    } else {
-      output = new Array(length);
-    }
-  }
-  for (let i = 0; i < length; i += stride) {
-    output[i] = 180 * input[i] / HALF_SIZE;
-    output[i + 1] = 360 * Math.atan(Math.exp(input[i + 1] / RADIUS$1)) / Math.PI - 90;
-  }
-  return output;
-}
-const RADIUS = 6378137;
-const EXTENT = [-180, -90, 180, 90];
-const METERS_PER_UNIT = Math.PI * RADIUS / 180;
-class EPSG4326Projection extends Projection {
-  /**
-   * @param {string} code Code.
-   * @param {string} [axisOrientation] Axis orientation.
-   */
-  constructor(code, axisOrientation) {
-    super({
-      code,
-      units: "degrees",
-      extent: EXTENT,
-      axisOrientation,
-      global: true,
-      metersPerUnit: METERS_PER_UNIT,
-      worldExtent: EXTENT
-    });
-  }
-}
-const PROJECTIONS = [
-  new EPSG4326Projection("CRS:84"),
-  new EPSG4326Projection("EPSG:4326", "neu"),
-  new EPSG4326Projection("urn:ogc:def:crs:OGC:1.3:CRS84"),
-  new EPSG4326Projection("urn:ogc:def:crs:OGC:2:84"),
-  new EPSG4326Projection("http://www.opengis.net/def/crs/OGC/1.3/CRS84"),
-  new EPSG4326Projection("http://www.opengis.net/gml/srs/epsg.xml#4326", "neu"),
-  new EPSG4326Projection("http://www.opengis.net/def/crs/EPSG/0/4326", "neu")
-];
-let cache$1 = {};
-function clear$2() {
-  cache$1 = {};
-}
-function get$3(code) {
-  return cache$1[code] || cache$1[code.replace(/urn:(x-)?ogc:def:crs:EPSG:(.*:)?(\w+)$/, "EPSG:$3")] || null;
-}
-function add$2(code, projection) {
-  cache$1[code] = projection;
-}
-function clear$1(object) {
-  for (const property in object) {
-    delete object[property];
-  }
-}
-function isEmpty$1(object) {
-  let property;
-  for (property in object) {
-    return false;
-  }
-  return !property;
-}
-let transforms = {};
-function clear() {
-  transforms = {};
-}
-function add$1(source2, destination, transformFn) {
-  const sourceCode = source2.getCode();
-  const destinationCode = destination.getCode();
-  if (!(sourceCode in transforms)) {
-    transforms[sourceCode] = {};
-  }
-  transforms[sourceCode][destinationCode] = transformFn;
-}
-function get$2(sourceCode, destinationCode) {
-  if (sourceCode in transforms && destinationCode in transforms[sourceCode]) {
-    return transforms[sourceCode][destinationCode];
-  }
-  return null;
+function warn(...args) {
+  console.warn(...args);
 }
 const Relationship = {
   UNKNOWN: 0,
@@ -5565,7 +5266,7 @@ function forEachCorner(extent, callback) {
 }
 function getArea(extent) {
   let area = 0;
-  if (!isEmpty(extent)) {
+  if (!isEmpty$1(extent)) {
     area = getWidth(extent) * getHeight(extent);
   }
   return area;
@@ -5676,7 +5377,7 @@ function getWidth(extent) {
 function intersects$1(extent1, extent2) {
   return extent1[0] <= extent2[2] && extent1[2] >= extent2[0] && extent1[1] <= extent2[3] && extent1[3] >= extent2[1];
 }
-function isEmpty(extent) {
+function isEmpty$1(extent) {
   return extent[2] < extent[0] || extent[3] < extent[1];
 }
 function returnOrUpdate(extent, dest) {
@@ -5726,7 +5427,7 @@ function intersectsSegment(extent, start2, end2) {
   return intersects2;
 }
 function applyTransform(extent, transformFn, dest, stops) {
-  if (isEmpty(extent)) {
+  if (isEmpty$1(extent)) {
     return createOrUpdateEmpty(dest);
   }
   let coordinates2 = [];
@@ -5873,12 +5574,12 @@ function toDegrees(angleInRadians) {
 function toRadians(angleInDegrees) {
   return angleInDegrees * Math.PI / 180;
 }
-function modulo(a2, b2) {
-  const r2 = a2 % b2;
-  return r2 * b2 < 0 ? r2 + b2 : r2;
+function modulo(a3, b3) {
+  const r2 = a3 % b3;
+  return r2 * b3 < 0 ? r2 + b3 : r2;
 }
-function lerp(a2, b2, x2) {
-  return a2 + x2 * (b2 - a2);
+function lerp(a3, b3, x2) {
+  return a3 + x2 * (b3 - a3);
 }
 function toFixed(n, decimals) {
   const factor = Math.pow(10, decimals);
@@ -5897,7 +5598,7 @@ function wrap(n, min2, max2) {
   const range = max2 - min2;
   return ((n - min2) % range + range) % range + min2;
 }
-function add(coordinate, delta) {
+function add$2(coordinate, delta) {
   coordinate[0] += +delta[0];
   coordinate[1] += +delta[1];
   return coordinate;
@@ -5921,7 +5622,7 @@ function rotate$1(coordinate, angle) {
   coordinate[1] = y2;
   return coordinate;
 }
-function scale$3(coordinate, scale2) {
+function scale$2(coordinate, scale2) {
   coordinate[0] *= scale2;
   coordinate[1] *= scale2;
   return coordinate;
@@ -5947,15 +5648,296 @@ function getWorldsAway(coordinate, projection, sourceExtentWidth) {
   }
   return worldsAway;
 }
-const DEFAULT_RADIUS = 63710088e-1;
-function getDistance(c1, c2, radius) {
-  radius = radius || DEFAULT_RADIUS;
-  const lat1 = toRadians(c1[1]);
-  const lat2 = toRadians(c2[1]);
-  const deltaLatBy2 = (lat2 - lat1) / 2;
-  const deltaLonBy2 = toRadians(c2[0] - c1[0]) / 2;
-  const a2 = Math.sin(deltaLatBy2) * Math.sin(deltaLatBy2) + Math.sin(deltaLonBy2) * Math.sin(deltaLonBy2) * Math.cos(lat1) * Math.cos(lat2);
-  return 2 * radius * Math.atan2(Math.sqrt(a2), Math.sqrt(1 - a2));
+const METERS_PER_UNIT$1 = {
+  // use the radius of the Normal sphere
+  "radians": 6370997 / (2 * Math.PI),
+  "degrees": 2 * Math.PI * 6370997 / 360,
+  "ft": 0.3048,
+  "m": 1,
+  "us-ft": 1200 / 3937
+};
+class Projection {
+  /**
+   * @param {Options} options Projection options.
+   */
+  constructor(options) {
+    this.code_ = options.code;
+    this.units_ = /** @type {import("./Units.js").Units} */
+    options.units;
+    this.extent_ = options.extent !== void 0 ? options.extent : null;
+    this.worldExtent_ = options.worldExtent !== void 0 ? options.worldExtent : null;
+    this.axisOrientation_ = options.axisOrientation !== void 0 ? options.axisOrientation : "enu";
+    this.global_ = options.global !== void 0 ? options.global : false;
+    this.canWrapX_ = !!(this.global_ && this.extent_);
+    this.getPointResolutionFunc_ = options.getPointResolution;
+    this.defaultTileGrid_ = null;
+    this.metersPerUnit_ = options.metersPerUnit;
+  }
+  /**
+   * @return {boolean} The projection is suitable for wrapping the x-axis
+   */
+  canWrapX() {
+    return this.canWrapX_;
+  }
+  /**
+   * Get the code for this projection, e.g. 'EPSG:4326'.
+   * @return {string} Code.
+   * @api
+   */
+  getCode() {
+    return this.code_;
+  }
+  /**
+   * Get the validity extent for this projection.
+   * @return {import("../extent.js").Extent} Extent.
+   * @api
+   */
+  getExtent() {
+    return this.extent_;
+  }
+  /**
+   * Get the units of this projection.
+   * @return {import("./Units.js").Units} Units.
+   * @api
+   */
+  getUnits() {
+    return this.units_;
+  }
+  /**
+   * Get the amount of meters per unit of this projection.  If the projection is
+   * not configured with `metersPerUnit` or a units identifier, the return is
+   * `undefined`.
+   * @return {number|undefined} Meters.
+   * @api
+   */
+  getMetersPerUnit() {
+    return this.metersPerUnit_ || METERS_PER_UNIT$1[this.units_];
+  }
+  /**
+   * Get the world extent for this projection.
+   * @return {import("../extent.js").Extent} Extent.
+   * @api
+   */
+  getWorldExtent() {
+    return this.worldExtent_;
+  }
+  /**
+   * Get the axis orientation of this projection.
+   * Example values are:
+   * enu - the default easting, northing, elevation.
+   * neu - northing, easting, up - useful for "lat/long" geographic coordinates,
+   *     or south orientated transverse mercator.
+   * wnu - westing, northing, up - some planetary coordinate systems have
+   *     "west positive" coordinate systems
+   * @return {string} Axis orientation.
+   * @api
+   */
+  getAxisOrientation() {
+    return this.axisOrientation_;
+  }
+  /**
+   * Is this projection a global projection which spans the whole world?
+   * @return {boolean} Whether the projection is global.
+   * @api
+   */
+  isGlobal() {
+    return this.global_;
+  }
+  /**
+   * Set if the projection is a global projection which spans the whole world
+   * @param {boolean} global Whether the projection is global.
+   * @api
+   */
+  setGlobal(global) {
+    this.global_ = global;
+    this.canWrapX_ = !!(global && this.extent_);
+  }
+  /**
+   * @return {import("../tilegrid/TileGrid.js").default} The default tile grid.
+   */
+  getDefaultTileGrid() {
+    return this.defaultTileGrid_;
+  }
+  /**
+   * @param {import("../tilegrid/TileGrid.js").default} tileGrid The default tile grid.
+   */
+  setDefaultTileGrid(tileGrid) {
+    this.defaultTileGrid_ = tileGrid;
+  }
+  /**
+   * Set the validity extent for this projection.
+   * @param {import("../extent.js").Extent} extent Extent.
+   * @api
+   */
+  setExtent(extent) {
+    this.extent_ = extent;
+    this.canWrapX_ = !!(this.global_ && extent);
+  }
+  /**
+   * Set the world extent for this projection.
+   * @param {import("../extent.js").Extent} worldExtent World extent
+   *     [minlon, minlat, maxlon, maxlat].
+   * @api
+   */
+  setWorldExtent(worldExtent) {
+    this.worldExtent_ = worldExtent;
+  }
+  /**
+   * Set the getPointResolution function (see {@link module:ol/proj.getPointResolution}
+   * for this projection.
+   * @param {function(number, import("../coordinate.js").Coordinate):number} func Function
+   * @api
+   */
+  setGetPointResolution(func) {
+    this.getPointResolutionFunc_ = func;
+  }
+  /**
+   * Get the custom point resolution function for this projection (if set).
+   * @return {GetPointResolution|undefined} The custom point
+   * resolution function (if set).
+   */
+  getPointResolutionFunc() {
+    return this.getPointResolutionFunc_;
+  }
+}
+const RADIUS$1 = 6378137;
+const HALF_SIZE = Math.PI * RADIUS$1;
+const EXTENT$1 = [-HALF_SIZE, -HALF_SIZE, HALF_SIZE, HALF_SIZE];
+const WORLD_EXTENT = [-180, -85, 180, 85];
+const MAX_SAFE_Y = RADIUS$1 * Math.log(Math.tan(Math.PI / 2));
+class EPSG3857Projection extends Projection {
+  /**
+   * @param {string} code Code.
+   */
+  constructor(code) {
+    super({
+      code,
+      units: "m",
+      extent: EXTENT$1,
+      global: true,
+      worldExtent: WORLD_EXTENT,
+      getPointResolution: function(resolution, point) {
+        return resolution / Math.cosh(point[1] / RADIUS$1);
+      }
+    });
+  }
+}
+const PROJECTIONS$1 = [
+  new EPSG3857Projection("EPSG:3857"),
+  new EPSG3857Projection("EPSG:102100"),
+  new EPSG3857Projection("EPSG:102113"),
+  new EPSG3857Projection("EPSG:900913"),
+  new EPSG3857Projection("http://www.opengis.net/def/crs/EPSG/0/3857"),
+  new EPSG3857Projection("http://www.opengis.net/gml/srs/epsg.xml#3857")
+];
+function fromEPSG4326(input, output, dimension, stride) {
+  const length = input.length;
+  dimension = dimension > 1 ? dimension : 2;
+  stride = stride ?? dimension;
+  if (output === void 0) {
+    if (dimension > 2) {
+      output = input.slice();
+    } else {
+      output = new Array(length);
+    }
+  }
+  for (let i = 0; i < length; i += stride) {
+    output[i] = HALF_SIZE * input[i] / 180;
+    let y2 = RADIUS$1 * Math.log(Math.tan(Math.PI * (+input[i + 1] + 90) / 360));
+    if (y2 > MAX_SAFE_Y) {
+      y2 = MAX_SAFE_Y;
+    } else if (y2 < -MAX_SAFE_Y) {
+      y2 = -MAX_SAFE_Y;
+    }
+    output[i + 1] = y2;
+  }
+  return output;
+}
+function toEPSG4326(input, output, dimension, stride) {
+  const length = input.length;
+  dimension = dimension > 1 ? dimension : 2;
+  stride = stride ?? dimension;
+  if (output === void 0) {
+    if (dimension > 2) {
+      output = input.slice();
+    } else {
+      output = new Array(length);
+    }
+  }
+  for (let i = 0; i < length; i += stride) {
+    output[i] = 180 * input[i] / HALF_SIZE;
+    output[i + 1] = 360 * Math.atan(Math.exp(input[i + 1] / RADIUS$1)) / Math.PI - 90;
+  }
+  return output;
+}
+const RADIUS = 6378137;
+const EXTENT = [-180, -90, 180, 90];
+const METERS_PER_UNIT = Math.PI * RADIUS / 180;
+class EPSG4326Projection extends Projection {
+  /**
+   * @param {string} code Code.
+   * @param {string} [axisOrientation] Axis orientation.
+   */
+  constructor(code, axisOrientation) {
+    super({
+      code,
+      units: "degrees",
+      extent: EXTENT,
+      axisOrientation,
+      global: true,
+      metersPerUnit: METERS_PER_UNIT,
+      worldExtent: EXTENT
+    });
+  }
+}
+const PROJECTIONS = [
+  new EPSG4326Projection("CRS:84"),
+  new EPSG4326Projection("EPSG:4326", "neu"),
+  new EPSG4326Projection("urn:ogc:def:crs:OGC:1.3:CRS84"),
+  new EPSG4326Projection("urn:ogc:def:crs:OGC:2:84"),
+  new EPSG4326Projection("http://www.opengis.net/def/crs/OGC/1.3/CRS84"),
+  new EPSG4326Projection("http://www.opengis.net/gml/srs/epsg.xml#4326", "neu"),
+  new EPSG4326Projection("http://www.opengis.net/def/crs/EPSG/0/4326", "neu")
+];
+let cache$1 = {};
+function clear$2() {
+  cache$1 = {};
+}
+function get$3(code) {
+  return cache$1[code] || cache$1[code.replace(/urn:(x-)?ogc:def:crs:EPSG:(.*:)?(\w+)$/, "EPSG:$3")] || null;
+}
+function add$1(code, projection) {
+  cache$1[code] = projection;
+}
+function clear$1(object) {
+  for (const property in object) {
+    delete object[property];
+  }
+}
+function isEmpty(object) {
+  let property;
+  for (property in object) {
+    return false;
+  }
+  return !property;
+}
+let transforms = {};
+function clear() {
+  transforms = {};
+}
+function add(source2, destination, transformFn) {
+  const sourceCode = source2.getCode();
+  const destinationCode = destination.getCode();
+  if (!(sourceCode in transforms)) {
+    transforms[sourceCode] = {};
+  }
+  transforms[sourceCode][destinationCode] = transformFn;
+}
+function get$2(sourceCode, destinationCode) {
+  if (sourceCode in transforms && destinationCode in transforms[sourceCode]) {
+    return transforms[sourceCode][destinationCode];
+  }
+  return null;
 }
 const K0 = 0.9996;
 const E = 669438e-8;
@@ -6032,14 +6014,14 @@ function fromLonLat$1(longitude, latitude, zone) {
   const centralLonRad = toRadians(centralLon);
   const n = R$1 / Math.sqrt(1 - E * latSin ** 2);
   const c = E_P2 * latCos ** 2;
-  const a2 = latCos * wrap(lonRad - centralLonRad, -Math.PI, Math.PI);
-  const a22 = a2 * a2;
-  const a3 = a22 * a2;
-  const a4 = a3 * a2;
-  const a5 = a4 * a2;
-  const a6 = a5 * a2;
+  const a3 = latCos * wrap(lonRad - centralLonRad, -Math.PI, Math.PI);
+  const a22 = a3 * a3;
+  const a32 = a22 * a3;
+  const a4 = a32 * a3;
+  const a5 = a4 * a3;
+  const a6 = a5 * a3;
   const m = R$1 * (M1 * latRad - M2 * Math.sin(2 * latRad) + M3 * Math.sin(4 * latRad) - M4 * Math.sin(6 * latRad));
-  const easting = K0 * n * (a2 + a3 / 6 * (1 - latTan2 + c) + a5 / 120 * (5 - 18 * latTan2 + latTan4 + 72 * c - 58 * E_P2)) + 5e5;
+  const easting = K0 * n * (a3 + a32 / 6 * (1 - latTan2 + c) + a5 / 120 * (5 - 18 * latTan2 + latTan4 + 72 * c - 58 * E_P2)) + 5e5;
   let northing = K0 * (m + n * latTan * (a22 / 2 + a4 / 24 * (5 - latTan2 + 9 * c + 4 * c ** 2) + a6 / 720 * (61 - 58 * latTan2 + latTan4 + 600 * c - 330 * E_P2)));
   if (!zone.north) {
     northing += 1e7;
@@ -6118,8 +6100,15 @@ function makeTransforms(projection) {
     inverse: makeTransformFunction(toLonLat$1, zone)
   };
 }
-function warn(...args) {
-  console.warn(...args);
+const DEFAULT_RADIUS = 63710088e-1;
+function getDistance(c1, c2, radius) {
+  radius = radius || DEFAULT_RADIUS;
+  const lat1 = toRadians(c1[1]);
+  const lat2 = toRadians(c2[1]);
+  const deltaLatBy2 = (lat2 - lat1) / 2;
+  const deltaLonBy2 = toRadians(c2[0] - c1[0]) / 2;
+  const a3 = Math.sin(deltaLatBy2) * Math.sin(deltaLatBy2) + Math.sin(deltaLonBy2) * Math.sin(deltaLonBy2) * Math.cos(lat1) * Math.cos(lat2);
+  return 2 * radius * Math.atan2(Math.sqrt(a3), Math.sqrt(1 - a3));
 }
 const transformFactories = [makeTransforms];
 const projectionFactories = [makeProjection];
@@ -6149,8 +6138,8 @@ function identityTransform(input, output) {
   return input;
 }
 function addProjection(projection) {
-  add$2(projection.getCode(), projection);
-  add$1(projection, projection, cloneTransform);
+  add$1(projection.getCode(), projection);
+  add(projection, projection, cloneTransform);
 }
 function addProjections(projections) {
   projections.forEach(addProjection);
@@ -6223,7 +6212,7 @@ function addEquivalentProjections(projections) {
   projections.forEach(function(source2) {
     projections.forEach(function(destination) {
       if (source2 !== destination) {
-        add$1(source2, destination, cloneTransform);
+        add(source2, destination, cloneTransform);
       }
     });
   });
@@ -6231,8 +6220,8 @@ function addEquivalentProjections(projections) {
 function addEquivalentTransforms(projections1, projections2, forwardTransform, inverseTransform) {
   projections1.forEach(function(projection1) {
     projections2.forEach(function(projection2) {
-      add$1(projection1, projection2, forwardTransform);
-      add$1(projection2, projection1, inverseTransform);
+      add(projection1, projection2, forwardTransform);
+      add(projection2, projection1, inverseTransform);
     });
   });
 }
@@ -6280,12 +6269,12 @@ function createTransformFromCoordinateTransform(coordTransform) {
 function addCoordinateTransforms(source2, destination, forward, inverse) {
   const sourceProj = get$1(source2);
   const destProj = get$1(destination);
-  add$1(
+  add(
     sourceProj,
     destProj,
     createTransformFromCoordinateTransform(forward)
   );
-  add$1(
+  add(
     destProj,
     sourceProj,
     createTransformFromCoordinateTransform(inverse)
@@ -6311,7 +6300,7 @@ function toLonLat(coordinate, projection) {
   }
   return lonLat;
 }
-function equivalent(projection1, projection2) {
+function equivalent$1(projection1, projection2) {
   if (projection1 === projection2) {
     return true;
   }
@@ -6368,7 +6357,7 @@ function getTransformFromProjections(source2, destination) {
   if (transformFunc) {
     addProjection(source2);
     addProjection(destination);
-    add$1(source2, destination, transformFunc);
+    add(source2, destination, transformFunc);
   }
   return transformFunc;
 }
@@ -6515,7 +6504,7 @@ const proj = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   createSafeCoordinateTransform,
   createTransformFromCoordinateTransform,
   disableCoordinateWarning,
-  equivalent,
+  equivalent: equivalent$1,
   fromLonLat,
   fromUserCoordinate,
   fromUserExtent,
@@ -6600,32 +6589,20 @@ var do_fetch = function(url) {
     do_after_fetch(data, url);
   });
 };
-class BaseEvent {
+const CollectionEventType = {
   /**
-   * @param {string} type Type.
-   */
-  constructor(type) {
-    this.propagationStopped;
-    this.defaultPrevented;
-    this.type = type;
-    this.target = null;
-  }
-  /**
-   * Prevent default. This means that no emulated `click`, `singleclick` or `doubleclick` events
-   * will be fired.
+   * Triggered when an item is added to the collection.
+   * @event module:ol/Collection.CollectionEvent#add
    * @api
    */
-  preventDefault() {
-    this.defaultPrevented = true;
-  }
+  ADD: "add",
   /**
-   * Stop event propagation.
+   * Triggered when an item is removed from the collection.
+   * @event module:ol/Collection.CollectionEvent#remove
    * @api
    */
-  stopPropagation() {
-    this.propagationStopped = true;
-  }
-}
+  REMOVE: "remove"
+};
 const ObjectEventType = {
   /**
    * Triggered when a property is changed.
@@ -6633,6 +6610,28 @@ const ObjectEventType = {
    * @api
    */
   PROPERTYCHANGE: "propertychange"
+};
+const EventType = {
+  /**
+   * Generic change event. Triggered when the revision counter is increased.
+   * @event module:ol/events/Event~BaseEvent#change
+   * @api
+   */
+  CHANGE: "change",
+  /**
+   * Generic error event. Triggered when an error occurs.
+   * @event module:ol/events/Event~BaseEvent#error
+   * @api
+   */
+  ERROR: "error",
+  CONTEXTMENU: "contextmenu",
+  CLICK: "click",
+  DBLCLICK: "dblclick",
+  KEYDOWN: "keydown",
+  KEYPRESS: "keypress",
+  LOAD: "load",
+  TOUCHMOVE: "touchmove",
+  WHEEL: "wheel"
 };
 class Disposable {
   constructor() {
@@ -6672,11 +6671,11 @@ function binarySearch(haystack, needle, comparator) {
   }
   return found ? low : ~low;
 }
-function ascending(a2, b2) {
-  return a2 > b2 ? 1 : a2 < b2 ? -1 : 0;
+function ascending(a3, b3) {
+  return a3 > b3 ? 1 : a3 < b3 ? -1 : 0;
 }
-function descending(a2, b2) {
-  return a2 < b2 ? 1 : a2 > b2 ? -1 : 0;
+function descending(a3, b3) {
+  return a3 < b3 ? 1 : a3 > b3 ? -1 : 0;
 }
 function linearFindNearest(arr, target, direction) {
   if (arr[0] <= target) {
@@ -6804,6 +6803,32 @@ function toPromise(getter) {
     return Promise.resolve(value);
   }
   return promiseGetter();
+}
+class BaseEvent {
+  /**
+   * @param {string} type Type.
+   */
+  constructor(type) {
+    this.propagationStopped;
+    this.defaultPrevented;
+    this.type = type;
+    this.target = null;
+  }
+  /**
+   * Prevent default. This means that no emulated `click`, `singleclick` or `doubleclick` events
+   * will be fired.
+   * @api
+   */
+  preventDefault() {
+    this.defaultPrevented = true;
+  }
+  /**
+   * Stop event propagation.
+   * @api
+   */
+  stopPropagation() {
+    this.propagationStopped = true;
+  }
 }
 class Target extends Disposable {
   /**
@@ -6939,41 +6964,12 @@ class Target extends Disposable {
     }
   }
 }
-const EventType = {
-  /**
-   * Generic change event. Triggered when the revision counter is increased.
-   * @event module:ol/events/Event~BaseEvent#change
-   * @api
-   */
-  CHANGE: "change",
-  /**
-   * Generic error event. Triggered when an error occurs.
-   * @event module:ol/events/Event~BaseEvent#error
-   * @api
-   */
-  ERROR: "error",
-  BLUR: "blur",
-  CLEAR: "clear",
-  CONTEXTMENU: "contextmenu",
-  CLICK: "click",
-  DBLCLICK: "dblclick",
-  DRAGENTER: "dragenter",
-  DRAGOVER: "dragover",
-  DROP: "drop",
-  FOCUS: "focus",
-  KEYDOWN: "keydown",
-  KEYPRESS: "keypress",
-  LOAD: "load",
-  RESIZE: "resize",
-  TOUCHMOVE: "touchmove",
-  WHEEL: "wheel"
-};
 function listen(target, type, listener, thisArg, once) {
   if (once) {
     const originalListener = listener;
-    listener = function() {
+    listener = function(event) {
       target.removeEventListener(type, listener);
-      originalListener.apply(thisArg ?? this, arguments);
+      return originalListener.call(thisArg ?? this, event);
     };
   } else if (thisArg && thisArg !== target) {
     listener = listener.bind(thisArg);
@@ -7264,7 +7260,7 @@ class BaseObject extends Observable {
     if (this.values_ && key in this.values_) {
       const oldValue = this.values_[key];
       delete this.values_[key];
-      if (isEmpty$1(this.values_)) {
+      if (isEmpty(this.values_)) {
         this.values_ = null;
       }
       if (!silent) {
@@ -7273,20 +7269,6 @@ class BaseObject extends Observable {
     }
   }
 }
-const CollectionEventType = {
-  /**
-   * Triggered when an item is added to the collection.
-   * @event module:ol/Collection.CollectionEvent#add
-   * @api
-   */
-  ADD: "add",
-  /**
-   * Triggered when an item is removed from the collection.
-   * @event module:ol/Collection.CollectionEvent#remove
-   * @api
-   */
-  REMOVE: "remove"
-};
 const Property$2 = {
   LENGTH: "length"
 };
@@ -7511,357 +7493,771 @@ class Collection extends BaseObject {
     }
   }
 }
-const LayerProperty = {
-  OPACITY: "opacity",
-  VISIBLE: "visible",
-  EXTENT: "extent",
-  Z_INDEX: "zIndex",
-  MAX_RESOLUTION: "maxResolution",
-  MIN_RESOLUTION: "minResolution",
-  MAX_ZOOM: "maxZoom",
-  MIN_ZOOM: "minZoom",
-  SOURCE: "source",
-  MAP: "map"
-};
-function assert(assertion, errorMessage) {
-  if (!assertion) {
-    throw new Error(errorMessage);
+class MapEvent extends BaseEvent {
+  /**
+   * @param {string} type Event type.
+   * @param {import("./Map.js").default} map Map.
+   * @param {?import("./Map.js").FrameState} [frameState] Frame state.
+   */
+  constructor(type, map2, frameState) {
+    super(type);
+    this.map = map2;
+    this.frameState = frameState !== void 0 ? frameState : null;
   }
 }
-class BaseLayer extends BaseObject {
+class MapBrowserEvent extends MapEvent {
   /**
-   * @param {Options} options Layer options.
+   * @param {string} type Event type.
+   * @param {import("./Map.js").default} map Map.
+   * @param {EVENT} originalEvent Original event.
+   * @param {boolean} [dragging] Is the map currently being dragged?
+   * @param {import("./Map.js").FrameState} [frameState] Frame state.
+   * @param {Array<PointerEvent>} [activePointers] Active pointers.
    */
-  constructor(options) {
-    super();
-    this.on;
-    this.once;
-    this.un;
-    this.background_ = options.background;
-    const properties = Object.assign({}, options);
-    if (typeof options.properties === "object") {
-      delete properties.properties;
-      Object.assign(properties, options.properties);
+  constructor(type, map2, originalEvent, dragging, frameState, activePointers) {
+    super(type, map2, frameState);
+    this.originalEvent = originalEvent;
+    this.pixel_ = null;
+    this.coordinate_ = null;
+    this.dragging = dragging !== void 0 ? dragging : false;
+    this.activePointers = activePointers;
+  }
+  /**
+   * The map pixel relative to the viewport corresponding to the original event.
+   * @type {import("./pixel.js").Pixel}
+   * @api
+   */
+  get pixel() {
+    if (!this.pixel_) {
+      this.pixel_ = this.map.getEventPixel(this.originalEvent);
     }
-    properties[LayerProperty.OPACITY] = options.opacity !== void 0 ? options.opacity : 1;
-    assert(
-      typeof properties[LayerProperty.OPACITY] === "number",
-      "Layer opacity must be a number"
+    return this.pixel_;
+  }
+  set pixel(pixel) {
+    this.pixel_ = pixel;
+  }
+  /**
+   * The coordinate corresponding to the original browser event.  This will be in the user
+   * projection if one is set.  Otherwise it will be in the view projection.
+   * @type {import("./coordinate.js").Coordinate}
+   * @api
+   */
+  get coordinate() {
+    if (!this.coordinate_) {
+      this.coordinate_ = this.map.getCoordinateFromPixel(this.pixel);
+    }
+    return this.coordinate_;
+  }
+  set coordinate(coordinate) {
+    this.coordinate_ = coordinate;
+  }
+  /**
+   * Prevents the default browser action.
+   * See https://developer.mozilla.org/en-US/docs/Web/API/event.preventDefault.
+   * @api
+   * @override
+   */
+  preventDefault() {
+    super.preventDefault();
+    if ("preventDefault" in this.originalEvent) {
+      this.originalEvent.preventDefault();
+    }
+  }
+  /**
+   * Prevents further propagation of the current event.
+   * See https://developer.mozilla.org/en-US/docs/Web/API/event.stopPropagation.
+   * @api
+   * @override
+   */
+  stopPropagation() {
+    super.stopPropagation();
+    if ("stopPropagation" in this.originalEvent) {
+      this.originalEvent.stopPropagation();
+    }
+  }
+}
+const MapBrowserEventType = {
+  /**
+   * A true single click with no dragging and no double click. Note that this
+   * event is delayed by 250 ms to ensure that it is not a double click.
+   * @event module:ol/MapBrowserEvent~MapBrowserEvent#singleclick
+   * @api
+   */
+  SINGLECLICK: "singleclick",
+  /**
+   * A click with no dragging. A double click will fire two of this.
+   * @event module:ol/MapBrowserEvent~MapBrowserEvent#click
+   * @api
+   */
+  CLICK: EventType.CLICK,
+  /**
+   * A true double click, with no dragging.
+   * @event module:ol/MapBrowserEvent~MapBrowserEvent#dblclick
+   * @api
+   */
+  DBLCLICK: EventType.DBLCLICK,
+  /**
+   * Triggered when a pointer is dragged.
+   * @event module:ol/MapBrowserEvent~MapBrowserEvent#pointerdrag
+   * @api
+   */
+  POINTERDRAG: "pointerdrag",
+  /**
+   * Triggered when a pointer is moved. Note that on touch devices this is
+   * triggered when the map is panned, so is not the same as mousemove.
+   * @event module:ol/MapBrowserEvent~MapBrowserEvent#pointermove
+   * @api
+   */
+  POINTERMOVE: "pointermove",
+  POINTERDOWN: "pointerdown",
+  POINTERUP: "pointerup",
+  POINTEROVER: "pointerover",
+  POINTEROUT: "pointerout",
+  POINTERENTER: "pointerenter",
+  POINTERLEAVE: "pointerleave",
+  POINTERCANCEL: "pointercancel"
+};
+const ua = typeof navigator !== "undefined" && typeof navigator.userAgent !== "undefined" ? navigator.userAgent.toLowerCase() : "";
+const SAFARI = ua.includes("safari") && !ua.includes("chrom");
+SAFARI && (ua.includes("version/15.4") || /cpu (os|iphone os) 15_4 like mac os x/.test(ua));
+const WEBKIT = ua.includes("webkit") && !ua.includes("edge");
+const MAC = ua.includes("macintosh");
+const DEVICE_PIXEL_RATIO = typeof devicePixelRatio !== "undefined" ? devicePixelRatio : 1;
+const WORKER_OFFSCREEN_CANVAS = typeof WorkerGlobalScope !== "undefined" && typeof OffscreenCanvas !== "undefined" && self instanceof WorkerGlobalScope;
+const IMAGE_DECODE = typeof Image !== "undefined" && Image.prototype.decode;
+const PASSIVE_EVENT_LISTENERS = function() {
+  let passive2 = false;
+  try {
+    const options = Object.defineProperty({}, "passive", {
+      get: function() {
+        passive2 = true;
+      }
+    });
+    window.addEventListener("_", null, options);
+    window.removeEventListener("_", null, options);
+  } catch {
+  }
+  return passive2;
+}();
+const PointerEventType = {
+  POINTERMOVE: "pointermove",
+  POINTERDOWN: "pointerdown"
+};
+class MapBrowserEventHandler extends Target {
+  /**
+   * @param {import("./Map.js").default} map The map with the viewport to listen to events on.
+   * @param {number} [moveTolerance] The minimal distance the pointer must travel to trigger a move.
+   */
+  constructor(map2, moveTolerance) {
+    super(map2);
+    this.map_ = map2;
+    this.clickTimeoutId_;
+    this.emulateClicks_ = false;
+    this.dragging_ = false;
+    this.dragListenerKeys_ = [];
+    this.moveTolerance_ = moveTolerance === void 0 ? 1 : moveTolerance;
+    this.down_ = null;
+    const element = this.map_.getViewport();
+    this.activePointers_ = [];
+    this.trackedTouches_ = {};
+    this.element_ = element;
+    this.pointerdownListenerKey_ = listen(
+      element,
+      PointerEventType.POINTERDOWN,
+      this.handlePointerDown_,
+      this
     );
-    properties[LayerProperty.VISIBLE] = options.visible !== void 0 ? options.visible : true;
-    properties[LayerProperty.Z_INDEX] = options.zIndex;
-    properties[LayerProperty.MAX_RESOLUTION] = options.maxResolution !== void 0 ? options.maxResolution : Infinity;
-    properties[LayerProperty.MIN_RESOLUTION] = options.minResolution !== void 0 ? options.minResolution : 0;
-    properties[LayerProperty.MIN_ZOOM] = options.minZoom !== void 0 ? options.minZoom : -Infinity;
-    properties[LayerProperty.MAX_ZOOM] = options.maxZoom !== void 0 ? options.maxZoom : Infinity;
-    this.className_ = properties.className !== void 0 ? properties.className : "ol-layer";
-    delete properties.className;
-    this.setProperties(properties);
-    this.state_ = null;
+    this.originalPointerMoveEvent_;
+    this.relayedListenerKey_ = listen(
+      element,
+      PointerEventType.POINTERMOVE,
+      this.relayMoveEvent_,
+      this
+    );
+    this.boundHandleTouchMove_ = this.handleTouchMove_.bind(this);
+    this.element_.addEventListener(
+      EventType.TOUCHMOVE,
+      this.boundHandleTouchMove_,
+      PASSIVE_EVENT_LISTENERS ? { passive: false } : false
+    );
   }
   /**
-   * Get the background for this layer.
-   * @return {BackgroundColor|false} Layer background.
+   * @param {PointerEvent} pointerEvent Pointer
+   * event.
+   * @private
    */
-  getBackground() {
-    return this.background_;
+  emulateClick_(pointerEvent) {
+    let newEvent = new MapBrowserEvent(
+      MapBrowserEventType.CLICK,
+      this.map_,
+      pointerEvent
+    );
+    this.dispatchEvent(newEvent);
+    if (this.clickTimeoutId_ !== void 0) {
+      clearTimeout(this.clickTimeoutId_);
+      this.clickTimeoutId_ = void 0;
+      newEvent = new MapBrowserEvent(
+        MapBrowserEventType.DBLCLICK,
+        this.map_,
+        pointerEvent
+      );
+      this.dispatchEvent(newEvent);
+    } else {
+      this.clickTimeoutId_ = setTimeout(() => {
+        this.clickTimeoutId_ = void 0;
+        const newEvent2 = new MapBrowserEvent(
+          MapBrowserEventType.SINGLECLICK,
+          this.map_,
+          pointerEvent
+        );
+        this.dispatchEvent(newEvent2);
+      }, 250);
+    }
   }
   /**
-   * @return {string} CSS class name.
-   */
-  getClassName() {
-    return this.className_;
-  }
-  /**
-   * This method is not meant to be called by layers or layer renderers because the state
-   * is incorrect if the layer is included in a layer group.
+   * Keeps track on how many pointers are currently active.
    *
-   * @param {boolean} [managed] Layer is managed.
-   * @return {import("./Layer.js").State} Layer state.
+   * @param {PointerEvent} pointerEvent Pointer
+   * event.
+   * @private
    */
-  getLayerState(managed) {
-    const state = this.state_ || /** @type {?} */
-    {
-      layer: this,
-      managed: managed === void 0 ? true : managed
-    };
-    const zIndex = this.getZIndex();
-    state.opacity = clamp(Math.round(this.getOpacity() * 100) / 100, 0, 1);
-    state.visible = this.getVisible();
-    state.extent = this.getExtent();
-    state.zIndex = zIndex === void 0 && !state.managed ? Infinity : zIndex;
-    state.maxResolution = this.getMaxResolution();
-    state.minResolution = Math.max(this.getMinResolution(), 0);
-    state.minZoom = this.getMinZoom();
-    state.maxZoom = this.getMaxZoom();
-    this.state_ = state;
-    return state;
+  updateActivePointers_(pointerEvent) {
+    const event = pointerEvent;
+    const id = event.pointerId;
+    if (event.type == MapBrowserEventType.POINTERUP || event.type == MapBrowserEventType.POINTERCANCEL) {
+      delete this.trackedTouches_[id];
+      for (const pointerId in this.trackedTouches_) {
+        if (this.trackedTouches_[pointerId].target !== event.target) {
+          delete this.trackedTouches_[pointerId];
+          break;
+        }
+      }
+    } else if (event.type == MapBrowserEventType.POINTERDOWN || event.type == MapBrowserEventType.POINTERMOVE) {
+      this.trackedTouches_[id] = event;
+    }
+    this.activePointers_ = Object.values(this.trackedTouches_);
   }
   /**
-   * @abstract
-   * @param {Array<import("./Layer.js").default>} [array] Array of layers (to be
-   *     modified in place).
-   * @return {Array<import("./Layer.js").default>} Array of layers.
+   * @param {PointerEvent} pointerEvent Pointer
+   * event.
+   * @private
    */
-  getLayersArray(array) {
-    return abstract();
+  handlePointerUp_(pointerEvent) {
+    this.updateActivePointers_(pointerEvent);
+    const newEvent = new MapBrowserEvent(
+      MapBrowserEventType.POINTERUP,
+      this.map_,
+      pointerEvent,
+      void 0,
+      void 0,
+      this.activePointers_
+    );
+    this.dispatchEvent(newEvent);
+    if (this.emulateClicks_ && !newEvent.defaultPrevented && !this.dragging_ && this.isMouseActionButton_(pointerEvent)) {
+      this.emulateClick_(this.down_);
+    }
+    if (this.activePointers_.length === 0) {
+      this.dragListenerKeys_.forEach(unlistenByKey);
+      this.dragListenerKeys_.length = 0;
+      this.dragging_ = false;
+      this.down_ = null;
+    }
   }
   /**
-   * @abstract
-   * @param {Array<import("./Layer.js").State>} [states] Optional list of layer
-   *     states (to be modified in place).
-   * @return {Array<import("./Layer.js").State>} List of layer states.
+   * @param {PointerEvent} pointerEvent Pointer
+   * event.
+   * @return {boolean} If the left mouse button was pressed.
+   * @private
    */
-  getLayerStatesArray(states) {
-    return abstract();
+  isMouseActionButton_(pointerEvent) {
+    return pointerEvent.button === 0;
   }
   /**
-   * Return the {@link module:ol/extent~Extent extent} of the layer or `undefined` if it
-   * will be visible regardless of extent.
-   * @return {import("../extent.js").Extent|undefined} The layer extent.
-   * @observable
-   * @api
+   * @param {PointerEvent} pointerEvent Pointer
+   * event.
+   * @private
    */
-  getExtent() {
-    return (
-      /** @type {import("../extent.js").Extent|undefined} */
-      this.get(LayerProperty.EXTENT)
+  handlePointerDown_(pointerEvent) {
+    this.emulateClicks_ = this.activePointers_.length === 0;
+    this.updateActivePointers_(pointerEvent);
+    const newEvent = new MapBrowserEvent(
+      MapBrowserEventType.POINTERDOWN,
+      this.map_,
+      pointerEvent,
+      void 0,
+      void 0,
+      this.activePointers_
+    );
+    this.dispatchEvent(newEvent);
+    this.down_ = new PointerEvent(pointerEvent.type, pointerEvent);
+    Object.defineProperty(this.down_, "target", {
+      writable: false,
+      value: pointerEvent.target
+    });
+    if (this.dragListenerKeys_.length === 0) {
+      const doc = this.map_.getOwnerDocument();
+      this.dragListenerKeys_.push(
+        listen(
+          doc,
+          MapBrowserEventType.POINTERMOVE,
+          this.handlePointerMove_,
+          this
+        ),
+        listen(doc, MapBrowserEventType.POINTERUP, this.handlePointerUp_, this),
+        /* Note that the listener for `pointercancel is set up on
+         * `pointerEventHandler_` and not `documentPointerEventHandler_` like
+         * the `pointerup` and `pointermove` listeners.
+         *
+         * The reason for this is the following: `TouchSource.vacuumTouches_()`
+         * issues `pointercancel` events, when there was no `touchend` for a
+         * `touchstart`. Now, let's say a first `touchstart` is registered on
+         * `pointerEventHandler_`. The `documentPointerEventHandler_` is set up.
+         * But `documentPointerEventHandler_` doesn't know about the first
+         * `touchstart`. If there is no `touchend` for the `touchstart`, we can
+         * only receive a `touchcancel` from `pointerEventHandler_`, because it is
+         * only registered there.
+         */
+        listen(
+          this.element_,
+          MapBrowserEventType.POINTERCANCEL,
+          this.handlePointerUp_,
+          this
+        )
+      );
+      if (this.element_.getRootNode && this.element_.getRootNode() !== doc) {
+        this.dragListenerKeys_.push(
+          listen(
+            this.element_.getRootNode(),
+            MapBrowserEventType.POINTERUP,
+            this.handlePointerUp_,
+            this
+          )
+        );
+      }
+    }
+  }
+  /**
+   * @param {PointerEvent} pointerEvent Pointer
+   * event.
+   * @private
+   */
+  handlePointerMove_(pointerEvent) {
+    if (this.isMoving_(pointerEvent)) {
+      this.updateActivePointers_(pointerEvent);
+      this.dragging_ = true;
+      const newEvent = new MapBrowserEvent(
+        MapBrowserEventType.POINTERDRAG,
+        this.map_,
+        pointerEvent,
+        this.dragging_,
+        void 0,
+        this.activePointers_
+      );
+      this.dispatchEvent(newEvent);
+    }
+  }
+  /**
+   * Wrap and relay a pointermove event.
+   * @param {PointerEvent} pointerEvent Pointer
+   * event.
+   * @private
+   */
+  relayMoveEvent_(pointerEvent) {
+    this.originalPointerMoveEvent_ = pointerEvent;
+    const dragging = !!(this.down_ && this.isMoving_(pointerEvent));
+    this.dispatchEvent(
+      new MapBrowserEvent(
+        MapBrowserEventType.POINTERMOVE,
+        this.map_,
+        pointerEvent,
+        dragging
+      )
     );
   }
   /**
-   * Return the maximum resolution of the layer. Returns Infinity if
-   * the layer has no maximum resolution set.
-   * @return {number} The maximum resolution of the layer.
-   * @observable
-   * @api
+   * Flexible handling of a `touch-action: none` css equivalent: because calling
+   * `preventDefault()` on a `pointermove` event does not stop native page scrolling
+   * and zooming, we also listen for `touchmove` and call `preventDefault()` on it
+   * when an interaction (currently `DragPan` handles the event.
+   * @param {TouchEvent} event Event.
+   * @private
    */
-  getMaxResolution() {
-    return (
-      /** @type {number} */
-      this.get(LayerProperty.MAX_RESOLUTION)
-    );
+  handleTouchMove_(event) {
+    const originalEvent = this.originalPointerMoveEvent_;
+    if ((!originalEvent || originalEvent.defaultPrevented) && (typeof event.cancelable !== "boolean" || event.cancelable === true)) {
+      event.preventDefault();
+    }
   }
   /**
-   * Return the minimum resolution of the layer. Returns 0 if
-   * the layer has no minimum resolution set.
-   * @return {number} The minimum resolution of the layer.
-   * @observable
-   * @api
+   * @param {PointerEvent} pointerEvent Pointer
+   * event.
+   * @return {boolean} Is moving.
+   * @private
    */
-  getMinResolution() {
-    return (
-      /** @type {number} */
-      this.get(LayerProperty.MIN_RESOLUTION)
-    );
-  }
-  /**
-   * Return the minimum zoom level of the layer. Returns -Infinity if
-   * the layer has no minimum zoom set.
-   * @return {number} The minimum zoom level of the layer.
-   * @observable
-   * @api
-   */
-  getMinZoom() {
-    return (
-      /** @type {number} */
-      this.get(LayerProperty.MIN_ZOOM)
-    );
-  }
-  /**
-   * Return the maximum zoom level of the layer. Returns Infinity if
-   * the layer has no maximum zoom set.
-   * @return {number} The maximum zoom level of the layer.
-   * @observable
-   * @api
-   */
-  getMaxZoom() {
-    return (
-      /** @type {number} */
-      this.get(LayerProperty.MAX_ZOOM)
-    );
-  }
-  /**
-   * Return the opacity of the layer (between 0 and 1).
-   * @return {number} The opacity of the layer.
-   * @observable
-   * @api
-   */
-  getOpacity() {
-    return (
-      /** @type {number} */
-      this.get(LayerProperty.OPACITY)
-    );
-  }
-  /**
-   * @abstract
-   * @return {import("../source/Source.js").State} Source state.
-   */
-  getSourceState() {
-    return abstract();
-  }
-  /**
-   * Return the value of this layer's `visible` property. To find out whether the layer
-   * is visible on a map, use `isVisible()` instead.
-   * @return {boolean} The value of the `visible` property of the layer.
-   * @observable
-   * @api
-   */
-  getVisible() {
-    return (
-      /** @type {boolean} */
-      this.get(LayerProperty.VISIBLE)
-    );
-  }
-  /**
-   * Return the Z-index of the layer, which is used to order layers before
-   * rendering. Returns undefined if the layer is unmanaged.
-   * @return {number|undefined} The Z-index of the layer.
-   * @observable
-   * @api
-   */
-  getZIndex() {
-    return (
-      /** @type {number|undefined} */
-      this.get(LayerProperty.Z_INDEX)
-    );
-  }
-  /**
-   * Sets the background color.
-   * @param {BackgroundColor} [background] Background color.
-   */
-  setBackground(background) {
-    this.background_ = background;
-    this.changed();
-  }
-  /**
-   * Set the extent at which the layer is visible.  If `undefined`, the layer
-   * will be visible at all extents.
-   * @param {import("../extent.js").Extent|undefined} extent The extent of the layer.
-   * @observable
-   * @api
-   */
-  setExtent(extent) {
-    this.set(LayerProperty.EXTENT, extent);
-  }
-  /**
-   * Set the maximum resolution at which the layer is visible.
-   * @param {number} maxResolution The maximum resolution of the layer.
-   * @observable
-   * @api
-   */
-  setMaxResolution(maxResolution) {
-    this.set(LayerProperty.MAX_RESOLUTION, maxResolution);
-  }
-  /**
-   * Set the minimum resolution at which the layer is visible.
-   * @param {number} minResolution The minimum resolution of the layer.
-   * @observable
-   * @api
-   */
-  setMinResolution(minResolution) {
-    this.set(LayerProperty.MIN_RESOLUTION, minResolution);
-  }
-  /**
-   * Set the maximum zoom (exclusive) at which the layer is visible.
-   * Note that the zoom levels for layer visibility are based on the
-   * view zoom level, which may be different from a tile source zoom level.
-   * @param {number} maxZoom The maximum zoom of the layer.
-   * @observable
-   * @api
-   */
-  setMaxZoom(maxZoom) {
-    this.set(LayerProperty.MAX_ZOOM, maxZoom);
-  }
-  /**
-   * Set the minimum zoom (inclusive) at which the layer is visible.
-   * Note that the zoom levels for layer visibility are based on the
-   * view zoom level, which may be different from a tile source zoom level.
-   * @param {number} minZoom The minimum zoom of the layer.
-   * @observable
-   * @api
-   */
-  setMinZoom(minZoom) {
-    this.set(LayerProperty.MIN_ZOOM, minZoom);
-  }
-  /**
-   * Set the opacity of the layer, allowed values range from 0 to 1.
-   * @param {number} opacity The opacity of the layer.
-   * @observable
-   * @api
-   */
-  setOpacity(opacity) {
-    assert(typeof opacity === "number", "Layer opacity must be a number");
-    this.set(LayerProperty.OPACITY, opacity);
-  }
-  /**
-   * Set the visibility of the layer (`true` or `false`).
-   * @param {boolean} visible The visibility of the layer.
-   * @observable
-   * @api
-   */
-  setVisible(visible) {
-    this.set(LayerProperty.VISIBLE, visible);
-  }
-  /**
-   * Set Z-index of the layer, which is used to order layers before rendering.
-   * The default Z-index is 0.
-   * @param {number} zindex The z-index of the layer.
-   * @observable
-   * @api
-   */
-  setZIndex(zindex) {
-    this.set(LayerProperty.Z_INDEX, zindex);
+  isMoving_(pointerEvent) {
+    return this.dragging_ || Math.abs(pointerEvent.clientX - this.down_.clientX) > this.moveTolerance_ || Math.abs(pointerEvent.clientY - this.down_.clientY) > this.moveTolerance_;
   }
   /**
    * Clean up.
    * @override
    */
   disposeInternal() {
-    if (this.state_) {
-      this.state_.layer = null;
-      this.state_ = null;
+    if (this.relayedListenerKey_) {
+      unlistenByKey(this.relayedListenerKey_);
+      this.relayedListenerKey_ = null;
     }
+    this.element_.removeEventListener(
+      EventType.TOUCHMOVE,
+      this.boundHandleTouchMove_
+    );
+    if (this.pointerdownListenerKey_) {
+      unlistenByKey(this.pointerdownListenerKey_);
+      this.pointerdownListenerKey_ = null;
+    }
+    this.dragListenerKeys_.forEach(unlistenByKey);
+    this.dragListenerKeys_.length = 0;
+    this.element_ = null;
     super.disposeInternal();
   }
 }
-const RenderEventType = {
+const MapEventType = {
   /**
-   * Triggered before a layer is rendered.
-   * @event module:ol/render/Event~RenderEvent#prerender
-   * @api
-   */
-  PRERENDER: "prerender",
-  /**
-   * Triggered after a layer is rendered.
-   * @event module:ol/render/Event~RenderEvent#postrender
+   * Triggered after a map frame is rendered.
+   * @event module:ol/MapEvent~MapEvent#postrender
    * @api
    */
   POSTRENDER: "postrender",
   /**
-   * Triggered before layers are composed.  When dispatched by the map, the event object will not have
-   * a `context` set.  When dispatched by a layer, the event object will have a `context` set.  Only
-   * WebGL layers currently dispatch this event.
-   * @event module:ol/render/Event~RenderEvent#precompose
+   * Triggered when the map starts moving.
+   * @event module:ol/MapEvent~MapEvent#movestart
    * @api
    */
-  PRECOMPOSE: "precompose",
+  MOVESTART: "movestart",
   /**
-   * Triggered after layers are composed.  When dispatched by the map, the event object will not have
-   * a `context` set.  When dispatched by a layer, the event object will have a `context` set.  Only
-   * WebGL layers currently dispatch this event.
-   * @event module:ol/render/Event~RenderEvent#postcompose
+   * Triggered after the map is moved.
+   * @event module:ol/MapEvent~MapEvent#moveend
    * @api
    */
-  POSTCOMPOSE: "postcompose",
+  MOVEEND: "moveend",
   /**
-   * Triggered when rendering is complete, i.e. all sources and tiles have
-   * finished loading for the current viewport, and all tiles are faded in.
-   * The event object will not have a `context` set.
-   * @event module:ol/render/Event~RenderEvent#rendercomplete
+   * Triggered when loading of additional map data (tiles, images, features) starts.
+   * @event module:ol/MapEvent~MapEvent#loadstart
    * @api
    */
-  RENDERCOMPLETE: "rendercomplete"
+  LOADSTART: "loadstart",
+  /**
+   * Triggered when loading of additional map data has completed.
+   * @event module:ol/MapEvent~MapEvent#loadend
+   * @api
+   */
+  LOADEND: "loadend"
 };
+const MapProperty = {
+  LAYERGROUP: "layergroup",
+  SIZE: "size",
+  TARGET: "target",
+  VIEW: "view"
+};
+const TileState = {
+  IDLE: 0,
+  LOADING: 1,
+  LOADED: 2,
+  /**
+   * Indicates that tile loading failed
+   * @type {number}
+   */
+  ERROR: 3,
+  EMPTY: 4
+};
+function assert(assertion, errorMessage) {
+  if (!assertion) {
+    throw new Error(errorMessage);
+  }
+}
+const DROP = Infinity;
+class PriorityQueue {
+  /**
+   * @param {function(T): number} priorityFunction Priority function.
+   * @param {function(T): string} keyFunction Key function.
+   */
+  constructor(priorityFunction, keyFunction) {
+    this.priorityFunction_ = priorityFunction;
+    this.keyFunction_ = keyFunction;
+    this.elements_ = [];
+    this.priorities_ = [];
+    this.queuedElements_ = {};
+  }
+  /**
+   * FIXME empty description for jsdoc
+   */
+  clear() {
+    this.elements_.length = 0;
+    this.priorities_.length = 0;
+    clear$1(this.queuedElements_);
+  }
+  /**
+   * Remove and return the highest-priority element. O(log N).
+   * @return {T} Element.
+   */
+  dequeue() {
+    const elements = this.elements_;
+    const priorities = this.priorities_;
+    const element = elements[0];
+    if (elements.length == 1) {
+      elements.length = 0;
+      priorities.length = 0;
+    } else {
+      elements[0] = /** @type {T} */
+      elements.pop();
+      priorities[0] = /** @type {number} */
+      priorities.pop();
+      this.siftUp_(0);
+    }
+    const elementKey = this.keyFunction_(element);
+    delete this.queuedElements_[elementKey];
+    return element;
+  }
+  /**
+   * Enqueue an element. O(log N).
+   * @param {T} element Element.
+   * @return {boolean} The element was added to the queue.
+   */
+  enqueue(element) {
+    assert(
+      !(this.keyFunction_(element) in this.queuedElements_),
+      "Tried to enqueue an `element` that was already added to the queue"
+    );
+    const priority = this.priorityFunction_(element);
+    if (priority != DROP) {
+      this.elements_.push(element);
+      this.priorities_.push(priority);
+      this.queuedElements_[this.keyFunction_(element)] = true;
+      this.siftDown_(0, this.elements_.length - 1);
+      return true;
+    }
+    return false;
+  }
+  /**
+   * @return {number} Count.
+   */
+  getCount() {
+    return this.elements_.length;
+  }
+  /**
+   * Gets the index of the left child of the node at the given index.
+   * @param {number} index The index of the node to get the left child for.
+   * @return {number} The index of the left child.
+   * @private
+   */
+  getLeftChildIndex_(index) {
+    return index * 2 + 1;
+  }
+  /**
+   * Gets the index of the right child of the node at the given index.
+   * @param {number} index The index of the node to get the right child for.
+   * @return {number} The index of the right child.
+   * @private
+   */
+  getRightChildIndex_(index) {
+    return index * 2 + 2;
+  }
+  /**
+   * Gets the index of the parent of the node at the given index.
+   * @param {number} index The index of the node to get the parent for.
+   * @return {number} The index of the parent.
+   * @private
+   */
+  getParentIndex_(index) {
+    return index - 1 >> 1;
+  }
+  /**
+   * Make this a heap. O(N).
+   * @private
+   */
+  heapify_() {
+    let i;
+    for (i = (this.elements_.length >> 1) - 1; i >= 0; i--) {
+      this.siftUp_(i);
+    }
+  }
+  /**
+   * @return {boolean} Is empty.
+   */
+  isEmpty() {
+    return this.elements_.length === 0;
+  }
+  /**
+   * @param {string} key Key.
+   * @return {boolean} Is key queued.
+   */
+  isKeyQueued(key) {
+    return key in this.queuedElements_;
+  }
+  /**
+   * @param {T} element Element.
+   * @return {boolean} Is queued.
+   */
+  isQueued(element) {
+    return this.isKeyQueued(this.keyFunction_(element));
+  }
+  /**
+   * @param {number} index The index of the node to move down.
+   * @private
+   */
+  siftUp_(index) {
+    const elements = this.elements_;
+    const priorities = this.priorities_;
+    const count = elements.length;
+    const element = elements[index];
+    const priority = priorities[index];
+    const startIndex = index;
+    while (index < count >> 1) {
+      const lIndex = this.getLeftChildIndex_(index);
+      const rIndex = this.getRightChildIndex_(index);
+      const smallerChildIndex = rIndex < count && priorities[rIndex] < priorities[lIndex] ? rIndex : lIndex;
+      elements[index] = elements[smallerChildIndex];
+      priorities[index] = priorities[smallerChildIndex];
+      index = smallerChildIndex;
+    }
+    elements[index] = element;
+    priorities[index] = priority;
+    this.siftDown_(startIndex, index);
+  }
+  /**
+   * @param {number} startIndex The index of the root.
+   * @param {number} index The index of the node to move up.
+   * @private
+   */
+  siftDown_(startIndex, index) {
+    const elements = this.elements_;
+    const priorities = this.priorities_;
+    const element = elements[index];
+    const priority = priorities[index];
+    while (index > startIndex) {
+      const parentIndex = this.getParentIndex_(index);
+      if (priorities[parentIndex] > priority) {
+        elements[index] = elements[parentIndex];
+        priorities[index] = priorities[parentIndex];
+        index = parentIndex;
+      } else {
+        break;
+      }
+    }
+    elements[index] = element;
+    priorities[index] = priority;
+  }
+  /**
+   * FIXME empty description for jsdoc
+   */
+  reprioritize() {
+    const priorityFunction = this.priorityFunction_;
+    const elements = this.elements_;
+    const priorities = this.priorities_;
+    let index = 0;
+    const n = elements.length;
+    let element, i, priority;
+    for (i = 0; i < n; ++i) {
+      element = elements[i];
+      priority = priorityFunction(element);
+      if (priority == DROP) {
+        delete this.queuedElements_[this.keyFunction_(element)];
+      } else {
+        priorities[index] = priority;
+        elements[index++] = element;
+      }
+    }
+    elements.length = index;
+    priorities.length = index;
+    this.heapify_();
+  }
+}
+class TileQueue extends PriorityQueue {
+  /**
+   * @param {PriorityFunction} tilePriorityFunction Tile priority function.
+   * @param {function(): ?} tileChangeCallback Function called on each tile change event.
+   */
+  constructor(tilePriorityFunction, tileChangeCallback) {
+    super(
+      (element) => tilePriorityFunction.apply(null, element),
+      (element) => element[0].getKey()
+    );
+    this.boundHandleTileChange_ = this.handleTileChange.bind(this);
+    this.tileChangeCallback_ = tileChangeCallback;
+    this.tilesLoading_ = 0;
+    this.tilesLoadingKeys_ = {};
+  }
+  /**
+   * @param {TileQueueElement} element Element.
+   * @return {boolean} The element was added to the queue.
+   * @override
+   */
+  enqueue(element) {
+    const added = super.enqueue(element);
+    if (added) {
+      const tile = element[0];
+      tile.addEventListener(EventType.CHANGE, this.boundHandleTileChange_);
+    }
+    return added;
+  }
+  /**
+   * @return {number} Number of tiles loading.
+   */
+  getTilesLoading() {
+    return this.tilesLoading_;
+  }
+  /**
+   * @param {import("./events/Event.js").default} event Event.
+   * @protected
+   */
+  handleTileChange(event) {
+    const tile = (
+      /** @type {import("./Tile.js").default} */
+      event.target
+    );
+    const state = tile.getState();
+    if (state === TileState.LOADED || state === TileState.ERROR || state === TileState.EMPTY) {
+      if (state !== TileState.ERROR) {
+        tile.removeEventListener(EventType.CHANGE, this.boundHandleTileChange_);
+      }
+      const tileKey = tile.getKey();
+      if (tileKey in this.tilesLoadingKeys_) {
+        delete this.tilesLoadingKeys_[tileKey];
+        --this.tilesLoading_;
+      }
+      this.tileChangeCallback_();
+    }
+  }
+  /**
+   * @param {number} maxTotalLoading Maximum number tiles to load simultaneously.
+   * @param {number} maxNewLoads Maximum number of new tiles to load.
+   */
+  loadMoreTiles(maxTotalLoading, maxNewLoads) {
+    let newLoads = 0;
+    while (this.tilesLoading_ < maxTotalLoading && newLoads < maxNewLoads && this.getCount() > 0) {
+      const tile = this.dequeue()[0];
+      const tileKey = tile.getKey();
+      const state = tile.getState();
+      if (state === TileState.IDLE && !(tileKey in this.tilesLoadingKeys_)) {
+        this.tilesLoadingKeys_[tileKey] = true;
+        ++this.tilesLoading_;
+        ++newLoads;
+        tile.load();
+      }
+    }
+  }
+}
+function getTilePriority(frameState, tile, tileSourceKey, tileCenter, tileResolution) {
+  if (!frameState || !(tileSourceKey in frameState.wantedTiles)) {
+    return DROP;
+  }
+  if (!frameState.wantedTiles[tileSourceKey][tile.getKey()]) {
+    return DROP;
+  }
+  const center = frameState.viewState.center;
+  const deltaX = tileCenter[0] - center[0];
+  const deltaY = tileCenter[1] - center[1];
+  return 65536 * Math.log(tileResolution) + Math.sqrt(deltaX * deltaX + deltaY * deltaY) / tileResolution;
+}
 const ViewHint = {
   ANIMATING: 0,
   INTERACTING: 1
@@ -7871,8 +8267,6 @@ const ViewProperty = {
   RESOLUTION: "resolution",
   ROTATION: "rotation"
 };
-const DEFAULT_MAX_ZOOM = 42;
-const DEFAULT_TILE_SIZE = 256;
 function createExtent(extent, onlyCenter, smooth) {
   return (
     /**
@@ -7920,193 +8314,6 @@ function createExtent(extent, onlyCenter, smooth) {
 function none$1(center) {
   return center;
 }
-function getViewportClampedResolution(resolution, maxExtent, viewportSize, showFullExtent) {
-  const xResolution = getWidth(maxExtent) / viewportSize[0];
-  const yResolution = getHeight(maxExtent) / viewportSize[1];
-  if (showFullExtent) {
-    return Math.min(resolution, Math.max(xResolution, yResolution));
-  }
-  return Math.min(resolution, Math.min(xResolution, yResolution));
-}
-function getSmoothClampedResolution(resolution, maxResolution, minResolution) {
-  let result = Math.min(resolution, maxResolution);
-  const ratio = 50;
-  result *= Math.log(1 + ratio * Math.max(0, resolution / maxResolution - 1)) / ratio + 1;
-  if (minResolution) {
-    result = Math.max(result, minResolution);
-    result /= Math.log(1 + ratio * Math.max(0, minResolution / resolution - 1)) / ratio + 1;
-  }
-  return clamp(result, minResolution / 2, maxResolution * 2);
-}
-function createSnapToResolutions(resolutions, smooth, maxExtent, showFullExtent) {
-  smooth = smooth !== void 0 ? smooth : true;
-  return (
-    /**
-     * @param {number|undefined} resolution Resolution.
-     * @param {number} direction Direction.
-     * @param {import("./size.js").Size} size Viewport size.
-     * @param {boolean} [isMoving] True if an interaction or animation is in progress.
-     * @return {number|undefined} Resolution.
-     */
-    function(resolution, direction, size, isMoving) {
-      if (resolution !== void 0) {
-        const maxResolution = resolutions[0];
-        const minResolution = resolutions[resolutions.length - 1];
-        const cappedMaxRes = maxExtent ? getViewportClampedResolution(
-          maxResolution,
-          maxExtent,
-          size,
-          showFullExtent
-        ) : maxResolution;
-        if (isMoving) {
-          if (!smooth) {
-            return clamp(resolution, minResolution, cappedMaxRes);
-          }
-          return getSmoothClampedResolution(
-            resolution,
-            cappedMaxRes,
-            minResolution
-          );
-        }
-        const capped = Math.min(cappedMaxRes, resolution);
-        const z2 = Math.floor(linearFindNearest(resolutions, capped, direction));
-        if (resolutions[z2] > cappedMaxRes && z2 < resolutions.length - 1) {
-          return resolutions[z2 + 1];
-        }
-        return resolutions[z2];
-      }
-      return void 0;
-    }
-  );
-}
-function createSnapToPower(power, maxResolution, minResolution, smooth, maxExtent, showFullExtent) {
-  smooth = smooth !== void 0 ? smooth : true;
-  minResolution = minResolution !== void 0 ? minResolution : 0;
-  return (
-    /**
-     * @param {number|undefined} resolution Resolution.
-     * @param {number} direction Direction.
-     * @param {import("./size.js").Size} size Viewport size.
-     * @param {boolean} [isMoving] True if an interaction or animation is in progress.
-     * @return {number|undefined} Resolution.
-     */
-    function(resolution, direction, size, isMoving) {
-      if (resolution !== void 0) {
-        const cappedMaxRes = maxExtent ? getViewportClampedResolution(
-          maxResolution,
-          maxExtent,
-          size,
-          showFullExtent
-        ) : maxResolution;
-        if (isMoving) {
-          if (!smooth) {
-            return clamp(resolution, minResolution, cappedMaxRes);
-          }
-          return getSmoothClampedResolution(
-            resolution,
-            cappedMaxRes,
-            minResolution
-          );
-        }
-        const tolerance = 1e-9;
-        const minZoomLevel = Math.ceil(
-          Math.log(maxResolution / cappedMaxRes) / Math.log(power) - tolerance
-        );
-        const offset2 = -direction * (0.5 - tolerance) + 0.5;
-        const capped = Math.min(cappedMaxRes, resolution);
-        const cappedZoomLevel = Math.floor(
-          Math.log(maxResolution / capped) / Math.log(power) + offset2
-        );
-        const zoomLevel = Math.max(minZoomLevel, cappedZoomLevel);
-        const newResolution = maxResolution / Math.pow(power, zoomLevel);
-        return clamp(newResolution, minResolution, cappedMaxRes);
-      }
-      return void 0;
-    }
-  );
-}
-function createMinMaxResolution(maxResolution, minResolution, smooth, maxExtent, showFullExtent) {
-  smooth = smooth !== void 0 ? smooth : true;
-  return (
-    /**
-     * @param {number|undefined} resolution Resolution.
-     * @param {number} direction Direction.
-     * @param {import("./size.js").Size} size Viewport size.
-     * @param {boolean} [isMoving] True if an interaction or animation is in progress.
-     * @return {number|undefined} Resolution.
-     */
-    function(resolution, direction, size, isMoving) {
-      if (resolution !== void 0) {
-        const cappedMaxRes = maxExtent ? getViewportClampedResolution(
-          maxResolution,
-          maxExtent,
-          size,
-          showFullExtent
-        ) : maxResolution;
-        if (!smooth || !isMoving) {
-          return clamp(resolution, minResolution, cappedMaxRes);
-        }
-        return getSmoothClampedResolution(
-          resolution,
-          cappedMaxRes,
-          minResolution
-        );
-      }
-      return void 0;
-    }
-  );
-}
-function disable(rotation) {
-  if (rotation !== void 0) {
-    return 0;
-  }
-  return void 0;
-}
-function none(rotation) {
-  if (rotation !== void 0) {
-    return rotation;
-  }
-  return void 0;
-}
-function createSnapToN(n) {
-  const theta = 2 * Math.PI / n;
-  return (
-    /**
-     * @param {number|undefined} rotation Rotation.
-     * @param {boolean} [isMoving] True if an interaction or animation is in progress.
-     * @return {number|undefined} Rotation.
-     */
-    function(rotation, isMoving) {
-      if (isMoving) {
-        return rotation;
-      }
-      if (rotation !== void 0) {
-        rotation = Math.floor(rotation / theta + 0.5) * theta;
-        return rotation;
-      }
-      return void 0;
-    }
-  );
-}
-function createSnapToZero(tolerance) {
-  const t = toRadians(5);
-  return (
-    /**
-     * @param {number|undefined} rotation Rotation.
-     * @param {boolean} [isMoving] True if an interaction or animation is in progress.
-     * @return {number|undefined} Rotation.
-     */
-    function(rotation, isMoving) {
-      if (isMoving || rotation === void 0) {
-        return rotation;
-      }
-      if (Math.abs(rotation) <= t) {
-        return 0;
-      }
-      return rotation;
-    }
-  );
-}
 function easeIn(t) {
   return Math.pow(t, 3);
 }
@@ -8120,7 +8327,7 @@ function linear(t) {
   return t;
 }
 new Array(6);
-function create$1() {
+function create() {
   return [1, 0, 0, 1, 0, 0];
 }
 function setFromArray(transform1, transform2) {
@@ -8153,29 +8360,41 @@ function compose(transform2, dx1, dy1, sx, sy, angle, dx2, dy2) {
 function makeInverse(target, source2) {
   const det = determinant(source2);
   assert(det !== 0, "Transformation matrix cannot be inverted");
-  const a2 = source2[0];
-  const b2 = source2[1];
+  const a3 = source2[0];
+  const b3 = source2[1];
   const c = source2[2];
   const d2 = source2[3];
   const e = source2[4];
   const f = source2[5];
   target[0] = d2 / det;
-  target[1] = -b2 / det;
+  target[1] = -b3 / det;
   target[2] = -c / det;
-  target[3] = a2 / det;
+  target[3] = a3 / det;
   target[4] = (c * f - d2 * e) / det;
-  target[5] = -(a2 * f - b2 * e) / det;
+  target[5] = -(a3 * f - b3 * e) / det;
   return target;
 }
 function determinant(mat) {
   return mat[0] * mat[3] - mat[1] * mat[2];
 }
-const matrixPrecision = [1e6, 1e6, 1e6, 1e6, 2, 2];
+const matrixPrecision = [1e5, 1e5, 1e5, 1e5, 2, 2];
 function toString$1(mat) {
-  const transformString = "matrix(" + mat.map(
-    (value, i) => Math.round(value * matrixPrecision[i]) / matrixPrecision[i]
-  ).join(", ") + ")";
+  const transformString = "matrix(" + mat.join(", ") + ")";
   return transformString;
+}
+function fromString$1(cssTransform) {
+  const values = cssTransform.substring(7, cssTransform.length - 1).split(",");
+  return values.map(parseFloat);
+}
+function equivalent(cssTransform1, cssTransform2) {
+  const mat1 = fromString$1(cssTransform1);
+  const mat2 = fromString$1(cssTransform2);
+  for (let i = 0; i < 6; ++i) {
+    if (Math.round((mat1[i] - mat2[i]) * matrixPrecision[i]) !== 0) {
+      return false;
+    }
+  }
+  return true;
 }
 function transform2D(flatCoordinates, offset2, end2, stride, transform2, dest, destinationStride) {
   dest = dest ? dest : [];
@@ -8216,7 +8435,7 @@ function rotate(flatCoordinates, offset2, end2, stride, angle, anchor, dest) {
   }
   return dest;
 }
-function scale$2(flatCoordinates, offset2, end2, stride, sx, sy, anchor, dest) {
+function scale$1(flatCoordinates, offset2, end2, stride, sx, sy, anchor, dest) {
   dest = dest ? dest : [];
   const anchorX = anchor[0];
   const anchorY = anchor[1];
@@ -8235,7 +8454,7 @@ function scale$2(flatCoordinates, offset2, end2, stride, sx, sy, anchor, dest) {
   }
   return dest;
 }
-function translate$1(flatCoordinates, offset2, end2, stride, deltaX, deltaY, dest) {
+function translate(flatCoordinates, offset2, end2, stride, deltaX, deltaY, dest) {
   dest = dest ? dest : [];
   let i = 0;
   for (let j = offset2; j < end2; j += stride) {
@@ -8250,7 +8469,8 @@ function translate$1(flatCoordinates, offset2, end2, stride, deltaX, deltaY, des
   }
   return dest;
 }
-const tmpTransform$1 = create$1();
+const tmpTransform$1 = create();
+const tmpPoint = [NaN, NaN];
 class Geometry extends BaseObject {
   constructor() {
     super();
@@ -8308,8 +8528,7 @@ class Geometry extends BaseObject {
    * @return {boolean} Contains (x, y).
    */
   containsXY(x2, y2) {
-    const coord = this.getClosestPoint([x2, y2]);
-    return coord[0] === x2 && coord[1] === y2;
+    return this.closestPointXY(x2, y2, tmpPoint, Number.MIN_VALUE) === 0;
   }
   /**
    * Return the closest point of the geometry to the passed point as
@@ -8700,7 +8919,7 @@ class SimpleGeometry extends Geometry {
     const flatCoordinates = this.getFlatCoordinates();
     if (flatCoordinates) {
       const stride = this.getStride();
-      scale$2(
+      scale$1(
         flatCoordinates,
         0,
         flatCoordinates.length,
@@ -8725,7 +8944,7 @@ class SimpleGeometry extends Geometry {
     const flatCoordinates = this.getFlatCoordinates();
     if (flatCoordinates) {
       const stride = this.getStride();
-      translate$1(
+      translate(
         flatCoordinates,
         0,
         flatCoordinates.length,
@@ -8781,6 +9000,30 @@ function transformGeom2D(simpleGeometry, transform2, dest) {
     dest
   );
 }
+function linearRing(flatCoordinates, offset2, end2, stride) {
+  let twiceArea = 0;
+  const x0 = flatCoordinates[end2 - stride];
+  const y0 = flatCoordinates[end2 - stride + 1];
+  let dx1 = 0;
+  let dy1 = 0;
+  for (; offset2 < end2; offset2 += stride) {
+    const dx2 = flatCoordinates[offset2] - x0;
+    const dy2 = flatCoordinates[offset2 + 1] - y0;
+    twiceArea += dy1 * dx2 - dx1 * dy2;
+    dx1 = dx2;
+    dy1 = dy2;
+  }
+  return twiceArea / 2;
+}
+function linearRings(flatCoordinates, offset2, ends, stride) {
+  let area = 0;
+  for (let i = 0, ii = ends.length; i < ii; ++i) {
+    const end2 = ends[i];
+    area += linearRing(flatCoordinates, offset2, end2, stride);
+    offset2 = end2;
+  }
+  return area;
+}
 function assignClosest(flatCoordinates, offset1, offset2, stride, x2, y2, closestPoint) {
   const x1 = flatCoordinates[offset1];
   const y1 = flatCoordinates[offset1 + 1];
@@ -8835,7 +9078,7 @@ function arrayMaxSquaredDelta(flatCoordinates, offset2, ends, stride, max2) {
   }
   return max2;
 }
-function assignClosestPoint(flatCoordinates, offset2, end2, stride, maxDelta, isRing, x2, y2, closestPoint, minSquaredDistance, tmpPoint) {
+function assignClosestPoint(flatCoordinates, offset2, end2, stride, maxDelta, isRing, x2, y2, closestPoint, minSquaredDistance, tmpPoint2) {
   if (offset2 == end2) {
     return minSquaredDistance;
   }
@@ -8856,7 +9099,7 @@ function assignClosestPoint(flatCoordinates, offset2, end2, stride, maxDelta, is
     }
     return minSquaredDistance;
   }
-  tmpPoint = tmpPoint ? tmpPoint : [NaN, NaN];
+  tmpPoint2 = tmpPoint2 ? tmpPoint2 : [NaN, NaN];
   let index = offset2 + stride;
   while (index < end2) {
     assignClosest(
@@ -8866,13 +9109,13 @@ function assignClosestPoint(flatCoordinates, offset2, end2, stride, maxDelta, is
       stride,
       x2,
       y2,
-      tmpPoint
+      tmpPoint2
     );
-    squaredDistance$1 = squaredDistance(x2, y2, tmpPoint[0], tmpPoint[1]);
+    squaredDistance$1 = squaredDistance(x2, y2, tmpPoint2[0], tmpPoint2[1]);
     if (squaredDistance$1 < minSquaredDistance) {
       minSquaredDistance = squaredDistance$1;
       for (i = 0; i < stride; ++i) {
-        closestPoint[i] = tmpPoint[i];
+        closestPoint[i] = tmpPoint2[i];
       }
       closestPoint.length = stride;
       index += stride;
@@ -8891,21 +9134,21 @@ function assignClosestPoint(flatCoordinates, offset2, end2, stride, maxDelta, is
       stride,
       x2,
       y2,
-      tmpPoint
+      tmpPoint2
     );
-    squaredDistance$1 = squaredDistance(x2, y2, tmpPoint[0], tmpPoint[1]);
+    squaredDistance$1 = squaredDistance(x2, y2, tmpPoint2[0], tmpPoint2[1]);
     if (squaredDistance$1 < minSquaredDistance) {
       minSquaredDistance = squaredDistance$1;
       for (i = 0; i < stride; ++i) {
-        closestPoint[i] = tmpPoint[i];
+        closestPoint[i] = tmpPoint2[i];
       }
       closestPoint.length = stride;
     }
   }
   return minSquaredDistance;
 }
-function assignClosestArrayPoint(flatCoordinates, offset2, ends, stride, maxDelta, isRing, x2, y2, closestPoint, minSquaredDistance, tmpPoint) {
-  tmpPoint = tmpPoint ? tmpPoint : [NaN, NaN];
+function assignClosestArrayPoint(flatCoordinates, offset2, ends, stride, maxDelta, isRing, x2, y2, closestPoint, minSquaredDistance, tmpPoint2) {
+  tmpPoint2 = tmpPoint2 ? tmpPoint2 : [NaN, NaN];
   for (let i = 0, ii = ends.length; i < ii; ++i) {
     const end2 = ends[i];
     minSquaredDistance = assignClosestPoint(
@@ -8919,7 +9162,7 @@ function assignClosestArrayPoint(flatCoordinates, offset2, ends, stride, maxDelt
       y2,
       closestPoint,
       minSquaredDistance,
-      tmpPoint
+      tmpPoint2
     );
     offset2 = end2;
   }
@@ -8955,6 +9198,49 @@ function deflateCoordinatesArray(flatCoordinates, offset2, coordinatess, stride,
   }
   ends.length = i;
   return ends;
+}
+function inflateCoordinates(flatCoordinates, offset2, end2, stride, coordinates2) {
+  coordinates2 = coordinates2 !== void 0 ? coordinates2 : [];
+  let i = 0;
+  for (let j = offset2; j < end2; j += stride) {
+    coordinates2[i++] = flatCoordinates.slice(j, j + stride);
+  }
+  coordinates2.length = i;
+  return coordinates2;
+}
+function inflateCoordinatesArray(flatCoordinates, offset2, ends, stride, coordinatess) {
+  coordinatess = coordinatess !== void 0 ? coordinatess : [];
+  let i = 0;
+  for (let j = 0, jj = ends.length; j < jj; ++j) {
+    const end2 = ends[j];
+    coordinatess[i++] = inflateCoordinates(
+      flatCoordinates,
+      offset2,
+      end2,
+      stride,
+      coordinatess[i]
+    );
+    offset2 = end2;
+  }
+  coordinatess.length = i;
+  return coordinatess;
+}
+function inflateMultiCoordinatesArray(flatCoordinates, offset2, endss, stride, coordinatesss) {
+  coordinatesss = coordinatesss !== void 0 ? coordinatesss : [];
+  let i = 0;
+  for (let j = 0, jj = endss.length; j < jj; ++j) {
+    const ends = endss[j];
+    coordinatesss[i++] = ends.length === 1 && ends[0] === offset2 ? [] : inflateCoordinatesArray(
+      flatCoordinates,
+      offset2,
+      ends,
+      stride,
+      coordinatesss[i]
+    );
+    offset2 = ends[ends.length - 1];
+  }
+  coordinatesss.length = i;
+  return coordinatesss;
 }
 function douglasPeucker(flatCoordinates, offset2, end2, stride, squaredTolerance, simplifiedFlatCoordinates, simplifiedOffset) {
   const n = (end2 - offset2) / stride;
@@ -9088,73 +9374,6 @@ function quantizeArray(flatCoordinates, offset2, ends, stride, tolerance, simpli
     offset2 = end2;
   }
   return simplifiedOffset;
-}
-function inflateCoordinates(flatCoordinates, offset2, end2, stride, coordinates2) {
-  coordinates2 = coordinates2 !== void 0 ? coordinates2 : [];
-  let i = 0;
-  for (let j = offset2; j < end2; j += stride) {
-    coordinates2[i++] = flatCoordinates.slice(j, j + stride);
-  }
-  coordinates2.length = i;
-  return coordinates2;
-}
-function inflateCoordinatesArray(flatCoordinates, offset2, ends, stride, coordinatess) {
-  coordinatess = coordinatess !== void 0 ? coordinatess : [];
-  let i = 0;
-  for (let j = 0, jj = ends.length; j < jj; ++j) {
-    const end2 = ends[j];
-    coordinatess[i++] = inflateCoordinates(
-      flatCoordinates,
-      offset2,
-      end2,
-      stride,
-      coordinatess[i]
-    );
-    offset2 = end2;
-  }
-  coordinatess.length = i;
-  return coordinatess;
-}
-function inflateMultiCoordinatesArray(flatCoordinates, offset2, endss, stride, coordinatesss) {
-  coordinatesss = coordinatesss !== void 0 ? coordinatesss : [];
-  let i = 0;
-  for (let j = 0, jj = endss.length; j < jj; ++j) {
-    const ends = endss[j];
-    coordinatesss[i++] = ends.length === 1 && ends[0] === offset2 ? [] : inflateCoordinatesArray(
-      flatCoordinates,
-      offset2,
-      ends,
-      stride,
-      coordinatesss[i]
-    );
-    offset2 = ends[ends.length - 1];
-  }
-  coordinatesss.length = i;
-  return coordinatesss;
-}
-function linearRing(flatCoordinates, offset2, end2, stride) {
-  let twiceArea = 0;
-  const x0 = flatCoordinates[end2 - stride];
-  const y0 = flatCoordinates[end2 - stride + 1];
-  let dx1 = 0;
-  let dy1 = 0;
-  for (; offset2 < end2; offset2 += stride) {
-    const dx2 = flatCoordinates[offset2] - x0;
-    const dy2 = flatCoordinates[offset2 + 1] - y0;
-    twiceArea += dy1 * dx2 - dx1 * dy2;
-    dx1 = dx2;
-    dy1 = dy2;
-  }
-  return twiceArea / 2;
-}
-function linearRings(flatCoordinates, offset2, ends, stride) {
-  let area = 0;
-  for (let i = 0, ii = ends.length; i < ii; ++i) {
-    const end2 = ends[i];
-    area += linearRing(flatCoordinates, offset2, end2, stride);
-    offset2 = end2;
-  }
-  return area;
 }
 class LinearRing extends SimpleGeometry {
   /**
@@ -9547,24 +9766,12 @@ function forEach(flatCoordinates, offset2, end2, stride, callback) {
   }
   return false;
 }
-function intersectsLineString(flatCoordinates, offset2, end2, stride, extent) {
-  const coordinatesExtent = extendFlatCoordinates(
-    createEmpty(),
-    flatCoordinates,
-    offset2,
-    end2,
-    stride
-  );
+function intersectsLineString(flatCoordinates, offset2, end2, stride, extent, coordinatesExtent) {
+  coordinatesExtent = coordinatesExtent ?? extendFlatCoordinates(createEmpty(), flatCoordinates, offset2, end2, stride);
   if (!intersects$1(extent, coordinatesExtent)) {
     return false;
   }
-  if (containsExtent(extent, coordinatesExtent)) {
-    return true;
-  }
-  if (coordinatesExtent[0] >= extent[0] && coordinatesExtent[2] <= extent[2]) {
-    return true;
-  }
-  if (coordinatesExtent[1] >= extent[1] && coordinatesExtent[3] <= extent[3]) {
+  if (coordinatesExtent[0] >= extent[0] && coordinatesExtent[2] <= extent[2] || coordinatesExtent[1] >= extent[1] && coordinatesExtent[3] <= extent[3]) {
     return true;
   }
   return forEach(
@@ -10085,7 +10292,7 @@ class Polygon extends SimpleGeometry {
   }
 }
 function fromExtent(extent) {
-  if (isEmpty(extent)) {
+  if (isEmpty$1(extent)) {
     throw new Error("Cannot create polygon from empty extent");
   }
   const minX = extent[0];
@@ -10106,6 +10313,195 @@ function fromExtent(extent) {
   ];
   return new Polygon(flatCoordinates, "XY", [flatCoordinates.length]);
 }
+function getViewportClampedResolution(resolution, maxExtent, viewportSize, showFullExtent) {
+  const xResolution = getWidth(maxExtent) / viewportSize[0];
+  const yResolution = getHeight(maxExtent) / viewportSize[1];
+  if (showFullExtent) {
+    return Math.min(resolution, Math.max(xResolution, yResolution));
+  }
+  return Math.min(resolution, Math.min(xResolution, yResolution));
+}
+function getSmoothClampedResolution(resolution, maxResolution, minResolution) {
+  let result = Math.min(resolution, maxResolution);
+  const ratio = 50;
+  result *= Math.log(1 + ratio * Math.max(0, resolution / maxResolution - 1)) / ratio + 1;
+  if (minResolution) {
+    result = Math.max(result, minResolution);
+    result /= Math.log(1 + ratio * Math.max(0, minResolution / resolution - 1)) / ratio + 1;
+  }
+  return clamp(result, minResolution / 2, maxResolution * 2);
+}
+function createSnapToResolutions(resolutions, smooth, maxExtent, showFullExtent) {
+  smooth = smooth !== void 0 ? smooth : true;
+  return (
+    /**
+     * @param {number|undefined} resolution Resolution.
+     * @param {number} direction Direction.
+     * @param {import("./size.js").Size} size Viewport size.
+     * @param {boolean} [isMoving] True if an interaction or animation is in progress.
+     * @return {number|undefined} Resolution.
+     */
+    function(resolution, direction, size, isMoving) {
+      if (resolution !== void 0) {
+        const maxResolution = resolutions[0];
+        const minResolution = resolutions[resolutions.length - 1];
+        const cappedMaxRes = maxExtent ? getViewportClampedResolution(
+          maxResolution,
+          maxExtent,
+          size,
+          showFullExtent
+        ) : maxResolution;
+        if (isMoving) {
+          if (!smooth) {
+            return clamp(resolution, minResolution, cappedMaxRes);
+          }
+          return getSmoothClampedResolution(
+            resolution,
+            cappedMaxRes,
+            minResolution
+          );
+        }
+        const capped = Math.min(cappedMaxRes, resolution);
+        const z2 = Math.floor(linearFindNearest(resolutions, capped, direction));
+        if (resolutions[z2] > cappedMaxRes && z2 < resolutions.length - 1) {
+          return resolutions[z2 + 1];
+        }
+        return resolutions[z2];
+      }
+      return void 0;
+    }
+  );
+}
+function createSnapToPower(power, maxResolution, minResolution, smooth, maxExtent, showFullExtent) {
+  smooth = smooth !== void 0 ? smooth : true;
+  minResolution = minResolution !== void 0 ? minResolution : 0;
+  return (
+    /**
+     * @param {number|undefined} resolution Resolution.
+     * @param {number} direction Direction.
+     * @param {import("./size.js").Size} size Viewport size.
+     * @param {boolean} [isMoving] True if an interaction or animation is in progress.
+     * @return {number|undefined} Resolution.
+     */
+    function(resolution, direction, size, isMoving) {
+      if (resolution !== void 0) {
+        const cappedMaxRes = maxExtent ? getViewportClampedResolution(
+          maxResolution,
+          maxExtent,
+          size,
+          showFullExtent
+        ) : maxResolution;
+        if (isMoving) {
+          if (!smooth) {
+            return clamp(resolution, minResolution, cappedMaxRes);
+          }
+          return getSmoothClampedResolution(
+            resolution,
+            cappedMaxRes,
+            minResolution
+          );
+        }
+        const tolerance = 1e-9;
+        const minZoomLevel = Math.ceil(
+          Math.log(maxResolution / cappedMaxRes) / Math.log(power) - tolerance
+        );
+        const offset2 = -direction * (0.5 - tolerance) + 0.5;
+        const capped = Math.min(cappedMaxRes, resolution);
+        const cappedZoomLevel = Math.floor(
+          Math.log(maxResolution / capped) / Math.log(power) + offset2
+        );
+        const zoomLevel = Math.max(minZoomLevel, cappedZoomLevel);
+        const newResolution = maxResolution / Math.pow(power, zoomLevel);
+        return clamp(newResolution, minResolution, cappedMaxRes);
+      }
+      return void 0;
+    }
+  );
+}
+function createMinMaxResolution(maxResolution, minResolution, smooth, maxExtent, showFullExtent) {
+  smooth = smooth !== void 0 ? smooth : true;
+  return (
+    /**
+     * @param {number|undefined} resolution Resolution.
+     * @param {number} direction Direction.
+     * @param {import("./size.js").Size} size Viewport size.
+     * @param {boolean} [isMoving] True if an interaction or animation is in progress.
+     * @return {number|undefined} Resolution.
+     */
+    function(resolution, direction, size, isMoving) {
+      if (resolution !== void 0) {
+        const cappedMaxRes = maxExtent ? getViewportClampedResolution(
+          maxResolution,
+          maxExtent,
+          size,
+          showFullExtent
+        ) : maxResolution;
+        if (!smooth || !isMoving) {
+          return clamp(resolution, minResolution, cappedMaxRes);
+        }
+        return getSmoothClampedResolution(
+          resolution,
+          cappedMaxRes,
+          minResolution
+        );
+      }
+      return void 0;
+    }
+  );
+}
+function disable(rotation) {
+  if (rotation !== void 0) {
+    return 0;
+  }
+  return void 0;
+}
+function none(rotation) {
+  if (rotation !== void 0) {
+    return rotation;
+  }
+  return void 0;
+}
+function createSnapToN(n) {
+  const theta = 2 * Math.PI / n;
+  return (
+    /**
+     * @param {number|undefined} rotation Rotation.
+     * @param {boolean} [isMoving] True if an interaction or animation is in progress.
+     * @return {number|undefined} Rotation.
+     */
+    function(rotation, isMoving) {
+      if (isMoving) {
+        return rotation;
+      }
+      if (rotation !== void 0) {
+        rotation = Math.floor(rotation / theta + 0.5) * theta;
+        return rotation;
+      }
+      return void 0;
+    }
+  );
+}
+function createSnapToZero(tolerance) {
+  const t = toRadians(5);
+  return (
+    /**
+     * @param {number|undefined} rotation Rotation.
+     * @param {boolean} [isMoving] True if an interaction or animation is in progress.
+     * @return {number|undefined} Rotation.
+     */
+    function(rotation, isMoving) {
+      if (isMoving || rotation === void 0) {
+        return rotation;
+      }
+      if (Math.abs(rotation) <= t) {
+        return 0;
+      }
+      return rotation;
+    }
+  );
+}
+const DEFAULT_MAX_ZOOM = 42;
+const DEFAULT_TILE_SIZE = 256;
 const DEFAULT_MIN_ZOOM = 0;
 class View extends BaseObject {
   /**
@@ -10511,7 +10907,7 @@ class View extends BaseObject {
     if (currentCenter !== void 0) {
       center = [currentCenter[0] - anchor[0], currentCenter[1] - anchor[1]];
       rotate$1(center, rotation - this.getRotation());
-      add(center, anchor);
+      add$2(center, anchor);
     }
     return center;
   }
@@ -10926,8 +11322,7 @@ class View extends BaseObject {
    * @api
    */
   getResolutionForZoom(zoom) {
-    var _a;
-    if ((_a = this.resolutions_) == null ? void 0 : _a.length) {
+    if (this.resolutions_?.length) {
       if (this.resolutions_.length === 1) {
         return this.resolutions_[0];
       }
@@ -10960,7 +11355,7 @@ class View extends BaseObject {
     );
     if (Array.isArray(geometryOrExtent)) {
       assert(
-        !isEmpty(geometryOrExtent),
+        !isEmpty$1(geometryOrExtent),
         "Cannot fit empty extent provided as `geometry`"
       );
       const extent = fromUserExtent(geometryOrExtent, this.getProjection());
@@ -11432,7 +11827,7 @@ class View extends BaseObject {
   /**
    * Get a valid zoom level according to the current view constraints.
    * @param {number|undefined} targetZoom Target zoom.
-   * @param {number} [direction=0] Indicate which resolution should be used
+   * @param {number} [direction] Indicate which resolution should be used
    * by a renderer if the view resolution does not match any resolution of the tile source.
    * If 0, the nearest resolution will be used. If 1, the nearest lower resolution
    * will be used. If -1, the nearest higher resolution will be used.
@@ -11447,7 +11842,7 @@ class View extends BaseObject {
   /**
    * Get a valid resolution according to the current view constraints.
    * @param {number|undefined} targetResolution Target resolution.
-   * @param {number} [direction=0] Indicate which resolution should be used
+   * @param {number} [direction] Indicate which resolution should be used
    * by a renderer if the view resolution does not match any resolution of the tile source.
    * If 0, the nearest resolution will be used. If 1, the nearest lower resolution
    * will be used. If -1, the nearest higher resolution will be used.
@@ -11617,6 +12012,2615 @@ function calculateCenterOn(coordinate, size, position, resolution, rotation) {
   const centerY = rotY * cosAngle + rotX * sinAngle;
   return [centerX, centerY];
 }
+const CLASS_HIDDEN = "ol-hidden";
+const CLASS_UNSELECTABLE = "ol-unselectable";
+const CLASS_UNSUPPORTED = "ol-unsupported";
+const CLASS_CONTROL = "ol-control";
+const CLASS_COLLAPSED = "ol-collapsed";
+const fontRegEx = new RegExp(
+  [
+    "^\\s*(?=(?:(?:[-a-z]+\\s*){0,2}(italic|oblique))?)",
+    "(?=(?:(?:[-a-z]+\\s*){0,2}(small-caps))?)",
+    "(?=(?:(?:[-a-z]+\\s*){0,2}(bold(?:er)?|lighter|[1-9]00 ))?)",
+    "(?:(?:normal|\\1|\\2|\\3)\\s*){0,3}((?:xx?-)?",
+    "(?:small|large)|medium|smaller|larger|[\\.\\d]+(?:\\%|in|[cem]m|ex|p[ctx]))",
+    "(?:\\s*\\/\\s*(normal|[\\.\\d]+(?:\\%|in|[cem]m|ex|p[ctx])?))",
+    `?\\s*([-,\\"\\'\\sa-z0-9]+?)\\s*$`
+  ].join(""),
+  "i"
+);
+const fontRegExMatchIndex = [
+  "style",
+  "variant",
+  "weight",
+  "size",
+  "lineHeight",
+  "family"
+];
+const fontWeights = {
+  normal: 400,
+  bold: 700
+};
+const getFontParameters = function(fontSpec) {
+  const match = fontSpec.match(fontRegEx);
+  if (!match) {
+    return null;
+  }
+  const style = (
+    /** @type {FontParameters} */
+    {
+      lineHeight: "normal",
+      size: "1.2em",
+      style: "normal",
+      weight: "400",
+      variant: "normal"
+    }
+  );
+  for (let i = 0, ii = fontRegExMatchIndex.length; i < ii; ++i) {
+    const value = match[i + 1];
+    if (value !== void 0) {
+      style[fontRegExMatchIndex[i]] = typeof value === "string" ? value.trim() : value;
+    }
+  }
+  if (isNaN(Number(style.weight)) && style.weight in fontWeights) {
+    style.weight = fontWeights[style.weight];
+  }
+  style.families = style.family.split(/,\s?/).map((f) => f.trim().replace(/^['"]|['"]$/g, ""));
+  return style;
+};
+function createCanvasContext2D(width, height, canvasPool2, settings) {
+  let canvas;
+  if (canvasPool2 && canvasPool2.length) {
+    canvas = /** @type {HTMLCanvasElement} */
+    canvasPool2.shift();
+  } else if (WORKER_OFFSCREEN_CANVAS) {
+    canvas = new OffscreenCanvas(width || 300, height || 300);
+  } else {
+    canvas = document.createElement("canvas");
+  }
+  if (width) {
+    canvas.width = width;
+  }
+  if (height) {
+    canvas.height = height;
+  }
+  return (
+    /** @type {CanvasRenderingContext2D} */
+    canvas.getContext("2d", settings)
+  );
+}
+let sharedCanvasContext;
+function getSharedCanvasContext2D() {
+  if (!sharedCanvasContext) {
+    sharedCanvasContext = createCanvasContext2D(1, 1);
+  }
+  return sharedCanvasContext;
+}
+function releaseCanvas(context) {
+  const canvas = context.canvas;
+  canvas.width = 1;
+  canvas.height = 1;
+  context.clearRect(0, 0, 1, 1);
+}
+function replaceNode(newNode, oldNode) {
+  const parent = oldNode.parentNode;
+  if (parent) {
+    parent.replaceChild(newNode, oldNode);
+  }
+}
+function removeChildren(node) {
+  while (node.lastChild) {
+    node.lastChild.remove();
+  }
+}
+function replaceChildren(node, children) {
+  const oldChildren = node.childNodes;
+  for (let i = 0; true; ++i) {
+    const oldChild = oldChildren[i];
+    const newChild = children[i];
+    if (!oldChild && !newChild) {
+      break;
+    }
+    if (oldChild === newChild) {
+      continue;
+    }
+    if (!oldChild) {
+      node.appendChild(newChild);
+      continue;
+    }
+    if (!newChild) {
+      node.removeChild(oldChild);
+      --i;
+      continue;
+    }
+    node.insertBefore(newChild, oldChild);
+  }
+}
+class Control extends BaseObject {
+  /**
+   * @param {Options} options Control options.
+   */
+  constructor(options) {
+    super();
+    const element = options.element;
+    if (element && !options.target && !element.style.pointerEvents) {
+      element.style.pointerEvents = "auto";
+    }
+    this.element = element ? element : null;
+    this.target_ = null;
+    this.map_ = null;
+    this.listenerKeys = [];
+    if (options.render) {
+      this.render = options.render;
+    }
+    if (options.target) {
+      this.setTarget(options.target);
+    }
+  }
+  /**
+   * Clean up.
+   * @override
+   */
+  disposeInternal() {
+    this.element?.remove();
+    super.disposeInternal();
+  }
+  /**
+   * Get the map associated with this control.
+   * @return {import("../Map.js").default|null} Map.
+   * @api
+   */
+  getMap() {
+    return this.map_;
+  }
+  /**
+   * Remove the control from its current map and attach it to the new map.
+   * Pass `null` to just remove the control from the current map.
+   * Subclasses may set up event handlers to get notified about changes to
+   * the map here.
+   * @param {import("../Map.js").default|null} map Map.
+   * @api
+   */
+  setMap(map2) {
+    if (this.map_) {
+      this.element?.remove();
+    }
+    for (let i = 0, ii = this.listenerKeys.length; i < ii; ++i) {
+      unlistenByKey(this.listenerKeys[i]);
+    }
+    this.listenerKeys.length = 0;
+    this.map_ = map2;
+    if (map2) {
+      const target = this.target_ ?? map2.getOverlayContainerStopEvent();
+      if (this.element) {
+        target.appendChild(this.element);
+      }
+      if (this.render !== VOID) {
+        this.listenerKeys.push(
+          listen(map2, MapEventType.POSTRENDER, this.render, this)
+        );
+      }
+      map2.render();
+    }
+  }
+  /**
+   * Renders the control.
+   * @param {import("../MapEvent.js").default} mapEvent Map event.
+   * @api
+   */
+  render(mapEvent) {
+  }
+  /**
+   * This function is used to set a target element for the control. It has no
+   * effect if it is called after the control has been added to the map (i.e.
+   * after `setMap` is called on the control). If no `target` is set in the
+   * options passed to the control constructor and if `setTarget` is not called
+   * then the control is added to the map's overlay container.
+   * @param {HTMLElement|string} target Target.
+   * @api
+   */
+  setTarget(target) {
+    this.target_ = typeof target === "string" ? document.getElementById(target) : target;
+  }
+}
+const Control$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: Control
+}, Symbol.toStringTag, { value: "Module" }));
+class Attribution extends Control {
+  /**
+   * @param {Options} [options] Attribution options.
+   */
+  constructor(options) {
+    options = options ? options : {};
+    super({
+      element: document.createElement("div"),
+      render: options.render,
+      target: options.target
+    });
+    this.ulElement_ = document.createElement("ul");
+    this.collapsed_ = options.collapsed !== void 0 ? options.collapsed : true;
+    this.userCollapsed_ = this.collapsed_;
+    this.overrideCollapsible_ = options.collapsible !== void 0;
+    this.collapsible_ = options.collapsible !== void 0 ? options.collapsible : true;
+    if (!this.collapsible_) {
+      this.collapsed_ = false;
+    }
+    this.attributions_ = options.attributions;
+    const className = options.className !== void 0 ? options.className : "ol-attribution";
+    const tipLabel = options.tipLabel !== void 0 ? options.tipLabel : "Attributions";
+    const expandClassName = options.expandClassName !== void 0 ? options.expandClassName : className + "-expand";
+    const collapseLabel = options.collapseLabel !== void 0 ? options.collapseLabel : "›";
+    const collapseClassName = options.collapseClassName !== void 0 ? options.collapseClassName : className + "-collapse";
+    if (typeof collapseLabel === "string") {
+      this.collapseLabel_ = document.createElement("span");
+      this.collapseLabel_.textContent = collapseLabel;
+      this.collapseLabel_.className = collapseClassName;
+    } else {
+      this.collapseLabel_ = collapseLabel;
+    }
+    const label = options.label !== void 0 ? options.label : "i";
+    if (typeof label === "string") {
+      this.label_ = document.createElement("span");
+      this.label_.textContent = label;
+      this.label_.className = expandClassName;
+    } else {
+      this.label_ = label;
+    }
+    const activeLabel = this.collapsible_ && !this.collapsed_ ? this.collapseLabel_ : this.label_;
+    this.toggleButton_ = document.createElement("button");
+    this.toggleButton_.setAttribute("type", "button");
+    this.toggleButton_.setAttribute("aria-expanded", String(!this.collapsed_));
+    this.toggleButton_.title = tipLabel;
+    this.toggleButton_.appendChild(activeLabel);
+    this.toggleButton_.addEventListener(
+      EventType.CLICK,
+      this.handleClick_.bind(this),
+      false
+    );
+    const cssClasses = className + " " + CLASS_UNSELECTABLE + " " + CLASS_CONTROL + (this.collapsed_ && this.collapsible_ ? " " + CLASS_COLLAPSED : "") + (this.collapsible_ ? "" : " ol-uncollapsible");
+    const element = this.element;
+    element.className = cssClasses;
+    element.appendChild(this.toggleButton_);
+    element.appendChild(this.ulElement_);
+    this.renderedAttributions_ = [];
+    this.renderedVisible_ = true;
+  }
+  /**
+   * Collect a list of visible attributions and set the collapsible state.
+   * @param {import("../Map.js").FrameState} frameState Frame state.
+   * @return {Array<string>} Attributions.
+   * @private
+   */
+  collectSourceAttributions_(frameState) {
+    const layers = this.getMap().getAllLayers();
+    const visibleAttributions = new Set(
+      layers.flatMap((layer) => layer.getAttributions(frameState))
+    );
+    if (this.attributions_ !== void 0) {
+      Array.isArray(this.attributions_) ? this.attributions_.forEach((item) => visibleAttributions.add(item)) : visibleAttributions.add(this.attributions_);
+    }
+    if (!this.overrideCollapsible_) {
+      const collapsible = !layers.some(
+        (layer) => layer.getSource()?.getAttributionsCollapsible() === false
+      );
+      this.setCollapsible(collapsible);
+    }
+    return Array.from(visibleAttributions);
+  }
+  /**
+   * @private
+   * @param {?import("../Map.js").FrameState} frameState Frame state.
+   */
+  async updateElement_(frameState) {
+    if (!frameState) {
+      if (this.renderedVisible_) {
+        this.element.style.display = "none";
+        this.renderedVisible_ = false;
+      }
+      return;
+    }
+    const attributions = await Promise.all(
+      this.collectSourceAttributions_(frameState).map(
+        (attribution) => toPromise(() => attribution)
+      )
+    );
+    const visible = attributions.length > 0;
+    if (this.renderedVisible_ != visible) {
+      this.element.style.display = visible ? "" : "none";
+      this.renderedVisible_ = visible;
+    }
+    if (equals(attributions, this.renderedAttributions_)) {
+      return;
+    }
+    removeChildren(this.ulElement_);
+    for (let i = 0, ii = attributions.length; i < ii; ++i) {
+      const element = document.createElement("li");
+      element.innerHTML = attributions[i];
+      this.ulElement_.appendChild(element);
+    }
+    this.renderedAttributions_ = attributions;
+  }
+  /**
+   * @param {MouseEvent} event The event to handle
+   * @private
+   */
+  handleClick_(event) {
+    event.preventDefault();
+    this.handleToggle_();
+    this.userCollapsed_ = this.collapsed_;
+  }
+  /**
+   * @private
+   */
+  handleToggle_() {
+    this.element.classList.toggle(CLASS_COLLAPSED);
+    if (this.collapsed_) {
+      replaceNode(this.collapseLabel_, this.label_);
+    } else {
+      replaceNode(this.label_, this.collapseLabel_);
+    }
+    this.collapsed_ = !this.collapsed_;
+    this.toggleButton_.setAttribute("aria-expanded", String(!this.collapsed_));
+  }
+  /**
+   * Return `true` if the attribution is collapsible, `false` otherwise.
+   * @return {boolean} True if the widget is collapsible.
+   * @api
+   */
+  getCollapsible() {
+    return this.collapsible_;
+  }
+  /**
+   * Set whether the attribution should be collapsible.
+   * @param {boolean} collapsible True if the widget is collapsible.
+   * @api
+   */
+  setCollapsible(collapsible) {
+    if (this.collapsible_ === collapsible) {
+      return;
+    }
+    this.collapsible_ = collapsible;
+    this.element.classList.toggle("ol-uncollapsible");
+    if (this.userCollapsed_) {
+      this.handleToggle_();
+    }
+  }
+  /**
+   * Collapse or expand the attribution according to the passed parameter. Will
+   * not do anything if the attribution isn't collapsible or if the current
+   * collapsed state is already the one requested.
+   * @param {boolean} collapsed True if the widget is collapsed.
+   * @api
+   */
+  setCollapsed(collapsed) {
+    this.userCollapsed_ = collapsed;
+    if (!this.collapsible_ || this.collapsed_ === collapsed) {
+      return;
+    }
+    this.handleToggle_();
+  }
+  /**
+   * Return `true` when the attribution is currently collapsed or `false`
+   * otherwise.
+   * @return {boolean} True if the widget is collapsed.
+   * @api
+   */
+  getCollapsed() {
+    return this.collapsed_;
+  }
+  /**
+   * Update the attribution element.
+   * @param {import("../MapEvent.js").default} mapEvent Map event.
+   * @override
+   */
+  render(mapEvent) {
+    this.updateElement_(mapEvent.frameState);
+  }
+}
+class Rotate extends Control {
+  /**
+   * @param {Options} [options] Rotate options.
+   */
+  constructor(options) {
+    options = options ? options : {};
+    super({
+      element: document.createElement("div"),
+      render: options.render,
+      target: options.target
+    });
+    const className = options.className !== void 0 ? options.className : "ol-rotate";
+    const label = options.label !== void 0 ? options.label : "⇧";
+    const compassClassName = options.compassClassName !== void 0 ? options.compassClassName : "ol-compass";
+    this.label_ = null;
+    if (typeof label === "string") {
+      this.label_ = document.createElement("span");
+      this.label_.className = compassClassName;
+      this.label_.textContent = label;
+    } else {
+      this.label_ = label;
+      this.label_.classList.add(compassClassName);
+    }
+    const tipLabel = options.tipLabel ? options.tipLabel : "Reset rotation";
+    const button = document.createElement("button");
+    button.className = className + "-reset";
+    button.setAttribute("type", "button");
+    button.title = tipLabel;
+    button.appendChild(this.label_);
+    button.addEventListener(
+      EventType.CLICK,
+      this.handleClick_.bind(this),
+      false
+    );
+    const cssClasses = className + " " + CLASS_UNSELECTABLE + " " + CLASS_CONTROL;
+    const element = this.element;
+    element.className = cssClasses;
+    element.appendChild(button);
+    this.callResetNorth_ = options.resetNorth ? options.resetNorth : void 0;
+    this.duration_ = options.duration !== void 0 ? options.duration : 250;
+    this.autoHide_ = options.autoHide !== void 0 ? options.autoHide : true;
+    this.rotation_ = void 0;
+    if (this.autoHide_) {
+      this.element.classList.add(CLASS_HIDDEN);
+    }
+  }
+  /**
+   * @param {MouseEvent} event The event to handle
+   * @private
+   */
+  handleClick_(event) {
+    event.preventDefault();
+    if (this.callResetNorth_ !== void 0) {
+      this.callResetNorth_();
+    } else {
+      this.resetNorth_();
+    }
+  }
+  /**
+   * @private
+   */
+  resetNorth_() {
+    const map2 = this.getMap();
+    const view = map2.getView();
+    if (!view) {
+      return;
+    }
+    const rotation = view.getRotation();
+    if (rotation !== void 0) {
+      if (this.duration_ > 0 && rotation % (2 * Math.PI) !== 0) {
+        view.animate({
+          rotation: 0,
+          duration: this.duration_,
+          easing: easeOut
+        });
+      } else {
+        view.setRotation(0);
+      }
+    }
+  }
+  /**
+   * Update the rotate control element.
+   * @param {import("../MapEvent.js").default} mapEvent Map event.
+   * @override
+   */
+  render(mapEvent) {
+    const frameState = mapEvent.frameState;
+    if (!frameState) {
+      return;
+    }
+    const rotation = frameState.viewState.rotation;
+    if (rotation != this.rotation_) {
+      const transform2 = "rotate(" + rotation + "rad)";
+      if (this.autoHide_) {
+        const contains2 = this.element.classList.contains(CLASS_HIDDEN);
+        if (!contains2 && rotation === 0) {
+          this.element.classList.add(CLASS_HIDDEN);
+        } else if (contains2 && rotation !== 0) {
+          this.element.classList.remove(CLASS_HIDDEN);
+        }
+      }
+      this.label_.style.transform = transform2;
+    }
+    this.rotation_ = rotation;
+  }
+}
+class Zoom extends Control {
+  /**
+   * @param {Options} [options] Zoom options.
+   */
+  constructor(options) {
+    options = options ? options : {};
+    super({
+      element: document.createElement("div"),
+      target: options.target
+    });
+    const className = options.className !== void 0 ? options.className : "ol-zoom";
+    const delta = options.delta !== void 0 ? options.delta : 1;
+    const zoomInClassName = options.zoomInClassName !== void 0 ? options.zoomInClassName : className + "-in";
+    const zoomOutClassName = options.zoomOutClassName !== void 0 ? options.zoomOutClassName : className + "-out";
+    const zoomInLabel = options.zoomInLabel !== void 0 ? options.zoomInLabel : "+";
+    const zoomOutLabel = options.zoomOutLabel !== void 0 ? options.zoomOutLabel : "–";
+    const zoomInTipLabel = options.zoomInTipLabel !== void 0 ? options.zoomInTipLabel : "Zoom in";
+    const zoomOutTipLabel = options.zoomOutTipLabel !== void 0 ? options.zoomOutTipLabel : "Zoom out";
+    const inElement = document.createElement("button");
+    inElement.className = zoomInClassName;
+    inElement.setAttribute("type", "button");
+    inElement.title = zoomInTipLabel;
+    inElement.appendChild(
+      typeof zoomInLabel === "string" ? document.createTextNode(zoomInLabel) : zoomInLabel
+    );
+    inElement.addEventListener(
+      EventType.CLICK,
+      this.handleClick_.bind(this, delta),
+      false
+    );
+    const outElement = document.createElement("button");
+    outElement.className = zoomOutClassName;
+    outElement.setAttribute("type", "button");
+    outElement.title = zoomOutTipLabel;
+    outElement.appendChild(
+      typeof zoomOutLabel === "string" ? document.createTextNode(zoomOutLabel) : zoomOutLabel
+    );
+    outElement.addEventListener(
+      EventType.CLICK,
+      this.handleClick_.bind(this, -delta),
+      false
+    );
+    const cssClasses = className + " " + CLASS_UNSELECTABLE + " " + CLASS_CONTROL;
+    const element = this.element;
+    element.className = cssClasses;
+    element.appendChild(inElement);
+    element.appendChild(outElement);
+    this.duration_ = options.duration !== void 0 ? options.duration : 250;
+  }
+  /**
+   * @param {number} delta Zoom delta.
+   * @param {MouseEvent} event The event to handle
+   * @private
+   */
+  handleClick_(delta, event) {
+    event.preventDefault();
+    this.zoomByDelta_(delta);
+  }
+  /**
+   * @param {number} delta Zoom delta.
+   * @private
+   */
+  zoomByDelta_(delta) {
+    const map2 = this.getMap();
+    const view = map2.getView();
+    if (!view) {
+      return;
+    }
+    const currentZoom = view.getZoom();
+    if (currentZoom !== void 0) {
+      const newZoom = view.getConstrainedZoom(currentZoom + delta);
+      if (this.duration_ > 0) {
+        if (view.getAnimating()) {
+          view.cancelAnimations();
+        }
+        view.animate({
+          zoom: newZoom,
+          duration: this.duration_,
+          easing: easeOut
+        });
+      } else {
+        view.setZoom(newZoom);
+      }
+    }
+  }
+}
+function defaults$1(options) {
+  options = options ? options : {};
+  const controls = new Collection();
+  const zoomControl = options.zoom !== void 0 ? options.zoom : true;
+  if (zoomControl) {
+    controls.push(new Zoom(options.zoomOptions));
+  }
+  const rotateControl = options.rotate !== void 0 ? options.rotate : true;
+  if (rotateControl) {
+    controls.push(new Rotate(options.rotateOptions));
+  }
+  const attributionControl = options.attribution !== void 0 ? options.attribution : true;
+  if (attributionControl) {
+    controls.push(new Attribution(options.attributionOptions));
+  }
+  return controls;
+}
+class Kinetic {
+  /**
+   * @param {number} decay Rate of decay (must be negative).
+   * @param {number} minVelocity Minimum velocity (pixels/millisecond).
+   * @param {number} delay Delay to consider to calculate the kinetic
+   *     initial values (milliseconds).
+   */
+  constructor(decay, minVelocity, delay) {
+    this.decay_ = decay;
+    this.minVelocity_ = minVelocity;
+    this.delay_ = delay;
+    this.points_ = [];
+    this.angle_ = 0;
+    this.initialVelocity_ = 0;
+  }
+  /**
+   * FIXME empty description for jsdoc
+   */
+  begin() {
+    this.points_.length = 0;
+    this.angle_ = 0;
+    this.initialVelocity_ = 0;
+  }
+  /**
+   * @param {number} x X.
+   * @param {number} y Y.
+   */
+  update(x2, y2) {
+    this.points_.push(x2, y2, Date.now());
+  }
+  /**
+   * @return {boolean} Whether we should do kinetic animation.
+   */
+  end() {
+    if (this.points_.length < 6) {
+      return false;
+    }
+    const delay = Date.now() - this.delay_;
+    const lastIndex = this.points_.length - 3;
+    if (this.points_[lastIndex + 2] < delay) {
+      return false;
+    }
+    let firstIndex = lastIndex - 3;
+    while (firstIndex > 0 && this.points_[firstIndex + 2] > delay) {
+      firstIndex -= 3;
+    }
+    const duration = this.points_[lastIndex + 2] - this.points_[firstIndex + 2];
+    if (duration < 1e3 / 60) {
+      return false;
+    }
+    const dx = this.points_[lastIndex] - this.points_[firstIndex];
+    const dy = this.points_[lastIndex + 1] - this.points_[firstIndex + 1];
+    this.angle_ = Math.atan2(dy, dx);
+    this.initialVelocity_ = Math.sqrt(dx * dx + dy * dy) / duration;
+    return this.initialVelocity_ > this.minVelocity_;
+  }
+  /**
+   * @return {number} Total distance travelled (pixels).
+   */
+  getDistance() {
+    return (this.minVelocity_ - this.initialVelocity_) / this.decay_;
+  }
+  /**
+   * @return {number} Angle of the kinetic panning animation (radians).
+   */
+  getAngle() {
+    return this.angle_;
+  }
+}
+const InteractionProperty = {
+  ACTIVE: "active"
+};
+class Interaction extends BaseObject {
+  /**
+   * @param {InteractionOptions} [options] Options.
+   */
+  constructor(options) {
+    super();
+    this.on;
+    this.once;
+    this.un;
+    if (options && options.handleEvent) {
+      this.handleEvent = options.handleEvent;
+    }
+    this.map_ = null;
+    this.setActive(true);
+  }
+  /**
+   * Return whether the interaction is currently active.
+   * @return {boolean} `true` if the interaction is active, `false` otherwise.
+   * @observable
+   * @api
+   */
+  getActive() {
+    return (
+      /** @type {boolean} */
+      this.get(InteractionProperty.ACTIVE)
+    );
+  }
+  /**
+   * Get the map associated with this interaction.
+   * @return {import("../Map.js").default|null} Map.
+   * @api
+   */
+  getMap() {
+    return this.map_;
+  }
+  /**
+   * Handles the {@link module:ol/MapBrowserEvent~MapBrowserEvent map browser event}.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Map browser event.
+   * @return {boolean} `false` to stop event propagation.
+   * @api
+   */
+  handleEvent(mapBrowserEvent) {
+    return true;
+  }
+  /**
+   * Activate or deactivate the interaction.
+   * @param {boolean} active Active.
+   * @observable
+   * @api
+   */
+  setActive(active) {
+    this.set(InteractionProperty.ACTIVE, active);
+  }
+  /**
+   * Remove the interaction from its current map and attach it to the new map.
+   * Subclasses may set up event handlers to get notified about changes to
+   * the map here.
+   * @param {import("../Map.js").default|null} map Map.
+   */
+  setMap(map2) {
+    this.map_ = map2;
+  }
+}
+function pan(view, delta, duration) {
+  const currentCenter = view.getCenterInternal();
+  if (currentCenter) {
+    const center = [currentCenter[0] + delta[0], currentCenter[1] + delta[1]];
+    view.animateInternal({
+      duration: duration !== void 0 ? duration : 250,
+      easing: linear,
+      center: view.getConstrainedCenter(center)
+    });
+  }
+}
+function zoomByDelta(view, delta, anchor, duration) {
+  const currentZoom = view.getZoom();
+  if (currentZoom === void 0) {
+    return;
+  }
+  const newZoom = view.getConstrainedZoom(currentZoom + delta);
+  const newResolution = view.getResolutionForZoom(newZoom);
+  if (view.getAnimating()) {
+    view.cancelAnimations();
+  }
+  view.animate({
+    resolution: newResolution,
+    anchor,
+    duration: duration !== void 0 ? duration : 250,
+    easing: easeOut
+  });
+}
+class DoubleClickZoom extends Interaction {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    super();
+    options = options ? options : {};
+    this.delta_ = options.delta ? options.delta : 1;
+    this.duration_ = options.duration !== void 0 ? options.duration : 250;
+  }
+  /**
+   * Handles the {@link module:ol/MapBrowserEvent~MapBrowserEvent map browser event} (if it was a
+   * doubleclick) and eventually zooms the map.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Map browser event.
+   * @return {boolean} `false` to stop event propagation.
+   * @override
+   */
+  handleEvent(mapBrowserEvent) {
+    let stopEvent = false;
+    if (mapBrowserEvent.type == MapBrowserEventType.DBLCLICK) {
+      const browserEvent = (
+        /** @type {MouseEvent} */
+        mapBrowserEvent.originalEvent
+      );
+      const map2 = mapBrowserEvent.map;
+      const anchor = mapBrowserEvent.coordinate;
+      const delta = browserEvent.shiftKey ? -this.delta_ : this.delta_;
+      const view = map2.getView();
+      zoomByDelta(view, delta, anchor, this.duration_);
+      browserEvent.preventDefault();
+      stopEvent = true;
+    }
+    return !stopEvent;
+  }
+}
+function all$1(var_args) {
+  const conditions = arguments;
+  return function(event) {
+    let pass = true;
+    for (let i = 0, ii = conditions.length; i < ii; ++i) {
+      pass = pass && conditions[i](event);
+      if (!pass) {
+        break;
+      }
+    }
+    return pass;
+  };
+}
+const altShiftKeysOnly = function(mapBrowserEvent) {
+  const originalEvent = mapBrowserEvent.originalEvent;
+  return originalEvent.altKey && !(originalEvent.metaKey || originalEvent.ctrlKey) && originalEvent.shiftKey;
+};
+const focus = function(event) {
+  const targetElement = event.map.getTargetElement();
+  const rootNode = targetElement.getRootNode();
+  const activeElement = event.map.getOwnerDocument().activeElement;
+  return rootNode instanceof ShadowRoot ? rootNode.host.contains(activeElement) : targetElement.contains(activeElement);
+};
+const focusWithTabindex = function(event) {
+  const targetElement = event.map.getTargetElement();
+  const rootNode = targetElement.getRootNode();
+  const tabIndexCandidate = rootNode instanceof ShadowRoot ? rootNode.host : targetElement;
+  return tabIndexCandidate.hasAttribute("tabindex") ? focus(event) : true;
+};
+const always$1 = TRUE;
+const mouseActionButton = function(mapBrowserEvent) {
+  const originalEvent = mapBrowserEvent.originalEvent;
+  return "pointerId" in originalEvent && originalEvent.button == 0 && !(WEBKIT && MAC && originalEvent.ctrlKey);
+};
+const noModifierKeys = function(mapBrowserEvent) {
+  const originalEvent = (
+    /** @type {KeyboardEvent|MouseEvent|TouchEvent} */
+    mapBrowserEvent.originalEvent
+  );
+  return !originalEvent.altKey && !(originalEvent.metaKey || originalEvent.ctrlKey) && !originalEvent.shiftKey;
+};
+const platformModifierKey = function(mapBrowserEvent) {
+  const originalEvent = mapBrowserEvent.originalEvent;
+  return MAC ? originalEvent.metaKey : originalEvent.ctrlKey;
+};
+const shiftKeyOnly = function(mapBrowserEvent) {
+  const originalEvent = mapBrowserEvent.originalEvent;
+  return !originalEvent.altKey && !(originalEvent.metaKey || originalEvent.ctrlKey) && originalEvent.shiftKey;
+};
+const targetNotEditable = function(mapBrowserEvent) {
+  const originalEvent = mapBrowserEvent.originalEvent;
+  const tagName = (
+    /** @type {Element} */
+    originalEvent.target.tagName
+  );
+  return tagName !== "INPUT" && tagName !== "SELECT" && tagName !== "TEXTAREA" && // `isContentEditable` is only available on `HTMLElement`, but it may also be a
+  // different type like `SVGElement`.
+  // @ts-ignore
+  !originalEvent.target.isContentEditable;
+};
+const mouseOnly = function(mapBrowserEvent) {
+  const pointerEvent = mapBrowserEvent.originalEvent;
+  return "pointerId" in pointerEvent && pointerEvent.pointerType == "mouse";
+};
+const primaryAction = function(mapBrowserEvent) {
+  const pointerEvent = mapBrowserEvent.originalEvent;
+  return "pointerId" in pointerEvent && pointerEvent.isPrimary && pointerEvent.button === 0;
+};
+class PointerInteraction extends Interaction {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    options = options ? options : {};
+    super(
+      /** @type {import("./Interaction.js").InteractionOptions} */
+      options
+    );
+    if (options.handleDownEvent) {
+      this.handleDownEvent = options.handleDownEvent;
+    }
+    if (options.handleDragEvent) {
+      this.handleDragEvent = options.handleDragEvent;
+    }
+    if (options.handleMoveEvent) {
+      this.handleMoveEvent = options.handleMoveEvent;
+    }
+    if (options.handleUpEvent) {
+      this.handleUpEvent = options.handleUpEvent;
+    }
+    if (options.stopDown) {
+      this.stopDown = options.stopDown;
+    }
+    this.handlingDownUpSequence = false;
+    this.targetPointers = [];
+  }
+  /**
+   * Returns the current number of pointers involved in the interaction,
+   * e.g. `2` when two fingers are used.
+   * @return {number} The number of pointers.
+   * @api
+   */
+  getPointerCount() {
+    return this.targetPointers.length;
+  }
+  /**
+   * Handle pointer down events.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @return {boolean} If the event was consumed.
+   * @protected
+   */
+  handleDownEvent(mapBrowserEvent) {
+    return false;
+  }
+  /**
+   * Handle pointer drag events.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @protected
+   */
+  handleDragEvent(mapBrowserEvent) {
+  }
+  /**
+   * Handles the {@link module:ol/MapBrowserEvent~MapBrowserEvent map browser event} and may call into
+   * other functions, if event sequences like e.g. 'drag' or 'down-up' etc. are
+   * detected.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Map browser event.
+   * @return {boolean} `false` to stop event propagation.
+   * @api
+   * @override
+   */
+  handleEvent(mapBrowserEvent) {
+    if (!mapBrowserEvent.originalEvent) {
+      return true;
+    }
+    let stopEvent = false;
+    this.updateTrackedPointers_(mapBrowserEvent);
+    if (this.handlingDownUpSequence) {
+      if (mapBrowserEvent.type == MapBrowserEventType.POINTERDRAG) {
+        this.handleDragEvent(mapBrowserEvent);
+        mapBrowserEvent.originalEvent.preventDefault();
+      } else if (mapBrowserEvent.type == MapBrowserEventType.POINTERUP) {
+        const handledUp = this.handleUpEvent(mapBrowserEvent);
+        this.handlingDownUpSequence = handledUp && this.targetPointers.length > 0;
+      }
+    } else {
+      if (mapBrowserEvent.type == MapBrowserEventType.POINTERDOWN) {
+        const handled = this.handleDownEvent(mapBrowserEvent);
+        this.handlingDownUpSequence = handled;
+        stopEvent = this.stopDown(handled);
+      } else if (mapBrowserEvent.type == MapBrowserEventType.POINTERMOVE) {
+        this.handleMoveEvent(mapBrowserEvent);
+      }
+    }
+    return !stopEvent;
+  }
+  /**
+   * Handle pointer move events.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @protected
+   */
+  handleMoveEvent(mapBrowserEvent) {
+  }
+  /**
+   * Handle pointer up events.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @return {boolean} If the event was consumed.
+   * @protected
+   */
+  handleUpEvent(mapBrowserEvent) {
+    return false;
+  }
+  /**
+   * This function is used to determine if "down" events should be propagated
+   * to other interactions or should be stopped.
+   * @param {boolean} handled Was the event handled by the interaction?
+   * @return {boolean} Should the `down` event be stopped?
+   */
+  stopDown(handled) {
+    return handled;
+  }
+  /**
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @private
+   */
+  updateTrackedPointers_(mapBrowserEvent) {
+    if (mapBrowserEvent.activePointers) {
+      this.targetPointers = mapBrowserEvent.activePointers;
+    }
+  }
+}
+function centroid(pointerEvents) {
+  const length = pointerEvents.length;
+  let clientX = 0;
+  let clientY = 0;
+  for (let i = 0; i < length; i++) {
+    clientX += pointerEvents[i].clientX;
+    clientY += pointerEvents[i].clientY;
+  }
+  return { clientX: clientX / length, clientY: clientY / length };
+}
+class DragPan extends PointerInteraction {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    super({
+      stopDown: FALSE
+    });
+    options = options ? options : {};
+    this.kinetic_ = options.kinetic;
+    this.lastCentroid = null;
+    this.lastPointersCount_;
+    this.panning_ = false;
+    const condition = options.condition ? options.condition : all$1(noModifierKeys, primaryAction);
+    this.condition_ = options.onFocusOnly ? all$1(focusWithTabindex, condition) : condition;
+    this.noKinetic_ = false;
+  }
+  /**
+   * Handle pointer drag events.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @override
+   */
+  handleDragEvent(mapBrowserEvent) {
+    const map2 = mapBrowserEvent.map;
+    if (!this.panning_) {
+      this.panning_ = true;
+      map2.getView().beginInteraction();
+    }
+    const targetPointers = this.targetPointers;
+    const centroid$1 = map2.getEventPixel(centroid(targetPointers));
+    if (targetPointers.length == this.lastPointersCount_) {
+      if (this.kinetic_) {
+        this.kinetic_.update(centroid$1[0], centroid$1[1]);
+      }
+      if (this.lastCentroid) {
+        const delta = [
+          this.lastCentroid[0] - centroid$1[0],
+          centroid$1[1] - this.lastCentroid[1]
+        ];
+        const map3 = mapBrowserEvent.map;
+        const view = map3.getView();
+        scale$2(delta, view.getResolution());
+        rotate$1(delta, view.getRotation());
+        view.adjustCenterInternal(delta);
+      }
+    } else if (this.kinetic_) {
+      this.kinetic_.begin();
+    }
+    this.lastCentroid = centroid$1;
+    this.lastPointersCount_ = targetPointers.length;
+    mapBrowserEvent.originalEvent.preventDefault();
+  }
+  /**
+   * Handle pointer up events.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @return {boolean} If the event was consumed.
+   * @override
+   */
+  handleUpEvent(mapBrowserEvent) {
+    const map2 = mapBrowserEvent.map;
+    const view = map2.getView();
+    if (this.targetPointers.length === 0) {
+      if (!this.noKinetic_ && this.kinetic_ && this.kinetic_.end()) {
+        const distance = this.kinetic_.getDistance();
+        const angle = this.kinetic_.getAngle();
+        const center = view.getCenterInternal();
+        const centerpx = map2.getPixelFromCoordinateInternal(center);
+        const dest = map2.getCoordinateFromPixelInternal([
+          centerpx[0] - distance * Math.cos(angle),
+          centerpx[1] - distance * Math.sin(angle)
+        ]);
+        view.animateInternal({
+          center: view.getConstrainedCenter(dest),
+          duration: 500,
+          easing: easeOut
+        });
+      }
+      if (this.panning_) {
+        this.panning_ = false;
+        view.endInteraction();
+      }
+      return false;
+    }
+    if (this.kinetic_) {
+      this.kinetic_.begin();
+    }
+    this.lastCentroid = null;
+    return true;
+  }
+  /**
+   * Handle pointer down events.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @return {boolean} If the event was consumed.
+   * @override
+   */
+  handleDownEvent(mapBrowserEvent) {
+    if (this.targetPointers.length > 0 && this.condition_(mapBrowserEvent)) {
+      const map2 = mapBrowserEvent.map;
+      const view = map2.getView();
+      this.lastCentroid = null;
+      if (view.getAnimating()) {
+        view.cancelAnimations();
+      }
+      if (this.kinetic_) {
+        this.kinetic_.begin();
+      }
+      this.noKinetic_ = this.targetPointers.length > 1;
+      return true;
+    }
+    return false;
+  }
+}
+class DragRotate extends PointerInteraction {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    options = options ? options : {};
+    super({
+      stopDown: FALSE
+    });
+    this.condition_ = options.condition ? options.condition : altShiftKeysOnly;
+    this.lastAngle_ = void 0;
+    this.duration_ = options.duration !== void 0 ? options.duration : 250;
+  }
+  /**
+   * Handle pointer drag events.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @override
+   */
+  handleDragEvent(mapBrowserEvent) {
+    if (!mouseOnly(mapBrowserEvent)) {
+      return;
+    }
+    const map2 = mapBrowserEvent.map;
+    const view = map2.getView();
+    if (view.getConstraints().rotation === disable) {
+      return;
+    }
+    const size = map2.getSize();
+    const offset2 = mapBrowserEvent.pixel;
+    const theta = Math.atan2(size[1] / 2 - offset2[1], offset2[0] - size[0] / 2);
+    if (this.lastAngle_ !== void 0) {
+      const delta = theta - this.lastAngle_;
+      view.adjustRotationInternal(-delta);
+    }
+    this.lastAngle_ = theta;
+  }
+  /**
+   * Handle pointer up events.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @return {boolean} If the event was consumed.
+   * @override
+   */
+  handleUpEvent(mapBrowserEvent) {
+    if (!mouseOnly(mapBrowserEvent)) {
+      return true;
+    }
+    const map2 = mapBrowserEvent.map;
+    const view = map2.getView();
+    view.endInteraction(this.duration_);
+    return false;
+  }
+  /**
+   * Handle pointer down events.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @return {boolean} If the event was consumed.
+   * @override
+   */
+  handleDownEvent(mapBrowserEvent) {
+    if (!mouseOnly(mapBrowserEvent)) {
+      return false;
+    }
+    if (mouseActionButton(mapBrowserEvent) && this.condition_(mapBrowserEvent)) {
+      const map2 = mapBrowserEvent.map;
+      map2.getView().beginInteraction();
+      this.lastAngle_ = void 0;
+      return true;
+    }
+    return false;
+  }
+}
+class RenderBox extends Disposable {
+  /**
+   * @param {string} className CSS class name.
+   */
+  constructor(className) {
+    super();
+    this.geometry_ = null;
+    this.element_ = document.createElement("div");
+    this.element_.style.position = "absolute";
+    this.element_.style.pointerEvents = "auto";
+    this.element_.className = "ol-box " + className;
+    this.map_ = null;
+    this.startPixel_ = null;
+    this.endPixel_ = null;
+  }
+  /**
+   * Clean up.
+   * @override
+   */
+  disposeInternal() {
+    this.setMap(null);
+  }
+  /**
+   * @private
+   */
+  render_() {
+    const startPixel = this.startPixel_;
+    const endPixel = this.endPixel_;
+    const px = "px";
+    const style = this.element_.style;
+    style.left = Math.min(startPixel[0], endPixel[0]) + px;
+    style.top = Math.min(startPixel[1], endPixel[1]) + px;
+    style.width = Math.abs(endPixel[0] - startPixel[0]) + px;
+    style.height = Math.abs(endPixel[1] - startPixel[1]) + px;
+  }
+  /**
+   * @param {import("../Map.js").default|null} map Map.
+   */
+  setMap(map2) {
+    if (this.map_) {
+      this.map_.getOverlayContainer().removeChild(this.element_);
+      const style = this.element_.style;
+      style.left = "inherit";
+      style.top = "inherit";
+      style.width = "inherit";
+      style.height = "inherit";
+    }
+    this.map_ = map2;
+    if (this.map_) {
+      this.map_.getOverlayContainer().appendChild(this.element_);
+    }
+  }
+  /**
+   * @param {import("../pixel.js").Pixel} startPixel Start pixel.
+   * @param {import("../pixel.js").Pixel} endPixel End pixel.
+   */
+  setPixels(startPixel, endPixel) {
+    this.startPixel_ = startPixel;
+    this.endPixel_ = endPixel;
+    this.createOrUpdateGeometry();
+    this.render_();
+  }
+  /**
+   * Creates or updates the cached geometry.
+   */
+  createOrUpdateGeometry() {
+    if (!this.map_) {
+      return;
+    }
+    const startPixel = this.startPixel_;
+    const endPixel = this.endPixel_;
+    const pixels = [
+      startPixel,
+      [startPixel[0], endPixel[1]],
+      endPixel,
+      [endPixel[0], startPixel[1]]
+    ];
+    const coordinates2 = pixels.map(
+      this.map_.getCoordinateFromPixelInternal,
+      this.map_
+    );
+    coordinates2[4] = coordinates2[0].slice();
+    if (!this.geometry_) {
+      this.geometry_ = new Polygon([coordinates2]);
+    } else {
+      this.geometry_.setCoordinates([coordinates2]);
+    }
+  }
+  /**
+   * @return {import("../geom/Polygon.js").default} Geometry.
+   */
+  getGeometry() {
+    return this.geometry_;
+  }
+}
+const DragBoxEventType = {
+  /**
+   * Triggered upon drag box start.
+   * @event DragBoxEvent#boxstart
+   * @api
+   */
+  BOXSTART: "boxstart",
+  /**
+   * Triggered on drag when box is active.
+   * @event DragBoxEvent#boxdrag
+   * @api
+   */
+  BOXDRAG: "boxdrag",
+  /**
+   * Triggered upon drag box end.
+   * @event DragBoxEvent#boxend
+   * @api
+   */
+  BOXEND: "boxend",
+  /**
+   * Triggered upon drag box canceled.
+   * @event DragBoxEvent#boxcancel
+   * @api
+   */
+  BOXCANCEL: "boxcancel"
+};
+class DragBoxEvent extends BaseEvent {
+  /**
+   * @param {string} type The event type.
+   * @param {import("../coordinate.js").Coordinate} coordinate The event coordinate.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Originating event.
+   */
+  constructor(type, coordinate, mapBrowserEvent) {
+    super(type);
+    this.coordinate = coordinate;
+    this.mapBrowserEvent = mapBrowserEvent;
+  }
+}
+class DragBox extends PointerInteraction {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    super();
+    this.on;
+    this.once;
+    this.un;
+    options = options ?? {};
+    this.box_ = new RenderBox(options.className || "ol-dragbox");
+    this.minArea_ = options.minArea ?? 64;
+    if (options.onBoxEnd) {
+      this.onBoxEnd = options.onBoxEnd;
+    }
+    this.startPixel_ = null;
+    this.condition_ = options.condition ?? mouseActionButton;
+    this.boxEndCondition_ = options.boxEndCondition ?? this.defaultBoxEndCondition;
+  }
+  /**
+   * The default condition for determining whether the boxend event
+   * should fire.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent The originating MapBrowserEvent
+   *     leading to the box end.
+   * @param {import("../pixel.js").Pixel} startPixel The starting pixel of the box.
+   * @param {import("../pixel.js").Pixel} endPixel The end pixel of the box.
+   * @return {boolean} Whether or not the boxend condition should be fired.
+   */
+  defaultBoxEndCondition(mapBrowserEvent, startPixel, endPixel) {
+    const width = endPixel[0] - startPixel[0];
+    const height = endPixel[1] - startPixel[1];
+    return width * width + height * height >= this.minArea_;
+  }
+  /**
+   * Returns geometry of last drawn box.
+   * @return {import("../geom/Polygon.js").default} Geometry.
+   * @api
+   */
+  getGeometry() {
+    return this.box_.getGeometry();
+  }
+  /**
+   * Handle pointer drag events.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @override
+   */
+  handleDragEvent(mapBrowserEvent) {
+    if (!this.startPixel_) {
+      return;
+    }
+    this.box_.setPixels(this.startPixel_, mapBrowserEvent.pixel);
+    this.dispatchEvent(
+      new DragBoxEvent(
+        DragBoxEventType.BOXDRAG,
+        mapBrowserEvent.coordinate,
+        mapBrowserEvent
+      )
+    );
+  }
+  /**
+   * Handle pointer up events.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @return {boolean} If the event was consumed.
+   * @override
+   */
+  handleUpEvent(mapBrowserEvent) {
+    if (!this.startPixel_) {
+      return false;
+    }
+    const completeBox = this.boxEndCondition_(
+      mapBrowserEvent,
+      this.startPixel_,
+      mapBrowserEvent.pixel
+    );
+    if (completeBox) {
+      this.onBoxEnd(mapBrowserEvent);
+    }
+    this.dispatchEvent(
+      new DragBoxEvent(
+        completeBox ? DragBoxEventType.BOXEND : DragBoxEventType.BOXCANCEL,
+        mapBrowserEvent.coordinate,
+        mapBrowserEvent
+      )
+    );
+    this.box_.setMap(null);
+    this.startPixel_ = null;
+    return false;
+  }
+  /**
+   * Handle pointer down events.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @return {boolean} If the event was consumed.
+   * @override
+   */
+  handleDownEvent(mapBrowserEvent) {
+    if (this.condition_(mapBrowserEvent)) {
+      this.startPixel_ = mapBrowserEvent.pixel;
+      this.box_.setMap(mapBrowserEvent.map);
+      this.box_.setPixels(this.startPixel_, this.startPixel_);
+      this.dispatchEvent(
+        new DragBoxEvent(
+          DragBoxEventType.BOXSTART,
+          mapBrowserEvent.coordinate,
+          mapBrowserEvent
+        )
+      );
+      return true;
+    }
+    return false;
+  }
+  /**
+   * Function to execute just before `onboxend` is fired
+   * @param {import("../MapBrowserEvent.js").default} event Event.
+   */
+  onBoxEnd(event) {
+  }
+  /**
+   * Activate or deactivate the interaction.
+   * @param {boolean} active Active.
+   * @observable
+   * @api
+   * @override
+   */
+  setActive(active) {
+    if (!active) {
+      this.box_.setMap(null);
+      if (this.startPixel_) {
+        this.dispatchEvent(
+          new DragBoxEvent(DragBoxEventType.BOXCANCEL, this.startPixel_, null)
+        );
+        this.startPixel_ = null;
+      }
+    }
+    super.setActive(active);
+  }
+  /**
+   * @param {import("../Map.js").default|null} map Map.
+   * @override
+   */
+  setMap(map2) {
+    const oldMap = this.getMap();
+    if (oldMap) {
+      this.box_.setMap(null);
+      if (this.startPixel_) {
+        this.dispatchEvent(
+          new DragBoxEvent(DragBoxEventType.BOXCANCEL, this.startPixel_, null)
+        );
+        this.startPixel_ = null;
+      }
+    }
+    super.setMap(map2);
+  }
+}
+class DragZoom extends DragBox {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    options = options ? options : {};
+    const condition = options.condition ? options.condition : shiftKeyOnly;
+    super({
+      condition,
+      className: options.className || "ol-dragzoom",
+      minArea: options.minArea
+    });
+    this.duration_ = options.duration !== void 0 ? options.duration : 200;
+    this.out_ = options.out !== void 0 ? options.out : false;
+  }
+  /**
+   * Function to execute just before `onboxend` is fired
+   * @param {import("../MapBrowserEvent.js").default} event Event.
+   * @override
+   */
+  onBoxEnd(event) {
+    const map2 = this.getMap();
+    const view = (
+      /** @type {!import("../View.js").default} */
+      map2.getView()
+    );
+    let geometry = this.getGeometry();
+    if (this.out_) {
+      const rotatedExtent = view.rotatedExtentForGeometry(geometry);
+      const resolution = view.getResolutionForExtentInternal(rotatedExtent);
+      const factor = view.getResolution() / resolution;
+      geometry = geometry.clone();
+      geometry.scale(factor * factor);
+    }
+    view.fitInternal(geometry, {
+      duration: this.duration_,
+      easing: easeOut
+    });
+  }
+}
+const Key = {
+  LEFT: "ArrowLeft",
+  UP: "ArrowUp",
+  RIGHT: "ArrowRight",
+  DOWN: "ArrowDown"
+};
+class KeyboardPan extends Interaction {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    super();
+    options = options || {};
+    this.defaultCondition_ = function(mapBrowserEvent) {
+      return noModifierKeys(mapBrowserEvent) && targetNotEditable(mapBrowserEvent);
+    };
+    this.condition_ = options.condition !== void 0 ? options.condition : this.defaultCondition_;
+    this.duration_ = options.duration !== void 0 ? options.duration : 100;
+    this.pixelDelta_ = options.pixelDelta !== void 0 ? options.pixelDelta : 128;
+  }
+  /**
+   * Handles the {@link module:ol/MapBrowserEvent~MapBrowserEvent map browser event} if it was a
+   * `KeyEvent`, and decides the direction to pan to (if an arrow key was
+   * pressed).
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Map browser event.
+   * @return {boolean} `false` to stop event propagation.
+   * @override
+   */
+  handleEvent(mapBrowserEvent) {
+    let stopEvent = false;
+    if (mapBrowserEvent.type == EventType.KEYDOWN) {
+      const keyEvent = (
+        /** @type {KeyboardEvent} */
+        mapBrowserEvent.originalEvent
+      );
+      const key = keyEvent.key;
+      if (this.condition_(mapBrowserEvent) && (key == Key.DOWN || key == Key.LEFT || key == Key.RIGHT || key == Key.UP)) {
+        const map2 = mapBrowserEvent.map;
+        const view = map2.getView();
+        const mapUnitsDelta = view.getResolution() * this.pixelDelta_;
+        let deltaX = 0, deltaY = 0;
+        if (key == Key.DOWN) {
+          deltaY = -mapUnitsDelta;
+        } else if (key == Key.LEFT) {
+          deltaX = -mapUnitsDelta;
+        } else if (key == Key.RIGHT) {
+          deltaX = mapUnitsDelta;
+        } else {
+          deltaY = mapUnitsDelta;
+        }
+        const delta = [deltaX, deltaY];
+        rotate$1(delta, view.getRotation());
+        pan(view, delta, this.duration_);
+        keyEvent.preventDefault();
+        stopEvent = true;
+      }
+    }
+    return !stopEvent;
+  }
+}
+class KeyboardZoom extends Interaction {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    super();
+    options = options ? options : {};
+    this.condition_ = options.condition ? options.condition : function(mapBrowserEvent) {
+      return !platformModifierKey(mapBrowserEvent) && targetNotEditable(mapBrowserEvent);
+    };
+    this.delta_ = options.delta ? options.delta : 1;
+    this.duration_ = options.duration !== void 0 ? options.duration : 100;
+  }
+  /**
+   * Handles the {@link module:ol/MapBrowserEvent~MapBrowserEvent map browser event} if it was a
+   * `KeyEvent`, and decides whether to zoom in or out (depending on whether the
+   * key pressed was '+' or '-').
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Map browser event.
+   * @return {boolean} `false` to stop event propagation.
+   * @override
+   */
+  handleEvent(mapBrowserEvent) {
+    let stopEvent = false;
+    if (mapBrowserEvent.type == EventType.KEYDOWN || mapBrowserEvent.type == EventType.KEYPRESS) {
+      const keyEvent = (
+        /** @type {KeyboardEvent} */
+        mapBrowserEvent.originalEvent
+      );
+      const key = keyEvent.key;
+      if (this.condition_(mapBrowserEvent) && (key === "+" || key === "-")) {
+        const map2 = mapBrowserEvent.map;
+        const delta = key === "+" ? this.delta_ : -this.delta_;
+        const view = map2.getView();
+        zoomByDelta(view, delta, void 0, this.duration_);
+        keyEvent.preventDefault();
+        stopEvent = true;
+      }
+    }
+    return !stopEvent;
+  }
+}
+const DELTA_LINE_MULTIPLIER = 40;
+const DELTA_PAGE_MULTIPLIER = 300;
+class MouseWheelZoom extends Interaction {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    options = options ? options : {};
+    super(
+      /** @type {import("./Interaction.js").InteractionOptions} */
+      options
+    );
+    this.totalDelta_ = 0;
+    this.lastDelta_ = 0;
+    this.maxDelta_ = options.maxDelta !== void 0 ? options.maxDelta : 1;
+    this.duration_ = options.duration !== void 0 ? options.duration : 250;
+    this.timeout_ = options.timeout !== void 0 ? options.timeout : 80;
+    this.useAnchor_ = options.useAnchor !== void 0 ? options.useAnchor : true;
+    this.constrainResolution_ = options.constrainResolution !== void 0 ? options.constrainResolution : false;
+    const condition = options.condition ? options.condition : always$1;
+    this.condition_ = options.onFocusOnly ? all$1(focusWithTabindex, condition) : condition;
+    this.lastAnchor_ = null;
+    this.startTime_ = void 0;
+    this.timeoutId_;
+    this.mode_ = void 0;
+    this.trackpadEventGap_ = 400;
+    this.trackpadTimeoutId_;
+    this.deltaPerZoom_ = 300;
+  }
+  /**
+   * @private
+   */
+  endInteraction_() {
+    this.trackpadTimeoutId_ = void 0;
+    const map2 = this.getMap();
+    if (!map2) {
+      return;
+    }
+    const view = map2.getView();
+    view.endInteraction(
+      void 0,
+      this.lastDelta_ ? this.lastDelta_ > 0 ? 1 : -1 : 0,
+      this.lastAnchor_ ? map2.getCoordinateFromPixel(this.lastAnchor_) : null
+    );
+  }
+  /**
+   * Handles the {@link module:ol/MapBrowserEvent~MapBrowserEvent map browser event} (if it was a mousewheel-event) and eventually
+   * zooms the map.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Map browser event.
+   * @return {boolean} `false` to stop event propagation.
+   * @override
+   */
+  handleEvent(mapBrowserEvent) {
+    if (!this.condition_(mapBrowserEvent)) {
+      return true;
+    }
+    const type = mapBrowserEvent.type;
+    if (type !== EventType.WHEEL) {
+      return true;
+    }
+    const map2 = mapBrowserEvent.map;
+    const wheelEvent = (
+      /** @type {WheelEvent} */
+      mapBrowserEvent.originalEvent
+    );
+    wheelEvent.preventDefault();
+    if (this.useAnchor_) {
+      this.lastAnchor_ = mapBrowserEvent.pixel;
+    }
+    let delta = wheelEvent.deltaY;
+    switch (wheelEvent.deltaMode) {
+      case WheelEvent.DOM_DELTA_LINE:
+        delta *= DELTA_LINE_MULTIPLIER;
+        break;
+      case WheelEvent.DOM_DELTA_PAGE:
+        delta *= DELTA_PAGE_MULTIPLIER;
+        break;
+    }
+    if (delta === 0) {
+      return false;
+    }
+    this.lastDelta_ = delta;
+    const now = Date.now();
+    if (this.startTime_ === void 0) {
+      this.startTime_ = now;
+    }
+    if (!this.mode_ || now - this.startTime_ > this.trackpadEventGap_) {
+      this.mode_ = Math.abs(delta) < 4 ? "trackpad" : "wheel";
+    }
+    const view = map2.getView();
+    if (this.mode_ === "trackpad" && !(view.getConstrainResolution() || this.constrainResolution_)) {
+      if (this.trackpadTimeoutId_) {
+        clearTimeout(this.trackpadTimeoutId_);
+      } else {
+        if (view.getAnimating()) {
+          view.cancelAnimations();
+        }
+        view.beginInteraction();
+      }
+      this.trackpadTimeoutId_ = setTimeout(
+        this.endInteraction_.bind(this),
+        this.timeout_
+      );
+      view.adjustZoom(
+        -delta / this.deltaPerZoom_,
+        this.lastAnchor_ ? map2.getCoordinateFromPixel(this.lastAnchor_) : null
+      );
+      this.startTime_ = now;
+      return false;
+    }
+    this.totalDelta_ += delta;
+    const timeLeft = Math.max(this.timeout_ - (now - this.startTime_), 0);
+    clearTimeout(this.timeoutId_);
+    this.timeoutId_ = setTimeout(
+      this.handleWheelZoom_.bind(this, map2),
+      timeLeft
+    );
+    return false;
+  }
+  /**
+   * @private
+   * @param {import("../Map.js").default} map Map.
+   */
+  handleWheelZoom_(map2) {
+    const view = map2.getView();
+    if (view.getAnimating()) {
+      view.cancelAnimations();
+    }
+    let delta = -clamp(
+      this.totalDelta_,
+      -this.maxDelta_ * this.deltaPerZoom_,
+      this.maxDelta_ * this.deltaPerZoom_
+    ) / this.deltaPerZoom_;
+    if (view.getConstrainResolution() || this.constrainResolution_) {
+      delta = delta ? delta > 0 ? 1 : -1 : 0;
+    }
+    zoomByDelta(
+      view,
+      delta,
+      this.lastAnchor_ ? map2.getCoordinateFromPixel(this.lastAnchor_) : null,
+      this.duration_
+    );
+    this.mode_ = void 0;
+    this.totalDelta_ = 0;
+    this.lastAnchor_ = null;
+    this.startTime_ = void 0;
+    this.timeoutId_ = void 0;
+  }
+  /**
+   * Enable or disable using the mouse's location as an anchor when zooming
+   * @param {boolean} useAnchor true to zoom to the mouse's location, false
+   * to zoom to the center of the map
+   * @api
+   */
+  setMouseAnchor(useAnchor) {
+    this.useAnchor_ = useAnchor;
+    if (!useAnchor) {
+      this.lastAnchor_ = null;
+    }
+  }
+}
+class PinchRotate extends PointerInteraction {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    options = options ? options : {};
+    const pointerOptions = (
+      /** @type {import("./Pointer.js").Options} */
+      options
+    );
+    if (!pointerOptions.stopDown) {
+      pointerOptions.stopDown = FALSE;
+    }
+    super(pointerOptions);
+    this.anchor_ = null;
+    this.lastAngle_ = void 0;
+    this.rotating_ = false;
+    this.rotationDelta_ = 0;
+    this.threshold_ = options.threshold !== void 0 ? options.threshold : 0.3;
+    this.duration_ = options.duration !== void 0 ? options.duration : 250;
+  }
+  /**
+   * Handle pointer drag events.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @override
+   */
+  handleDragEvent(mapBrowserEvent) {
+    let rotationDelta = 0;
+    const touch0 = this.targetPointers[0];
+    const touch1 = this.targetPointers[1];
+    const angle = Math.atan2(
+      touch1.clientY - touch0.clientY,
+      touch1.clientX - touch0.clientX
+    );
+    if (this.lastAngle_ !== void 0) {
+      const delta = angle - this.lastAngle_;
+      this.rotationDelta_ += delta;
+      if (!this.rotating_ && Math.abs(this.rotationDelta_) > this.threshold_) {
+        this.rotating_ = true;
+      }
+      rotationDelta = delta;
+    }
+    this.lastAngle_ = angle;
+    const map2 = mapBrowserEvent.map;
+    const view = map2.getView();
+    if (view.getConstraints().rotation === disable) {
+      return;
+    }
+    this.anchor_ = map2.getCoordinateFromPixelInternal(
+      map2.getEventPixel(centroid(this.targetPointers))
+    );
+    if (this.rotating_) {
+      map2.render();
+      view.adjustRotationInternal(rotationDelta, this.anchor_);
+    }
+  }
+  /**
+   * Handle pointer up events.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @return {boolean} If the event was consumed.
+   * @override
+   */
+  handleUpEvent(mapBrowserEvent) {
+    if (this.targetPointers.length < 2) {
+      const map2 = mapBrowserEvent.map;
+      const view = map2.getView();
+      view.endInteraction(this.duration_);
+      return false;
+    }
+    return true;
+  }
+  /**
+   * Handle pointer down events.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @return {boolean} If the event was consumed.
+   * @override
+   */
+  handleDownEvent(mapBrowserEvent) {
+    if (this.targetPointers.length >= 2) {
+      const map2 = mapBrowserEvent.map;
+      this.anchor_ = null;
+      this.lastAngle_ = void 0;
+      this.rotating_ = false;
+      this.rotationDelta_ = 0;
+      if (!this.handlingDownUpSequence) {
+        map2.getView().beginInteraction();
+      }
+      return true;
+    }
+    return false;
+  }
+}
+class PinchZoom extends PointerInteraction {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    options = options ? options : {};
+    const pointerOptions = (
+      /** @type {import("./Pointer.js").Options} */
+      options
+    );
+    if (!pointerOptions.stopDown) {
+      pointerOptions.stopDown = FALSE;
+    }
+    super(pointerOptions);
+    this.anchor_ = null;
+    this.duration_ = options.duration !== void 0 ? options.duration : 400;
+    this.lastDistance_ = void 0;
+    this.lastScaleDelta_ = 1;
+  }
+  /**
+   * Handle pointer drag events.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @override
+   */
+  handleDragEvent(mapBrowserEvent) {
+    let scaleDelta = 1;
+    const touch0 = this.targetPointers[0];
+    const touch1 = this.targetPointers[1];
+    const dx = touch0.clientX - touch1.clientX;
+    const dy = touch0.clientY - touch1.clientY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    if (this.lastDistance_ !== void 0) {
+      scaleDelta = this.lastDistance_ / distance;
+    }
+    this.lastDistance_ = distance;
+    const map2 = mapBrowserEvent.map;
+    const view = map2.getView();
+    if (scaleDelta != 1) {
+      this.lastScaleDelta_ = scaleDelta;
+    }
+    this.anchor_ = map2.getCoordinateFromPixelInternal(
+      map2.getEventPixel(centroid(this.targetPointers))
+    );
+    map2.render();
+    view.adjustResolutionInternal(scaleDelta, this.anchor_);
+  }
+  /**
+   * Handle pointer up events.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @return {boolean} If the event was consumed.
+   * @override
+   */
+  handleUpEvent(mapBrowserEvent) {
+    if (this.targetPointers.length < 2) {
+      const map2 = mapBrowserEvent.map;
+      const view = map2.getView();
+      const direction = this.lastScaleDelta_ > 1 ? 1 : -1;
+      view.endInteraction(this.duration_, direction);
+      return false;
+    }
+    return true;
+  }
+  /**
+   * Handle pointer down events.
+   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
+   * @return {boolean} If the event was consumed.
+   * @override
+   */
+  handleDownEvent(mapBrowserEvent) {
+    if (this.targetPointers.length >= 2) {
+      const map2 = mapBrowserEvent.map;
+      this.anchor_ = null;
+      this.lastDistance_ = void 0;
+      this.lastScaleDelta_ = 1;
+      if (!this.handlingDownUpSequence) {
+        map2.getView().beginInteraction();
+      }
+      return true;
+    }
+    return false;
+  }
+}
+function defaults(options) {
+  options = options ? options : {};
+  const interactions = new Collection();
+  const kinetic = new Kinetic(-5e-3, 0.05, 100);
+  const altShiftDragRotate = options.altShiftDragRotate !== void 0 ? options.altShiftDragRotate : true;
+  if (altShiftDragRotate) {
+    interactions.push(new DragRotate());
+  }
+  const doubleClickZoom = options.doubleClickZoom !== void 0 ? options.doubleClickZoom : true;
+  if (doubleClickZoom) {
+    interactions.push(
+      new DoubleClickZoom({
+        delta: options.zoomDelta,
+        duration: options.zoomDuration
+      })
+    );
+  }
+  const dragPan = options.dragPan !== void 0 ? options.dragPan : true;
+  if (dragPan) {
+    interactions.push(
+      new DragPan({
+        onFocusOnly: options.onFocusOnly,
+        kinetic
+      })
+    );
+  }
+  const pinchRotate = options.pinchRotate !== void 0 ? options.pinchRotate : true;
+  if (pinchRotate) {
+    interactions.push(new PinchRotate());
+  }
+  const pinchZoom = options.pinchZoom !== void 0 ? options.pinchZoom : true;
+  if (pinchZoom) {
+    interactions.push(
+      new PinchZoom({
+        duration: options.zoomDuration
+      })
+    );
+  }
+  const keyboard = options.keyboard !== void 0 ? options.keyboard : true;
+  if (keyboard) {
+    interactions.push(new KeyboardPan());
+    interactions.push(
+      new KeyboardZoom({
+        delta: options.zoomDelta,
+        duration: options.zoomDuration
+      })
+    );
+  }
+  const mouseWheelZoom = options.mouseWheelZoom !== void 0 ? options.mouseWheelZoom : true;
+  if (mouseWheelZoom) {
+    interactions.push(
+      new MouseWheelZoom({
+        onFocusOnly: options.onFocusOnly,
+        duration: options.zoomDuration
+      })
+    );
+  }
+  const shiftDragZoom = options.shiftDragZoom !== void 0 ? options.shiftDragZoom : true;
+  if (shiftDragZoom) {
+    interactions.push(
+      new DragZoom({
+        duration: options.zoomDuration
+      })
+    );
+  }
+  return interactions;
+}
+const LayerProperty = {
+  OPACITY: "opacity",
+  VISIBLE: "visible",
+  EXTENT: "extent",
+  Z_INDEX: "zIndex",
+  MAX_RESOLUTION: "maxResolution",
+  MIN_RESOLUTION: "minResolution",
+  MAX_ZOOM: "maxZoom",
+  MIN_ZOOM: "minZoom",
+  SOURCE: "source",
+  MAP: "map"
+};
+class BaseLayer extends BaseObject {
+  /**
+   * @param {Options} options Layer options.
+   */
+  constructor(options) {
+    super();
+    this.on;
+    this.once;
+    this.un;
+    this.background_ = options.background;
+    const properties = Object.assign({}, options);
+    if (typeof options.properties === "object") {
+      delete properties.properties;
+      Object.assign(properties, options.properties);
+    }
+    properties[LayerProperty.OPACITY] = options.opacity !== void 0 ? options.opacity : 1;
+    assert(
+      typeof properties[LayerProperty.OPACITY] === "number",
+      "Layer opacity must be a number"
+    );
+    properties[LayerProperty.VISIBLE] = options.visible !== void 0 ? options.visible : true;
+    properties[LayerProperty.Z_INDEX] = options.zIndex;
+    properties[LayerProperty.MAX_RESOLUTION] = options.maxResolution !== void 0 ? options.maxResolution : Infinity;
+    properties[LayerProperty.MIN_RESOLUTION] = options.minResolution !== void 0 ? options.minResolution : 0;
+    properties[LayerProperty.MIN_ZOOM] = options.minZoom !== void 0 ? options.minZoom : -Infinity;
+    properties[LayerProperty.MAX_ZOOM] = options.maxZoom !== void 0 ? options.maxZoom : Infinity;
+    this.className_ = properties.className !== void 0 ? properties.className : "ol-layer";
+    delete properties.className;
+    this.setProperties(properties);
+    this.state_ = null;
+  }
+  /**
+   * Get the background for this layer.
+   * @return {BackgroundColor|false} Layer background.
+   */
+  getBackground() {
+    return this.background_;
+  }
+  /**
+   * @return {string} CSS class name.
+   */
+  getClassName() {
+    return this.className_;
+  }
+  /**
+   * This method is not meant to be called by layers or layer renderers because the state
+   * is incorrect if the layer is included in a layer group.
+   *
+   * @param {boolean} [managed] Layer is managed.
+   * @return {import("./Layer.js").State} Layer state.
+   */
+  getLayerState(managed) {
+    const state = this.state_ || /** @type {?} */
+    {
+      layer: this,
+      managed: managed === void 0 ? true : managed
+    };
+    const zIndex = this.getZIndex();
+    state.opacity = clamp(Math.round(this.getOpacity() * 100) / 100, 0, 1);
+    state.visible = this.getVisible();
+    state.extent = this.getExtent();
+    state.zIndex = zIndex === void 0 && !state.managed ? Infinity : zIndex;
+    state.maxResolution = this.getMaxResolution();
+    state.minResolution = Math.max(this.getMinResolution(), 0);
+    state.minZoom = this.getMinZoom();
+    state.maxZoom = this.getMaxZoom();
+    this.state_ = state;
+    return state;
+  }
+  /**
+   * @abstract
+   * @param {Array<import("./Layer.js").default>} [array] Array of layers (to be
+   *     modified in place).
+   * @return {Array<import("./Layer.js").default>} Array of layers.
+   */
+  getLayersArray(array) {
+    return abstract();
+  }
+  /**
+   * @abstract
+   * @param {Array<import("./Layer.js").State>} [states] Optional list of layer
+   *     states (to be modified in place).
+   * @return {Array<import("./Layer.js").State>} List of layer states.
+   */
+  getLayerStatesArray(states) {
+    return abstract();
+  }
+  /**
+   * Return the {@link module:ol/extent~Extent extent} of the layer or `undefined` if it
+   * will be visible regardless of extent.
+   * @return {import("../extent.js").Extent|undefined} The layer extent.
+   * @observable
+   * @api
+   */
+  getExtent() {
+    return (
+      /** @type {import("../extent.js").Extent|undefined} */
+      this.get(LayerProperty.EXTENT)
+    );
+  }
+  /**
+   * Return the maximum resolution of the layer. Returns Infinity if
+   * the layer has no maximum resolution set.
+   * @return {number} The maximum resolution of the layer.
+   * @observable
+   * @api
+   */
+  getMaxResolution() {
+    return (
+      /** @type {number} */
+      this.get(LayerProperty.MAX_RESOLUTION)
+    );
+  }
+  /**
+   * Return the minimum resolution of the layer. Returns 0 if
+   * the layer has no minimum resolution set.
+   * @return {number} The minimum resolution of the layer.
+   * @observable
+   * @api
+   */
+  getMinResolution() {
+    return (
+      /** @type {number} */
+      this.get(LayerProperty.MIN_RESOLUTION)
+    );
+  }
+  /**
+   * Return the minimum zoom level of the layer. Returns -Infinity if
+   * the layer has no minimum zoom set.
+   * @return {number} The minimum zoom level of the layer.
+   * @observable
+   * @api
+   */
+  getMinZoom() {
+    return (
+      /** @type {number} */
+      this.get(LayerProperty.MIN_ZOOM)
+    );
+  }
+  /**
+   * Return the maximum zoom level of the layer. Returns Infinity if
+   * the layer has no maximum zoom set.
+   * @return {number} The maximum zoom level of the layer.
+   * @observable
+   * @api
+   */
+  getMaxZoom() {
+    return (
+      /** @type {number} */
+      this.get(LayerProperty.MAX_ZOOM)
+    );
+  }
+  /**
+   * Return the opacity of the layer (between 0 and 1).
+   * @return {number} The opacity of the layer.
+   * @observable
+   * @api
+   */
+  getOpacity() {
+    return (
+      /** @type {number} */
+      this.get(LayerProperty.OPACITY)
+    );
+  }
+  /**
+   * @abstract
+   * @return {import("../source/Source.js").State} Source state.
+   */
+  getSourceState() {
+    return abstract();
+  }
+  /**
+   * Return the value of this layer's `visible` property. To find out whether the layer
+   * is visible on a map, use `isVisible()` instead.
+   * @return {boolean} The value of the `visible` property of the layer.
+   * @observable
+   * @api
+   */
+  getVisible() {
+    return (
+      /** @type {boolean} */
+      this.get(LayerProperty.VISIBLE)
+    );
+  }
+  /**
+   * Return the Z-index of the layer, which is used to order layers before
+   * rendering. Returns undefined if the layer is unmanaged.
+   * @return {number|undefined} The Z-index of the layer.
+   * @observable
+   * @api
+   */
+  getZIndex() {
+    return (
+      /** @type {number|undefined} */
+      this.get(LayerProperty.Z_INDEX)
+    );
+  }
+  /**
+   * Sets the background color.
+   * @param {BackgroundColor} [background] Background color.
+   */
+  setBackground(background) {
+    this.background_ = background;
+    this.changed();
+  }
+  /**
+   * Set the extent at which the layer is visible.  If `undefined`, the layer
+   * will be visible at all extents.
+   * @param {import("../extent.js").Extent|undefined} extent The extent of the layer.
+   * @observable
+   * @api
+   */
+  setExtent(extent) {
+    this.set(LayerProperty.EXTENT, extent);
+  }
+  /**
+   * Set the maximum resolution at which the layer is visible.
+   * @param {number} maxResolution The maximum resolution of the layer.
+   * @observable
+   * @api
+   */
+  setMaxResolution(maxResolution) {
+    this.set(LayerProperty.MAX_RESOLUTION, maxResolution);
+  }
+  /**
+   * Set the minimum resolution at which the layer is visible.
+   * @param {number} minResolution The minimum resolution of the layer.
+   * @observable
+   * @api
+   */
+  setMinResolution(minResolution) {
+    this.set(LayerProperty.MIN_RESOLUTION, minResolution);
+  }
+  /**
+   * Set the maximum zoom (exclusive) at which the layer is visible.
+   * Note that the zoom levels for layer visibility are based on the
+   * view zoom level, which may be different from a tile source zoom level.
+   * @param {number} maxZoom The maximum zoom of the layer.
+   * @observable
+   * @api
+   */
+  setMaxZoom(maxZoom) {
+    this.set(LayerProperty.MAX_ZOOM, maxZoom);
+  }
+  /**
+   * Set the minimum zoom (inclusive) at which the layer is visible.
+   * Note that the zoom levels for layer visibility are based on the
+   * view zoom level, which may be different from a tile source zoom level.
+   * @param {number} minZoom The minimum zoom of the layer.
+   * @observable
+   * @api
+   */
+  setMinZoom(minZoom) {
+    this.set(LayerProperty.MIN_ZOOM, minZoom);
+  }
+  /**
+   * Set the opacity of the layer, allowed values range from 0 to 1.
+   * @param {number} opacity The opacity of the layer.
+   * @observable
+   * @api
+   */
+  setOpacity(opacity) {
+    assert(typeof opacity === "number", "Layer opacity must be a number");
+    this.set(LayerProperty.OPACITY, opacity);
+  }
+  /**
+   * Set the visibility of the layer (`true` or `false`).
+   * @param {boolean} visible The visibility of the layer.
+   * @observable
+   * @api
+   */
+  setVisible(visible) {
+    this.set(LayerProperty.VISIBLE, visible);
+  }
+  /**
+   * Set Z-index of the layer, which is used to order layers before rendering.
+   * The default Z-index is 0.
+   * @param {number} zindex The z-index of the layer.
+   * @observable
+   * @api
+   */
+  setZIndex(zindex) {
+    this.set(LayerProperty.Z_INDEX, zindex);
+  }
+  /**
+   * Clean up.
+   * @override
+   */
+  disposeInternal() {
+    if (this.state_) {
+      this.state_.layer = null;
+      this.state_ = null;
+    }
+    super.disposeInternal();
+  }
+}
+class GroupEvent extends BaseEvent {
+  /**
+   * @param {GroupEventType} type The event type.
+   * @param {BaseLayer} layer The layer.
+   */
+  constructor(type, layer) {
+    super(type);
+    this.layer = layer;
+  }
+}
+const Property$1 = {
+  LAYERS: "layers"
+};
+class LayerGroup extends BaseLayer {
+  /**
+   * @param {Options} [options] Layer options.
+   */
+  constructor(options) {
+    options = options || {};
+    const baseOptions = (
+      /** @type {Options} */
+      Object.assign({}, options)
+    );
+    delete baseOptions.layers;
+    let layers = options.layers;
+    super(baseOptions);
+    this.on;
+    this.once;
+    this.un;
+    this.layersListenerKeys_ = [];
+    this.listenerKeys_ = {};
+    this.addChangeListener(Property$1.LAYERS, this.handleLayersChanged_);
+    if (layers) {
+      if (Array.isArray(layers)) {
+        layers = new Collection(layers.slice(), { unique: true });
+      } else {
+        assert(
+          typeof /** @type {?} */
+          layers.getArray === "function",
+          "Expected `layers` to be an array or a `Collection`"
+        );
+      }
+    } else {
+      layers = new Collection(void 0, { unique: true });
+    }
+    this.setLayers(layers);
+  }
+  /**
+   * @private
+   */
+  handleLayerChange_() {
+    this.changed();
+  }
+  /**
+   * @private
+   */
+  handleLayersChanged_() {
+    this.layersListenerKeys_.forEach(unlistenByKey);
+    this.layersListenerKeys_.length = 0;
+    const layers = this.getLayers();
+    this.layersListenerKeys_.push(
+      listen(layers, CollectionEventType.ADD, this.handleLayersAdd_, this),
+      listen(
+        layers,
+        CollectionEventType.REMOVE,
+        this.handleLayersRemove_,
+        this
+      )
+    );
+    for (const id in this.listenerKeys_) {
+      this.listenerKeys_[id].forEach(unlistenByKey);
+    }
+    clear$1(this.listenerKeys_);
+    const layersArray = layers.getArray();
+    for (let i = 0, ii = layersArray.length; i < ii; i++) {
+      const layer = layersArray[i];
+      this.registerLayerListeners_(layer);
+      this.dispatchEvent(new GroupEvent("addlayer", layer));
+    }
+    this.changed();
+  }
+  /**
+   * @param {BaseLayer} layer The layer.
+   */
+  registerLayerListeners_(layer) {
+    const listenerKeys = [
+      listen(
+        layer,
+        ObjectEventType.PROPERTYCHANGE,
+        this.handleLayerChange_,
+        this
+      ),
+      listen(layer, EventType.CHANGE, this.handleLayerChange_, this)
+    ];
+    if (layer instanceof LayerGroup) {
+      listenerKeys.push(
+        listen(layer, "addlayer", this.handleLayerGroupAdd_, this),
+        listen(layer, "removelayer", this.handleLayerGroupRemove_, this)
+      );
+    }
+    this.listenerKeys_[getUid(layer)] = listenerKeys;
+  }
+  /**
+   * @param {GroupEvent} event The layer group event.
+   */
+  handleLayerGroupAdd_(event) {
+    this.dispatchEvent(new GroupEvent("addlayer", event.layer));
+  }
+  /**
+   * @param {GroupEvent} event The layer group event.
+   */
+  handleLayerGroupRemove_(event) {
+    this.dispatchEvent(new GroupEvent("removelayer", event.layer));
+  }
+  /**
+   * @param {import("../Collection.js").CollectionEvent<import("./Base.js").default>} collectionEvent CollectionEvent.
+   * @private
+   */
+  handleLayersAdd_(collectionEvent) {
+    const layer = collectionEvent.element;
+    this.registerLayerListeners_(layer);
+    this.dispatchEvent(new GroupEvent("addlayer", layer));
+    this.changed();
+  }
+  /**
+   * @param {import("../Collection.js").CollectionEvent<import("./Base.js").default>} collectionEvent CollectionEvent.
+   * @private
+   */
+  handleLayersRemove_(collectionEvent) {
+    const layer = collectionEvent.element;
+    const key = getUid(layer);
+    this.listenerKeys_[key].forEach(unlistenByKey);
+    delete this.listenerKeys_[key];
+    this.dispatchEvent(new GroupEvent("removelayer", layer));
+    this.changed();
+  }
+  /**
+   * Returns the {@link module:ol/Collection~Collection collection} of {@link module:ol/layer/Layer~Layer layers}
+   * in this group.
+   * @return {!Collection<import("./Base.js").default>} Collection of
+   *   {@link module:ol/layer/Base~BaseLayer layers} that are part of this group.
+   * @observable
+   * @api
+   */
+  getLayers() {
+    return (
+      /** @type {!Collection<import("./Base.js").default>} */
+      this.get(Property$1.LAYERS)
+    );
+  }
+  /**
+   * Set the {@link module:ol/Collection~Collection collection} of {@link module:ol/layer/Layer~Layer layers}
+   * in this group.
+   * @param {!Collection<import("./Base.js").default>} layers Collection of
+   *   {@link module:ol/layer/Base~BaseLayer layers} that are part of this group.
+   * @observable
+   * @api
+   */
+  setLayers(layers) {
+    const collection = this.getLayers();
+    if (collection) {
+      const currentLayers = collection.getArray();
+      for (let i = 0, ii = currentLayers.length; i < ii; ++i) {
+        this.dispatchEvent(new GroupEvent("removelayer", currentLayers[i]));
+      }
+    }
+    this.set(Property$1.LAYERS, layers);
+  }
+  /**
+   * @param {Array<import("./Layer.js").default>} [array] Array of layers (to be modified in place).
+   * @return {Array<import("./Layer.js").default>} Array of layers.
+   * @override
+   */
+  getLayersArray(array) {
+    array = array !== void 0 ? array : [];
+    this.getLayers().forEach(function(layer) {
+      layer.getLayersArray(array);
+    });
+    return array;
+  }
+  /**
+   * Get the layer states list and use this groups z-index as the default
+   * for all layers in this and nested groups, if it is unset at this point.
+   * If dest is not provided and this group's z-index is undefined
+   * 0 is used a the default z-index.
+   * @param {Array<import("./Layer.js").State>} [dest] Optional list
+   * of layer states (to be modified in place).
+   * @return {Array<import("./Layer.js").State>} List of layer states.
+   * @override
+   */
+  getLayerStatesArray(dest) {
+    const states = dest !== void 0 ? dest : [];
+    const pos = states.length;
+    this.getLayers().forEach(function(layer) {
+      layer.getLayerStatesArray(states);
+    });
+    const ownLayerState = this.getLayerState();
+    let defaultZIndex = ownLayerState.zIndex;
+    if (!dest && ownLayerState.zIndex === void 0) {
+      defaultZIndex = 0;
+    }
+    for (let i = pos, ii = states.length; i < ii; i++) {
+      const layerState = states[i];
+      layerState.opacity *= ownLayerState.opacity;
+      layerState.visible = layerState.visible && ownLayerState.visible;
+      layerState.maxResolution = Math.min(
+        layerState.maxResolution,
+        ownLayerState.maxResolution
+      );
+      layerState.minResolution = Math.max(
+        layerState.minResolution,
+        ownLayerState.minResolution
+      );
+      layerState.minZoom = Math.max(layerState.minZoom, ownLayerState.minZoom);
+      layerState.maxZoom = Math.min(layerState.maxZoom, ownLayerState.maxZoom);
+      if (ownLayerState.extent !== void 0) {
+        if (layerState.extent !== void 0) {
+          layerState.extent = getIntersection(
+            layerState.extent,
+            ownLayerState.extent
+          );
+        } else {
+          layerState.extent = ownLayerState.extent;
+        }
+      }
+      if (layerState.zIndex === void 0) {
+        layerState.zIndex = defaultZIndex;
+      }
+    }
+    return states;
+  }
+  /**
+   * @return {import("../source/Source.js").State} Source state.
+   * @override
+   */
+  getSourceState() {
+    return "ready";
+  }
+}
+const RenderEventType = {
+  /**
+   * Triggered before a layer is rendered.
+   * @event module:ol/render/Event~RenderEvent#prerender
+   * @api
+   */
+  PRERENDER: "prerender",
+  /**
+   * Triggered after a layer is rendered.
+   * @event module:ol/render/Event~RenderEvent#postrender
+   * @api
+   */
+  POSTRENDER: "postrender",
+  /**
+   * Triggered before layers are composed.  When dispatched by the map, the event object will not have
+   * a `context` set.  When dispatched by a layer, the event object will have a `context` set.  Only
+   * WebGL layers currently dispatch this event.
+   * @event module:ol/render/Event~RenderEvent#precompose
+   * @api
+   */
+  PRECOMPOSE: "precompose",
+  /**
+   * Triggered after layers are composed.  When dispatched by the map, the event object will not have
+   * a `context` set.  When dispatched by a layer, the event object will have a `context` set.  Only
+   * WebGL layers currently dispatch this event.
+   * @event module:ol/render/Event~RenderEvent#postcompose
+   * @api
+   */
+  POSTCOMPOSE: "postcompose",
+  /**
+   * Triggered when rendering is complete, i.e. all sources and tiles have
+   * finished loading for the current viewport, and all tiles are faded in.
+   * The event object will not have a `context` set.
+   * @event module:ol/render/Event~RenderEvent#rendercomplete
+   * @api
+   */
+  RENDERCOMPLETE: "rendercomplete"
+};
 class Layer extends BaseLayer {
   /**
    * @param {Options<SourceType>} options Layer options.
@@ -11802,11 +14806,10 @@ class Layer extends BaseLayer {
    * @api
    */
   getAttributions(view) {
-    var _a;
     if (!this.isVisible(view)) {
       return [];
     }
-    const getAttributions = (_a = this.getSource()) == null ? void 0 : _a.getAttributions();
+    const getAttributions = this.getSource()?.getAttributions();
     if (!getAttributions) {
       return [];
     }
@@ -12033,8 +15036,8 @@ function swap(arr, i, j) {
   arr[i] = arr[j];
   arr[j] = tmp;
 }
-function defaultCompare(a2, b2) {
-  return a2 < b2 ? -1 : a2 > b2 ? 1 : 0;
+function defaultCompare(a3, b3) {
+  return a3 < b3 ? -1 : a3 > b3 ? 1 : 0;
 }
 let RBush$1 = class RBush {
   constructor(maxEntries = 9) {
@@ -12153,11 +15156,11 @@ let RBush$1 = class RBush {
   toBBox(item) {
     return item;
   }
-  compareMinX(a2, b2) {
-    return a2.minX - b2.minX;
+  compareMinX(a3, b3) {
+    return a3.minX - b3.minX;
   }
-  compareMinY(a2, b2) {
-    return a2.minY - b2.minY;
+  compareMinY(a3, b3) {
+    return a3.minY - b3.minY;
   }
   toJSON() {
     return this.data;
@@ -12353,40 +15356,40 @@ function distBBox(node, k2, p5, toBBox, destNode) {
   }
   return destNode;
 }
-function extend(a2, b2) {
-  a2.minX = Math.min(a2.minX, b2.minX);
-  a2.minY = Math.min(a2.minY, b2.minY);
-  a2.maxX = Math.max(a2.maxX, b2.maxX);
-  a2.maxY = Math.max(a2.maxY, b2.maxY);
-  return a2;
+function extend(a3, b3) {
+  a3.minX = Math.min(a3.minX, b3.minX);
+  a3.minY = Math.min(a3.minY, b3.minY);
+  a3.maxX = Math.max(a3.maxX, b3.maxX);
+  a3.maxY = Math.max(a3.maxY, b3.maxY);
+  return a3;
 }
-function compareNodeMinX(a2, b2) {
-  return a2.minX - b2.minX;
+function compareNodeMinX(a3, b3) {
+  return a3.minX - b3.minX;
 }
-function compareNodeMinY(a2, b2) {
-  return a2.minY - b2.minY;
+function compareNodeMinY(a3, b3) {
+  return a3.minY - b3.minY;
 }
-function bboxArea(a2) {
-  return (a2.maxX - a2.minX) * (a2.maxY - a2.minY);
+function bboxArea(a3) {
+  return (a3.maxX - a3.minX) * (a3.maxY - a3.minY);
 }
-function bboxMargin(a2) {
-  return a2.maxX - a2.minX + (a2.maxY - a2.minY);
+function bboxMargin(a3) {
+  return a3.maxX - a3.minX + (a3.maxY - a3.minY);
 }
-function enlargedArea(a2, b2) {
-  return (Math.max(b2.maxX, a2.maxX) - Math.min(b2.minX, a2.minX)) * (Math.max(b2.maxY, a2.maxY) - Math.min(b2.minY, a2.minY));
+function enlargedArea(a3, b3) {
+  return (Math.max(b3.maxX, a3.maxX) - Math.min(b3.minX, a3.minX)) * (Math.max(b3.maxY, a3.maxY) - Math.min(b3.minY, a3.minY));
 }
-function intersectionArea(a2, b2) {
-  const minX = Math.max(a2.minX, b2.minX);
-  const minY = Math.max(a2.minY, b2.minY);
-  const maxX = Math.min(a2.maxX, b2.maxX);
-  const maxY = Math.min(a2.maxY, b2.maxY);
+function intersectionArea(a3, b3) {
+  const minX = Math.max(a3.minX, b3.minX);
+  const minY = Math.max(a3.minY, b3.minY);
+  const maxX = Math.min(a3.maxX, b3.maxX);
+  const maxY = Math.min(a3.maxY, b3.maxY);
   return Math.max(0, maxX - minX) * Math.max(0, maxY - minY);
 }
-function contains(a2, b2) {
-  return a2.minX <= b2.minX && a2.minY <= b2.minY && b2.maxX <= a2.maxX && b2.maxY <= a2.maxY;
+function contains(a3, b3) {
+  return a3.minX <= b3.minX && a3.minY <= b3.minY && b3.maxX <= a3.maxX && b3.maxY <= a3.maxY;
 }
-function intersects(a2, b2) {
-  return b2.minX <= a2.maxX && b2.minY <= a2.maxY && b2.maxX >= a2.minX && b2.maxY >= a2.minY;
+function intersects(a3, b3) {
+  return b3.minX <= a3.maxX && b3.minY <= a3.maxY && b3.maxX >= a3.minX && b3.maxY >= a3.minY;
 }
 function createNode(children) {
   return {
@@ -12410,485 +15413,81 @@ function multiSelect(arr, left2, right2, n, compare) {
     stack.push(left2, mid, mid, right2);
   }
 }
-const ImageState = {
-  IDLE: 0,
-  LOADING: 1,
-  LOADED: 2,
-  ERROR: 3,
-  EMPTY: 4
-};
-const rgb = {
-  name: "rgb",
-  min: [0, 0, 0],
-  max: [255, 255, 255],
-  channel: ["red", "green", "blue"],
-  alias: ["RGB"]
-};
-var xyz = {
-  name: "xyz",
-  min: [0, 0, 0],
-  channel: ["X", "Y", "Z"],
-  alias: ["XYZ", "ciexyz", "cie1931"]
-};
-xyz.whitepoint = {
-  //1931 2°
-  2: {
-    //incadescent
-    A: [109.85, 100, 35.585],
-    // B:[],
-    C: [98.074, 100, 118.232],
-    D50: [96.422, 100, 82.521],
-    D55: [95.682, 100, 92.149],
-    //daylight
-    D65: [95.045592705167, 100, 108.9057750759878],
-    D75: [94.972, 100, 122.638],
-    //flourescent
-    // F1: [],
-    F2: [99.187, 100, 67.395],
-    // F3: [],
-    // F4: [],
-    // F5: [],
-    // F6:[],
-    F7: [95.044, 100, 108.755],
-    // F8: [],
-    // F9: [],
-    // F10: [],
-    F11: [100.966, 100, 64.37],
-    // F12: [],
-    E: [100, 100, 100]
-  },
-  //1964  10°
-  10: {
-    //incadescent
-    A: [111.144, 100, 35.2],
-    C: [97.285, 100, 116.145],
-    D50: [96.72, 100, 81.427],
-    D55: [95.799, 100, 90.926],
-    //daylight
-    D65: [94.811, 100, 107.304],
-    D75: [94.416, 100, 120.641],
-    //flourescent
-    F2: [103.28, 100, 69.026],
-    F7: [95.792, 100, 107.687],
-    F11: [103.866, 100, 65.627],
-    E: [100, 100, 100]
-  }
-};
-xyz.max = xyz.whitepoint[2].D65;
-xyz.rgb = function(_xyz, white) {
-  white = white || xyz.whitepoint[2].E;
-  var x2 = _xyz[0] / white[0], y2 = _xyz[1] / white[1], z2 = _xyz[2] / white[2], r2, g, b2;
-  r2 = x2 * 3.240969941904521 + y2 * -1.537383177570093 + z2 * -0.498610760293;
-  g = x2 * -0.96924363628087 + y2 * 1.87596750150772 + z2 * 0.041555057407175;
-  b2 = x2 * 0.055630079696993 + y2 * -0.20397695888897 + z2 * 1.056971514242878;
-  r2 = r2 > 31308e-7 ? 1.055 * Math.pow(r2, 1 / 2.4) - 0.055 : r2 = r2 * 12.92;
-  g = g > 31308e-7 ? 1.055 * Math.pow(g, 1 / 2.4) - 0.055 : g = g * 12.92;
-  b2 = b2 > 31308e-7 ? 1.055 * Math.pow(b2, 1 / 2.4) - 0.055 : b2 = b2 * 12.92;
-  r2 = Math.min(Math.max(0, r2), 1);
-  g = Math.min(Math.max(0, g), 1);
-  b2 = Math.min(Math.max(0, b2), 1);
-  return [r2 * 255, g * 255, b2 * 255];
-};
-rgb.xyz = function(rgb2, white) {
-  var r2 = rgb2[0] / 255, g = rgb2[1] / 255, b2 = rgb2[2] / 255;
-  r2 = r2 > 0.04045 ? Math.pow((r2 + 0.055) / 1.055, 2.4) : r2 / 12.92;
-  g = g > 0.04045 ? Math.pow((g + 0.055) / 1.055, 2.4) : g / 12.92;
-  b2 = b2 > 0.04045 ? Math.pow((b2 + 0.055) / 1.055, 2.4) : b2 / 12.92;
-  var x2 = r2 * 0.41239079926595 + g * 0.35758433938387 + b2 * 0.18048078840183;
-  var y2 = r2 * 0.21263900587151 + g * 0.71516867876775 + b2 * 0.072192315360733;
-  var z2 = r2 * 0.019330818715591 + g * 0.11919477979462 + b2 * 0.95053215224966;
-  white = white || xyz.whitepoint[2].E;
-  return [x2 * white[0], y2 * white[1], z2 * white[2]];
-};
-const luv = {
-  name: "luv",
-  //NOTE: luv has no rigidly defined limits
-  //easyrgb fails to get proper coords
-  //boronine states no rigid limits
-  //colorMine refers this ones:
-  min: [0, -134, -140],
-  max: [100, 224, 122],
-  channel: ["lightness", "u", "v"],
-  alias: ["LUV", "cieluv", "cie1976"],
-  xyz: function(arg, i, o) {
-    var _u, _v, l, u, v, x2, y2, z2, xn, yn, zn, un, vn;
-    l = arg[0], u = arg[1], v = arg[2];
-    if (l === 0) return [0, 0, 0];
-    var k2 = 0.0011070564598794539;
-    i = i || "D65";
-    o = o || 2;
-    xn = xyz.whitepoint[o][i][0];
-    yn = xyz.whitepoint[o][i][1];
-    zn = xyz.whitepoint[o][i][2];
-    un = 4 * xn / (xn + 15 * yn + 3 * zn);
-    vn = 9 * yn / (xn + 15 * yn + 3 * zn);
-    _u = u / (13 * l) + un || 0;
-    _v = v / (13 * l) + vn || 0;
-    y2 = l > 8 ? yn * Math.pow((l + 16) / 116, 3) : yn * l * k2;
-    x2 = y2 * 9 * _u / (4 * _v) || 0;
-    z2 = y2 * (12 - 3 * _u - 20 * _v) / (4 * _v) || 0;
-    return [x2, y2, z2];
-  }
-};
-xyz.luv = function(arg, i, o) {
-  var _u, _v, l, u, v, x2, y2, z2, xn, yn, zn, un, vn;
-  var e = 0.008856451679035631;
-  var k2 = 903.2962962962961;
-  i = i || "D65";
-  o = o || 2;
-  xn = xyz.whitepoint[o][i][0];
-  yn = xyz.whitepoint[o][i][1];
-  zn = xyz.whitepoint[o][i][2];
-  un = 4 * xn / (xn + 15 * yn + 3 * zn);
-  vn = 9 * yn / (xn + 15 * yn + 3 * zn);
-  x2 = arg[0], y2 = arg[1], z2 = arg[2];
-  _u = 4 * x2 / (x2 + 15 * y2 + 3 * z2) || 0;
-  _v = 9 * y2 / (x2 + 15 * y2 + 3 * z2) || 0;
-  var yr = y2 / yn;
-  l = yr <= e ? k2 * yr : 116 * Math.pow(yr, 1 / 3) - 16;
-  u = 13 * l * (_u - un);
-  v = 13 * l * (_v - vn);
-  return [l, u, v];
-};
-var lchuv = {
-  name: "lchuv",
-  channel: ["lightness", "chroma", "hue"],
-  alias: ["LCHuv", "cielchuv"],
-  min: [0, 0, 0],
-  max: [100, 100, 360],
-  luv: function(luv2) {
-    var l = luv2[0], c = luv2[1], h = luv2[2], u, v, hr;
-    hr = h / 360 * 2 * Math.PI;
-    u = c * Math.cos(hr);
-    v = c * Math.sin(hr);
-    return [l, u, v];
-  },
-  xyz: function(arg) {
-    return luv.xyz(lchuv.luv(arg));
-  }
-};
-luv.lchuv = function(luv2) {
-  var l = luv2[0], u = luv2[1], v = luv2[2];
-  var c = Math.sqrt(u * u + v * v);
-  var hr = Math.atan2(v, u);
-  var h = hr * 360 / 2 / Math.PI;
-  if (h < 0) {
-    h += 360;
-  }
-  return [l, c, h];
-};
-xyz.lchuv = function(arg) {
-  return luv.lchuv(xyz.luv(arg));
-};
-const names = {
-  aliceblue: [240, 248, 255],
-  antiquewhite: [250, 235, 215],
-  aqua: [0, 255, 255],
-  aquamarine: [127, 255, 212],
-  azure: [240, 255, 255],
-  beige: [245, 245, 220],
-  bisque: [255, 228, 196],
-  black: [0, 0, 0],
-  blanchedalmond: [255, 235, 205],
-  blue: [0, 0, 255],
-  blueviolet: [138, 43, 226],
-  brown: [165, 42, 42],
-  burlywood: [222, 184, 135],
-  cadetblue: [95, 158, 160],
-  chartreuse: [127, 255, 0],
-  chocolate: [210, 105, 30],
-  coral: [255, 127, 80],
-  cornflowerblue: [100, 149, 237],
-  cornsilk: [255, 248, 220],
-  crimson: [220, 20, 60],
-  cyan: [0, 255, 255],
-  darkblue: [0, 0, 139],
-  darkcyan: [0, 139, 139],
-  darkgoldenrod: [184, 134, 11],
-  darkgray: [169, 169, 169],
-  darkgreen: [0, 100, 0],
-  darkgrey: [169, 169, 169],
-  darkkhaki: [189, 183, 107],
-  darkmagenta: [139, 0, 139],
-  darkolivegreen: [85, 107, 47],
-  darkorange: [255, 140, 0],
-  darkorchid: [153, 50, 204],
-  darkred: [139, 0, 0],
-  darksalmon: [233, 150, 122],
-  darkseagreen: [143, 188, 143],
-  darkslateblue: [72, 61, 139],
-  darkslategray: [47, 79, 79],
-  darkslategrey: [47, 79, 79],
-  darkturquoise: [0, 206, 209],
-  darkviolet: [148, 0, 211],
-  deeppink: [255, 20, 147],
-  deepskyblue: [0, 191, 255],
-  dimgray: [105, 105, 105],
-  dimgrey: [105, 105, 105],
-  dodgerblue: [30, 144, 255],
-  firebrick: [178, 34, 34],
-  floralwhite: [255, 250, 240],
-  forestgreen: [34, 139, 34],
-  fuchsia: [255, 0, 255],
-  gainsboro: [220, 220, 220],
-  ghostwhite: [248, 248, 255],
-  gold: [255, 215, 0],
-  goldenrod: [218, 165, 32],
-  gray: [128, 128, 128],
-  green: [0, 128, 0],
-  greenyellow: [173, 255, 47],
-  grey: [128, 128, 128],
-  honeydew: [240, 255, 240],
-  hotpink: [255, 105, 180],
-  indianred: [205, 92, 92],
-  indigo: [75, 0, 130],
-  ivory: [255, 255, 240],
-  khaki: [240, 230, 140],
-  lavender: [230, 230, 250],
-  lavenderblush: [255, 240, 245],
-  lawngreen: [124, 252, 0],
-  lemonchiffon: [255, 250, 205],
-  lightblue: [173, 216, 230],
-  lightcoral: [240, 128, 128],
-  lightcyan: [224, 255, 255],
-  lightgoldenrodyellow: [250, 250, 210],
-  lightgray: [211, 211, 211],
-  lightgreen: [144, 238, 144],
-  lightgrey: [211, 211, 211],
-  lightpink: [255, 182, 193],
-  lightsalmon: [255, 160, 122],
-  lightseagreen: [32, 178, 170],
-  lightskyblue: [135, 206, 250],
-  lightslategray: [119, 136, 153],
-  lightslategrey: [119, 136, 153],
-  lightsteelblue: [176, 196, 222],
-  lightyellow: [255, 255, 224],
-  lime: [0, 255, 0],
-  limegreen: [50, 205, 50],
-  linen: [250, 240, 230],
-  magenta: [255, 0, 255],
-  maroon: [128, 0, 0],
-  mediumaquamarine: [102, 205, 170],
-  mediumblue: [0, 0, 205],
-  mediumorchid: [186, 85, 211],
-  mediumpurple: [147, 112, 219],
-  mediumseagreen: [60, 179, 113],
-  mediumslateblue: [123, 104, 238],
-  mediumspringgreen: [0, 250, 154],
-  mediumturquoise: [72, 209, 204],
-  mediumvioletred: [199, 21, 133],
-  midnightblue: [25, 25, 112],
-  mintcream: [245, 255, 250],
-  mistyrose: [255, 228, 225],
-  moccasin: [255, 228, 181],
-  navajowhite: [255, 222, 173],
-  navy: [0, 0, 128],
-  oldlace: [253, 245, 230],
-  olive: [128, 128, 0],
-  olivedrab: [107, 142, 35],
-  orange: [255, 165, 0],
-  orangered: [255, 69, 0],
-  orchid: [218, 112, 214],
-  palegoldenrod: [238, 232, 170],
-  palegreen: [152, 251, 152],
-  paleturquoise: [175, 238, 238],
-  palevioletred: [219, 112, 147],
-  papayawhip: [255, 239, 213],
-  peachpuff: [255, 218, 185],
-  peru: [205, 133, 63],
-  pink: [255, 192, 203],
-  plum: [221, 160, 221],
-  powderblue: [176, 224, 230],
-  purple: [128, 0, 128],
-  rebeccapurple: [102, 51, 153],
-  red: [255, 0, 0],
-  rosybrown: [188, 143, 143],
-  royalblue: [65, 105, 225],
-  saddlebrown: [139, 69, 19],
-  salmon: [250, 128, 114],
-  sandybrown: [244, 164, 96],
-  seagreen: [46, 139, 87],
-  seashell: [255, 245, 238],
-  sienna: [160, 82, 45],
-  silver: [192, 192, 192],
-  skyblue: [135, 206, 235],
-  slateblue: [106, 90, 205],
-  slategray: [112, 128, 144],
-  slategrey: [112, 128, 144],
-  snow: [255, 250, 250],
-  springgreen: [0, 255, 127],
-  steelblue: [70, 130, 180],
-  tan: [210, 180, 140],
-  teal: [0, 128, 128],
-  thistle: [216, 191, 216],
-  tomato: [255, 99, 71],
-  turquoise: [64, 224, 208],
-  violet: [238, 130, 238],
-  wheat: [245, 222, 179],
-  white: [255, 255, 255],
-  whitesmoke: [245, 245, 245],
-  yellow: [255, 255, 0],
-  yellowgreen: [154, 205, 50]
-};
-var baseHues = {
-  red: 0,
-  orange: 60,
-  yellow: 120,
-  green: 180,
-  blue: 240,
-  purple: 300
-};
-function parse$1(cstr) {
-  var _a, _b;
-  var m, parts = [], alpha = 1, space;
-  if (typeof cstr === "number") {
-    return { space: "rgb", values: [cstr >>> 16, (cstr & 65280) >>> 8, cstr & 255], alpha: 1 };
-  }
-  if (typeof cstr === "number") return { space: "rgb", values: [cstr >>> 16, (cstr & 65280) >>> 8, cstr & 255], alpha: 1 };
-  cstr = String(cstr).toLowerCase();
-  if (names[cstr]) {
-    parts = names[cstr].slice();
-    space = "rgb";
-  } else if (cstr === "transparent") {
-    alpha = 0;
-    space = "rgb";
-    parts = [0, 0, 0];
-  } else if (cstr[0] === "#") {
-    var base = cstr.slice(1);
-    var size = base.length;
-    var isShort = size <= 4;
-    alpha = 1;
-    if (isShort) {
-      parts = [
-        parseInt(base[0] + base[0], 16),
-        parseInt(base[1] + base[1], 16),
-        parseInt(base[2] + base[2], 16)
-      ];
-      if (size === 4) {
-        alpha = parseInt(base[3] + base[3], 16) / 255;
-      }
-    } else {
-      parts = [
-        parseInt(base[0] + base[1], 16),
-        parseInt(base[2] + base[3], 16),
-        parseInt(base[4] + base[5], 16)
-      ];
-      if (size === 8) {
-        alpha = parseInt(base[6] + base[7], 16) / 255;
-      }
-    }
-    if (!parts[0]) parts[0] = 0;
-    if (!parts[1]) parts[1] = 0;
-    if (!parts[2]) parts[2] = 0;
-    space = "rgb";
-  } else if (m = /^((?:rgba?|hs[lvb]a?|hwba?|cmyk?|xy[zy]|gray|lab|lchu?v?|[ly]uv|lms|oklch|oklab|color))\s*\(([^\)]*)\)/.exec(cstr)) {
-    var name = m[1];
-    space = name.replace(/a$/, "");
-    var dims = space === "cmyk" ? 4 : space === "gray" ? 1 : 3;
-    parts = m[2].trim().split(/\s*[,\/]\s*|\s+/);
-    if (space === "color") space = parts.shift();
-    parts = parts.map(function(x2, i) {
-      if (x2[x2.length - 1] === "%") {
-        x2 = parseFloat(x2) / 100;
-        if (i === 3) return x2;
-        if (space === "rgb") return x2 * 255;
-        if (space[0] === "h") return x2 * 100;
-        if (space[0] === "l" && !i) return x2 * 100;
-        if (space === "lab") return x2 * 125;
-        if (space === "lch") return i < 2 ? x2 * 150 : x2 * 360;
-        if (space[0] === "o" && !i) return x2;
-        if (space === "oklab") return x2 * 0.4;
-        if (space === "oklch") return i < 2 ? x2 * 0.4 : x2 * 360;
-        return x2;
-      }
-      if (space[i] === "h" || i === 2 && space[space.length - 1] === "h") {
-        if (baseHues[x2] !== void 0) return baseHues[x2];
-        if (x2.endsWith("deg")) return parseFloat(x2);
-        if (x2.endsWith("turn")) return parseFloat(x2) * 360;
-        if (x2.endsWith("grad")) return parseFloat(x2) * 360 / 400;
-        if (x2.endsWith("rad")) return parseFloat(x2) * 180 / Math.PI;
-      }
-      if (x2 === "none") return 0;
-      return parseFloat(x2);
-    });
-    alpha = parts.length > dims ? parts.pop() : 1;
-  } else if (/[0-9](?:\s|\/|,)/.test(cstr)) {
-    parts = cstr.match(/([0-9]+)/g).map(function(value) {
-      return parseFloat(value);
-    });
-    space = ((_b = (_a = cstr.match(/([a-z])/ig)) == null ? void 0 : _a.join("")) == null ? void 0 : _b.toLowerCase()) || "rgb";
-  }
-  return {
-    space,
-    values: parts,
-    alpha
-  };
-}
-const hsl = {
-  name: "hsl",
-  min: [0, 0, 0],
-  max: [360, 100, 100],
-  channel: ["hue", "saturation", "lightness"],
-  alias: ["HSL"],
-  rgb: function(hsl2) {
-    var h = hsl2[0] / 360, s = hsl2[1] / 100, l = hsl2[2] / 100, t1, t2, t3, rgb2, val, i = 0;
-    if (s === 0) return val = l * 255, [val, val, val];
-    t2 = l < 0.5 ? l * (1 + s) : l + s - l * s;
-    t1 = 2 * l - t2;
-    rgb2 = [0, 0, 0];
-    for (; i < 3; ) {
-      t3 = h + 1 / 3 * -(i - 1);
-      t3 < 0 ? t3++ : t3 > 1 && t3--;
-      val = 6 * t3 < 1 ? t1 + (t2 - t1) * 6 * t3 : 2 * t3 < 1 ? t2 : 3 * t3 < 2 ? t1 + (t2 - t1) * (2 / 3 - t3) * 6 : t1;
-      rgb2[i++] = val * 255;
-    }
-    return rgb2;
-  }
-};
-rgb.hsl = function(rgb2) {
-  var r2 = rgb2[0] / 255, g = rgb2[1] / 255, b2 = rgb2[2] / 255, min2 = Math.min(r2, g, b2), max2 = Math.max(r2, g, b2), delta = max2 - min2, h, s, l;
-  if (max2 === min2) {
-    h = 0;
-  } else if (r2 === max2) {
-    h = (g - b2) / delta;
-  } else if (g === max2) {
-    h = 2 + (b2 - r2) / delta;
-  } else if (b2 === max2) {
-    h = 4 + (r2 - g) / delta;
-  }
-  h = Math.min(h * 60, 360);
-  if (h < 0) {
-    h += 360;
-  }
-  l = (min2 + max2) / 2;
-  if (max2 === min2) {
-    s = 0;
-  } else if (l <= 0.5) {
-    s = delta / (max2 + min2);
-  } else {
-    s = delta / (2 - max2 - min2);
-  }
-  return [h, s * 100, l * 100];
-};
-function rgba(color) {
-  if (Array.isArray(color) && color.raw) color = String.raw(...arguments);
-  if (color instanceof Number) color = +color;
-  var values;
-  var parsed = parse$1(color);
-  if (!parsed.space) return [];
-  const min2 = parsed.space[0] === "h" ? hsl.min : rgb.min;
-  const max2 = parsed.space[0] === "h" ? hsl.max : rgb.max;
-  values = Array(3);
-  values[0] = Math.min(Math.max(parsed.values[0], min2[0]), max2[0]);
-  values[1] = Math.min(Math.max(parsed.values[1], min2[1]), max2[1]);
-  values[2] = Math.min(Math.max(parsed.values[2], min2[2]), max2[2]);
-  if (parsed.space[0] === "h") {
-    values = hsl.rgb(values);
-  }
-  values.push(Math.min(Math.max(parsed.alpha, 0), 1));
-  return values;
-}
 const NO_COLOR = [NaN, NaN, NaN, 0];
+let colorParseContext;
+function getColorParseContext() {
+  if (!colorParseContext) {
+    colorParseContext = createCanvasContext2D(1, 1, void 0, {
+      willReadFrequently: true,
+      desynchronized: true
+    });
+  }
+  return colorParseContext;
+}
+const rgbModernRegEx = /^rgba?\(\s*(\d+%?)\s+(\d+%?)\s+(\d+%?)(?:\s*\/\s*(\d+%|\d*\.\d+|[01]))?\s*\)$/i;
+const rgbLegacyAbsoluteRegEx = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*(\d+%|\d*\.\d+|[01]))?\s*\)$/i;
+const rgbLegacyPercentageRegEx = /^rgba?\(\s*(\d+%)\s*,\s*(\d+%)\s*,\s*(\d+%)(?:\s*,\s*(\d+%|\d*\.\d+|[01]))?\s*\)$/i;
+const hexRegEx = /^#([\da-f]{3,4}|[\da-f]{6}|[\da-f]{8})$/i;
+function toColorComponent(s, divider) {
+  return s.endsWith("%") ? Number(s.substring(0, s.length - 1)) / divider : Number(s);
+}
+function throwInvalidColor(color) {
+  throw new Error('failed to parse "' + color + '" as color');
+}
+function parseRgba(color) {
+  if (color.toLowerCase().startsWith("rgb")) {
+    const rgb = color.match(rgbLegacyAbsoluteRegEx) || color.match(rgbModernRegEx) || color.match(rgbLegacyPercentageRegEx);
+    if (rgb) {
+      const alpha = rgb[4];
+      const rgbDivider = 100 / 255;
+      return [
+        clamp(toColorComponent(rgb[1], rgbDivider) + 0.5 | 0, 0, 255),
+        clamp(toColorComponent(rgb[2], rgbDivider) + 0.5 | 0, 0, 255),
+        clamp(toColorComponent(rgb[3], rgbDivider) + 0.5 | 0, 0, 255),
+        alpha !== void 0 ? clamp(toColorComponent(alpha, 100), 0, 1) : 1
+      ];
+    }
+    throwInvalidColor(color);
+  }
+  if (color.startsWith("#")) {
+    if (hexRegEx.test(color)) {
+      const hex = color.substring(1);
+      const step = hex.length <= 4 ? 1 : 2;
+      const colorFromHex = [0, 0, 0, 255];
+      for (let i = 0, ii = hex.length; i < ii; i += step) {
+        let colorComponent = parseInt(hex.substring(i, i + step), 16);
+        if (step === 1) {
+          colorComponent += colorComponent << 4;
+        }
+        colorFromHex[i / step] = colorComponent;
+      }
+      colorFromHex[3] = colorFromHex[3] / 255;
+      return colorFromHex;
+    }
+    throwInvalidColor(color);
+  }
+  const context = getColorParseContext();
+  context.fillStyle = "#abcdef";
+  let invalidCheckFillStyle = context.fillStyle;
+  context.fillStyle = color;
+  if (context.fillStyle === invalidCheckFillStyle) {
+    context.fillStyle = "#fedcba";
+    invalidCheckFillStyle = context.fillStyle;
+    context.fillStyle = color;
+    if (context.fillStyle === invalidCheckFillStyle) {
+      throwInvalidColor(color);
+    }
+  }
+  const colorString = context.fillStyle;
+  if (colorString.startsWith("#") || colorString.startsWith("rgba")) {
+    return parseRgba(colorString);
+  }
+  context.clearRect(0, 0, 1, 1);
+  context.fillRect(0, 0, 1, 1);
+  const colorFromImage = Array.from(context.getImageData(0, 0, 1, 1).data);
+  colorFromImage[3] = toFixed(colorFromImage[3] / 255, 3);
+  return colorFromImage;
+}
 function asString(color) {
   if (typeof color === "string") {
     return color;
@@ -12906,15 +15505,49 @@ function withAlpha(color) {
   output[3] = 1;
   return output;
 }
+function b1(v) {
+  return v > 31308e-7 ? Math.pow(v, 1 / 2.4) * 269.025 - 14.025 : v * 3294.6;
+}
+function b2(v) {
+  return v > 0.2068965 ? Math.pow(v, 3) : (v - 4 / 29) * (108 / 841);
+}
+function a1(v) {
+  return v > 10.314724 ? Math.pow((v + 14.025) / 269.025, 2.4) : v / 3294.6;
+}
+function a2(v) {
+  return v > 88564e-7 ? Math.pow(v, 1 / 3) : v / (108 / 841) + 4 / 29;
+}
 function rgbaToLcha(color) {
-  const output = xyz.lchuv(rgb.xyz(color));
-  output[3] = color[3];
-  return output;
+  const r2 = a1(color[0]);
+  const g = a1(color[1]);
+  const b3 = a1(color[2]);
+  const y2 = a2(r2 * 0.222488403 + g * 0.716873169 + b3 * 0.06060791);
+  const l = 500 * (a2(r2 * 0.452247074 + g * 0.399439023 + b3 * 0.148375274) - y2);
+  const q = 200 * (y2 - a2(r2 * 0.016863605 + g * 0.117638439 + b3 * 0.865350722));
+  const h = Math.atan2(q, l) * (180 / Math.PI);
+  return [
+    116 * y2 - 16,
+    Math.sqrt(l * l + q * q),
+    h < 0 ? h + 360 : h,
+    color[3]
+  ];
 }
 function lchaToRgba(color) {
-  const output = xyz.rgb(lchuv.xyz(color));
-  output[3] = color[3];
-  return output;
+  const l = (color[0] + 16) / 116;
+  const c = color[1];
+  const h = color[2] * Math.PI / 180;
+  const y2 = b2(l);
+  const x2 = b2(l + c / 500 * Math.cos(h));
+  const z2 = b2(l - c / 200 * Math.sin(h));
+  const r2 = b1(x2 * 3.021973625 - y2 * 1.617392459 - z2 * 0.404875592);
+  const g = b1(x2 * -0.943766287 + y2 * 1.916279586 + z2 * 0.027607165);
+  const b3 = b1(x2 * 0.069407491 - y2 * 0.22898585 + z2 * 1.159737864);
+  return [
+    clamp(r2 + 0.5 | 0, 0, 255),
+    clamp(g + 0.5 | 0, 0, 255),
+    clamp(b3 + 0.5 | 0, 0, 255),
+    color[3]
+  ];
 }
 function fromString(s) {
   if (s === "none") {
@@ -12932,16 +15565,15 @@ function fromString(s) {
       }
     }
   }
-  const color = rgba(s);
+  const color = parseRgba(s);
   if (color.length !== 4) {
-    throw new Error('failed to parse "' + s + '" as color');
+    throwInvalidColor(s);
   }
   for (const c of color) {
     if (isNaN(c)) {
-      throw new Error('failed to parse "' + s + '" as color');
+      throwInvalidColor(s);
     }
   }
-  normalize(color);
   cache[s] = color;
   ++cacheSize;
   return color;
@@ -12952,13 +15584,6 @@ function asArray(color) {
   }
   return fromString(color);
 }
-function normalize(color) {
-  color[0] = clamp(color[0] + 0.5 | 0, 0, 255);
-  color[1] = clamp(color[1] + 0.5 | 0, 0, 255);
-  color[2] = clamp(color[2] + 0.5 | 0, 0, 255);
-  color[3] = clamp(color[3], 0, 1);
-  return color;
-}
 function toString(color) {
   let r2 = color[0];
   if (r2 != (r2 | 0)) {
@@ -12968,501 +15593,17 @@ function toString(color) {
   if (g != (g | 0)) {
     g = g + 0.5 | 0;
   }
-  let b2 = color[2];
-  if (b2 != (b2 | 0)) {
-    b2 = b2 + 0.5 | 0;
+  let b3 = color[2];
+  if (b3 != (b3 | 0)) {
+    b3 = b3 + 0.5 | 0;
   }
-  const a2 = color[3] === void 0 ? 1 : Math.round(color[3] * 1e3) / 1e3;
-  return "rgba(" + r2 + "," + g + "," + b2 + "," + a2 + ")";
-}
-const ua = typeof navigator !== "undefined" && typeof navigator.userAgent !== "undefined" ? navigator.userAgent.toLowerCase() : "";
-const FIREFOX = ua.includes("firefox");
-const SAFARI = ua.includes("safari") && !ua.includes("chrom");
-SAFARI && (ua.includes("version/15.4") || /cpu (os|iphone os) 15_4 like mac os x/.test(ua));
-const WEBKIT = ua.includes("webkit") && !ua.includes("edge");
-const MAC = ua.includes("macintosh");
-const DEVICE_PIXEL_RATIO = typeof devicePixelRatio !== "undefined" ? devicePixelRatio : 1;
-const WORKER_OFFSCREEN_CANVAS = typeof WorkerGlobalScope !== "undefined" && typeof OffscreenCanvas !== "undefined" && self instanceof WorkerGlobalScope;
-const IMAGE_DECODE = typeof Image !== "undefined" && Image.prototype.decode;
-const PASSIVE_EVENT_LISTENERS = function() {
-  let passive2 = false;
-  try {
-    const options = Object.defineProperty({}, "passive", {
-      get: function() {
-        passive2 = true;
-      }
-    });
-    window.addEventListener("_", null, options);
-    window.removeEventListener("_", null, options);
-  } catch (error) {
-  }
-  return passive2;
-}();
-function createCanvasContext2D(width, height, canvasPool2, settings) {
-  let canvas;
-  if (canvasPool2 && canvasPool2.length) {
-    canvas = /** @type {HTMLCanvasElement} */
-    canvasPool2.shift();
-  } else if (WORKER_OFFSCREEN_CANVAS) {
-    canvas = new OffscreenCanvas(width || 300, height || 300);
-  } else {
-    canvas = document.createElement("canvas");
-  }
-  if (width) {
-    canvas.width = width;
-  }
-  if (height) {
-    canvas.height = height;
-  }
-  return (
-    /** @type {CanvasRenderingContext2D} */
-    canvas.getContext("2d", settings)
-  );
-}
-let sharedCanvasContext;
-function getSharedCanvasContext2D() {
-  if (!sharedCanvasContext) {
-    sharedCanvasContext = createCanvasContext2D(1, 1);
-  }
-  return sharedCanvasContext;
-}
-function releaseCanvas(context) {
-  const canvas = context.canvas;
-  canvas.width = 1;
-  canvas.height = 1;
-  context.clearRect(0, 0, 1, 1);
-}
-function replaceNode(newNode, oldNode) {
-  const parent = oldNode.parentNode;
-  if (parent) {
-    parent.replaceChild(newNode, oldNode);
-  }
-}
-function removeChildren(node) {
-  while (node.lastChild) {
-    node.lastChild.remove();
-  }
-}
-function replaceChildren(node, children) {
-  const oldChildren = node.childNodes;
-  for (let i = 0; true; ++i) {
-    const oldChild = oldChildren[i];
-    const newChild = children[i];
-    if (!oldChild && !newChild) {
-      break;
-    }
-    if (oldChild === newChild) {
-      continue;
-    }
-    if (!oldChild) {
-      node.appendChild(newChild);
-      continue;
-    }
-    if (!newChild) {
-      node.removeChild(oldChild);
-      --i;
-      continue;
-    }
-    node.insertBefore(newChild, oldChild);
-  }
-}
-function listenImage(image, loadHandler, errorHandler) {
-  const img = (
-    /** @type {HTMLImageElement} */
-    image
-  );
-  let listening = true;
-  let decoding = false;
-  let loaded = false;
-  const listenerKeys = [
-    listenOnce(img, EventType.LOAD, function() {
-      loaded = true;
-      if (!decoding) {
-        loadHandler();
-      }
-    })
-  ];
-  if (img.src && IMAGE_DECODE) {
-    decoding = true;
-    img.decode().then(function() {
-      if (listening) {
-        loadHandler();
-      }
-    }).catch(function(error) {
-      if (listening) {
-        if (loaded) {
-          loadHandler();
-        } else {
-          errorHandler();
-        }
-      }
-    });
-  } else {
-    listenerKeys.push(listenOnce(img, EventType.ERROR, errorHandler));
-  }
-  return function unlisten() {
-    listening = false;
-    listenerKeys.forEach(unlistenByKey);
-  };
-}
-function load(image, src) {
-  return new Promise((resolve, reject) => {
-    function handleLoad() {
-      unlisten();
-      resolve(image);
-    }
-    function handleError() {
-      unlisten();
-      reject(new Error("Image load error"));
-    }
-    function unlisten() {
-      image.removeEventListener("load", handleLoad);
-      image.removeEventListener("error", handleError);
-    }
-    image.addEventListener("load", handleLoad);
-    image.addEventListener("error", handleError);
-  });
-}
-function decodeFallback(image, src) {
-  if (src) {
-    image.src = src;
-  }
-  return image.src && IMAGE_DECODE ? new Promise(
-    (resolve, reject) => image.decode().then(() => resolve(image)).catch(
-      (e) => image.complete && image.width ? resolve(image) : reject(e)
-    )
-  ) : load(image);
-}
-class IconImageCache {
-  constructor() {
-    this.cache_ = {};
-    this.patternCache_ = {};
-    this.cacheSize_ = 0;
-    this.maxCacheSize_ = 1024;
-  }
-  /**
-   * FIXME empty description for jsdoc
-   */
-  clear() {
-    this.cache_ = {};
-    this.patternCache_ = {};
-    this.cacheSize_ = 0;
-  }
-  /**
-   * @return {boolean} Can expire cache.
-   */
-  canExpireCache() {
-    return this.cacheSize_ > this.maxCacheSize_;
-  }
-  /**
-   * FIXME empty description for jsdoc
-   */
-  expire() {
-    if (this.canExpireCache()) {
-      let i = 0;
-      for (const key in this.cache_) {
-        const iconImage = this.cache_[key];
-        if ((i++ & 3) === 0 && !iconImage.hasListener()) {
-          delete this.cache_[key];
-          delete this.patternCache_[key];
-          --this.cacheSize_;
-        }
-      }
-    }
-  }
-  /**
-   * @param {string} src Src.
-   * @param {?string} crossOrigin Cross origin.
-   * @param {import("../color.js").Color|string|null} color Color.
-   * @return {import("./IconImage.js").default} Icon image.
-   */
-  get(src, crossOrigin, color) {
-    const key = getCacheKey$1(src, crossOrigin, color);
-    return key in this.cache_ ? this.cache_[key] : null;
-  }
-  /**
-   * @param {string} src Src.
-   * @param {?string} crossOrigin Cross origin.
-   * @param {import("../color.js").Color|string|null} color Color.
-   * @return {CanvasPattern} Icon image.
-   */
-  getPattern(src, crossOrigin, color) {
-    const key = getCacheKey$1(src, crossOrigin, color);
-    return key in this.patternCache_ ? this.patternCache_[key] : null;
-  }
-  /**
-   * @param {string} src Src.
-   * @param {?string} crossOrigin Cross origin.
-   * @param {import("../color.js").Color|string|null} color Color.
-   * @param {import("./IconImage.js").default|null} iconImage Icon image.
-   * @param {boolean} [pattern] Also cache a `'repeat'` pattern with this `iconImage`.
-   */
-  set(src, crossOrigin, color, iconImage, pattern) {
-    const key = getCacheKey$1(src, crossOrigin, color);
-    const update = key in this.cache_;
-    this.cache_[key] = iconImage;
-    if (pattern) {
-      if (iconImage.getImageState() === ImageState.IDLE) {
-        iconImage.load();
-      }
-      if (iconImage.getImageState() === ImageState.LOADING) {
-        iconImage.ready().then(() => {
-          this.patternCache_[key] = getSharedCanvasContext2D().createPattern(
-            iconImage.getImage(1),
-            "repeat"
-          );
-        });
-      } else {
-        this.patternCache_[key] = getSharedCanvasContext2D().createPattern(
-          iconImage.getImage(1),
-          "repeat"
-        );
-      }
-    }
-    if (!update) {
-      ++this.cacheSize_;
-    }
-  }
-  /**
-   * Set the cache size of the icon cache. Default is `1024`. Change this value when
-   * your map uses more than 1024 different icon images and you are not caching icon
-   * styles on the application level.
-   * @param {number} maxCacheSize Cache max size.
-   * @api
-   */
-  setSize(maxCacheSize) {
-    this.maxCacheSize_ = maxCacheSize;
-    this.expire();
-  }
-}
-function getCacheKey$1(src, crossOrigin, color) {
-  const colorString = color ? asArray(color) : "null";
-  return crossOrigin + ":" + src + ":" + colorString;
-}
-const shared = new IconImageCache();
-let taintedTestContext = null;
-class IconImage extends Target {
-  /**
-   * @param {HTMLImageElement|HTMLCanvasElement|ImageBitmap|null} image Image.
-   * @param {string|undefined} src Src.
-   * @param {?string} crossOrigin Cross origin.
-   * @param {import("../ImageState.js").default|undefined} imageState Image state.
-   * @param {import("../color.js").Color|string|null} color Color.
-   */
-  constructor(image, src, crossOrigin, imageState, color) {
-    super();
-    this.hitDetectionImage_ = null;
-    this.image_ = image;
-    this.crossOrigin_ = crossOrigin;
-    this.canvas_ = {};
-    this.color_ = color;
-    this.imageState_ = imageState === void 0 ? ImageState.IDLE : imageState;
-    this.size_ = image && image.width && image.height ? [image.width, image.height] : null;
-    this.src_ = src;
-    this.tainted_;
-    this.ready_ = null;
-  }
-  /**
-   * @private
-   */
-  initializeImage_() {
-    this.image_ = new Image();
-    if (this.crossOrigin_ !== null) {
-      this.image_.crossOrigin = this.crossOrigin_;
-    }
-  }
-  /**
-   * @private
-   * @return {boolean} The image canvas is tainted.
-   */
-  isTainted_() {
-    if (this.tainted_ === void 0 && this.imageState_ === ImageState.LOADED) {
-      if (!taintedTestContext) {
-        taintedTestContext = createCanvasContext2D(1, 1, void 0, {
-          willReadFrequently: true
-        });
-      }
-      taintedTestContext.drawImage(this.image_, 0, 0);
-      try {
-        taintedTestContext.getImageData(0, 0, 1, 1);
-        this.tainted_ = false;
-      } catch (e) {
-        taintedTestContext = null;
-        this.tainted_ = true;
-      }
-    }
-    return this.tainted_ === true;
-  }
-  /**
-   * @private
-   */
-  dispatchChangeEvent_() {
-    this.dispatchEvent(EventType.CHANGE);
-  }
-  /**
-   * @private
-   */
-  handleImageError_() {
-    this.imageState_ = ImageState.ERROR;
-    this.dispatchChangeEvent_();
-  }
-  /**
-   * @private
-   */
-  handleImageLoad_() {
-    this.imageState_ = ImageState.LOADED;
-    this.size_ = [this.image_.width, this.image_.height];
-    this.dispatchChangeEvent_();
-  }
-  /**
-   * @param {number} pixelRatio Pixel ratio.
-   * @return {HTMLImageElement|HTMLCanvasElement|ImageBitmap} Image or Canvas element or image bitmap.
-   */
-  getImage(pixelRatio) {
-    if (!this.image_) {
-      this.initializeImage_();
-    }
-    this.replaceColor_(pixelRatio);
-    return this.canvas_[pixelRatio] ? this.canvas_[pixelRatio] : this.image_;
-  }
-  /**
-   * @param {number} pixelRatio Pixel ratio.
-   * @return {number} Image or Canvas element.
-   */
-  getPixelRatio(pixelRatio) {
-    this.replaceColor_(pixelRatio);
-    return this.canvas_[pixelRatio] ? pixelRatio : 1;
-  }
-  /**
-   * @return {import("../ImageState.js").default} Image state.
-   */
-  getImageState() {
-    return this.imageState_;
-  }
-  /**
-   * @return {HTMLImageElement|HTMLCanvasElement|ImageBitmap} Image element.
-   */
-  getHitDetectionImage() {
-    if (!this.image_) {
-      this.initializeImage_();
-    }
-    if (!this.hitDetectionImage_) {
-      if (this.isTainted_()) {
-        const width = this.size_[0];
-        const height = this.size_[1];
-        const context = createCanvasContext2D(width, height);
-        context.fillRect(0, 0, width, height);
-        this.hitDetectionImage_ = context.canvas;
-      } else {
-        this.hitDetectionImage_ = this.image_;
-      }
-    }
-    return this.hitDetectionImage_;
-  }
-  /**
-   * Get the size of the icon (in pixels).
-   * @return {import("../size.js").Size} Image size.
-   */
-  getSize() {
-    return this.size_;
-  }
-  /**
-   * @return {string|undefined} Image src.
-   */
-  getSrc() {
-    return this.src_;
-  }
-  /**
-   * Load not yet loaded URI.
-   */
-  load() {
-    if (this.imageState_ !== ImageState.IDLE) {
-      return;
-    }
-    if (!this.image_) {
-      this.initializeImage_();
-    }
-    this.imageState_ = ImageState.LOADING;
-    try {
-      if (this.src_ !== void 0) {
-        this.image_.src = this.src_;
-      }
-    } catch (e) {
-      this.handleImageError_();
-    }
-    if (this.image_ instanceof HTMLImageElement) {
-      decodeFallback(this.image_, this.src_).then((image) => {
-        this.image_ = image;
-        this.handleImageLoad_();
-      }).catch(this.handleImageError_.bind(this));
-    }
-  }
-  /**
-   * @param {number} pixelRatio Pixel ratio.
-   * @private
-   */
-  replaceColor_(pixelRatio) {
-    if (!this.color_ || this.canvas_[pixelRatio] || this.imageState_ !== ImageState.LOADED) {
-      return;
-    }
-    const image = this.image_;
-    const ctx = createCanvasContext2D(
-      Math.ceil(image.width * pixelRatio),
-      Math.ceil(image.height * pixelRatio)
-    );
-    const canvas = ctx.canvas;
-    ctx.scale(pixelRatio, pixelRatio);
-    ctx.drawImage(image, 0, 0);
-    ctx.globalCompositeOperation = "multiply";
-    ctx.fillStyle = asString(this.color_);
-    ctx.fillRect(0, 0, canvas.width / pixelRatio, canvas.height / pixelRatio);
-    ctx.globalCompositeOperation = "destination-in";
-    ctx.drawImage(image, 0, 0);
-    this.canvas_[pixelRatio] = canvas;
-  }
-  /**
-   * @return {Promise<void>} Promise that resolves when the image is loaded.
-   */
-  ready() {
-    if (!this.ready_) {
-      this.ready_ = new Promise((resolve) => {
-        if (this.imageState_ === ImageState.LOADED || this.imageState_ === ImageState.ERROR) {
-          resolve();
-        } else {
-          const onChange = () => {
-            if (this.imageState_ === ImageState.LOADED || this.imageState_ === ImageState.ERROR) {
-              this.removeEventListener(EventType.CHANGE, onChange);
-              resolve();
-            }
-          };
-          this.addEventListener(EventType.CHANGE, onChange);
-        }
-      });
-    }
-    return this.ready_;
-  }
-}
-function get(image, cacheKey, crossOrigin, imageState, color, pattern) {
-  let iconImage = cacheKey === void 0 ? void 0 : shared.get(cacheKey, crossOrigin, color);
-  if (!iconImage) {
-    iconImage = new IconImage(
-      image,
-      image && "src" in image ? image.src || void 0 : cacheKey,
-      crossOrigin,
-      imageState,
-      color
-    );
-    shared.set(cacheKey, crossOrigin, color, iconImage, pattern);
-  }
-  if (pattern && iconImage && !shared.getPattern(cacheKey, crossOrigin, color)) {
-    shared.set(cacheKey, crossOrigin, color, iconImage, pattern);
-  }
-  return iconImage;
+  const a3 = color[3] === void 0 ? 1 : Math.round(color[3] * 1e3) / 1e3;
+  return "rgba(" + r2 + "," + g + "," + b3 + "," + a3 + ")";
 }
 function hasArea(size) {
   return size[0] > 0 && size[1] > 0;
 }
-function scale$1(size, ratio, dest) {
+function scale(size, ratio, dest) {
   if (dest === void 0) {
     dest = [0, 0];
   }
@@ -13481,2406 +15622,6 @@ function toSize(size, dest) {
     dest[1] = size;
   }
   return dest;
-}
-class ImageStyle {
-  /**
-   * @param {Options} options Options.
-   */
-  constructor(options) {
-    this.opacity_ = options.opacity;
-    this.rotateWithView_ = options.rotateWithView;
-    this.rotation_ = options.rotation;
-    this.scale_ = options.scale;
-    this.scaleArray_ = toSize(options.scale);
-    this.displacement_ = options.displacement;
-    this.declutterMode_ = options.declutterMode;
-  }
-  /**
-   * Clones the style.
-   * @return {ImageStyle} The cloned style.
-   * @api
-   */
-  clone() {
-    const scale2 = this.getScale();
-    return new ImageStyle({
-      opacity: this.getOpacity(),
-      scale: Array.isArray(scale2) ? scale2.slice() : scale2,
-      rotation: this.getRotation(),
-      rotateWithView: this.getRotateWithView(),
-      displacement: this.getDisplacement().slice(),
-      declutterMode: this.getDeclutterMode()
-    });
-  }
-  /**
-   * Get the symbolizer opacity.
-   * @return {number} Opacity.
-   * @api
-   */
-  getOpacity() {
-    return this.opacity_;
-  }
-  /**
-   * Determine whether the symbolizer rotates with the map.
-   * @return {boolean} Rotate with map.
-   * @api
-   */
-  getRotateWithView() {
-    return this.rotateWithView_;
-  }
-  /**
-   * Get the symoblizer rotation.
-   * @return {number} Rotation.
-   * @api
-   */
-  getRotation() {
-    return this.rotation_;
-  }
-  /**
-   * Get the symbolizer scale.
-   * @return {number|import("../size.js").Size} Scale.
-   * @api
-   */
-  getScale() {
-    return this.scale_;
-  }
-  /**
-   * Get the symbolizer scale array.
-   * @return {import("../size.js").Size} Scale array.
-   */
-  getScaleArray() {
-    return this.scaleArray_;
-  }
-  /**
-   * Get the displacement of the shape
-   * @return {Array<number>} Shape's center displacement
-   * @api
-   */
-  getDisplacement() {
-    return this.displacement_;
-  }
-  /**
-   * Get the declutter mode of the shape
-   * @return {import("./Style.js").DeclutterMode} Shape's declutter mode
-   * @api
-   */
-  getDeclutterMode() {
-    return this.declutterMode_;
-  }
-  /**
-   * Get the anchor point in pixels. The anchor determines the center point for the
-   * symbolizer.
-   * @abstract
-   * @return {Array<number>} Anchor.
-   */
-  getAnchor() {
-    return abstract();
-  }
-  /**
-   * Get the image element for the symbolizer.
-   * @abstract
-   * @param {number} pixelRatio Pixel ratio.
-   * @return {import('../DataTile.js').ImageLike} Image element.
-   */
-  getImage(pixelRatio) {
-    return abstract();
-  }
-  /**
-   * @abstract
-   * @return {import('../DataTile.js').ImageLike} Image element.
-   */
-  getHitDetectionImage() {
-    return abstract();
-  }
-  /**
-   * Get the image pixel ratio.
-   * @param {number} pixelRatio Pixel ratio.
-   * @return {number} Pixel ratio.
-   */
-  getPixelRatio(pixelRatio) {
-    return 1;
-  }
-  /**
-   * @abstract
-   * @return {import("../ImageState.js").default} Image state.
-   */
-  getImageState() {
-    return abstract();
-  }
-  /**
-   * @abstract
-   * @return {import("../size.js").Size} Image size.
-   */
-  getImageSize() {
-    return abstract();
-  }
-  /**
-   * Get the origin of the symbolizer.
-   * @abstract
-   * @return {Array<number>} Origin.
-   */
-  getOrigin() {
-    return abstract();
-  }
-  /**
-   * Get the size of the symbolizer (in pixels).
-   * @abstract
-   * @return {import("../size.js").Size} Size.
-   */
-  getSize() {
-    return abstract();
-  }
-  /**
-   * Set the displacement.
-   *
-   * @param {Array<number>} displacement Displacement.
-   * @api
-   */
-  setDisplacement(displacement) {
-    this.displacement_ = displacement;
-  }
-  /**
-   * Set the opacity.
-   *
-   * @param {number} opacity Opacity.
-   * @api
-   */
-  setOpacity(opacity) {
-    this.opacity_ = opacity;
-  }
-  /**
-   * Set whether to rotate the style with the view.
-   *
-   * @param {boolean} rotateWithView Rotate with map.
-   * @api
-   */
-  setRotateWithView(rotateWithView) {
-    this.rotateWithView_ = rotateWithView;
-  }
-  /**
-   * Set the rotation.
-   *
-   * @param {number} rotation Rotation.
-   * @api
-   */
-  setRotation(rotation) {
-    this.rotation_ = rotation;
-  }
-  /**
-   * Set the scale.
-   *
-   * @param {number|import("../size.js").Size} scale Scale.
-   * @api
-   */
-  setScale(scale2) {
-    this.scale_ = scale2;
-    this.scaleArray_ = toSize(scale2);
-  }
-  /**
-   * @abstract
-   * @param {function(import("../events/Event.js").default): void} listener Listener function.
-   */
-  listenImageChange(listener) {
-    abstract();
-  }
-  /**
-   * Load not yet loaded URI.
-   * @abstract
-   */
-  load() {
-    abstract();
-  }
-  /**
-   * @abstract
-   * @param {function(import("../events/Event.js").default): void} listener Listener function.
-   */
-  unlistenImageChange(listener) {
-    abstract();
-  }
-  /**
-   * @return {Promise<void>} `false` or Promise that resolves when the style is ready to use.
-   */
-  ready() {
-    return Promise.resolve();
-  }
-}
-function asColorLike(color) {
-  if (!color) {
-    return null;
-  }
-  if (Array.isArray(color)) {
-    return toString(color);
-  }
-  if (typeof color === "object" && "src" in color) {
-    return asCanvasPattern(color);
-  }
-  return color;
-}
-function asCanvasPattern(pattern) {
-  if (!pattern.offset || !pattern.size) {
-    return shared.getPattern(pattern.src, "anonymous", pattern.color);
-  }
-  const cacheKey = pattern.src + ":" + pattern.offset;
-  const canvasPattern = shared.getPattern(
-    cacheKey,
-    void 0,
-    pattern.color
-  );
-  if (canvasPattern) {
-    return canvasPattern;
-  }
-  const iconImage = shared.get(pattern.src, "anonymous", null);
-  if (iconImage.getImageState() !== ImageState.LOADED) {
-    return null;
-  }
-  const patternCanvasContext = createCanvasContext2D(
-    pattern.size[0],
-    pattern.size[1]
-  );
-  patternCanvasContext.drawImage(
-    iconImage.getImage(1),
-    pattern.offset[0],
-    pattern.offset[1],
-    pattern.size[0],
-    pattern.size[1],
-    0,
-    0,
-    pattern.size[0],
-    pattern.size[1]
-  );
-  get(
-    patternCanvasContext.canvas,
-    cacheKey,
-    void 0,
-    ImageState.LOADED,
-    pattern.color,
-    true
-  );
-  return shared.getPattern(cacheKey, void 0, pattern.color);
-}
-const CLASS_HIDDEN = "ol-hidden";
-const CLASS_UNSELECTABLE = "ol-unselectable";
-const CLASS_UNSUPPORTED = "ol-unsupported";
-const CLASS_CONTROL = "ol-control";
-const CLASS_COLLAPSED = "ol-collapsed";
-const fontRegEx = new RegExp(
-  [
-    "^\\s*(?=(?:(?:[-a-z]+\\s*){0,2}(italic|oblique))?)",
-    "(?=(?:(?:[-a-z]+\\s*){0,2}(small-caps))?)",
-    "(?=(?:(?:[-a-z]+\\s*){0,2}(bold(?:er)?|lighter|[1-9]00 ))?)",
-    "(?:(?:normal|\\1|\\2|\\3)\\s*){0,3}((?:xx?-)?",
-    "(?:small|large)|medium|smaller|larger|[\\.\\d]+(?:\\%|in|[cem]m|ex|p[ctx]))",
-    "(?:\\s*\\/\\s*(normal|[\\.\\d]+(?:\\%|in|[cem]m|ex|p[ctx])?))",
-    `?\\s*([-,\\"\\'\\sa-z]+?)\\s*$`
-  ].join(""),
-  "i"
-);
-const fontRegExMatchIndex = [
-  "style",
-  "variant",
-  "weight",
-  "size",
-  "lineHeight",
-  "family"
-];
-const getFontParameters = function(fontSpec) {
-  const match = fontSpec.match(fontRegEx);
-  if (!match) {
-    return null;
-  }
-  const style = (
-    /** @type {FontParameters} */
-    {
-      lineHeight: "normal",
-      size: "1.2em",
-      style: "normal",
-      weight: "normal",
-      variant: "normal"
-    }
-  );
-  for (let i = 0, ii = fontRegExMatchIndex.length; i < ii; ++i) {
-    const value = match[i + 1];
-    if (value !== void 0) {
-      style[fontRegExMatchIndex[i]] = value;
-    }
-  }
-  style.families = style.family.split(/,\s?/);
-  return style;
-};
-const defaultFont = "10px sans-serif";
-const defaultFillStyle = "#000";
-const defaultLineCap = "round";
-const defaultLineDash = [];
-const defaultLineDashOffset = 0;
-const defaultLineJoin = "round";
-const defaultMiterLimit = 10;
-const defaultStrokeStyle = "#000";
-const defaultTextAlign = "center";
-const defaultTextBaseline = "middle";
-const defaultPadding = [0, 0, 0, 0];
-const defaultLineWidth = 1;
-const checkedFonts = new BaseObject();
-let measureContext = null;
-let measureFont;
-const textHeights = {};
-const registerFont = function() {
-  const retries = 100;
-  const size = "32px ";
-  const referenceFonts = ["monospace", "serif"];
-  const len = referenceFonts.length;
-  const text = "wmytzilWMYTZIL@#/&?$%10";
-  let interval, referenceWidth;
-  function isAvailable(fontStyle, fontWeight, fontFamily) {
-    let available = true;
-    for (let i = 0; i < len; ++i) {
-      const referenceFont = referenceFonts[i];
-      referenceWidth = measureTextWidth(
-        fontStyle + " " + fontWeight + " " + size + referenceFont,
-        text
-      );
-      if (fontFamily != referenceFont) {
-        const width = measureTextWidth(
-          fontStyle + " " + fontWeight + " " + size + fontFamily + "," + referenceFont,
-          text
-        );
-        available = available && width != referenceWidth;
-      }
-    }
-    if (available) {
-      return true;
-    }
-    return false;
-  }
-  function check() {
-    let done = true;
-    const fonts = checkedFonts.getKeys();
-    for (let i = 0, ii = fonts.length; i < ii; ++i) {
-      const font = fonts[i];
-      if (checkedFonts.get(font) < retries) {
-        const [style, weight, family] = font.split("\n");
-        if (isAvailable(style, weight, family)) {
-          clear$1(textHeights);
-          measureContext = null;
-          measureFont = void 0;
-          checkedFonts.set(font, retries);
-        } else {
-          checkedFonts.set(font, checkedFonts.get(font) + 1, true);
-          done = false;
-        }
-      }
-    }
-    if (done) {
-      clearInterval(interval);
-      interval = void 0;
-    }
-  }
-  return function(fontSpec) {
-    const font = getFontParameters(fontSpec);
-    if (!font) {
-      return;
-    }
-    const families = font.families;
-    for (let i = 0, ii = families.length; i < ii; ++i) {
-      const family = families[i];
-      const key = font.style + "\n" + font.weight + "\n" + family;
-      if (checkedFonts.get(key) === void 0) {
-        checkedFonts.set(key, retries, true);
-        if (!isAvailable(font.style, font.weight, family)) {
-          checkedFonts.set(key, 0, true);
-          if (interval === void 0) {
-            interval = setInterval(check, 32);
-          }
-        }
-      }
-    }
-  };
-}();
-const measureTextHeight = /* @__PURE__ */ function() {
-  let measureElement;
-  return function(fontSpec) {
-    let height = textHeights[fontSpec];
-    if (height == void 0) {
-      if (WORKER_OFFSCREEN_CANVAS) {
-        const font = getFontParameters(fontSpec);
-        const metrics = measureText(fontSpec, "Žg");
-        const lineHeight = isNaN(Number(font.lineHeight)) ? 1.2 : Number(font.lineHeight);
-        height = lineHeight * (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent);
-      } else {
-        if (!measureElement) {
-          measureElement = document.createElement("div");
-          measureElement.innerHTML = "M";
-          measureElement.style.minHeight = "0";
-          measureElement.style.maxHeight = "none";
-          measureElement.style.height = "auto";
-          measureElement.style.padding = "0";
-          measureElement.style.border = "none";
-          measureElement.style.position = "absolute";
-          measureElement.style.display = "block";
-          measureElement.style.left = "-99999px";
-        }
-        measureElement.style.font = fontSpec;
-        document.body.appendChild(measureElement);
-        height = measureElement.offsetHeight;
-        document.body.removeChild(measureElement);
-      }
-      textHeights[fontSpec] = height;
-    }
-    return height;
-  };
-}();
-function measureText(font, text) {
-  if (!measureContext) {
-    measureContext = createCanvasContext2D(1, 1);
-  }
-  if (font != measureFont) {
-    measureContext.font = font;
-    measureFont = measureContext.font;
-  }
-  return measureContext.measureText(text);
-}
-function measureTextWidth(font, text) {
-  return measureText(font, text).width;
-}
-function measureAndCacheTextWidth(font, text, cache2) {
-  if (text in cache2) {
-    return cache2[text];
-  }
-  const width = text.split("\n").reduce((prev, curr) => Math.max(prev, measureTextWidth(font, curr)), 0);
-  cache2[text] = width;
-  return width;
-}
-function getTextDimensions(baseStyle, chunks) {
-  const widths = [];
-  const heights = [];
-  const lineWidths = [];
-  let width = 0;
-  let lineWidth = 0;
-  let height = 0;
-  let lineHeight = 0;
-  for (let i = 0, ii = chunks.length; i <= ii; i += 2) {
-    const text = chunks[i];
-    if (text === "\n" || i === ii) {
-      width = Math.max(width, lineWidth);
-      lineWidths.push(lineWidth);
-      lineWidth = 0;
-      height += lineHeight;
-      lineHeight = 0;
-      continue;
-    }
-    const font = chunks[i + 1] || baseStyle.font;
-    const currentWidth = measureTextWidth(font, text);
-    widths.push(currentWidth);
-    lineWidth += currentWidth;
-    const currentHeight = measureTextHeight(font);
-    heights.push(currentHeight);
-    lineHeight = Math.max(lineHeight, currentHeight);
-  }
-  return { width, height, widths, heights, lineWidths };
-}
-function drawImageOrLabel(context, transform2, opacity, labelOrImage, originX, originY, w2, h, x2, y2, scale2) {
-  context.save();
-  if (opacity !== 1) {
-    if (context.globalAlpha === void 0) {
-      context.globalAlpha = (context2) => context2.globalAlpha *= opacity;
-    } else {
-      context.globalAlpha *= opacity;
-    }
-  }
-  if (transform2) {
-    context.transform.apply(context, transform2);
-  }
-  if (
-    /** @type {*} */
-    labelOrImage.contextInstructions
-  ) {
-    context.translate(x2, y2);
-    context.scale(scale2[0], scale2[1]);
-    executeLabelInstructions(
-      /** @type {Label} */
-      labelOrImage,
-      context
-    );
-  } else if (scale2[0] < 0 || scale2[1] < 0) {
-    context.translate(x2, y2);
-    context.scale(scale2[0], scale2[1]);
-    context.drawImage(
-      /** @type {HTMLCanvasElement|HTMLImageElement|HTMLVideoElement} */
-      labelOrImage,
-      originX,
-      originY,
-      w2,
-      h,
-      0,
-      0,
-      w2,
-      h
-    );
-  } else {
-    context.drawImage(
-      /** @type {HTMLCanvasElement|HTMLImageElement|HTMLVideoElement} */
-      labelOrImage,
-      originX,
-      originY,
-      w2,
-      h,
-      x2,
-      y2,
-      w2 * scale2[0],
-      h * scale2[1]
-    );
-  }
-  context.restore();
-}
-function executeLabelInstructions(label, context) {
-  const contextInstructions = label.contextInstructions;
-  for (let i = 0, ii = contextInstructions.length; i < ii; i += 2) {
-    if (Array.isArray(contextInstructions[i + 1])) {
-      context[contextInstructions[i]].apply(
-        context,
-        contextInstructions[i + 1]
-      );
-    } else {
-      context[contextInstructions[i]] = contextInstructions[i + 1];
-    }
-  }
-}
-class RegularShape extends ImageStyle {
-  /**
-   * @param {Options} options Options.
-   */
-  constructor(options) {
-    super({
-      opacity: 1,
-      rotateWithView: options.rotateWithView !== void 0 ? options.rotateWithView : false,
-      rotation: options.rotation !== void 0 ? options.rotation : 0,
-      scale: options.scale !== void 0 ? options.scale : 1,
-      displacement: options.displacement !== void 0 ? options.displacement : [0, 0],
-      declutterMode: options.declutterMode
-    });
-    this.hitDetectionCanvas_ = null;
-    this.fill_ = options.fill !== void 0 ? options.fill : null;
-    this.origin_ = [0, 0];
-    this.points_ = options.points;
-    this.radius = options.radius;
-    this.radius2_ = options.radius2;
-    this.angle_ = options.angle !== void 0 ? options.angle : 0;
-    this.stroke_ = options.stroke !== void 0 ? options.stroke : null;
-    this.size_;
-    this.renderOptions_;
-    this.imageState_ = this.fill_ && this.fill_.loading() ? ImageState.LOADING : ImageState.LOADED;
-    if (this.imageState_ === ImageState.LOADING) {
-      this.ready().then(() => this.imageState_ = ImageState.LOADED);
-    }
-    this.render();
-  }
-  /**
-   * Clones the style.
-   * @return {RegularShape} The cloned style.
-   * @api
-   * @override
-   */
-  clone() {
-    const scale2 = this.getScale();
-    const style = new RegularShape({
-      fill: this.getFill() ? this.getFill().clone() : void 0,
-      points: this.getPoints(),
-      radius: this.getRadius(),
-      radius2: this.getRadius2(),
-      angle: this.getAngle(),
-      stroke: this.getStroke() ? this.getStroke().clone() : void 0,
-      rotation: this.getRotation(),
-      rotateWithView: this.getRotateWithView(),
-      scale: Array.isArray(scale2) ? scale2.slice() : scale2,
-      displacement: this.getDisplacement().slice(),
-      declutterMode: this.getDeclutterMode()
-    });
-    style.setOpacity(this.getOpacity());
-    return style;
-  }
-  /**
-   * Get the anchor point in pixels. The anchor determines the center point for the
-   * symbolizer.
-   * @return {Array<number>} Anchor.
-   * @api
-   * @override
-   */
-  getAnchor() {
-    const size = this.size_;
-    const displacement = this.getDisplacement();
-    const scale2 = this.getScaleArray();
-    return [
-      size[0] / 2 - displacement[0] / scale2[0],
-      size[1] / 2 + displacement[1] / scale2[1]
-    ];
-  }
-  /**
-   * Get the angle used in generating the shape.
-   * @return {number} Shape's rotation in radians.
-   * @api
-   */
-  getAngle() {
-    return this.angle_;
-  }
-  /**
-   * Get the fill style for the shape.
-   * @return {import("./Fill.js").default|null} Fill style.
-   * @api
-   */
-  getFill() {
-    return this.fill_;
-  }
-  /**
-   * Set the fill style.
-   * @param {import("./Fill.js").default|null} fill Fill style.
-   * @api
-   */
-  setFill(fill) {
-    this.fill_ = fill;
-    this.render();
-  }
-  /**
-   * @return {HTMLCanvasElement} Image element.
-   * @override
-   */
-  getHitDetectionImage() {
-    if (!this.hitDetectionCanvas_) {
-      this.hitDetectionCanvas_ = this.createHitDetectionCanvas_(
-        this.renderOptions_
-      );
-    }
-    return this.hitDetectionCanvas_;
-  }
-  /**
-   * Get the image icon.
-   * @param {number} pixelRatio Pixel ratio.
-   * @return {HTMLCanvasElement} Image or Canvas element.
-   * @api
-   * @override
-   */
-  getImage(pixelRatio) {
-    var _a, _b;
-    const fillKey = (_a = this.fill_) == null ? void 0 : _a.getKey();
-    const cacheKey = `${pixelRatio},${this.angle_},${this.radius},${this.radius2_},${this.points_},${fillKey}` + Object.values(this.renderOptions_).join(",");
-    let image = (
-      /** @type {HTMLCanvasElement} */
-      (_b = shared.get(cacheKey, null, null)) == null ? void 0 : _b.getImage(1)
-    );
-    if (!image) {
-      const renderOptions = this.renderOptions_;
-      const size = Math.ceil(renderOptions.size * pixelRatio);
-      const context = createCanvasContext2D(size, size);
-      this.draw_(renderOptions, context, pixelRatio);
-      image = context.canvas;
-      shared.set(
-        cacheKey,
-        null,
-        null,
-        new IconImage(image, void 0, null, ImageState.LOADED, null)
-      );
-    }
-    return image;
-  }
-  /**
-   * Get the image pixel ratio.
-   * @param {number} pixelRatio Pixel ratio.
-   * @return {number} Pixel ratio.
-   * @override
-   */
-  getPixelRatio(pixelRatio) {
-    return pixelRatio;
-  }
-  /**
-   * @return {import("../size.js").Size} Image size.
-   * @override
-   */
-  getImageSize() {
-    return this.size_;
-  }
-  /**
-   * @return {import("../ImageState.js").default} Image state.
-   * @override
-   */
-  getImageState() {
-    return this.imageState_;
-  }
-  /**
-   * Get the origin of the symbolizer.
-   * @return {Array<number>} Origin.
-   * @api
-   * @override
-   */
-  getOrigin() {
-    return this.origin_;
-  }
-  /**
-   * Get the number of points for generating the shape.
-   * @return {number} Number of points for stars and regular polygons.
-   * @api
-   */
-  getPoints() {
-    return this.points_;
-  }
-  /**
-   * Get the (primary) radius for the shape.
-   * @return {number} Radius.
-   * @api
-   */
-  getRadius() {
-    return this.radius;
-  }
-  /**
-   * Get the secondary radius for the shape.
-   * @return {number|undefined} Radius2.
-   * @api
-   */
-  getRadius2() {
-    return this.radius2_;
-  }
-  /**
-   * Get the size of the symbolizer (in pixels).
-   * @return {import("../size.js").Size} Size.
-   * @api
-   * @override
-   */
-  getSize() {
-    return this.size_;
-  }
-  /**
-   * Get the stroke style for the shape.
-   * @return {import("./Stroke.js").default|null} Stroke style.
-   * @api
-   */
-  getStroke() {
-    return this.stroke_;
-  }
-  /**
-   * Set the stroke style.
-   * @param {import("./Stroke.js").default|null} stroke Stroke style.
-   * @api
-   */
-  setStroke(stroke) {
-    this.stroke_ = stroke;
-    this.render();
-  }
-  /**
-   * @param {function(import("../events/Event.js").default): void} listener Listener function.
-   * @override
-   */
-  listenImageChange(listener) {
-  }
-  /**
-   * Load not yet loaded URI.
-   * @override
-   */
-  load() {
-  }
-  /**
-   * @param {function(import("../events/Event.js").default): void} listener Listener function.
-   * @override
-   */
-  unlistenImageChange(listener) {
-  }
-  /**
-   * Calculate additional canvas size needed for the miter.
-   * @param {string} lineJoin Line join
-   * @param {number} strokeWidth Stroke width
-   * @param {number} miterLimit Miter limit
-   * @return {number} Additional canvas size needed
-   * @private
-   */
-  calculateLineJoinSize_(lineJoin, strokeWidth, miterLimit) {
-    if (strokeWidth === 0 || this.points_ === Infinity || lineJoin !== "bevel" && lineJoin !== "miter") {
-      return strokeWidth;
-    }
-    let r1 = this.radius;
-    let r2 = this.radius2_ === void 0 ? r1 : this.radius2_;
-    if (r1 < r2) {
-      const tmp = r1;
-      r1 = r2;
-      r2 = tmp;
-    }
-    const points = this.radius2_ === void 0 ? this.points_ : this.points_ * 2;
-    const alpha = 2 * Math.PI / points;
-    const a2 = r2 * Math.sin(alpha);
-    const b2 = Math.sqrt(r2 * r2 - a2 * a2);
-    const d2 = r1 - b2;
-    const e = Math.sqrt(a2 * a2 + d2 * d2);
-    const miterRatio = e / a2;
-    if (lineJoin === "miter" && miterRatio <= miterLimit) {
-      return miterRatio * strokeWidth;
-    }
-    const k2 = strokeWidth / 2 / miterRatio;
-    const l = strokeWidth / 2 * (d2 / e);
-    const maxr = Math.sqrt((r1 + k2) * (r1 + k2) + l * l);
-    const bevelAdd = maxr - r1;
-    if (this.radius2_ === void 0 || lineJoin === "bevel") {
-      return bevelAdd * 2;
-    }
-    const aa = r1 * Math.sin(alpha);
-    const bb = Math.sqrt(r1 * r1 - aa * aa);
-    const dd = r2 - bb;
-    const ee = Math.sqrt(aa * aa + dd * dd);
-    const innerMiterRatio = ee / aa;
-    if (innerMiterRatio <= miterLimit) {
-      const innerLength = innerMiterRatio * strokeWidth / 2 - r2 - r1;
-      return 2 * Math.max(bevelAdd, innerLength);
-    }
-    return bevelAdd * 2;
-  }
-  /**
-   * @return {RenderOptions}  The render options
-   * @protected
-   */
-  createRenderOptions() {
-    let lineCap = defaultLineCap;
-    let lineJoin = defaultLineJoin;
-    let miterLimit = 0;
-    let lineDash = null;
-    let lineDashOffset = 0;
-    let strokeStyle;
-    let strokeWidth = 0;
-    if (this.stroke_) {
-      strokeStyle = asColorLike(this.stroke_.getColor() ?? defaultStrokeStyle);
-      strokeWidth = this.stroke_.getWidth() ?? defaultLineWidth;
-      lineDash = this.stroke_.getLineDash();
-      lineDashOffset = this.stroke_.getLineDashOffset() ?? 0;
-      lineJoin = this.stroke_.getLineJoin() ?? defaultLineJoin;
-      lineCap = this.stroke_.getLineCap() ?? defaultLineCap;
-      miterLimit = this.stroke_.getMiterLimit() ?? defaultMiterLimit;
-    }
-    const add2 = this.calculateLineJoinSize_(lineJoin, strokeWidth, miterLimit);
-    const maxRadius = Math.max(this.radius, this.radius2_ || 0);
-    const size = Math.ceil(2 * maxRadius + add2);
-    return {
-      strokeStyle,
-      strokeWidth,
-      size,
-      lineCap,
-      lineDash,
-      lineDashOffset,
-      lineJoin,
-      miterLimit
-    };
-  }
-  /**
-   * @protected
-   */
-  render() {
-    this.renderOptions_ = this.createRenderOptions();
-    const size = this.renderOptions_.size;
-    this.hitDetectionCanvas_ = null;
-    this.size_ = [size, size];
-  }
-  /**
-   * @private
-   * @param {RenderOptions} renderOptions Render options.
-   * @param {CanvasRenderingContext2D} context The rendering context.
-   * @param {number} pixelRatio The pixel ratio.
-   */
-  draw_(renderOptions, context, pixelRatio) {
-    context.scale(pixelRatio, pixelRatio);
-    context.translate(renderOptions.size / 2, renderOptions.size / 2);
-    this.createPath_(context);
-    if (this.fill_) {
-      let color = this.fill_.getColor();
-      if (color === null) {
-        color = defaultFillStyle;
-      }
-      context.fillStyle = asColorLike(color);
-      context.fill();
-    }
-    if (renderOptions.strokeStyle) {
-      context.strokeStyle = renderOptions.strokeStyle;
-      context.lineWidth = renderOptions.strokeWidth;
-      if (renderOptions.lineDash) {
-        context.setLineDash(renderOptions.lineDash);
-        context.lineDashOffset = renderOptions.lineDashOffset;
-      }
-      context.lineCap = renderOptions.lineCap;
-      context.lineJoin = renderOptions.lineJoin;
-      context.miterLimit = renderOptions.miterLimit;
-      context.stroke();
-    }
-  }
-  /**
-   * @private
-   * @param {RenderOptions} renderOptions Render options.
-   * @return {HTMLCanvasElement} Canvas containing the icon
-   */
-  createHitDetectionCanvas_(renderOptions) {
-    let context;
-    if (this.fill_) {
-      let color = this.fill_.getColor();
-      let opacity = 0;
-      if (typeof color === "string") {
-        color = asArray(color);
-      }
-      if (color === null) {
-        opacity = 1;
-      } else if (Array.isArray(color)) {
-        opacity = color.length === 4 ? color[3] : 1;
-      }
-      if (opacity === 0) {
-        context = createCanvasContext2D(renderOptions.size, renderOptions.size);
-        this.drawHitDetectionCanvas_(renderOptions, context);
-      }
-    }
-    return context ? context.canvas : this.getImage(1);
-  }
-  /**
-   * @private
-   * @param {CanvasRenderingContext2D} context The context to draw in.
-   */
-  createPath_(context) {
-    let points = this.points_;
-    const radius = this.radius;
-    if (points === Infinity) {
-      context.arc(0, 0, radius, 0, 2 * Math.PI);
-    } else {
-      const radius2 = this.radius2_ === void 0 ? radius : this.radius2_;
-      if (this.radius2_ !== void 0) {
-        points *= 2;
-      }
-      const startAngle = this.angle_ - Math.PI / 2;
-      const step = 2 * Math.PI / points;
-      for (let i = 0; i < points; i++) {
-        const angle0 = startAngle + i * step;
-        const radiusC = i % 2 === 0 ? radius : radius2;
-        context.lineTo(radiusC * Math.cos(angle0), radiusC * Math.sin(angle0));
-      }
-      context.closePath();
-    }
-  }
-  /**
-   * @private
-   * @param {RenderOptions} renderOptions Render options.
-   * @param {CanvasRenderingContext2D} context The context.
-   */
-  drawHitDetectionCanvas_(renderOptions, context) {
-    context.translate(renderOptions.size / 2, renderOptions.size / 2);
-    this.createPath_(context);
-    context.fillStyle = defaultFillStyle;
-    context.fill();
-    if (renderOptions.strokeStyle) {
-      context.strokeStyle = renderOptions.strokeStyle;
-      context.lineWidth = renderOptions.strokeWidth;
-      if (renderOptions.lineDash) {
-        context.setLineDash(renderOptions.lineDash);
-        context.lineDashOffset = renderOptions.lineDashOffset;
-      }
-      context.lineJoin = renderOptions.lineJoin;
-      context.miterLimit = renderOptions.miterLimit;
-      context.stroke();
-    }
-  }
-  /**
-   * @override
-   */
-  ready() {
-    return this.fill_ ? this.fill_.ready() : Promise.resolve();
-  }
-}
-class CircleStyle extends RegularShape {
-  /**
-   * @param {Options} [options] Options.
-   */
-  constructor(options) {
-    options = options ? options : { radius: 5 };
-    super({
-      points: Infinity,
-      fill: options.fill,
-      radius: options.radius,
-      stroke: options.stroke,
-      scale: options.scale !== void 0 ? options.scale : 1,
-      rotation: options.rotation !== void 0 ? options.rotation : 0,
-      rotateWithView: options.rotateWithView !== void 0 ? options.rotateWithView : false,
-      displacement: options.displacement !== void 0 ? options.displacement : [0, 0],
-      declutterMode: options.declutterMode
-    });
-  }
-  /**
-   * Clones the style.
-   * @return {CircleStyle} The cloned style.
-   * @api
-   * @override
-   */
-  clone() {
-    const scale2 = this.getScale();
-    const style = new CircleStyle({
-      fill: this.getFill() ? this.getFill().clone() : void 0,
-      stroke: this.getStroke() ? this.getStroke().clone() : void 0,
-      radius: this.getRadius(),
-      scale: Array.isArray(scale2) ? scale2.slice() : scale2,
-      rotation: this.getRotation(),
-      rotateWithView: this.getRotateWithView(),
-      displacement: this.getDisplacement().slice(),
-      declutterMode: this.getDeclutterMode()
-    });
-    style.setOpacity(this.getOpacity());
-    return style;
-  }
-  /**
-   * Set the circle radius.
-   *
-   * @param {number} radius Circle radius.
-   * @api
-   */
-  setRadius(radius) {
-    this.radius = radius;
-    this.render();
-  }
-}
-class Fill {
-  /**
-   * @param {Options} [options] Options.
-   */
-  constructor(options) {
-    options = options || {};
-    this.patternImage_ = null;
-    this.color_ = null;
-    if (options.color !== void 0) {
-      this.setColor(options.color);
-    }
-  }
-  /**
-   * Clones the style. The color is not cloned if it is a {@link module:ol/colorlike~ColorLike}.
-   * @return {Fill} The cloned style.
-   * @api
-   */
-  clone() {
-    const color = this.getColor();
-    return new Fill({
-      color: Array.isArray(color) ? color.slice() : color || void 0
-    });
-  }
-  /**
-   * Get the fill color.
-   * @return {import("../color.js").Color|import("../colorlike.js").ColorLike|import('../colorlike.js').PatternDescriptor|null} Color.
-   * @api
-   */
-  getColor() {
-    return this.color_;
-  }
-  /**
-   * Set the color.
-   *
-   * @param {import("../color.js").Color|import("../colorlike.js").ColorLike|import('../colorlike.js').PatternDescriptor|null} color Color.
-   * @api
-   */
-  setColor(color) {
-    if (color !== null && typeof color === "object" && "src" in color) {
-      const patternImage = get(
-        null,
-        color.src,
-        "anonymous",
-        void 0,
-        color.offset ? null : color.color ? color.color : null,
-        !(color.offset && color.size)
-      );
-      patternImage.ready().then(() => {
-        this.patternImage_ = null;
-      });
-      if (patternImage.getImageState() === ImageState.IDLE) {
-        patternImage.load();
-      }
-      if (patternImage.getImageState() === ImageState.LOADING) {
-        this.patternImage_ = patternImage;
-      }
-    }
-    this.color_ = color;
-  }
-  /**
-   * @return {string} Key of the fill for cache lookup.
-   */
-  getKey() {
-    const fill = this.getColor();
-    if (!fill) {
-      return "";
-    }
-    return fill instanceof CanvasPattern || fill instanceof CanvasGradient ? getUid(fill) : typeof fill === "object" && "src" in fill ? fill.src + ":" + fill.offset : asArray(fill).toString();
-  }
-  /**
-   * @return {boolean} The fill style is loading an image pattern.
-   */
-  loading() {
-    return !!this.patternImage_;
-  }
-  /**
-   * @return {Promise<void>} `false` or a promise that resolves when the style is ready to use.
-   */
-  ready() {
-    return this.patternImage_ ? this.patternImage_.ready() : Promise.resolve();
-  }
-}
-class Stroke {
-  /**
-   * @param {Options} [options] Options.
-   */
-  constructor(options) {
-    options = options || {};
-    this.color_ = options.color !== void 0 ? options.color : null;
-    this.lineCap_ = options.lineCap;
-    this.lineDash_ = options.lineDash !== void 0 ? options.lineDash : null;
-    this.lineDashOffset_ = options.lineDashOffset;
-    this.lineJoin_ = options.lineJoin;
-    this.miterLimit_ = options.miterLimit;
-    this.width_ = options.width;
-  }
-  /**
-   * Clones the style.
-   * @return {Stroke} The cloned style.
-   * @api
-   */
-  clone() {
-    const color = this.getColor();
-    return new Stroke({
-      color: Array.isArray(color) ? color.slice() : color || void 0,
-      lineCap: this.getLineCap(),
-      lineDash: this.getLineDash() ? this.getLineDash().slice() : void 0,
-      lineDashOffset: this.getLineDashOffset(),
-      lineJoin: this.getLineJoin(),
-      miterLimit: this.getMiterLimit(),
-      width: this.getWidth()
-    });
-  }
-  /**
-   * Get the stroke color.
-   * @return {import("../color.js").Color|import("../colorlike.js").ColorLike} Color.
-   * @api
-   */
-  getColor() {
-    return this.color_;
-  }
-  /**
-   * Get the line cap type for the stroke.
-   * @return {CanvasLineCap|undefined} Line cap.
-   * @api
-   */
-  getLineCap() {
-    return this.lineCap_;
-  }
-  /**
-   * Get the line dash style for the stroke.
-   * @return {Array<number>|null} Line dash.
-   * @api
-   */
-  getLineDash() {
-    return this.lineDash_;
-  }
-  /**
-   * Get the line dash offset for the stroke.
-   * @return {number|undefined} Line dash offset.
-   * @api
-   */
-  getLineDashOffset() {
-    return this.lineDashOffset_;
-  }
-  /**
-   * Get the line join type for the stroke.
-   * @return {CanvasLineJoin|undefined} Line join.
-   * @api
-   */
-  getLineJoin() {
-    return this.lineJoin_;
-  }
-  /**
-   * Get the miter limit for the stroke.
-   * @return {number|undefined} Miter limit.
-   * @api
-   */
-  getMiterLimit() {
-    return this.miterLimit_;
-  }
-  /**
-   * Get the stroke width.
-   * @return {number|undefined} Width.
-   * @api
-   */
-  getWidth() {
-    return this.width_;
-  }
-  /**
-   * Set the color.
-   *
-   * @param {import("../color.js").Color|import("../colorlike.js").ColorLike} color Color.
-   * @api
-   */
-  setColor(color) {
-    this.color_ = color;
-  }
-  /**
-   * Set the line cap.
-   *
-   * @param {CanvasLineCap|undefined} lineCap Line cap.
-   * @api
-   */
-  setLineCap(lineCap) {
-    this.lineCap_ = lineCap;
-  }
-  /**
-   * Set the line dash.
-   *
-   * @param {Array<number>|null} lineDash Line dash.
-   * @api
-   */
-  setLineDash(lineDash) {
-    this.lineDash_ = lineDash;
-  }
-  /**
-   * Set the line dash offset.
-   *
-   * @param {number|undefined} lineDashOffset Line dash offset.
-   * @api
-   */
-  setLineDashOffset(lineDashOffset) {
-    this.lineDashOffset_ = lineDashOffset;
-  }
-  /**
-   * Set the line join.
-   *
-   * @param {CanvasLineJoin|undefined} lineJoin Line join.
-   * @api
-   */
-  setLineJoin(lineJoin) {
-    this.lineJoin_ = lineJoin;
-  }
-  /**
-   * Set the miter limit.
-   *
-   * @param {number|undefined} miterLimit Miter limit.
-   * @api
-   */
-  setMiterLimit(miterLimit) {
-    this.miterLimit_ = miterLimit;
-  }
-  /**
-   * Set the width.
-   *
-   * @param {number|undefined} width Width.
-   * @api
-   */
-  setWidth(width) {
-    this.width_ = width;
-  }
-}
-class Style {
-  /**
-   * @param {Options} [options] Style options.
-   */
-  constructor(options) {
-    options = options || {};
-    this.geometry_ = null;
-    this.geometryFunction_ = defaultGeometryFunction;
-    if (options.geometry !== void 0) {
-      this.setGeometry(options.geometry);
-    }
-    this.fill_ = options.fill !== void 0 ? options.fill : null;
-    this.image_ = options.image !== void 0 ? options.image : null;
-    this.renderer_ = options.renderer !== void 0 ? options.renderer : null;
-    this.hitDetectionRenderer_ = options.hitDetectionRenderer !== void 0 ? options.hitDetectionRenderer : null;
-    this.stroke_ = options.stroke !== void 0 ? options.stroke : null;
-    this.text_ = options.text !== void 0 ? options.text : null;
-    this.zIndex_ = options.zIndex;
-  }
-  /**
-   * Clones the style.
-   * @return {Style} The cloned style.
-   * @api
-   */
-  clone() {
-    let geometry = this.getGeometry();
-    if (geometry && typeof geometry === "object") {
-      geometry = /** @type {import("../geom/Geometry.js").default} */
-      geometry.clone();
-    }
-    return new Style({
-      geometry: geometry ?? void 0,
-      fill: this.getFill() ? this.getFill().clone() : void 0,
-      image: this.getImage() ? this.getImage().clone() : void 0,
-      renderer: this.getRenderer() ?? void 0,
-      stroke: this.getStroke() ? this.getStroke().clone() : void 0,
-      text: this.getText() ? this.getText().clone() : void 0,
-      zIndex: this.getZIndex()
-    });
-  }
-  /**
-   * Get the custom renderer function that was configured with
-   * {@link #setRenderer} or the `renderer` constructor option.
-   * @return {RenderFunction|null} Custom renderer function.
-   * @api
-   */
-  getRenderer() {
-    return this.renderer_;
-  }
-  /**
-   * Sets a custom renderer function for this style. When set, `fill`, `stroke`
-   * and `image` options of the style will be ignored.
-   * @param {RenderFunction|null} renderer Custom renderer function.
-   * @api
-   */
-  setRenderer(renderer) {
-    this.renderer_ = renderer;
-  }
-  /**
-   * Sets a custom renderer function for this style used
-   * in hit detection.
-   * @param {RenderFunction|null} renderer Custom renderer function.
-   * @api
-   */
-  setHitDetectionRenderer(renderer) {
-    this.hitDetectionRenderer_ = renderer;
-  }
-  /**
-   * Get the custom renderer function that was configured with
-   * {@link #setHitDetectionRenderer} or the `hitDetectionRenderer` constructor option.
-   * @return {RenderFunction|null} Custom renderer function.
-   * @api
-   */
-  getHitDetectionRenderer() {
-    return this.hitDetectionRenderer_;
-  }
-  /**
-   * Get the geometry to be rendered.
-   * @return {string|import("../geom/Geometry.js").default|GeometryFunction|null}
-   * Feature property or geometry or function that returns the geometry that will
-   * be rendered with this style.
-   * @api
-   */
-  getGeometry() {
-    return this.geometry_;
-  }
-  /**
-   * Get the function used to generate a geometry for rendering.
-   * @return {!GeometryFunction} Function that is called with a feature
-   * and returns the geometry to render instead of the feature's geometry.
-   * @api
-   */
-  getGeometryFunction() {
-    return this.geometryFunction_;
-  }
-  /**
-   * Get the fill style.
-   * @return {import("./Fill.js").default|null} Fill style.
-   * @api
-   */
-  getFill() {
-    return this.fill_;
-  }
-  /**
-   * Set the fill style.
-   * @param {import("./Fill.js").default|null} fill Fill style.
-   * @api
-   */
-  setFill(fill) {
-    this.fill_ = fill;
-  }
-  /**
-   * Get the image style.
-   * @return {import("./Image.js").default|null} Image style.
-   * @api
-   */
-  getImage() {
-    return this.image_;
-  }
-  /**
-   * Set the image style.
-   * @param {import("./Image.js").default} image Image style.
-   * @api
-   */
-  setImage(image) {
-    this.image_ = image;
-  }
-  /**
-   * Get the stroke style.
-   * @return {import("./Stroke.js").default|null} Stroke style.
-   * @api
-   */
-  getStroke() {
-    return this.stroke_;
-  }
-  /**
-   * Set the stroke style.
-   * @param {import("./Stroke.js").default|null} stroke Stroke style.
-   * @api
-   */
-  setStroke(stroke) {
-    this.stroke_ = stroke;
-  }
-  /**
-   * Get the text style.
-   * @return {import("./Text.js").default|null} Text style.
-   * @api
-   */
-  getText() {
-    return this.text_;
-  }
-  /**
-   * Set the text style.
-   * @param {import("./Text.js").default} text Text style.
-   * @api
-   */
-  setText(text) {
-    this.text_ = text;
-  }
-  /**
-   * Get the z-index for the style.
-   * @return {number|undefined} ZIndex.
-   * @api
-   */
-  getZIndex() {
-    return this.zIndex_;
-  }
-  /**
-   * Set a geometry that is rendered instead of the feature's geometry.
-   *
-   * @param {string|import("../geom/Geometry.js").default|GeometryFunction} geometry
-   *     Feature property or geometry or function returning a geometry to render
-   *     for this style.
-   * @api
-   */
-  setGeometry(geometry) {
-    if (typeof geometry === "function") {
-      this.geometryFunction_ = geometry;
-    } else if (typeof geometry === "string") {
-      this.geometryFunction_ = function(feature) {
-        return (
-          /** @type {import("../geom/Geometry.js").default} */
-          feature.get(geometry)
-        );
-      };
-    } else if (!geometry) {
-      this.geometryFunction_ = defaultGeometryFunction;
-    } else if (geometry !== void 0) {
-      this.geometryFunction_ = function() {
-        return (
-          /** @type {import("../geom/Geometry.js").default} */
-          geometry
-        );
-      };
-    }
-    this.geometry_ = geometry;
-  }
-  /**
-   * Set the z-index.
-   *
-   * @param {number|undefined} zIndex ZIndex.
-   * @api
-   */
-  setZIndex(zIndex) {
-    this.zIndex_ = zIndex;
-  }
-}
-function toFunction(obj) {
-  let styleFunction;
-  if (typeof obj === "function") {
-    styleFunction = obj;
-  } else {
-    let styles;
-    if (Array.isArray(obj)) {
-      styles = obj;
-    } else {
-      assert(
-        typeof /** @type {?} */
-        obj.getZIndex === "function",
-        "Expected an `Style` or an array of `Style`"
-      );
-      const style = (
-        /** @type {Style} */
-        obj
-      );
-      styles = [style];
-    }
-    styleFunction = function() {
-      return styles;
-    };
-  }
-  return styleFunction;
-}
-let defaultStyles = null;
-function createDefaultStyle(feature, resolution) {
-  if (!defaultStyles) {
-    const fill = new Fill({
-      color: "rgba(255,255,255,0.4)"
-    });
-    const stroke = new Stroke({
-      color: "#3399CC",
-      width: 1.25
-    });
-    defaultStyles = [
-      new Style({
-        image: new CircleStyle({
-          fill,
-          stroke,
-          radius: 5
-        }),
-        fill,
-        stroke
-      })
-    ];
-  }
-  return defaultStyles;
-}
-function createEditingStyle() {
-  const styles = {};
-  const white = [255, 255, 255, 1];
-  const blue = [0, 153, 255, 1];
-  const width = 3;
-  styles["Polygon"] = [
-    new Style({
-      fill: new Fill({
-        color: [255, 255, 255, 0.5]
-      })
-    })
-  ];
-  styles["MultiPolygon"] = styles["Polygon"];
-  styles["LineString"] = [
-    new Style({
-      stroke: new Stroke({
-        color: white,
-        width: width + 2
-      })
-    }),
-    new Style({
-      stroke: new Stroke({
-        color: blue,
-        width
-      })
-    })
-  ];
-  styles["MultiLineString"] = styles["LineString"];
-  styles["Circle"] = styles["Polygon"].concat(styles["LineString"]);
-  styles["Point"] = [
-    new Style({
-      image: new CircleStyle({
-        radius: width * 2,
-        fill: new Fill({
-          color: blue
-        }),
-        stroke: new Stroke({
-          color: white,
-          width: width / 2
-        })
-      }),
-      zIndex: Infinity
-    })
-  ];
-  styles["MultiPoint"] = styles["Point"];
-  styles["GeometryCollection"] = styles["Polygon"].concat(
-    styles["LineString"],
-    styles["Point"]
-  );
-  return styles;
-}
-function defaultGeometryFunction(feature) {
-  return feature.getGeometry();
-}
-const Style$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  createDefaultStyle,
-  createEditingStyle,
-  default: Style,
-  toFunction
-}, Symbol.toStringTag, { value: "Module" }));
-function calculateScale(width, height, wantedWidth, wantedHeight) {
-  if (wantedWidth !== void 0 && wantedHeight !== void 0) {
-    return [wantedWidth / width, wantedHeight / height];
-  }
-  if (wantedWidth !== void 0) {
-    return wantedWidth / width;
-  }
-  if (wantedHeight !== void 0) {
-    return wantedHeight / height;
-  }
-  return 1;
-}
-class Icon extends ImageStyle {
-  /**
-   * @param {Options} [options] Options.
-   */
-  constructor(options) {
-    options = options || {};
-    const opacity = options.opacity !== void 0 ? options.opacity : 1;
-    const rotation = options.rotation !== void 0 ? options.rotation : 0;
-    const scale2 = options.scale !== void 0 ? options.scale : 1;
-    const rotateWithView = options.rotateWithView !== void 0 ? options.rotateWithView : false;
-    super({
-      opacity,
-      rotation,
-      scale: scale2,
-      displacement: options.displacement !== void 0 ? options.displacement : [0, 0],
-      rotateWithView,
-      declutterMode: options.declutterMode
-    });
-    this.anchor_ = options.anchor !== void 0 ? options.anchor : [0.5, 0.5];
-    this.normalizedAnchor_ = null;
-    this.anchorOrigin_ = options.anchorOrigin !== void 0 ? options.anchorOrigin : "top-left";
-    this.anchorXUnits_ = options.anchorXUnits !== void 0 ? options.anchorXUnits : "fraction";
-    this.anchorYUnits_ = options.anchorYUnits !== void 0 ? options.anchorYUnits : "fraction";
-    this.crossOrigin_ = options.crossOrigin !== void 0 ? options.crossOrigin : null;
-    const image = options.img !== void 0 ? options.img : null;
-    let cacheKey = options.src;
-    assert(
-      !(cacheKey !== void 0 && image),
-      "`image` and `src` cannot be provided at the same time"
-    );
-    if ((cacheKey === void 0 || cacheKey.length === 0) && image) {
-      cacheKey = /** @type {HTMLImageElement} */
-      image.src || getUid(image);
-    }
-    assert(
-      cacheKey !== void 0 && cacheKey.length > 0,
-      "A defined and non-empty `src` or `image` must be provided"
-    );
-    assert(
-      !((options.width !== void 0 || options.height !== void 0) && options.scale !== void 0),
-      "`width` or `height` cannot be provided together with `scale`"
-    );
-    let imageState;
-    if (options.src !== void 0) {
-      imageState = ImageState.IDLE;
-    } else if (image !== void 0) {
-      if ("complete" in image) {
-        if (image.complete) {
-          imageState = image.src ? ImageState.LOADED : ImageState.IDLE;
-        } else {
-          imageState = ImageState.LOADING;
-        }
-      } else {
-        imageState = ImageState.LOADED;
-      }
-    }
-    this.color_ = options.color !== void 0 ? asArray(options.color) : null;
-    this.iconImage_ = get(
-      image,
-      /** @type {string} */
-      cacheKey,
-      this.crossOrigin_,
-      imageState,
-      this.color_
-    );
-    this.offset_ = options.offset !== void 0 ? options.offset : [0, 0];
-    this.offsetOrigin_ = options.offsetOrigin !== void 0 ? options.offsetOrigin : "top-left";
-    this.origin_ = null;
-    this.size_ = options.size !== void 0 ? options.size : null;
-    this.initialOptions_;
-    if (options.width !== void 0 || options.height !== void 0) {
-      let width, height;
-      if (options.size) {
-        [width, height] = options.size;
-      } else {
-        const image2 = this.getImage(1);
-        if (image2.width && image2.height) {
-          width = image2.width;
-          height = image2.height;
-        } else if (image2 instanceof HTMLImageElement) {
-          this.initialOptions_ = options;
-          const onload = () => {
-            this.unlistenImageChange(onload);
-            if (!this.initialOptions_) {
-              return;
-            }
-            const imageSize = this.iconImage_.getSize();
-            this.setScale(
-              calculateScale(
-                imageSize[0],
-                imageSize[1],
-                options.width,
-                options.height
-              )
-            );
-          };
-          this.listenImageChange(onload);
-          return;
-        }
-      }
-      if (width !== void 0) {
-        this.setScale(
-          calculateScale(width, height, options.width, options.height)
-        );
-      }
-    }
-  }
-  /**
-   * Clones the style. The underlying Image/HTMLCanvasElement is not cloned.
-   * @return {Icon} The cloned style.
-   * @api
-   * @override
-   */
-  clone() {
-    let scale2, width, height;
-    if (this.initialOptions_) {
-      width = this.initialOptions_.width;
-      height = this.initialOptions_.height;
-    } else {
-      scale2 = this.getScale();
-      scale2 = Array.isArray(scale2) ? scale2.slice() : scale2;
-    }
-    return new Icon({
-      anchor: this.anchor_.slice(),
-      anchorOrigin: this.anchorOrigin_,
-      anchorXUnits: this.anchorXUnits_,
-      anchorYUnits: this.anchorYUnits_,
-      color: this.color_ && this.color_.slice ? this.color_.slice() : this.color_ || void 0,
-      crossOrigin: this.crossOrigin_,
-      offset: this.offset_.slice(),
-      offsetOrigin: this.offsetOrigin_,
-      opacity: this.getOpacity(),
-      rotateWithView: this.getRotateWithView(),
-      rotation: this.getRotation(),
-      scale: scale2,
-      width,
-      height,
-      size: this.size_ !== null ? this.size_.slice() : void 0,
-      src: this.getSrc(),
-      displacement: this.getDisplacement().slice(),
-      declutterMode: this.getDeclutterMode()
-    });
-  }
-  /**
-   * Get the anchor point in pixels. The anchor determines the center point for the
-   * symbolizer.
-   * @return {Array<number>} Anchor.
-   * @api
-   * @override
-   */
-  getAnchor() {
-    let anchor = this.normalizedAnchor_;
-    if (!anchor) {
-      anchor = this.anchor_;
-      const size = this.getSize();
-      if (this.anchorXUnits_ == "fraction" || this.anchorYUnits_ == "fraction") {
-        if (!size) {
-          return null;
-        }
-        anchor = this.anchor_.slice();
-        if (this.anchorXUnits_ == "fraction") {
-          anchor[0] *= size[0];
-        }
-        if (this.anchorYUnits_ == "fraction") {
-          anchor[1] *= size[1];
-        }
-      }
-      if (this.anchorOrigin_ != "top-left") {
-        if (!size) {
-          return null;
-        }
-        if (anchor === this.anchor_) {
-          anchor = this.anchor_.slice();
-        }
-        if (this.anchorOrigin_ == "top-right" || this.anchorOrigin_ == "bottom-right") {
-          anchor[0] = -anchor[0] + size[0];
-        }
-        if (this.anchorOrigin_ == "bottom-left" || this.anchorOrigin_ == "bottom-right") {
-          anchor[1] = -anchor[1] + size[1];
-        }
-      }
-      this.normalizedAnchor_ = anchor;
-    }
-    const displacement = this.getDisplacement();
-    const scale2 = this.getScaleArray();
-    return [
-      anchor[0] - displacement[0] / scale2[0],
-      anchor[1] + displacement[1] / scale2[1]
-    ];
-  }
-  /**
-   * Set the anchor point. The anchor determines the center point for the
-   * symbolizer.
-   *
-   * @param {Array<number>} anchor Anchor.
-   * @api
-   */
-  setAnchor(anchor) {
-    this.anchor_ = anchor;
-    this.normalizedAnchor_ = null;
-  }
-  /**
-   * Get the icon color.
-   * @return {import("../color.js").Color} Color.
-   * @api
-   */
-  getColor() {
-    return this.color_;
-  }
-  /**
-   * Get the image icon.
-   * @param {number} pixelRatio Pixel ratio.
-   * @return {HTMLImageElement|HTMLCanvasElement|ImageBitmap} Image or Canvas element. If the Icon
-   * style was configured with `src` or with a not let loaded `img`, an `ImageBitmap` will be returned.
-   * @api
-   * @override
-   */
-  getImage(pixelRatio) {
-    return this.iconImage_.getImage(pixelRatio);
-  }
-  /**
-   * Get the pixel ratio.
-   * @param {number} pixelRatio Pixel ratio.
-   * @return {number} The pixel ratio of the image.
-   * @api
-   * @override
-   */
-  getPixelRatio(pixelRatio) {
-    return this.iconImage_.getPixelRatio(pixelRatio);
-  }
-  /**
-   * @return {import("../size.js").Size} Image size.
-   * @override
-   */
-  getImageSize() {
-    return this.iconImage_.getSize();
-  }
-  /**
-   * @return {import("../ImageState.js").default} Image state.
-   * @override
-   */
-  getImageState() {
-    return this.iconImage_.getImageState();
-  }
-  /**
-   * @return {HTMLImageElement|HTMLCanvasElement|ImageBitmap} Image element.
-   * @override
-   */
-  getHitDetectionImage() {
-    return this.iconImage_.getHitDetectionImage();
-  }
-  /**
-   * Get the origin of the symbolizer.
-   * @return {Array<number>} Origin.
-   * @api
-   * @override
-   */
-  getOrigin() {
-    if (this.origin_) {
-      return this.origin_;
-    }
-    let offset2 = this.offset_;
-    if (this.offsetOrigin_ != "top-left") {
-      const size = this.getSize();
-      const iconImageSize = this.iconImage_.getSize();
-      if (!size || !iconImageSize) {
-        return null;
-      }
-      offset2 = offset2.slice();
-      if (this.offsetOrigin_ == "top-right" || this.offsetOrigin_ == "bottom-right") {
-        offset2[0] = iconImageSize[0] - size[0] - offset2[0];
-      }
-      if (this.offsetOrigin_ == "bottom-left" || this.offsetOrigin_ == "bottom-right") {
-        offset2[1] = iconImageSize[1] - size[1] - offset2[1];
-      }
-    }
-    this.origin_ = offset2;
-    return this.origin_;
-  }
-  /**
-   * Get the image URL.
-   * @return {string|undefined} Image src.
-   * @api
-   */
-  getSrc() {
-    return this.iconImage_.getSrc();
-  }
-  /**
-   * Get the size of the icon (in pixels).
-   * @return {import("../size.js").Size} Image size.
-   * @api
-   * @override
-   */
-  getSize() {
-    return !this.size_ ? this.iconImage_.getSize() : this.size_;
-  }
-  /**
-   * Get the width of the icon (in pixels). Will return undefined when the icon image is not yet loaded.
-   * @return {number} Icon width (in pixels).
-   * @api
-   */
-  getWidth() {
-    const scale2 = this.getScaleArray();
-    if (this.size_) {
-      return this.size_[0] * scale2[0];
-    }
-    if (this.iconImage_.getImageState() == ImageState.LOADED) {
-      return this.iconImage_.getSize()[0] * scale2[0];
-    }
-    return void 0;
-  }
-  /**
-   * Get the height of the icon (in pixels). Will return undefined when the icon image is not yet loaded.
-   * @return {number} Icon height (in pixels).
-   * @api
-   */
-  getHeight() {
-    const scale2 = this.getScaleArray();
-    if (this.size_) {
-      return this.size_[1] * scale2[1];
-    }
-    if (this.iconImage_.getImageState() == ImageState.LOADED) {
-      return this.iconImage_.getSize()[1] * scale2[1];
-    }
-    return void 0;
-  }
-  /**
-   * Set the scale.
-   *
-   * @param {number|import("../size.js").Size} scale Scale.
-   * @api
-   * @override
-   */
-  setScale(scale2) {
-    delete this.initialOptions_;
-    super.setScale(scale2);
-  }
-  /**
-   * @param {function(import("../events/Event.js").default): void} listener Listener function.
-   * @override
-   */
-  listenImageChange(listener) {
-    this.iconImage_.addEventListener(EventType.CHANGE, listener);
-  }
-  /**
-   * Load not yet loaded URI.
-   * When rendering a feature with an icon style, the vector renderer will
-   * automatically call this method. However, you might want to call this
-   * method yourself for preloading or other purposes.
-   * @api
-   * @override
-   */
-  load() {
-    this.iconImage_.load();
-  }
-  /**
-   * @param {function(import("../events/Event.js").default): void} listener Listener function.
-   * @override
-   */
-  unlistenImageChange(listener) {
-    this.iconImage_.removeEventListener(EventType.CHANGE, listener);
-  }
-  /**
-   * @override
-   */
-  ready() {
-    return this.iconImage_.ready();
-  }
-}
-const Icon$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  default: Icon
-}, Symbol.toStringTag, { value: "Module" }));
-const DEFAULT_FILL_COLOR = "#333";
-class Text {
-  /**
-   * @param {Options} [options] Options.
-   */
-  constructor(options) {
-    options = options || {};
-    this.font_ = options.font;
-    this.rotation_ = options.rotation;
-    this.rotateWithView_ = options.rotateWithView;
-    this.keepUpright_ = options.keepUpright;
-    this.scale_ = options.scale;
-    this.scaleArray_ = toSize(options.scale !== void 0 ? options.scale : 1);
-    this.text_ = options.text;
-    this.textAlign_ = options.textAlign;
-    this.justify_ = options.justify;
-    this.repeat_ = options.repeat;
-    this.textBaseline_ = options.textBaseline;
-    this.fill_ = options.fill !== void 0 ? options.fill : new Fill({ color: DEFAULT_FILL_COLOR });
-    this.maxAngle_ = options.maxAngle !== void 0 ? options.maxAngle : Math.PI / 4;
-    this.placement_ = options.placement !== void 0 ? options.placement : "point";
-    this.overflow_ = !!options.overflow;
-    this.stroke_ = options.stroke !== void 0 ? options.stroke : null;
-    this.offsetX_ = options.offsetX !== void 0 ? options.offsetX : 0;
-    this.offsetY_ = options.offsetY !== void 0 ? options.offsetY : 0;
-    this.backgroundFill_ = options.backgroundFill ? options.backgroundFill : null;
-    this.backgroundStroke_ = options.backgroundStroke ? options.backgroundStroke : null;
-    this.padding_ = options.padding === void 0 ? null : options.padding;
-    this.declutterMode_ = options.declutterMode;
-  }
-  /**
-   * Clones the style.
-   * @return {Text} The cloned style.
-   * @api
-   */
-  clone() {
-    const scale2 = this.getScale();
-    return new Text({
-      font: this.getFont(),
-      placement: this.getPlacement(),
-      repeat: this.getRepeat(),
-      maxAngle: this.getMaxAngle(),
-      overflow: this.getOverflow(),
-      rotation: this.getRotation(),
-      rotateWithView: this.getRotateWithView(),
-      keepUpright: this.getKeepUpright(),
-      scale: Array.isArray(scale2) ? scale2.slice() : scale2,
-      text: this.getText(),
-      textAlign: this.getTextAlign(),
-      justify: this.getJustify(),
-      textBaseline: this.getTextBaseline(),
-      fill: this.getFill() ? this.getFill().clone() : void 0,
-      stroke: this.getStroke() ? this.getStroke().clone() : void 0,
-      offsetX: this.getOffsetX(),
-      offsetY: this.getOffsetY(),
-      backgroundFill: this.getBackgroundFill() ? this.getBackgroundFill().clone() : void 0,
-      backgroundStroke: this.getBackgroundStroke() ? this.getBackgroundStroke().clone() : void 0,
-      padding: this.getPadding() || void 0,
-      declutterMode: this.getDeclutterMode()
-    });
-  }
-  /**
-   * Get the `overflow` configuration.
-   * @return {boolean} Let text overflow the length of the path they follow.
-   * @api
-   */
-  getOverflow() {
-    return this.overflow_;
-  }
-  /**
-   * Get the font name.
-   * @return {string|undefined} Font.
-   * @api
-   */
-  getFont() {
-    return this.font_;
-  }
-  /**
-   * Get the maximum angle between adjacent characters.
-   * @return {number} Angle in radians.
-   * @api
-   */
-  getMaxAngle() {
-    return this.maxAngle_;
-  }
-  /**
-   * Get the label placement.
-   * @return {TextPlacement} Text placement.
-   * @api
-   */
-  getPlacement() {
-    return this.placement_;
-  }
-  /**
-   * Get the repeat interval of the text.
-   * @return {number|undefined} Repeat interval in pixels.
-   * @api
-   */
-  getRepeat() {
-    return this.repeat_;
-  }
-  /**
-   * Get the x-offset for the text.
-   * @return {number} Horizontal text offset.
-   * @api
-   */
-  getOffsetX() {
-    return this.offsetX_;
-  }
-  /**
-   * Get the y-offset for the text.
-   * @return {number} Vertical text offset.
-   * @api
-   */
-  getOffsetY() {
-    return this.offsetY_;
-  }
-  /**
-   * Get the fill style for the text.
-   * @return {import("./Fill.js").default|null} Fill style.
-   * @api
-   */
-  getFill() {
-    return this.fill_;
-  }
-  /**
-   * Determine whether the text rotates with the map.
-   * @return {boolean|undefined} Rotate with map.
-   * @api
-   */
-  getRotateWithView() {
-    return this.rotateWithView_;
-  }
-  /**
-   * Determine whether the text can be rendered upside down.
-   * @return {boolean|undefined} Keep text upright.
-   * @api
-   */
-  getKeepUpright() {
-    return this.keepUpright_;
-  }
-  /**
-   * Get the text rotation.
-   * @return {number|undefined} Rotation.
-   * @api
-   */
-  getRotation() {
-    return this.rotation_;
-  }
-  /**
-   * Get the text scale.
-   * @return {number|import("../size.js").Size|undefined} Scale.
-   * @api
-   */
-  getScale() {
-    return this.scale_;
-  }
-  /**
-   * Get the symbolizer scale array.
-   * @return {import("../size.js").Size} Scale array.
-   */
-  getScaleArray() {
-    return this.scaleArray_;
-  }
-  /**
-   * Get the stroke style for the text.
-   * @return {import("./Stroke.js").default|null} Stroke style.
-   * @api
-   */
-  getStroke() {
-    return this.stroke_;
-  }
-  /**
-   * Get the text to be rendered.
-   * @return {string|Array<string>|undefined} Text.
-   * @api
-   */
-  getText() {
-    return this.text_;
-  }
-  /**
-   * Get the text alignment.
-   * @return {CanvasTextAlign|undefined} Text align.
-   * @api
-   */
-  getTextAlign() {
-    return this.textAlign_;
-  }
-  /**
-   * Get the justification.
-   * @return {TextJustify|undefined} Justification.
-   * @api
-   */
-  getJustify() {
-    return this.justify_;
-  }
-  /**
-   * Get the text baseline.
-   * @return {CanvasTextBaseline|undefined} Text baseline.
-   * @api
-   */
-  getTextBaseline() {
-    return this.textBaseline_;
-  }
-  /**
-   * Get the background fill style for the text.
-   * @return {import("./Fill.js").default|null} Fill style.
-   * @api
-   */
-  getBackgroundFill() {
-    return this.backgroundFill_;
-  }
-  /**
-   * Get the background stroke style for the text.
-   * @return {import("./Stroke.js").default|null} Stroke style.
-   * @api
-   */
-  getBackgroundStroke() {
-    return this.backgroundStroke_;
-  }
-  /**
-   * Get the padding for the text.
-   * @return {Array<number>|null} Padding.
-   * @api
-   */
-  getPadding() {
-    return this.padding_;
-  }
-  /**
-   * Get the declutter mode of the shape
-   * @return {import("./Style.js").DeclutterMode} Shape's declutter mode
-   * @api
-   */
-  getDeclutterMode() {
-    return this.declutterMode_;
-  }
-  /**
-   * Set the `overflow` property.
-   *
-   * @param {boolean} overflow Let text overflow the path that it follows.
-   * @api
-   */
-  setOverflow(overflow) {
-    this.overflow_ = overflow;
-  }
-  /**
-   * Set the font.
-   *
-   * @param {string|undefined} font Font.
-   * @api
-   */
-  setFont(font) {
-    this.font_ = font;
-  }
-  /**
-   * Set the maximum angle between adjacent characters.
-   *
-   * @param {number} maxAngle Angle in radians.
-   * @api
-   */
-  setMaxAngle(maxAngle) {
-    this.maxAngle_ = maxAngle;
-  }
-  /**
-   * Set the x offset.
-   *
-   * @param {number} offsetX Horizontal text offset.
-   * @api
-   */
-  setOffsetX(offsetX) {
-    this.offsetX_ = offsetX;
-  }
-  /**
-   * Set the y offset.
-   *
-   * @param {number} offsetY Vertical text offset.
-   * @api
-   */
-  setOffsetY(offsetY) {
-    this.offsetY_ = offsetY;
-  }
-  /**
-   * Set the text placement.
-   *
-   * @param {TextPlacement} placement Placement.
-   * @api
-   */
-  setPlacement(placement) {
-    this.placement_ = placement;
-  }
-  /**
-   * Set the repeat interval of the text.
-   * @param {number|undefined} [repeat] Repeat interval in pixels.
-   * @api
-   */
-  setRepeat(repeat) {
-    this.repeat_ = repeat;
-  }
-  /**
-   * Set whether to rotate the text with the view.
-   *
-   * @param {boolean} rotateWithView Rotate with map.
-   * @api
-   */
-  setRotateWithView(rotateWithView) {
-    this.rotateWithView_ = rotateWithView;
-  }
-  /**
-   * Set whether the text can be rendered upside down.
-   *
-   * @param {boolean} keepUpright Keep text upright.
-   * @api
-   */
-  setKeepUpright(keepUpright) {
-    this.keepUpright_ = keepUpright;
-  }
-  /**
-   * Set the fill.
-   *
-   * @param {import("./Fill.js").default|null} fill Fill style.
-   * @api
-   */
-  setFill(fill) {
-    this.fill_ = fill;
-  }
-  /**
-   * Set the rotation.
-   *
-   * @param {number|undefined} rotation Rotation.
-   * @api
-   */
-  setRotation(rotation) {
-    this.rotation_ = rotation;
-  }
-  /**
-   * Set the scale.
-   *
-   * @param {number|import("../size.js").Size|undefined} scale Scale.
-   * @api
-   */
-  setScale(scale2) {
-    this.scale_ = scale2;
-    this.scaleArray_ = toSize(scale2 !== void 0 ? scale2 : 1);
-  }
-  /**
-   * Set the stroke.
-   *
-   * @param {import("./Stroke.js").default|null} stroke Stroke style.
-   * @api
-   */
-  setStroke(stroke) {
-    this.stroke_ = stroke;
-  }
-  /**
-   * Set the text.
-   *
-   * @param {string|Array<string>|undefined} text Text.
-   * @api
-   */
-  setText(text) {
-    this.text_ = text;
-  }
-  /**
-   * Set the text alignment.
-   *
-   * @param {CanvasTextAlign|undefined} textAlign Text align.
-   * @api
-   */
-  setTextAlign(textAlign) {
-    this.textAlign_ = textAlign;
-  }
-  /**
-   * Set the justification.
-   *
-   * @param {TextJustify|undefined} justify Justification.
-   * @api
-   */
-  setJustify(justify) {
-    this.justify_ = justify;
-  }
-  /**
-   * Set the text baseline.
-   *
-   * @param {CanvasTextBaseline|undefined} textBaseline Text baseline.
-   * @api
-   */
-  setTextBaseline(textBaseline) {
-    this.textBaseline_ = textBaseline;
-  }
-  /**
-   * Set the background fill.
-   *
-   * @param {import("./Fill.js").default|null} fill Fill style.
-   * @api
-   */
-  setBackgroundFill(fill) {
-    this.backgroundFill_ = fill;
-  }
-  /**
-   * Set the background stroke.
-   *
-   * @param {import("./Stroke.js").default|null} stroke Stroke style.
-   * @api
-   */
-  setBackgroundStroke(stroke) {
-    this.backgroundStroke_ = stroke;
-  }
-  /**
-   * Set the padding (`[top, right, bottom, left]`).
-   *
-   * @param {Array<number>|null} padding Padding.
-   * @api
-   */
-  setPadding(padding) {
-    this.padding_ = padding;
-  }
 }
 let numTypes = 0;
 const BooleanType = 1 << numTypes++;
@@ -15903,19 +15644,19 @@ function isSpecific(type) {
   return type in typeNames;
 }
 function typeName(type) {
-  const names2 = [];
+  const names = [];
   for (const namedType of namedTypes) {
     if (includesType(type, namedType)) {
-      names2.push(typeNames[namedType]);
+      names.push(typeNames[namedType]);
     }
   }
-  if (names2.length === 0) {
+  if (names.length === 0) {
     return "untyped";
   }
-  if (names2.length < 3) {
-    return names2.join(" or ");
+  if (names.length < 3) {
+    return names.join(" or ");
   }
-  return names2.slice(0, -1).join(", ") + ", or " + names2[names2.length - 1];
+  return names.slice(0, -1).join(", ") + ", or " + names[names.length - 1];
 }
 function includesType(broad, specific) {
   return (broad & specific) === specific;
@@ -15955,7 +15696,8 @@ function newParsingContext() {
     variables: /* @__PURE__ */ new Set(),
     properties: /* @__PURE__ */ new Set(),
     featureId: false,
-    geometryType: false
+    geometryType: false,
+    mapState: false
   };
 }
 function parse(encoded, expectedType, context) {
@@ -16099,9 +15841,9 @@ const parsers = {
   ),
   [Ops.GeometryType]: createCallExpressionParser(usesGeometryType, withNoArgs),
   [Ops.LineMetric]: createCallExpressionParser(withNoArgs),
-  [Ops.Resolution]: createCallExpressionParser(withNoArgs),
-  [Ops.Zoom]: createCallExpressionParser(withNoArgs),
-  [Ops.Time]: createCallExpressionParser(withNoArgs),
+  [Ops.Resolution]: createCallExpressionParser(usesMapState, withNoArgs),
+  [Ops.Zoom]: createCallExpressionParser(usesMapState, withNoArgs),
+  [Ops.Time]: createCallExpressionParser(usesMapState, withNoArgs),
   [Ops.Any]: createCallExpressionParser(
     hasArgsCount(2, Infinity),
     withArgsOfType(BooleanType)
@@ -16291,6 +16033,9 @@ function usesFeatureId(encoded, returnType, context) {
 function usesGeometryType(encoded, returnType, context) {
   context.geometryType = true;
 }
+function usesMapState(encoded, returnType, context) {
+  context.mapState = true;
+}
 function withNoArgs(encoded, returnType, context) {
   const operation = encoded[0];
   if (encoded.length !== 1) {
@@ -16389,13 +16134,13 @@ function withInterpolateArgs(encoded, returnType, context) {
       base = 1;
       break;
     case "exponential":
-      const b2 = interpolationType[1];
-      if (typeof b2 !== "number" || b2 <= 0) {
+      const b3 = interpolationType[1];
+      if (typeof b3 !== "number" || b3 <= 0) {
         throw new Error(
-          `expected a number base for exponential interpolation, got ${JSON.stringify(b2)} instead`
+          `expected a number base for exponential interpolation, got ${JSON.stringify(b3)} instead`
         );
       }
-      base = b2;
+      base = b3;
       break;
     default:
       throw new Error(
@@ -16966,7 +16711,7 @@ function compileMatchExpression(expression, context) {
   }
   return (context2) => {
     const value = args[0](context2);
-    for (let i = 1; i < length; i += 2) {
+    for (let i = 1; i < length - 1; i += 2) {
       if (value === args[i](context2)) {
         return args[i + 1](context2);
       }
@@ -17071,9 +16816,2783 @@ function interpolateColor(base, value, input1, rgba1, input2, rgba2) {
     lcha1[2] + interpolateNumber(base, value, input1, 0, input2, deltaHue),
     interpolateNumber(base, value, input1, rgba1[3], input2, rgba2[3])
   ];
-  return normalize(lchaToRgba(lcha));
+  return lchaToRgba(lcha);
 }
-function always$1(context) {
+const ImageState = {
+  IDLE: 0,
+  LOADING: 1,
+  LOADED: 2,
+  ERROR: 3
+};
+function listenImage(image, loadHandler, errorHandler) {
+  const img = (
+    /** @type {HTMLImageElement} */
+    image
+  );
+  let listening = true;
+  let decoding = false;
+  let loaded = false;
+  const listenerKeys = [
+    listenOnce(img, EventType.LOAD, function() {
+      loaded = true;
+      if (!decoding) {
+        loadHandler();
+      }
+    })
+  ];
+  if (img.src && IMAGE_DECODE) {
+    decoding = true;
+    img.decode().then(function() {
+      if (listening) {
+        loadHandler();
+      }
+    }).catch(function(error) {
+      if (listening) {
+        if (loaded) {
+          loadHandler();
+        } else {
+          errorHandler();
+        }
+      }
+    });
+  } else {
+    listenerKeys.push(listenOnce(img, EventType.ERROR, errorHandler));
+  }
+  return function unlisten() {
+    listening = false;
+    listenerKeys.forEach(unlistenByKey);
+  };
+}
+function load(image, src) {
+  return new Promise((resolve, reject) => {
+    function handleLoad() {
+      unlisten();
+      resolve(image);
+    }
+    function handleError() {
+      unlisten();
+      reject(new Error("Image load error"));
+    }
+    function unlisten() {
+      image.removeEventListener("load", handleLoad);
+      image.removeEventListener("error", handleError);
+    }
+    image.addEventListener("load", handleLoad);
+    image.addEventListener("error", handleError);
+  });
+}
+function decodeFallback(image, src) {
+  if (src) {
+    image.src = src;
+  }
+  return image.src && IMAGE_DECODE ? new Promise(
+    (resolve, reject) => image.decode().then(() => resolve(image)).catch(
+      (e) => image.complete && image.width ? resolve(image) : reject(e)
+    )
+  ) : load(image);
+}
+class IconImageCache {
+  constructor() {
+    this.cache_ = {};
+    this.patternCache_ = {};
+    this.cacheSize_ = 0;
+    this.maxCacheSize_ = 1024;
+  }
+  /**
+   * FIXME empty description for jsdoc
+   */
+  clear() {
+    this.cache_ = {};
+    this.patternCache_ = {};
+    this.cacheSize_ = 0;
+  }
+  /**
+   * @return {boolean} Can expire cache.
+   */
+  canExpireCache() {
+    return this.cacheSize_ > this.maxCacheSize_;
+  }
+  /**
+   * FIXME empty description for jsdoc
+   */
+  expire() {
+    if (this.canExpireCache()) {
+      let i = 0;
+      for (const key in this.cache_) {
+        const iconImage = this.cache_[key];
+        if ((i++ & 3) === 0 && !iconImage.hasListener()) {
+          delete this.cache_[key];
+          delete this.patternCache_[key];
+          --this.cacheSize_;
+        }
+      }
+    }
+  }
+  /**
+   * @param {string} src Src.
+   * @param {?string} crossOrigin Cross origin.
+   * @param {import("../color.js").Color|string|null} color Color.
+   * @return {import("./IconImage.js").default} Icon image.
+   */
+  get(src, crossOrigin, color) {
+    const key = getCacheKey$1(src, crossOrigin, color);
+    return key in this.cache_ ? this.cache_[key] : null;
+  }
+  /**
+   * @param {string} src Src.
+   * @param {?string} crossOrigin Cross origin.
+   * @param {import("../color.js").Color|string|null} color Color.
+   * @return {CanvasPattern} Icon image.
+   */
+  getPattern(src, crossOrigin, color) {
+    const key = getCacheKey$1(src, crossOrigin, color);
+    return key in this.patternCache_ ? this.patternCache_[key] : null;
+  }
+  /**
+   * @param {string} src Src.
+   * @param {?string} crossOrigin Cross origin.
+   * @param {import("../color.js").Color|string|null} color Color.
+   * @param {import("./IconImage.js").default|null} iconImage Icon image.
+   * @param {boolean} [pattern] Also cache a `'repeat'` pattern with this `iconImage`.
+   */
+  set(src, crossOrigin, color, iconImage, pattern) {
+    const key = getCacheKey$1(src, crossOrigin, color);
+    const update = key in this.cache_;
+    this.cache_[key] = iconImage;
+    if (pattern) {
+      if (iconImage.getImageState() === ImageState.IDLE) {
+        iconImage.load();
+      }
+      if (iconImage.getImageState() === ImageState.LOADING) {
+        iconImage.ready().then(() => {
+          this.patternCache_[key] = getSharedCanvasContext2D().createPattern(
+            iconImage.getImage(1),
+            "repeat"
+          );
+        });
+      } else {
+        this.patternCache_[key] = getSharedCanvasContext2D().createPattern(
+          iconImage.getImage(1),
+          "repeat"
+        );
+      }
+    }
+    if (!update) {
+      ++this.cacheSize_;
+    }
+  }
+  /**
+   * Set the cache size of the icon cache. Default is `1024`. Change this value when
+   * your map uses more than 1024 different icon images and you are not caching icon
+   * styles on the application level.
+   * @param {number} maxCacheSize Cache max size.
+   * @api
+   */
+  setSize(maxCacheSize) {
+    this.maxCacheSize_ = maxCacheSize;
+    this.expire();
+  }
+}
+function getCacheKey$1(src, crossOrigin, color) {
+  const colorString = color ? asArray(color) : "null";
+  return crossOrigin + ":" + src + ":" + colorString;
+}
+const shared = new IconImageCache();
+let taintedTestContext = null;
+class IconImage extends Target {
+  /**
+   * @param {HTMLImageElement|HTMLCanvasElement|ImageBitmap|null} image Image.
+   * @param {string|undefined} src Src.
+   * @param {?string} crossOrigin Cross origin.
+   * @param {import("../ImageState.js").default|undefined} imageState Image state.
+   * @param {import("../color.js").Color|string|null} color Color.
+   */
+  constructor(image, src, crossOrigin, imageState, color) {
+    super();
+    this.hitDetectionImage_ = null;
+    this.image_ = image;
+    this.crossOrigin_ = crossOrigin;
+    this.canvas_ = {};
+    this.color_ = color;
+    this.imageState_ = imageState === void 0 ? ImageState.IDLE : imageState;
+    this.size_ = image && image.width && image.height ? [image.width, image.height] : null;
+    this.src_ = src;
+    this.tainted_;
+    this.ready_ = null;
+  }
+  /**
+   * @private
+   */
+  initializeImage_() {
+    this.image_ = new Image();
+    if (this.crossOrigin_ !== null) {
+      this.image_.crossOrigin = this.crossOrigin_;
+    }
+  }
+  /**
+   * @private
+   * @return {boolean} The image canvas is tainted.
+   */
+  isTainted_() {
+    if (this.tainted_ === void 0 && this.imageState_ === ImageState.LOADED) {
+      if (!taintedTestContext) {
+        taintedTestContext = createCanvasContext2D(1, 1, void 0, {
+          willReadFrequently: true
+        });
+      }
+      taintedTestContext.drawImage(this.image_, 0, 0);
+      try {
+        taintedTestContext.getImageData(0, 0, 1, 1);
+        this.tainted_ = false;
+      } catch {
+        taintedTestContext = null;
+        this.tainted_ = true;
+      }
+    }
+    return this.tainted_ === true;
+  }
+  /**
+   * @private
+   */
+  dispatchChangeEvent_() {
+    this.dispatchEvent(EventType.CHANGE);
+  }
+  /**
+   * @private
+   */
+  handleImageError_() {
+    this.imageState_ = ImageState.ERROR;
+    this.dispatchChangeEvent_();
+  }
+  /**
+   * @private
+   */
+  handleImageLoad_() {
+    this.imageState_ = ImageState.LOADED;
+    this.size_ = [this.image_.width, this.image_.height];
+    this.dispatchChangeEvent_();
+  }
+  /**
+   * @param {number} pixelRatio Pixel ratio.
+   * @return {HTMLImageElement|HTMLCanvasElement|ImageBitmap} Image or Canvas element or image bitmap.
+   */
+  getImage(pixelRatio) {
+    if (!this.image_) {
+      this.initializeImage_();
+    }
+    this.replaceColor_(pixelRatio);
+    return this.canvas_[pixelRatio] ? this.canvas_[pixelRatio] : this.image_;
+  }
+  /**
+   * @param {number} pixelRatio Pixel ratio.
+   * @return {number} Image or Canvas element.
+   */
+  getPixelRatio(pixelRatio) {
+    this.replaceColor_(pixelRatio);
+    return this.canvas_[pixelRatio] ? pixelRatio : 1;
+  }
+  /**
+   * @return {import("../ImageState.js").default} Image state.
+   */
+  getImageState() {
+    return this.imageState_;
+  }
+  /**
+   * @return {HTMLImageElement|HTMLCanvasElement|ImageBitmap} Image element.
+   */
+  getHitDetectionImage() {
+    if (!this.image_) {
+      this.initializeImage_();
+    }
+    if (!this.hitDetectionImage_) {
+      if (this.isTainted_()) {
+        const width = this.size_[0];
+        const height = this.size_[1];
+        const context = createCanvasContext2D(width, height);
+        context.fillRect(0, 0, width, height);
+        this.hitDetectionImage_ = context.canvas;
+      } else {
+        this.hitDetectionImage_ = this.image_;
+      }
+    }
+    return this.hitDetectionImage_;
+  }
+  /**
+   * Get the size of the icon (in pixels).
+   * @return {import("../size.js").Size} Image size.
+   */
+  getSize() {
+    return this.size_;
+  }
+  /**
+   * @return {string|undefined} Image src.
+   */
+  getSrc() {
+    return this.src_;
+  }
+  /**
+   * Load not yet loaded URI.
+   */
+  load() {
+    if (this.imageState_ !== ImageState.IDLE) {
+      return;
+    }
+    if (!this.image_) {
+      this.initializeImage_();
+    }
+    this.imageState_ = ImageState.LOADING;
+    try {
+      if (this.src_ !== void 0) {
+        this.image_.src = this.src_;
+      }
+    } catch {
+      this.handleImageError_();
+    }
+    if (this.image_ instanceof HTMLImageElement) {
+      decodeFallback(this.image_, this.src_).then((image) => {
+        this.image_ = image;
+        this.handleImageLoad_();
+      }).catch(this.handleImageError_.bind(this));
+    }
+  }
+  /**
+   * @param {number} pixelRatio Pixel ratio.
+   * @private
+   */
+  replaceColor_(pixelRatio) {
+    if (!this.color_ || this.canvas_[pixelRatio] || this.imageState_ !== ImageState.LOADED) {
+      return;
+    }
+    const image = this.image_;
+    const ctx = createCanvasContext2D(
+      Math.ceil(image.width * pixelRatio),
+      Math.ceil(image.height * pixelRatio)
+    );
+    const canvas = ctx.canvas;
+    ctx.scale(pixelRatio, pixelRatio);
+    ctx.drawImage(image, 0, 0);
+    ctx.globalCompositeOperation = "multiply";
+    ctx.fillStyle = asString(this.color_);
+    ctx.fillRect(0, 0, canvas.width / pixelRatio, canvas.height / pixelRatio);
+    ctx.globalCompositeOperation = "destination-in";
+    ctx.drawImage(image, 0, 0);
+    this.canvas_[pixelRatio] = canvas;
+  }
+  /**
+   * @return {Promise<void>} Promise that resolves when the image is loaded.
+   */
+  ready() {
+    if (!this.ready_) {
+      this.ready_ = new Promise((resolve) => {
+        if (this.imageState_ === ImageState.LOADED || this.imageState_ === ImageState.ERROR) {
+          resolve();
+        } else {
+          const onChange = () => {
+            if (this.imageState_ === ImageState.LOADED || this.imageState_ === ImageState.ERROR) {
+              this.removeEventListener(EventType.CHANGE, onChange);
+              resolve();
+            }
+          };
+          this.addEventListener(EventType.CHANGE, onChange);
+        }
+      });
+    }
+    return this.ready_;
+  }
+}
+function get(image, cacheKey, crossOrigin, imageState, color, pattern) {
+  let iconImage = cacheKey === void 0 ? void 0 : shared.get(cacheKey, crossOrigin, color);
+  if (!iconImage) {
+    iconImage = new IconImage(
+      image,
+      image && "src" in image ? image.src || void 0 : cacheKey,
+      crossOrigin,
+      imageState,
+      color
+    );
+    shared.set(cacheKey, crossOrigin, color, iconImage, pattern);
+  }
+  if (pattern && iconImage && !shared.getPattern(cacheKey, crossOrigin, color)) {
+    shared.set(cacheKey, crossOrigin, color, iconImage, pattern);
+  }
+  return iconImage;
+}
+function asColorLike(color) {
+  if (!color) {
+    return null;
+  }
+  if (Array.isArray(color)) {
+    return toString(color);
+  }
+  if (typeof color === "object" && "src" in color) {
+    return asCanvasPattern(color);
+  }
+  return color;
+}
+function asCanvasPattern(pattern) {
+  if (!pattern.offset || !pattern.size) {
+    return shared.getPattern(pattern.src, "anonymous", pattern.color);
+  }
+  const cacheKey = pattern.src + ":" + pattern.offset;
+  const canvasPattern = shared.getPattern(
+    cacheKey,
+    void 0,
+    pattern.color
+  );
+  if (canvasPattern) {
+    return canvasPattern;
+  }
+  const iconImage = shared.get(pattern.src, "anonymous", null);
+  if (iconImage.getImageState() !== ImageState.LOADED) {
+    return null;
+  }
+  const patternCanvasContext = createCanvasContext2D(
+    pattern.size[0],
+    pattern.size[1]
+  );
+  patternCanvasContext.drawImage(
+    iconImage.getImage(1),
+    pattern.offset[0],
+    pattern.offset[1],
+    pattern.size[0],
+    pattern.size[1],
+    0,
+    0,
+    pattern.size[0],
+    pattern.size[1]
+  );
+  get(
+    patternCanvasContext.canvas,
+    cacheKey,
+    void 0,
+    ImageState.LOADED,
+    pattern.color,
+    true
+  );
+  return shared.getPattern(cacheKey, void 0, pattern.color);
+}
+const defaultFont = "10px sans-serif";
+const defaultFillStyle = "#000";
+const defaultLineCap = "round";
+const defaultLineDash = [];
+const defaultLineDashOffset = 0;
+const defaultLineJoin = "round";
+const defaultMiterLimit = 10;
+const defaultStrokeStyle = "#000";
+const defaultTextAlign = "center";
+const defaultTextBaseline = "middle";
+const defaultPadding = [0, 0, 0, 0];
+const defaultLineWidth = 1;
+const checkedFonts = new BaseObject();
+let measureContext = null;
+let measureFont;
+const textHeights = {};
+const genericFontFamilies = /* @__PURE__ */ new Set([
+  "serif",
+  "sans-serif",
+  "monospace",
+  "cursive",
+  "fantasy",
+  "system-ui",
+  "ui-serif",
+  "ui-sans-serif",
+  "ui-monospace",
+  "ui-rounded",
+  "emoji",
+  "math",
+  "fangsong"
+]);
+function getFontKey(style, weight, family) {
+  return `${style} ${weight} 16px "${family}"`;
+}
+const registerFont = /* @__PURE__ */ function() {
+  const retries = 100;
+  let timeout, fontFaceSet;
+  async function isAvailable(fontSpec) {
+    await fontFaceSet.ready;
+    const fontFaces = await fontFaceSet.load(fontSpec);
+    if (fontFaces.length === 0) {
+      return false;
+    }
+    const font = getFontParameters(fontSpec);
+    const checkFamily = font.families[0].toLowerCase();
+    const checkWeight = font.weight;
+    return fontFaces.some(
+      /**
+       * @param {import('../css.js').FontParameters} f Font.
+       * @return {boolean} Font matches.
+       */
+      (f) => {
+        const family = f.family.replace(/^['"]|['"]$/g, "").toLowerCase();
+        const weight = fontWeights[f.weight] || f.weight;
+        return family === checkFamily && f.style === font.style && weight == checkWeight;
+      }
+    );
+  }
+  async function check() {
+    await fontFaceSet.ready;
+    let done = true;
+    const checkedFontsProperties = checkedFonts.getProperties();
+    const fonts = Object.keys(checkedFontsProperties).filter(
+      (key) => checkedFontsProperties[key] < retries
+    );
+    for (let i = fonts.length - 1; i >= 0; --i) {
+      const font = fonts[i];
+      let currentRetries = checkedFontsProperties[font];
+      if (currentRetries < retries) {
+        if (await isAvailable(font)) {
+          clear$1(textHeights);
+          checkedFonts.set(font, retries);
+        } else {
+          currentRetries += 10;
+          checkedFonts.set(font, currentRetries, true);
+          if (currentRetries < retries) {
+            done = false;
+          }
+        }
+      }
+    }
+    timeout = void 0;
+    if (!done) {
+      timeout = setTimeout(check, 100);
+    }
+  }
+  return async function(fontSpec) {
+    if (!fontFaceSet) {
+      fontFaceSet = WORKER_OFFSCREEN_CANVAS ? self.fonts : document.fonts;
+    }
+    const font = getFontParameters(fontSpec);
+    if (!font) {
+      return;
+    }
+    const families = font.families;
+    let needCheck = false;
+    for (const family of families) {
+      if (genericFontFamilies.has(family)) {
+        continue;
+      }
+      const key = getFontKey(font.style, font.weight, family);
+      if (checkedFonts.get(key) !== void 0) {
+        continue;
+      }
+      checkedFonts.set(key, 0, true);
+      needCheck = true;
+    }
+    if (needCheck) {
+      clearTimeout(timeout);
+      timeout = setTimeout(check, 100);
+    }
+  };
+}();
+const measureTextHeight = /* @__PURE__ */ function() {
+  let measureElement;
+  return function(fontSpec) {
+    let height = textHeights[fontSpec];
+    if (height == void 0) {
+      if (WORKER_OFFSCREEN_CANVAS) {
+        const font = getFontParameters(fontSpec);
+        const metrics = measureText(fontSpec, "Žg");
+        const lineHeight = isNaN(Number(font.lineHeight)) ? 1.2 : Number(font.lineHeight);
+        height = lineHeight * (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent);
+      } else {
+        if (!measureElement) {
+          measureElement = document.createElement("div");
+          measureElement.innerHTML = "M";
+          measureElement.style.minHeight = "0";
+          measureElement.style.maxHeight = "none";
+          measureElement.style.height = "auto";
+          measureElement.style.padding = "0";
+          measureElement.style.border = "none";
+          measureElement.style.position = "absolute";
+          measureElement.style.display = "block";
+          measureElement.style.left = "-99999px";
+        }
+        measureElement.style.font = fontSpec;
+        document.body.appendChild(measureElement);
+        height = measureElement.offsetHeight;
+        document.body.removeChild(measureElement);
+      }
+      textHeights[fontSpec] = height;
+    }
+    return height;
+  };
+}();
+function measureText(font, text) {
+  if (!measureContext) {
+    measureContext = createCanvasContext2D(1, 1);
+  }
+  if (font != measureFont) {
+    measureContext.font = font;
+    measureFont = measureContext.font;
+  }
+  return measureContext.measureText(text);
+}
+function measureTextWidth(font, text) {
+  return measureText(font, text).width;
+}
+function measureAndCacheTextWidth(font, text, cache2) {
+  if (text in cache2) {
+    return cache2[text];
+  }
+  const width = text.split("\n").reduce((prev, curr) => Math.max(prev, measureTextWidth(font, curr)), 0);
+  cache2[text] = width;
+  return width;
+}
+function getTextDimensions(baseStyle, chunks) {
+  const widths = [];
+  const heights = [];
+  const lineWidths = [];
+  let width = 0;
+  let lineWidth = 0;
+  let height = 0;
+  let lineHeight = 0;
+  for (let i = 0, ii = chunks.length; i <= ii; i += 2) {
+    const text = chunks[i];
+    if (text === "\n" || i === ii) {
+      width = Math.max(width, lineWidth);
+      lineWidths.push(lineWidth);
+      lineWidth = 0;
+      height += lineHeight;
+      lineHeight = 0;
+      continue;
+    }
+    const font = chunks[i + 1] || baseStyle.font;
+    const currentWidth = measureTextWidth(font, text);
+    widths.push(currentWidth);
+    lineWidth += currentWidth;
+    const currentHeight = measureTextHeight(font);
+    heights.push(currentHeight);
+    lineHeight = Math.max(lineHeight, currentHeight);
+  }
+  return { width, height, widths, heights, lineWidths };
+}
+function drawImageOrLabel(context, transform2, opacity, labelOrImage, originX, originY, w2, h, x2, y2, scale2) {
+  context.save();
+  if (opacity !== 1) {
+    if (context.globalAlpha === void 0) {
+      context.globalAlpha = (context2) => context2.globalAlpha *= opacity;
+    } else {
+      context.globalAlpha *= opacity;
+    }
+  }
+  if (transform2) {
+    context.transform.apply(context, transform2);
+  }
+  if (
+    /** @type {*} */
+    labelOrImage.contextInstructions
+  ) {
+    context.translate(x2, y2);
+    context.scale(scale2[0], scale2[1]);
+    executeLabelInstructions(
+      /** @type {Label} */
+      labelOrImage,
+      context
+    );
+  } else if (scale2[0] < 0 || scale2[1] < 0) {
+    context.translate(x2, y2);
+    context.scale(scale2[0], scale2[1]);
+    context.drawImage(
+      /** @type {HTMLCanvasElement|HTMLImageElement|HTMLVideoElement} */
+      labelOrImage,
+      originX,
+      originY,
+      w2,
+      h,
+      0,
+      0,
+      w2,
+      h
+    );
+  } else {
+    context.drawImage(
+      /** @type {HTMLCanvasElement|HTMLImageElement|HTMLVideoElement} */
+      labelOrImage,
+      originX,
+      originY,
+      w2,
+      h,
+      x2,
+      y2,
+      w2 * scale2[0],
+      h * scale2[1]
+    );
+  }
+  context.restore();
+}
+function executeLabelInstructions(label, context) {
+  const contextInstructions = label.contextInstructions;
+  for (let i = 0, ii = contextInstructions.length; i < ii; i += 2) {
+    if (Array.isArray(contextInstructions[i + 1])) {
+      context[contextInstructions[i]].apply(
+        context,
+        contextInstructions[i + 1]
+      );
+    } else {
+      context[contextInstructions[i]] = contextInstructions[i + 1];
+    }
+  }
+}
+class ImageStyle {
+  /**
+   * @param {Options} options Options.
+   */
+  constructor(options) {
+    this.opacity_ = options.opacity;
+    this.rotateWithView_ = options.rotateWithView;
+    this.rotation_ = options.rotation;
+    this.scale_ = options.scale;
+    this.scaleArray_ = toSize(options.scale);
+    this.displacement_ = options.displacement;
+    this.declutterMode_ = options.declutterMode;
+  }
+  /**
+   * Clones the style.
+   * @return {ImageStyle} The cloned style.
+   * @api
+   */
+  clone() {
+    const scale2 = this.getScale();
+    return new ImageStyle({
+      opacity: this.getOpacity(),
+      scale: Array.isArray(scale2) ? scale2.slice() : scale2,
+      rotation: this.getRotation(),
+      rotateWithView: this.getRotateWithView(),
+      displacement: this.getDisplacement().slice(),
+      declutterMode: this.getDeclutterMode()
+    });
+  }
+  /**
+   * Get the symbolizer opacity.
+   * @return {number} Opacity.
+   * @api
+   */
+  getOpacity() {
+    return this.opacity_;
+  }
+  /**
+   * Determine whether the symbolizer rotates with the map.
+   * @return {boolean} Rotate with map.
+   * @api
+   */
+  getRotateWithView() {
+    return this.rotateWithView_;
+  }
+  /**
+   * Get the symoblizer rotation.
+   * @return {number} Rotation.
+   * @api
+   */
+  getRotation() {
+    return this.rotation_;
+  }
+  /**
+   * Get the symbolizer scale.
+   * @return {number|import("../size.js").Size} Scale.
+   * @api
+   */
+  getScale() {
+    return this.scale_;
+  }
+  /**
+   * Get the symbolizer scale array.
+   * @return {import("../size.js").Size} Scale array.
+   */
+  getScaleArray() {
+    return this.scaleArray_;
+  }
+  /**
+   * Get the displacement of the shape
+   * @return {Array<number>} Shape's center displacement
+   * @api
+   */
+  getDisplacement() {
+    return this.displacement_;
+  }
+  /**
+   * Get the declutter mode of the shape
+   * @return {import("./Style.js").DeclutterMode} Shape's declutter mode
+   * @api
+   */
+  getDeclutterMode() {
+    return this.declutterMode_;
+  }
+  /**
+   * Get the anchor point in pixels. The anchor determines the center point for the
+   * symbolizer.
+   * @abstract
+   * @return {Array<number>} Anchor.
+   */
+  getAnchor() {
+    return abstract();
+  }
+  /**
+   * Get the image element for the symbolizer.
+   * @abstract
+   * @param {number} pixelRatio Pixel ratio.
+   * @return {import('../DataTile.js').ImageLike} Image element.
+   */
+  getImage(pixelRatio) {
+    return abstract();
+  }
+  /**
+   * @abstract
+   * @return {import('../DataTile.js').ImageLike} Image element.
+   */
+  getHitDetectionImage() {
+    return abstract();
+  }
+  /**
+   * Get the image pixel ratio.
+   * @param {number} pixelRatio Pixel ratio.
+   * @return {number} Pixel ratio.
+   */
+  getPixelRatio(pixelRatio) {
+    return 1;
+  }
+  /**
+   * @abstract
+   * @return {import("../ImageState.js").default} Image state.
+   */
+  getImageState() {
+    return abstract();
+  }
+  /**
+   * @abstract
+   * @return {import("../size.js").Size} Image size.
+   */
+  getImageSize() {
+    return abstract();
+  }
+  /**
+   * Get the origin of the symbolizer.
+   * @abstract
+   * @return {Array<number>} Origin.
+   */
+  getOrigin() {
+    return abstract();
+  }
+  /**
+   * Get the size of the symbolizer (in pixels).
+   * @abstract
+   * @return {import("../size.js").Size} Size.
+   */
+  getSize() {
+    return abstract();
+  }
+  /**
+   * Set the displacement.
+   *
+   * @param {Array<number>} displacement Displacement.
+   * @api
+   */
+  setDisplacement(displacement) {
+    this.displacement_ = displacement;
+  }
+  /**
+   * Set the opacity.
+   *
+   * @param {number} opacity Opacity.
+   * @api
+   */
+  setOpacity(opacity) {
+    this.opacity_ = opacity;
+  }
+  /**
+   * Set whether to rotate the style with the view.
+   *
+   * @param {boolean} rotateWithView Rotate with map.
+   * @api
+   */
+  setRotateWithView(rotateWithView) {
+    this.rotateWithView_ = rotateWithView;
+  }
+  /**
+   * Set the rotation.
+   *
+   * @param {number} rotation Rotation.
+   * @api
+   */
+  setRotation(rotation) {
+    this.rotation_ = rotation;
+  }
+  /**
+   * Set the scale.
+   *
+   * @param {number|import("../size.js").Size} scale Scale.
+   * @api
+   */
+  setScale(scale2) {
+    this.scale_ = scale2;
+    this.scaleArray_ = toSize(scale2);
+  }
+  /**
+   * @abstract
+   * @param {function(import("../events/Event.js").default): void} listener Listener function.
+   */
+  listenImageChange(listener) {
+    abstract();
+  }
+  /**
+   * Load not yet loaded URI.
+   * @abstract
+   */
+  load() {
+    abstract();
+  }
+  /**
+   * @abstract
+   * @param {function(import("../events/Event.js").default): void} listener Listener function.
+   */
+  unlistenImageChange(listener) {
+    abstract();
+  }
+  /**
+   * @return {Promise<void>} `false` or Promise that resolves when the style is ready to use.
+   */
+  ready() {
+    return Promise.resolve();
+  }
+}
+class RegularShape extends ImageStyle {
+  /**
+   * @param {Options} options Options.
+   */
+  constructor(options) {
+    super({
+      opacity: 1,
+      rotateWithView: options.rotateWithView !== void 0 ? options.rotateWithView : false,
+      rotation: options.rotation !== void 0 ? options.rotation : 0,
+      scale: options.scale !== void 0 ? options.scale : 1,
+      displacement: options.displacement !== void 0 ? options.displacement : [0, 0],
+      declutterMode: options.declutterMode
+    });
+    this.hitDetectionCanvas_ = null;
+    this.fill_ = options.fill !== void 0 ? options.fill : null;
+    this.origin_ = [0, 0];
+    this.points_ = options.points;
+    this.radius = options.radius;
+    this.radius2_ = options.radius2;
+    this.angle_ = options.angle !== void 0 ? options.angle : 0;
+    this.stroke_ = options.stroke !== void 0 ? options.stroke : null;
+    this.size_;
+    this.renderOptions_;
+    this.imageState_ = this.fill_ && this.fill_.loading() ? ImageState.LOADING : ImageState.LOADED;
+    if (this.imageState_ === ImageState.LOADING) {
+      this.ready().then(() => this.imageState_ = ImageState.LOADED);
+    }
+    this.render();
+  }
+  /**
+   * Clones the style.
+   * @return {RegularShape} The cloned style.
+   * @api
+   * @override
+   */
+  clone() {
+    const scale2 = this.getScale();
+    const style = new RegularShape({
+      fill: this.getFill() ? this.getFill().clone() : void 0,
+      points: this.getPoints(),
+      radius: this.getRadius(),
+      radius2: this.getRadius2(),
+      angle: this.getAngle(),
+      stroke: this.getStroke() ? this.getStroke().clone() : void 0,
+      rotation: this.getRotation(),
+      rotateWithView: this.getRotateWithView(),
+      scale: Array.isArray(scale2) ? scale2.slice() : scale2,
+      displacement: this.getDisplacement().slice(),
+      declutterMode: this.getDeclutterMode()
+    });
+    style.setOpacity(this.getOpacity());
+    return style;
+  }
+  /**
+   * Get the anchor point in pixels. The anchor determines the center point for the
+   * symbolizer.
+   * @return {Array<number>} Anchor.
+   * @api
+   * @override
+   */
+  getAnchor() {
+    const size = this.size_;
+    const displacement = this.getDisplacement();
+    const scale2 = this.getScaleArray();
+    return [
+      size[0] / 2 - displacement[0] / scale2[0],
+      size[1] / 2 + displacement[1] / scale2[1]
+    ];
+  }
+  /**
+   * Get the angle used in generating the shape.
+   * @return {number} Shape's rotation in radians.
+   * @api
+   */
+  getAngle() {
+    return this.angle_;
+  }
+  /**
+   * Get the fill style for the shape.
+   * @return {import("./Fill.js").default|null} Fill style.
+   * @api
+   */
+  getFill() {
+    return this.fill_;
+  }
+  /**
+   * Set the fill style.
+   * @param {import("./Fill.js").default|null} fill Fill style.
+   * @api
+   */
+  setFill(fill) {
+    this.fill_ = fill;
+    this.render();
+  }
+  /**
+   * @return {HTMLCanvasElement} Image element.
+   * @override
+   */
+  getHitDetectionImage() {
+    if (!this.hitDetectionCanvas_) {
+      this.hitDetectionCanvas_ = this.createHitDetectionCanvas_(
+        this.renderOptions_
+      );
+    }
+    return this.hitDetectionCanvas_;
+  }
+  /**
+   * Get the image icon.
+   * @param {number} pixelRatio Pixel ratio.
+   * @return {HTMLCanvasElement} Image or Canvas element.
+   * @api
+   * @override
+   */
+  getImage(pixelRatio) {
+    const fillKey = this.fill_?.getKey();
+    const cacheKey = `${pixelRatio},${this.angle_},${this.radius},${this.radius2_},${this.points_},${fillKey}` + Object.values(this.renderOptions_).join(",");
+    let image = (
+      /** @type {HTMLCanvasElement} */
+      shared.get(cacheKey, null, null)?.getImage(1)
+    );
+    if (!image) {
+      const renderOptions = this.renderOptions_;
+      const size = Math.ceil(renderOptions.size * pixelRatio);
+      const context = createCanvasContext2D(size, size);
+      this.draw_(renderOptions, context, pixelRatio);
+      image = context.canvas;
+      shared.set(
+        cacheKey,
+        null,
+        null,
+        new IconImage(image, void 0, null, ImageState.LOADED, null)
+      );
+    }
+    return image;
+  }
+  /**
+   * Get the image pixel ratio.
+   * @param {number} pixelRatio Pixel ratio.
+   * @return {number} Pixel ratio.
+   * @override
+   */
+  getPixelRatio(pixelRatio) {
+    return pixelRatio;
+  }
+  /**
+   * @return {import("../size.js").Size} Image size.
+   * @override
+   */
+  getImageSize() {
+    return this.size_;
+  }
+  /**
+   * @return {import("../ImageState.js").default} Image state.
+   * @override
+   */
+  getImageState() {
+    return this.imageState_;
+  }
+  /**
+   * Get the origin of the symbolizer.
+   * @return {Array<number>} Origin.
+   * @api
+   * @override
+   */
+  getOrigin() {
+    return this.origin_;
+  }
+  /**
+   * Get the number of points for generating the shape.
+   * @return {number} Number of points for stars and regular polygons.
+   * @api
+   */
+  getPoints() {
+    return this.points_;
+  }
+  /**
+   * Get the (primary) radius for the shape.
+   * @return {number} Radius.
+   * @api
+   */
+  getRadius() {
+    return this.radius;
+  }
+  /**
+   * Get the secondary radius for the shape.
+   * @return {number|undefined} Radius2.
+   * @api
+   */
+  getRadius2() {
+    return this.radius2_;
+  }
+  /**
+   * Get the size of the symbolizer (in pixels).
+   * @return {import("../size.js").Size} Size.
+   * @api
+   * @override
+   */
+  getSize() {
+    return this.size_;
+  }
+  /**
+   * Get the stroke style for the shape.
+   * @return {import("./Stroke.js").default|null} Stroke style.
+   * @api
+   */
+  getStroke() {
+    return this.stroke_;
+  }
+  /**
+   * Set the stroke style.
+   * @param {import("./Stroke.js").default|null} stroke Stroke style.
+   * @api
+   */
+  setStroke(stroke) {
+    this.stroke_ = stroke;
+    this.render();
+  }
+  /**
+   * @param {function(import("../events/Event.js").default): void} listener Listener function.
+   * @override
+   */
+  listenImageChange(listener) {
+  }
+  /**
+   * Load not yet loaded URI.
+   * @override
+   */
+  load() {
+  }
+  /**
+   * @param {function(import("../events/Event.js").default): void} listener Listener function.
+   * @override
+   */
+  unlistenImageChange(listener) {
+  }
+  /**
+   * Calculate additional canvas size needed for the miter.
+   * @param {string} lineJoin Line join
+   * @param {number} strokeWidth Stroke width
+   * @param {number} miterLimit Miter limit
+   * @return {number} Additional canvas size needed
+   * @private
+   */
+  calculateLineJoinSize_(lineJoin, strokeWidth, miterLimit) {
+    if (strokeWidth === 0 || this.points_ === Infinity || lineJoin !== "bevel" && lineJoin !== "miter") {
+      return strokeWidth;
+    }
+    let r1 = this.radius;
+    let r2 = this.radius2_ === void 0 ? r1 : this.radius2_;
+    if (r1 < r2) {
+      const tmp = r1;
+      r1 = r2;
+      r2 = tmp;
+    }
+    const points = this.radius2_ === void 0 ? this.points_ : this.points_ * 2;
+    const alpha = 2 * Math.PI / points;
+    const a3 = r2 * Math.sin(alpha);
+    const b3 = Math.sqrt(r2 * r2 - a3 * a3);
+    const d2 = r1 - b3;
+    const e = Math.sqrt(a3 * a3 + d2 * d2);
+    const miterRatio = e / a3;
+    if (lineJoin === "miter" && miterRatio <= miterLimit) {
+      return miterRatio * strokeWidth;
+    }
+    const k2 = strokeWidth / 2 / miterRatio;
+    const l = strokeWidth / 2 * (d2 / e);
+    const maxr = Math.sqrt((r1 + k2) * (r1 + k2) + l * l);
+    const bevelAdd = maxr - r1;
+    if (this.radius2_ === void 0 || lineJoin === "bevel") {
+      return bevelAdd * 2;
+    }
+    const aa = r1 * Math.sin(alpha);
+    const bb = Math.sqrt(r1 * r1 - aa * aa);
+    const dd = r2 - bb;
+    const ee = Math.sqrt(aa * aa + dd * dd);
+    const innerMiterRatio = ee / aa;
+    if (innerMiterRatio <= miterLimit) {
+      const innerLength = innerMiterRatio * strokeWidth / 2 - r2 - r1;
+      return 2 * Math.max(bevelAdd, innerLength);
+    }
+    return bevelAdd * 2;
+  }
+  /**
+   * @return {RenderOptions}  The render options
+   * @protected
+   */
+  createRenderOptions() {
+    let lineCap = defaultLineCap;
+    let lineJoin = defaultLineJoin;
+    let miterLimit = 0;
+    let lineDash = null;
+    let lineDashOffset = 0;
+    let strokeStyle;
+    let strokeWidth = 0;
+    if (this.stroke_) {
+      strokeStyle = asColorLike(this.stroke_.getColor() ?? defaultStrokeStyle);
+      strokeWidth = this.stroke_.getWidth() ?? defaultLineWidth;
+      lineDash = this.stroke_.getLineDash();
+      lineDashOffset = this.stroke_.getLineDashOffset() ?? 0;
+      lineJoin = this.stroke_.getLineJoin() ?? defaultLineJoin;
+      lineCap = this.stroke_.getLineCap() ?? defaultLineCap;
+      miterLimit = this.stroke_.getMiterLimit() ?? defaultMiterLimit;
+    }
+    const add2 = this.calculateLineJoinSize_(lineJoin, strokeWidth, miterLimit);
+    const maxRadius = Math.max(this.radius, this.radius2_ || 0);
+    const size = Math.ceil(2 * maxRadius + add2);
+    return {
+      strokeStyle,
+      strokeWidth,
+      size,
+      lineCap,
+      lineDash,
+      lineDashOffset,
+      lineJoin,
+      miterLimit
+    };
+  }
+  /**
+   * @protected
+   */
+  render() {
+    this.renderOptions_ = this.createRenderOptions();
+    const size = this.renderOptions_.size;
+    this.hitDetectionCanvas_ = null;
+    this.size_ = [size, size];
+  }
+  /**
+   * @private
+   * @param {RenderOptions} renderOptions Render options.
+   * @param {CanvasRenderingContext2D} context The rendering context.
+   * @param {number} pixelRatio The pixel ratio.
+   */
+  draw_(renderOptions, context, pixelRatio) {
+    context.scale(pixelRatio, pixelRatio);
+    context.translate(renderOptions.size / 2, renderOptions.size / 2);
+    this.createPath_(context);
+    if (this.fill_) {
+      let color = this.fill_.getColor();
+      if (color === null) {
+        color = defaultFillStyle;
+      }
+      context.fillStyle = asColorLike(color);
+      context.fill();
+    }
+    if (renderOptions.strokeStyle) {
+      context.strokeStyle = renderOptions.strokeStyle;
+      context.lineWidth = renderOptions.strokeWidth;
+      if (renderOptions.lineDash) {
+        context.setLineDash(renderOptions.lineDash);
+        context.lineDashOffset = renderOptions.lineDashOffset;
+      }
+      context.lineCap = renderOptions.lineCap;
+      context.lineJoin = renderOptions.lineJoin;
+      context.miterLimit = renderOptions.miterLimit;
+      context.stroke();
+    }
+  }
+  /**
+   * @private
+   * @param {RenderOptions} renderOptions Render options.
+   * @return {HTMLCanvasElement} Canvas containing the icon
+   */
+  createHitDetectionCanvas_(renderOptions) {
+    let context;
+    if (this.fill_) {
+      let color = this.fill_.getColor();
+      let opacity = 0;
+      if (typeof color === "string") {
+        color = asArray(color);
+      }
+      if (color === null) {
+        opacity = 1;
+      } else if (Array.isArray(color)) {
+        opacity = color.length === 4 ? color[3] : 1;
+      }
+      if (opacity === 0) {
+        context = createCanvasContext2D(renderOptions.size, renderOptions.size);
+        this.drawHitDetectionCanvas_(renderOptions, context);
+      }
+    }
+    return context ? context.canvas : this.getImage(1);
+  }
+  /**
+   * @private
+   * @param {CanvasRenderingContext2D} context The context to draw in.
+   */
+  createPath_(context) {
+    let points = this.points_;
+    const radius = this.radius;
+    if (points === Infinity) {
+      context.arc(0, 0, radius, 0, 2 * Math.PI);
+    } else {
+      const radius2 = this.radius2_ === void 0 ? radius : this.radius2_;
+      if (this.radius2_ !== void 0) {
+        points *= 2;
+      }
+      const startAngle = this.angle_ - Math.PI / 2;
+      const step = 2 * Math.PI / points;
+      for (let i = 0; i < points; i++) {
+        const angle0 = startAngle + i * step;
+        const radiusC = i % 2 === 0 ? radius : radius2;
+        context.lineTo(radiusC * Math.cos(angle0), radiusC * Math.sin(angle0));
+      }
+      context.closePath();
+    }
+  }
+  /**
+   * @private
+   * @param {RenderOptions} renderOptions Render options.
+   * @param {CanvasRenderingContext2D} context The context.
+   */
+  drawHitDetectionCanvas_(renderOptions, context) {
+    context.translate(renderOptions.size / 2, renderOptions.size / 2);
+    this.createPath_(context);
+    context.fillStyle = defaultFillStyle;
+    context.fill();
+    if (renderOptions.strokeStyle) {
+      context.strokeStyle = renderOptions.strokeStyle;
+      context.lineWidth = renderOptions.strokeWidth;
+      if (renderOptions.lineDash) {
+        context.setLineDash(renderOptions.lineDash);
+        context.lineDashOffset = renderOptions.lineDashOffset;
+      }
+      context.lineJoin = renderOptions.lineJoin;
+      context.miterLimit = renderOptions.miterLimit;
+      context.stroke();
+    }
+  }
+  /**
+   * @override
+   */
+  ready() {
+    return this.fill_ ? this.fill_.ready() : Promise.resolve();
+  }
+}
+class CircleStyle extends RegularShape {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    options = options ? options : { radius: 5 };
+    super({
+      points: Infinity,
+      fill: options.fill,
+      radius: options.radius,
+      stroke: options.stroke,
+      scale: options.scale !== void 0 ? options.scale : 1,
+      rotation: options.rotation !== void 0 ? options.rotation : 0,
+      rotateWithView: options.rotateWithView !== void 0 ? options.rotateWithView : false,
+      displacement: options.displacement !== void 0 ? options.displacement : [0, 0],
+      declutterMode: options.declutterMode
+    });
+  }
+  /**
+   * Clones the style.
+   * @return {CircleStyle} The cloned style.
+   * @api
+   * @override
+   */
+  clone() {
+    const scale2 = this.getScale();
+    const style = new CircleStyle({
+      fill: this.getFill() ? this.getFill().clone() : void 0,
+      stroke: this.getStroke() ? this.getStroke().clone() : void 0,
+      radius: this.getRadius(),
+      scale: Array.isArray(scale2) ? scale2.slice() : scale2,
+      rotation: this.getRotation(),
+      rotateWithView: this.getRotateWithView(),
+      displacement: this.getDisplacement().slice(),
+      declutterMode: this.getDeclutterMode()
+    });
+    style.setOpacity(this.getOpacity());
+    return style;
+  }
+  /**
+   * Set the circle radius.
+   *
+   * @param {number} radius Circle radius.
+   * @api
+   */
+  setRadius(radius) {
+    this.radius = radius;
+    this.render();
+  }
+}
+class Fill {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    options = options || {};
+    this.patternImage_ = null;
+    this.color_ = null;
+    if (options.color !== void 0) {
+      this.setColor(options.color);
+    }
+  }
+  /**
+   * Clones the style. The color is not cloned if it is a {@link module:ol/colorlike~ColorLike}.
+   * @return {Fill} The cloned style.
+   * @api
+   */
+  clone() {
+    const color = this.getColor();
+    return new Fill({
+      color: Array.isArray(color) ? color.slice() : color || void 0
+    });
+  }
+  /**
+   * Get the fill color.
+   * @return {import("../color.js").Color|import("../colorlike.js").ColorLike|import('../colorlike.js').PatternDescriptor|null} Color.
+   * @api
+   */
+  getColor() {
+    return this.color_;
+  }
+  /**
+   * Set the color.
+   *
+   * @param {import("../color.js").Color|import("../colorlike.js").ColorLike|import('../colorlike.js').PatternDescriptor|null} color Color.
+   * @api
+   */
+  setColor(color) {
+    if (color !== null && typeof color === "object" && "src" in color) {
+      const patternImage = get(
+        null,
+        color.src,
+        "anonymous",
+        void 0,
+        color.offset ? null : color.color ? color.color : null,
+        !(color.offset && color.size)
+      );
+      patternImage.ready().then(() => {
+        this.patternImage_ = null;
+      });
+      if (patternImage.getImageState() === ImageState.IDLE) {
+        patternImage.load();
+      }
+      if (patternImage.getImageState() === ImageState.LOADING) {
+        this.patternImage_ = patternImage;
+      }
+    }
+    this.color_ = color;
+  }
+  /**
+   * @return {string} Key of the fill for cache lookup.
+   */
+  getKey() {
+    const fill = this.getColor();
+    if (!fill) {
+      return "";
+    }
+    return fill instanceof CanvasPattern || fill instanceof CanvasGradient ? getUid(fill) : typeof fill === "object" && "src" in fill ? fill.src + ":" + fill.offset : asArray(fill).toString();
+  }
+  /**
+   * @return {boolean} The fill style is loading an image pattern.
+   */
+  loading() {
+    return !!this.patternImage_;
+  }
+  /**
+   * @return {Promise<void>} `false` or a promise that resolves when the style is ready to use.
+   */
+  ready() {
+    return this.patternImage_ ? this.patternImage_.ready() : Promise.resolve();
+  }
+}
+function calculateScale(width, height, wantedWidth, wantedHeight) {
+  if (wantedWidth !== void 0 && wantedHeight !== void 0) {
+    return [wantedWidth / width, wantedHeight / height];
+  }
+  if (wantedWidth !== void 0) {
+    return wantedWidth / width;
+  }
+  if (wantedHeight !== void 0) {
+    return wantedHeight / height;
+  }
+  return 1;
+}
+class Icon extends ImageStyle {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    options = options || {};
+    const opacity = options.opacity !== void 0 ? options.opacity : 1;
+    const rotation = options.rotation !== void 0 ? options.rotation : 0;
+    const scale2 = options.scale !== void 0 ? options.scale : 1;
+    const rotateWithView = options.rotateWithView !== void 0 ? options.rotateWithView : false;
+    super({
+      opacity,
+      rotation,
+      scale: scale2,
+      displacement: options.displacement !== void 0 ? options.displacement : [0, 0],
+      rotateWithView,
+      declutterMode: options.declutterMode
+    });
+    this.anchor_ = options.anchor !== void 0 ? options.anchor : [0.5, 0.5];
+    this.normalizedAnchor_ = null;
+    this.anchorOrigin_ = options.anchorOrigin !== void 0 ? options.anchorOrigin : "top-left";
+    this.anchorXUnits_ = options.anchorXUnits !== void 0 ? options.anchorXUnits : "fraction";
+    this.anchorYUnits_ = options.anchorYUnits !== void 0 ? options.anchorYUnits : "fraction";
+    this.crossOrigin_ = options.crossOrigin !== void 0 ? options.crossOrigin : null;
+    const image = options.img !== void 0 ? options.img : null;
+    let cacheKey = options.src;
+    assert(
+      !(cacheKey !== void 0 && image),
+      "`image` and `src` cannot be provided at the same time"
+    );
+    if ((cacheKey === void 0 || cacheKey.length === 0) && image) {
+      cacheKey = /** @type {HTMLImageElement} */
+      image.src || getUid(image);
+    }
+    assert(
+      cacheKey !== void 0 && cacheKey.length > 0,
+      "A defined and non-empty `src` or `image` must be provided"
+    );
+    assert(
+      !((options.width !== void 0 || options.height !== void 0) && options.scale !== void 0),
+      "`width` or `height` cannot be provided together with `scale`"
+    );
+    let imageState;
+    if (options.src !== void 0) {
+      imageState = ImageState.IDLE;
+    } else if (image !== void 0) {
+      if ("complete" in image) {
+        if (image.complete) {
+          imageState = image.src ? ImageState.LOADED : ImageState.IDLE;
+        } else {
+          imageState = ImageState.LOADING;
+        }
+      } else {
+        imageState = ImageState.LOADED;
+      }
+    }
+    this.color_ = options.color !== void 0 ? asArray(options.color) : null;
+    this.iconImage_ = get(
+      image,
+      /** @type {string} */
+      cacheKey,
+      this.crossOrigin_,
+      imageState,
+      this.color_
+    );
+    this.offset_ = options.offset !== void 0 ? options.offset : [0, 0];
+    this.offsetOrigin_ = options.offsetOrigin !== void 0 ? options.offsetOrigin : "top-left";
+    this.origin_ = null;
+    this.size_ = options.size !== void 0 ? options.size : null;
+    this.initialOptions_;
+    if (options.width !== void 0 || options.height !== void 0) {
+      let width, height;
+      if (options.size) {
+        [width, height] = options.size;
+      } else {
+        const image2 = this.getImage(1);
+        if (image2.width && image2.height) {
+          width = image2.width;
+          height = image2.height;
+        } else if (image2 instanceof HTMLImageElement) {
+          this.initialOptions_ = options;
+          const onload = () => {
+            this.unlistenImageChange(onload);
+            if (!this.initialOptions_) {
+              return;
+            }
+            const imageSize = this.iconImage_.getSize();
+            this.setScale(
+              calculateScale(
+                imageSize[0],
+                imageSize[1],
+                options.width,
+                options.height
+              )
+            );
+          };
+          this.listenImageChange(onload);
+          return;
+        }
+      }
+      if (width !== void 0) {
+        this.setScale(
+          calculateScale(width, height, options.width, options.height)
+        );
+      }
+    }
+  }
+  /**
+   * Clones the style. The underlying Image/HTMLCanvasElement is not cloned.
+   * @return {Icon} The cloned style.
+   * @api
+   * @override
+   */
+  clone() {
+    let scale2, width, height;
+    if (this.initialOptions_) {
+      width = this.initialOptions_.width;
+      height = this.initialOptions_.height;
+    } else {
+      scale2 = this.getScale();
+      scale2 = Array.isArray(scale2) ? scale2.slice() : scale2;
+    }
+    return new Icon({
+      anchor: this.anchor_.slice(),
+      anchorOrigin: this.anchorOrigin_,
+      anchorXUnits: this.anchorXUnits_,
+      anchorYUnits: this.anchorYUnits_,
+      color: this.color_ && this.color_.slice ? this.color_.slice() : this.color_ || void 0,
+      crossOrigin: this.crossOrigin_,
+      offset: this.offset_.slice(),
+      offsetOrigin: this.offsetOrigin_,
+      opacity: this.getOpacity(),
+      rotateWithView: this.getRotateWithView(),
+      rotation: this.getRotation(),
+      scale: scale2,
+      width,
+      height,
+      size: this.size_ !== null ? this.size_.slice() : void 0,
+      src: this.getSrc(),
+      displacement: this.getDisplacement().slice(),
+      declutterMode: this.getDeclutterMode()
+    });
+  }
+  /**
+   * Get the anchor point in pixels. The anchor determines the center point for the
+   * symbolizer.
+   * @return {Array<number>} Anchor.
+   * @api
+   * @override
+   */
+  getAnchor() {
+    let anchor = this.normalizedAnchor_;
+    if (!anchor) {
+      anchor = this.anchor_;
+      const size = this.getSize();
+      if (this.anchorXUnits_ == "fraction" || this.anchorYUnits_ == "fraction") {
+        if (!size) {
+          return null;
+        }
+        anchor = this.anchor_.slice();
+        if (this.anchorXUnits_ == "fraction") {
+          anchor[0] *= size[0];
+        }
+        if (this.anchorYUnits_ == "fraction") {
+          anchor[1] *= size[1];
+        }
+      }
+      if (this.anchorOrigin_ != "top-left") {
+        if (!size) {
+          return null;
+        }
+        if (anchor === this.anchor_) {
+          anchor = this.anchor_.slice();
+        }
+        if (this.anchorOrigin_ == "top-right" || this.anchorOrigin_ == "bottom-right") {
+          anchor[0] = -anchor[0] + size[0];
+        }
+        if (this.anchorOrigin_ == "bottom-left" || this.anchorOrigin_ == "bottom-right") {
+          anchor[1] = -anchor[1] + size[1];
+        }
+      }
+      this.normalizedAnchor_ = anchor;
+    }
+    const displacement = this.getDisplacement();
+    const scale2 = this.getScaleArray();
+    return [
+      anchor[0] - displacement[0] / scale2[0],
+      anchor[1] + displacement[1] / scale2[1]
+    ];
+  }
+  /**
+   * Set the anchor point. The anchor determines the center point for the
+   * symbolizer.
+   *
+   * @param {Array<number>} anchor Anchor.
+   * @api
+   */
+  setAnchor(anchor) {
+    this.anchor_ = anchor;
+    this.normalizedAnchor_ = null;
+  }
+  /**
+   * Get the icon color.
+   * @return {import("../color.js").Color} Color.
+   * @api
+   */
+  getColor() {
+    return this.color_;
+  }
+  /**
+   * Get the image icon.
+   * @param {number} pixelRatio Pixel ratio.
+   * @return {HTMLImageElement|HTMLCanvasElement|ImageBitmap} Image or Canvas element. If the Icon
+   * style was configured with `src` or with a not let loaded `img`, an `ImageBitmap` will be returned.
+   * @api
+   * @override
+   */
+  getImage(pixelRatio) {
+    return this.iconImage_.getImage(pixelRatio);
+  }
+  /**
+   * Get the pixel ratio.
+   * @param {number} pixelRatio Pixel ratio.
+   * @return {number} The pixel ratio of the image.
+   * @api
+   * @override
+   */
+  getPixelRatio(pixelRatio) {
+    return this.iconImage_.getPixelRatio(pixelRatio);
+  }
+  /**
+   * @return {import("../size.js").Size} Image size.
+   * @override
+   */
+  getImageSize() {
+    return this.iconImage_.getSize();
+  }
+  /**
+   * @return {import("../ImageState.js").default} Image state.
+   * @override
+   */
+  getImageState() {
+    return this.iconImage_.getImageState();
+  }
+  /**
+   * @return {HTMLImageElement|HTMLCanvasElement|ImageBitmap} Image element.
+   * @override
+   */
+  getHitDetectionImage() {
+    return this.iconImage_.getHitDetectionImage();
+  }
+  /**
+   * Get the origin of the symbolizer.
+   * @return {Array<number>} Origin.
+   * @api
+   * @override
+   */
+  getOrigin() {
+    if (this.origin_) {
+      return this.origin_;
+    }
+    let offset2 = this.offset_;
+    if (this.offsetOrigin_ != "top-left") {
+      const size = this.getSize();
+      const iconImageSize = this.iconImage_.getSize();
+      if (!size || !iconImageSize) {
+        return null;
+      }
+      offset2 = offset2.slice();
+      if (this.offsetOrigin_ == "top-right" || this.offsetOrigin_ == "bottom-right") {
+        offset2[0] = iconImageSize[0] - size[0] - offset2[0];
+      }
+      if (this.offsetOrigin_ == "bottom-left" || this.offsetOrigin_ == "bottom-right") {
+        offset2[1] = iconImageSize[1] - size[1] - offset2[1];
+      }
+    }
+    this.origin_ = offset2;
+    return this.origin_;
+  }
+  /**
+   * Get the image URL.
+   * @return {string|undefined} Image src.
+   * @api
+   */
+  getSrc() {
+    return this.iconImage_.getSrc();
+  }
+  /**
+   * Get the size of the icon (in pixels).
+   * @return {import("../size.js").Size} Image size.
+   * @api
+   * @override
+   */
+  getSize() {
+    return !this.size_ ? this.iconImage_.getSize() : this.size_;
+  }
+  /**
+   * Get the width of the icon (in pixels). Will return undefined when the icon image is not yet loaded.
+   * @return {number} Icon width (in pixels).
+   * @api
+   */
+  getWidth() {
+    const scale2 = this.getScaleArray();
+    if (this.size_) {
+      return this.size_[0] * scale2[0];
+    }
+    if (this.iconImage_.getImageState() == ImageState.LOADED) {
+      return this.iconImage_.getSize()[0] * scale2[0];
+    }
+    return void 0;
+  }
+  /**
+   * Get the height of the icon (in pixels). Will return undefined when the icon image is not yet loaded.
+   * @return {number} Icon height (in pixels).
+   * @api
+   */
+  getHeight() {
+    const scale2 = this.getScaleArray();
+    if (this.size_) {
+      return this.size_[1] * scale2[1];
+    }
+    if (this.iconImage_.getImageState() == ImageState.LOADED) {
+      return this.iconImage_.getSize()[1] * scale2[1];
+    }
+    return void 0;
+  }
+  /**
+   * Set the scale.
+   *
+   * @param {number|import("../size.js").Size} scale Scale.
+   * @api
+   * @override
+   */
+  setScale(scale2) {
+    delete this.initialOptions_;
+    super.setScale(scale2);
+  }
+  /**
+   * @param {function(import("../events/Event.js").default): void} listener Listener function.
+   * @override
+   */
+  listenImageChange(listener) {
+    this.iconImage_.addEventListener(EventType.CHANGE, listener);
+  }
+  /**
+   * Load not yet loaded URI.
+   * When rendering a feature with an icon style, the vector renderer will
+   * automatically call this method. However, you might want to call this
+   * method yourself for preloading or other purposes.
+   * @api
+   * @override
+   */
+  load() {
+    this.iconImage_.load();
+  }
+  /**
+   * @param {function(import("../events/Event.js").default): void} listener Listener function.
+   * @override
+   */
+  unlistenImageChange(listener) {
+    this.iconImage_.removeEventListener(EventType.CHANGE, listener);
+  }
+  /**
+   * @override
+   */
+  ready() {
+    return this.iconImage_.ready();
+  }
+}
+const Icon$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: Icon
+}, Symbol.toStringTag, { value: "Module" }));
+class Stroke {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    options = options || {};
+    this.color_ = options.color !== void 0 ? options.color : null;
+    this.lineCap_ = options.lineCap;
+    this.lineDash_ = options.lineDash !== void 0 ? options.lineDash : null;
+    this.lineDashOffset_ = options.lineDashOffset;
+    this.lineJoin_ = options.lineJoin;
+    this.miterLimit_ = options.miterLimit;
+    this.width_ = options.width;
+  }
+  /**
+   * Clones the style.
+   * @return {Stroke} The cloned style.
+   * @api
+   */
+  clone() {
+    const color = this.getColor();
+    return new Stroke({
+      color: Array.isArray(color) ? color.slice() : color || void 0,
+      lineCap: this.getLineCap(),
+      lineDash: this.getLineDash() ? this.getLineDash().slice() : void 0,
+      lineDashOffset: this.getLineDashOffset(),
+      lineJoin: this.getLineJoin(),
+      miterLimit: this.getMiterLimit(),
+      width: this.getWidth()
+    });
+  }
+  /**
+   * Get the stroke color.
+   * @return {import("../color.js").Color|import("../colorlike.js").ColorLike} Color.
+   * @api
+   */
+  getColor() {
+    return this.color_;
+  }
+  /**
+   * Get the line cap type for the stroke.
+   * @return {CanvasLineCap|undefined} Line cap.
+   * @api
+   */
+  getLineCap() {
+    return this.lineCap_;
+  }
+  /**
+   * Get the line dash style for the stroke.
+   * @return {Array<number>|null} Line dash.
+   * @api
+   */
+  getLineDash() {
+    return this.lineDash_;
+  }
+  /**
+   * Get the line dash offset for the stroke.
+   * @return {number|undefined} Line dash offset.
+   * @api
+   */
+  getLineDashOffset() {
+    return this.lineDashOffset_;
+  }
+  /**
+   * Get the line join type for the stroke.
+   * @return {CanvasLineJoin|undefined} Line join.
+   * @api
+   */
+  getLineJoin() {
+    return this.lineJoin_;
+  }
+  /**
+   * Get the miter limit for the stroke.
+   * @return {number|undefined} Miter limit.
+   * @api
+   */
+  getMiterLimit() {
+    return this.miterLimit_;
+  }
+  /**
+   * Get the stroke width.
+   * @return {number|undefined} Width.
+   * @api
+   */
+  getWidth() {
+    return this.width_;
+  }
+  /**
+   * Set the color.
+   *
+   * @param {import("../color.js").Color|import("../colorlike.js").ColorLike} color Color.
+   * @api
+   */
+  setColor(color) {
+    this.color_ = color;
+  }
+  /**
+   * Set the line cap.
+   *
+   * @param {CanvasLineCap|undefined} lineCap Line cap.
+   * @api
+   */
+  setLineCap(lineCap) {
+    this.lineCap_ = lineCap;
+  }
+  /**
+   * Set the line dash.
+   *
+   * @param {Array<number>|null} lineDash Line dash.
+   * @api
+   */
+  setLineDash(lineDash) {
+    this.lineDash_ = lineDash;
+  }
+  /**
+   * Set the line dash offset.
+   *
+   * @param {number|undefined} lineDashOffset Line dash offset.
+   * @api
+   */
+  setLineDashOffset(lineDashOffset) {
+    this.lineDashOffset_ = lineDashOffset;
+  }
+  /**
+   * Set the line join.
+   *
+   * @param {CanvasLineJoin|undefined} lineJoin Line join.
+   * @api
+   */
+  setLineJoin(lineJoin) {
+    this.lineJoin_ = lineJoin;
+  }
+  /**
+   * Set the miter limit.
+   *
+   * @param {number|undefined} miterLimit Miter limit.
+   * @api
+   */
+  setMiterLimit(miterLimit) {
+    this.miterLimit_ = miterLimit;
+  }
+  /**
+   * Set the width.
+   *
+   * @param {number|undefined} width Width.
+   * @api
+   */
+  setWidth(width) {
+    this.width_ = width;
+  }
+}
+class Style {
+  /**
+   * @param {Options} [options] Style options.
+   */
+  constructor(options) {
+    options = options || {};
+    this.geometry_ = null;
+    this.geometryFunction_ = defaultGeometryFunction;
+    if (options.geometry !== void 0) {
+      this.setGeometry(options.geometry);
+    }
+    this.fill_ = options.fill !== void 0 ? options.fill : null;
+    this.image_ = options.image !== void 0 ? options.image : null;
+    this.renderer_ = options.renderer !== void 0 ? options.renderer : null;
+    this.hitDetectionRenderer_ = options.hitDetectionRenderer !== void 0 ? options.hitDetectionRenderer : null;
+    this.stroke_ = options.stroke !== void 0 ? options.stroke : null;
+    this.text_ = options.text !== void 0 ? options.text : null;
+    this.zIndex_ = options.zIndex;
+  }
+  /**
+   * Clones the style.
+   * @return {Style} The cloned style.
+   * @api
+   */
+  clone() {
+    let geometry = this.getGeometry();
+    if (geometry && typeof geometry === "object") {
+      geometry = /** @type {import("../geom/Geometry.js").default} */
+      geometry.clone();
+    }
+    return new Style({
+      geometry: geometry ?? void 0,
+      fill: this.getFill() ? this.getFill().clone() : void 0,
+      image: this.getImage() ? this.getImage().clone() : void 0,
+      renderer: this.getRenderer() ?? void 0,
+      stroke: this.getStroke() ? this.getStroke().clone() : void 0,
+      text: this.getText() ? this.getText().clone() : void 0,
+      zIndex: this.getZIndex()
+    });
+  }
+  /**
+   * Get the custom renderer function that was configured with
+   * {@link #setRenderer} or the `renderer` constructor option.
+   * @return {RenderFunction|null} Custom renderer function.
+   * @api
+   */
+  getRenderer() {
+    return this.renderer_;
+  }
+  /**
+   * Sets a custom renderer function for this style. When set, `fill`, `stroke`
+   * and `image` options of the style will be ignored.
+   * @param {RenderFunction|null} renderer Custom renderer function.
+   * @api
+   */
+  setRenderer(renderer) {
+    this.renderer_ = renderer;
+  }
+  /**
+   * Sets a custom renderer function for this style used
+   * in hit detection.
+   * @param {RenderFunction|null} renderer Custom renderer function.
+   * @api
+   */
+  setHitDetectionRenderer(renderer) {
+    this.hitDetectionRenderer_ = renderer;
+  }
+  /**
+   * Get the custom renderer function that was configured with
+   * {@link #setHitDetectionRenderer} or the `hitDetectionRenderer` constructor option.
+   * @return {RenderFunction|null} Custom renderer function.
+   * @api
+   */
+  getHitDetectionRenderer() {
+    return this.hitDetectionRenderer_;
+  }
+  /**
+   * Get the geometry to be rendered.
+   * @return {string|import("../geom/Geometry.js").default|GeometryFunction|null}
+   * Feature property or geometry or function that returns the geometry that will
+   * be rendered with this style.
+   * @api
+   */
+  getGeometry() {
+    return this.geometry_;
+  }
+  /**
+   * Get the function used to generate a geometry for rendering.
+   * @return {!GeometryFunction} Function that is called with a feature
+   * and returns the geometry to render instead of the feature's geometry.
+   * @api
+   */
+  getGeometryFunction() {
+    return this.geometryFunction_;
+  }
+  /**
+   * Get the fill style.
+   * @return {import("./Fill.js").default|null} Fill style.
+   * @api
+   */
+  getFill() {
+    return this.fill_;
+  }
+  /**
+   * Set the fill style.
+   * @param {import("./Fill.js").default|null} fill Fill style.
+   * @api
+   */
+  setFill(fill) {
+    this.fill_ = fill;
+  }
+  /**
+   * Get the image style.
+   * @return {import("./Image.js").default|null} Image style.
+   * @api
+   */
+  getImage() {
+    return this.image_;
+  }
+  /**
+   * Set the image style.
+   * @param {import("./Image.js").default} image Image style.
+   * @api
+   */
+  setImage(image) {
+    this.image_ = image;
+  }
+  /**
+   * Get the stroke style.
+   * @return {import("./Stroke.js").default|null} Stroke style.
+   * @api
+   */
+  getStroke() {
+    return this.stroke_;
+  }
+  /**
+   * Set the stroke style.
+   * @param {import("./Stroke.js").default|null} stroke Stroke style.
+   * @api
+   */
+  setStroke(stroke) {
+    this.stroke_ = stroke;
+  }
+  /**
+   * Get the text style.
+   * @return {import("./Text.js").default|null} Text style.
+   * @api
+   */
+  getText() {
+    return this.text_;
+  }
+  /**
+   * Set the text style.
+   * @param {import("./Text.js").default} text Text style.
+   * @api
+   */
+  setText(text) {
+    this.text_ = text;
+  }
+  /**
+   * Get the z-index for the style.
+   * @return {number|undefined} ZIndex.
+   * @api
+   */
+  getZIndex() {
+    return this.zIndex_;
+  }
+  /**
+   * Set a geometry that is rendered instead of the feature's geometry.
+   *
+   * @param {string|import("../geom/Geometry.js").default|GeometryFunction|null} geometry
+   *     Feature property or geometry or function returning a geometry to render
+   *     for this style.
+   * @api
+   */
+  setGeometry(geometry) {
+    if (typeof geometry === "function") {
+      this.geometryFunction_ = geometry;
+    } else if (typeof geometry === "string") {
+      this.geometryFunction_ = function(feature) {
+        return (
+          /** @type {import("../geom/Geometry.js").default} */
+          feature.get(geometry)
+        );
+      };
+    } else if (!geometry) {
+      this.geometryFunction_ = defaultGeometryFunction;
+    } else if (geometry !== void 0) {
+      this.geometryFunction_ = function() {
+        return (
+          /** @type {import("../geom/Geometry.js").default} */
+          geometry
+        );
+      };
+    }
+    this.geometry_ = geometry;
+  }
+  /**
+   * Set the z-index.
+   *
+   * @param {number|undefined} zIndex ZIndex.
+   * @api
+   */
+  setZIndex(zIndex) {
+    this.zIndex_ = zIndex;
+  }
+}
+function toFunction(obj) {
+  let styleFunction;
+  if (typeof obj === "function") {
+    styleFunction = obj;
+  } else {
+    let styles;
+    if (Array.isArray(obj)) {
+      styles = obj;
+    } else {
+      assert(
+        typeof /** @type {?} */
+        obj.getZIndex === "function",
+        "Expected an `Style` or an array of `Style`"
+      );
+      const style = (
+        /** @type {Style} */
+        obj
+      );
+      styles = [style];
+    }
+    styleFunction = function() {
+      return styles;
+    };
+  }
+  return styleFunction;
+}
+let defaultStyles = null;
+function createDefaultStyle(feature, resolution) {
+  if (!defaultStyles) {
+    const fill = new Fill({
+      color: "rgba(255,255,255,0.4)"
+    });
+    const stroke = new Stroke({
+      color: "#3399CC",
+      width: 1.25
+    });
+    defaultStyles = [
+      new Style({
+        image: new CircleStyle({
+          fill,
+          stroke,
+          radius: 5
+        }),
+        fill,
+        stroke
+      })
+    ];
+  }
+  return defaultStyles;
+}
+function createEditingStyle() {
+  const styles = {};
+  const white = [255, 255, 255, 1];
+  const blue = [0, 153, 255, 1];
+  const width = 3;
+  styles["Polygon"] = [
+    new Style({
+      fill: new Fill({
+        color: [255, 255, 255, 0.5]
+      })
+    })
+  ];
+  styles["MultiPolygon"] = styles["Polygon"];
+  styles["LineString"] = [
+    new Style({
+      stroke: new Stroke({
+        color: white,
+        width: width + 2
+      })
+    }),
+    new Style({
+      stroke: new Stroke({
+        color: blue,
+        width
+      })
+    })
+  ];
+  styles["MultiLineString"] = styles["LineString"];
+  styles["Circle"] = styles["Polygon"].concat(styles["LineString"]);
+  styles["Point"] = [
+    new Style({
+      image: new CircleStyle({
+        radius: width * 2,
+        fill: new Fill({
+          color: blue
+        }),
+        stroke: new Stroke({
+          color: white,
+          width: width / 2
+        })
+      }),
+      zIndex: Infinity
+    })
+  ];
+  styles["MultiPoint"] = styles["Point"];
+  styles["GeometryCollection"] = styles["Polygon"].concat(
+    styles["LineString"],
+    styles["Point"]
+  );
+  return styles;
+}
+function defaultGeometryFunction(feature) {
+  return feature.getGeometry();
+}
+const Style$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  createDefaultStyle,
+  createEditingStyle,
+  default: Style,
+  toFunction
+}, Symbol.toStringTag, { value: "Module" }));
+const DEFAULT_FILL_COLOR = "#333";
+class Text {
+  /**
+   * @param {Options} [options] Options.
+   */
+  constructor(options) {
+    options = options || {};
+    this.font_ = options.font;
+    this.rotation_ = options.rotation;
+    this.rotateWithView_ = options.rotateWithView;
+    this.keepUpright_ = options.keepUpright;
+    this.scale_ = options.scale;
+    this.scaleArray_ = toSize(options.scale !== void 0 ? options.scale : 1);
+    this.text_ = options.text;
+    this.textAlign_ = options.textAlign;
+    this.justify_ = options.justify;
+    this.repeat_ = options.repeat;
+    this.textBaseline_ = options.textBaseline;
+    this.fill_ = options.fill !== void 0 ? options.fill : new Fill({ color: DEFAULT_FILL_COLOR });
+    this.maxAngle_ = options.maxAngle !== void 0 ? options.maxAngle : Math.PI / 4;
+    this.placement_ = options.placement !== void 0 ? options.placement : "point";
+    this.overflow_ = !!options.overflow;
+    this.stroke_ = options.stroke !== void 0 ? options.stroke : null;
+    this.offsetX_ = options.offsetX !== void 0 ? options.offsetX : 0;
+    this.offsetY_ = options.offsetY !== void 0 ? options.offsetY : 0;
+    this.backgroundFill_ = options.backgroundFill ? options.backgroundFill : null;
+    this.backgroundStroke_ = options.backgroundStroke ? options.backgroundStroke : null;
+    this.padding_ = options.padding === void 0 ? null : options.padding;
+    this.declutterMode_ = options.declutterMode;
+  }
+  /**
+   * Clones the style.
+   * @return {Text} The cloned style.
+   * @api
+   */
+  clone() {
+    const scale2 = this.getScale();
+    return new Text({
+      font: this.getFont(),
+      placement: this.getPlacement(),
+      repeat: this.getRepeat(),
+      maxAngle: this.getMaxAngle(),
+      overflow: this.getOverflow(),
+      rotation: this.getRotation(),
+      rotateWithView: this.getRotateWithView(),
+      keepUpright: this.getKeepUpright(),
+      scale: Array.isArray(scale2) ? scale2.slice() : scale2,
+      text: this.getText(),
+      textAlign: this.getTextAlign(),
+      justify: this.getJustify(),
+      textBaseline: this.getTextBaseline(),
+      fill: this.getFill() ? this.getFill().clone() : void 0,
+      stroke: this.getStroke() ? this.getStroke().clone() : void 0,
+      offsetX: this.getOffsetX(),
+      offsetY: this.getOffsetY(),
+      backgroundFill: this.getBackgroundFill() ? this.getBackgroundFill().clone() : void 0,
+      backgroundStroke: this.getBackgroundStroke() ? this.getBackgroundStroke().clone() : void 0,
+      padding: this.getPadding() || void 0,
+      declutterMode: this.getDeclutterMode()
+    });
+  }
+  /**
+   * Get the `overflow` configuration.
+   * @return {boolean} Let text overflow the length of the path they follow.
+   * @api
+   */
+  getOverflow() {
+    return this.overflow_;
+  }
+  /**
+   * Get the font name.
+   * @return {string|undefined} Font.
+   * @api
+   */
+  getFont() {
+    return this.font_;
+  }
+  /**
+   * Get the maximum angle between adjacent characters.
+   * @return {number} Angle in radians.
+   * @api
+   */
+  getMaxAngle() {
+    return this.maxAngle_;
+  }
+  /**
+   * Get the label placement.
+   * @return {TextPlacement} Text placement.
+   * @api
+   */
+  getPlacement() {
+    return this.placement_;
+  }
+  /**
+   * Get the repeat interval of the text.
+   * @return {number|undefined} Repeat interval in pixels.
+   * @api
+   */
+  getRepeat() {
+    return this.repeat_;
+  }
+  /**
+   * Get the x-offset for the text.
+   * @return {number} Horizontal text offset.
+   * @api
+   */
+  getOffsetX() {
+    return this.offsetX_;
+  }
+  /**
+   * Get the y-offset for the text.
+   * @return {number} Vertical text offset.
+   * @api
+   */
+  getOffsetY() {
+    return this.offsetY_;
+  }
+  /**
+   * Get the fill style for the text.
+   * @return {import("./Fill.js").default|null} Fill style.
+   * @api
+   */
+  getFill() {
+    return this.fill_;
+  }
+  /**
+   * Determine whether the text rotates with the map.
+   * @return {boolean|undefined} Rotate with map.
+   * @api
+   */
+  getRotateWithView() {
+    return this.rotateWithView_;
+  }
+  /**
+   * Determine whether the text can be rendered upside down.
+   * @return {boolean|undefined} Keep text upright.
+   * @api
+   */
+  getKeepUpright() {
+    return this.keepUpright_;
+  }
+  /**
+   * Get the text rotation.
+   * @return {number|undefined} Rotation.
+   * @api
+   */
+  getRotation() {
+    return this.rotation_;
+  }
+  /**
+   * Get the text scale.
+   * @return {number|import("../size.js").Size|undefined} Scale.
+   * @api
+   */
+  getScale() {
+    return this.scale_;
+  }
+  /**
+   * Get the symbolizer scale array.
+   * @return {import("../size.js").Size} Scale array.
+   */
+  getScaleArray() {
+    return this.scaleArray_;
+  }
+  /**
+   * Get the stroke style for the text.
+   * @return {import("./Stroke.js").default|null} Stroke style.
+   * @api
+   */
+  getStroke() {
+    return this.stroke_;
+  }
+  /**
+   * Get the text to be rendered.
+   * @return {string|Array<string>|undefined} Text.
+   * @api
+   */
+  getText() {
+    return this.text_;
+  }
+  /**
+   * Get the text alignment.
+   * @return {CanvasTextAlign|undefined} Text align.
+   * @api
+   */
+  getTextAlign() {
+    return this.textAlign_;
+  }
+  /**
+   * Get the justification.
+   * @return {TextJustify|undefined} Justification.
+   * @api
+   */
+  getJustify() {
+    return this.justify_;
+  }
+  /**
+   * Get the text baseline.
+   * @return {CanvasTextBaseline|undefined} Text baseline.
+   * @api
+   */
+  getTextBaseline() {
+    return this.textBaseline_;
+  }
+  /**
+   * Get the background fill style for the text.
+   * @return {import("./Fill.js").default|null} Fill style.
+   * @api
+   */
+  getBackgroundFill() {
+    return this.backgroundFill_;
+  }
+  /**
+   * Get the background stroke style for the text.
+   * @return {import("./Stroke.js").default|null} Stroke style.
+   * @api
+   */
+  getBackgroundStroke() {
+    return this.backgroundStroke_;
+  }
+  /**
+   * Get the padding for the text.
+   * @return {Array<number>|null} Padding.
+   * @api
+   */
+  getPadding() {
+    return this.padding_;
+  }
+  /**
+   * Get the declutter mode of the shape
+   * @return {import("./Style.js").DeclutterMode} Shape's declutter mode
+   * @api
+   */
+  getDeclutterMode() {
+    return this.declutterMode_;
+  }
+  /**
+   * Set the `overflow` property.
+   *
+   * @param {boolean} overflow Let text overflow the path that it follows.
+   * @api
+   */
+  setOverflow(overflow) {
+    this.overflow_ = overflow;
+  }
+  /**
+   * Set the font.
+   *
+   * @param {string|undefined} font Font.
+   * @api
+   */
+  setFont(font) {
+    this.font_ = font;
+  }
+  /**
+   * Set the maximum angle between adjacent characters.
+   *
+   * @param {number} maxAngle Angle in radians.
+   * @api
+   */
+  setMaxAngle(maxAngle) {
+    this.maxAngle_ = maxAngle;
+  }
+  /**
+   * Set the x offset.
+   *
+   * @param {number} offsetX Horizontal text offset.
+   * @api
+   */
+  setOffsetX(offsetX) {
+    this.offsetX_ = offsetX;
+  }
+  /**
+   * Set the y offset.
+   *
+   * @param {number} offsetY Vertical text offset.
+   * @api
+   */
+  setOffsetY(offsetY) {
+    this.offsetY_ = offsetY;
+  }
+  /**
+   * Set the text placement.
+   *
+   * @param {TextPlacement} placement Placement.
+   * @api
+   */
+  setPlacement(placement) {
+    this.placement_ = placement;
+  }
+  /**
+   * Set the repeat interval of the text.
+   * @param {number|undefined} [repeat] Repeat interval in pixels.
+   * @api
+   */
+  setRepeat(repeat) {
+    this.repeat_ = repeat;
+  }
+  /**
+   * Set whether to rotate the text with the view.
+   *
+   * @param {boolean} rotateWithView Rotate with map.
+   * @api
+   */
+  setRotateWithView(rotateWithView) {
+    this.rotateWithView_ = rotateWithView;
+  }
+  /**
+   * Set whether the text can be rendered upside down.
+   *
+   * @param {boolean} keepUpright Keep text upright.
+   * @api
+   */
+  setKeepUpright(keepUpright) {
+    this.keepUpright_ = keepUpright;
+  }
+  /**
+   * Set the fill.
+   *
+   * @param {import("./Fill.js").default|null} fill Fill style.
+   * @api
+   */
+  setFill(fill) {
+    this.fill_ = fill;
+  }
+  /**
+   * Set the rotation.
+   *
+   * @param {number|undefined} rotation Rotation.
+   * @api
+   */
+  setRotation(rotation) {
+    this.rotation_ = rotation;
+  }
+  /**
+   * Set the scale.
+   *
+   * @param {number|import("../size.js").Size|undefined} scale Scale.
+   * @api
+   */
+  setScale(scale2) {
+    this.scale_ = scale2;
+    this.scaleArray_ = toSize(scale2 !== void 0 ? scale2 : 1);
+  }
+  /**
+   * Set the stroke.
+   *
+   * @param {import("./Stroke.js").default|null} stroke Stroke style.
+   * @api
+   */
+  setStroke(stroke) {
+    this.stroke_ = stroke;
+  }
+  /**
+   * Set the text.
+   *
+   * @param {string|Array<string>|undefined} text Text.
+   * @api
+   */
+  setText(text) {
+    this.text_ = text;
+  }
+  /**
+   * Set the text alignment.
+   *
+   * @param {CanvasTextAlign|undefined} textAlign Text align.
+   * @api
+   */
+  setTextAlign(textAlign) {
+    this.textAlign_ = textAlign;
+  }
+  /**
+   * Set the justification.
+   *
+   * @param {TextJustify|undefined} justify Justification.
+   * @api
+   */
+  setJustify(justify) {
+    this.justify_ = justify;
+  }
+  /**
+   * Set the text baseline.
+   *
+   * @param {CanvasTextBaseline|undefined} textBaseline Text baseline.
+   * @api
+   */
+  setTextBaseline(textBaseline) {
+    this.textBaseline_ = textBaseline;
+  }
+  /**
+   * Set the background fill.
+   *
+   * @param {import("./Fill.js").default|null} fill Fill style.
+   * @api
+   */
+  setBackgroundFill(fill) {
+    this.backgroundFill_ = fill;
+  }
+  /**
+   * Set the background stroke.
+   *
+   * @param {import("./Stroke.js").default|null} stroke Stroke style.
+   * @api
+   */
+  setBackgroundStroke(stroke) {
+    this.backgroundStroke_ = stroke;
+  }
+  /**
+   * Set the padding (`[top, right, bottom, left]`).
+   *
+   * @param {Array<number>|null} padding Padding.
+   * @api
+   */
+  setPadding(padding) {
+    this.padding_ = padding;
+  }
+}
+function always(context) {
   return true;
 }
 function rulesToStyleFunction(rules) {
@@ -17136,7 +19655,7 @@ function buildRuleSet(rules, context) {
   const compiledRules = new Array(length);
   for (let i = 0; i < length; ++i) {
     const rule = rules[i];
-    const filter = "filter" in rule ? buildExpression(rule.filter, BooleanType, context) : always$1;
+    const filter = "filter" in rule ? buildExpression(rule.filter, BooleanType, context) : always;
     let styles;
     if (Array.isArray(rule.style)) {
       const styleLength = rule.style.length;
@@ -17178,7 +19697,7 @@ function buildStyle(flatStyle, context) {
   const evaluateText = buildText(flatStyle, context);
   const evaluateImage = buildImage(flatStyle, context);
   const evaluateZIndex = numberEvaluator(flatStyle, "z-index", context);
-  if (!evaluateFill && !evaluateStroke && !evaluateText && !evaluateImage && !isEmpty$1(flatStyle)) {
+  if (!evaluateFill && !evaluateStroke && !evaluateText && !evaluateImage && !isEmpty(flatStyle)) {
     throw new Error(
       "No fill, stroke, point, or text symbolizer properties in style: " + JSON.stringify(flatStyle)
     );
@@ -17950,7 +20469,7 @@ function requireSizeLike(value, property) {
   }
   return requireSize(value, property);
 }
-const Property$1 = {
+const Property = {
   RENDER_ORDER: "renderOrder"
 };
 class BaseVectorLayer extends Layer {
@@ -18005,13 +20524,12 @@ class BaseVectorLayer extends Layer {
     return this.renderBuffer_;
   }
   /**
-   * @return {function(import("../Feature.js").default, import("../Feature.js").default): number|null|undefined} Render
-   *     order.
+   * @return {import("../render.js").OrderFunction|null|undefined} Render order.
    */
   getRenderOrder() {
     return (
       /** @type {import("../render.js").OrderFunction|null|undefined} */
-      this.get(Property$1.RENDER_ORDER)
+      this.get(Property.RENDER_ORDER)
     );
   }
   /**
@@ -18063,7 +20581,7 @@ class BaseVectorLayer extends Layer {
    *     Render order.
    */
   setRenderOrder(renderOrder) {
-    this.set(Property$1.RENDER_ORDER, renderOrder);
+    this.set(Property.RENDER_ORDER, renderOrder);
   }
   /**
    * Set the style for features.  This can be a single style object, an array
@@ -18149,6 +20667,21 @@ function toStyleLike(style) {
     style
   );
   return flatStylesToStyleFunction(flatStyles);
+}
+class RenderEvent extends BaseEvent {
+  /**
+   * @param {import("./EventType.js").default} type Type.
+   * @param {import("../transform.js").Transform} [inversePixelTransform] Transform for
+   *     CSS pixels to rendered pixels.
+   * @param {import("../Map.js").FrameState} [frameState] Frame state.
+   * @param {?(CanvasRenderingContext2D|WebGLRenderingContext)} [context] Context.
+   */
+  constructor(type, inversePixelTransform, frameState, context) {
+    super(type);
+    this.inversePixelTransform = inversePixelTransform;
+    this.frameState = frameState;
+    this.context = context;
+  }
 }
 class MapRenderer extends Disposable {
   /**
@@ -18256,7 +20789,7 @@ class MapRenderer extends Disposable {
     }
     const order2 = 1 / matches.length;
     matches.forEach((m, i) => m.distanceSq += i * order2);
-    matches.sort((a2, b2) => a2.distanceSq - b2.distanceSq);
+    matches.sort((a3, b3) => a3.distanceSq - b3.distanceSq);
     matches.some((m) => {
       return result = m.callback(m.feature, m.layer, m.geometry);
     });
@@ -18314,21 +20847,6 @@ class MapRenderer extends Disposable {
 }
 function expireIconCache(map2, frameState) {
   shared.expire();
-}
-class RenderEvent extends BaseEvent {
-  /**
-   * @param {import("./EventType.js").default} type Type.
-   * @param {import("../transform.js").Transform} [inversePixelTransform] Transform for
-   *     CSS pixels to rendered pixels.
-   * @param {import("../Map.js").FrameState} [frameState] Frame state.
-   * @param {?(CanvasRenderingContext2D|WebGLRenderingContext)} [context] Context.
-   */
-  constructor(type, inversePixelTransform, frameState, context) {
-    super(type);
-    this.inversePixelTransform = inversePixelTransform;
-    this.frameState = frameState;
-    this.context = context;
-  }
 }
 class CompositeMapRenderer extends MapRenderer {
   /**
@@ -18390,7 +20908,7 @@ class CompositeMapRenderer extends MapRenderer {
     this.calculateMatrices2D(frameState);
     this.dispatchRenderEvent(RenderEventType.PRECOMPOSE, frameState);
     const layerStatesArray = frameState.layerStatesArray.sort(
-      (a2, b2) => a2.zIndex - b2.zIndex
+      (a3, b3) => a3.zIndex - b3.zIndex
     );
     const declutter = layerStatesArray.some(
       (layerState) => layerState.layer instanceof BaseVectorLayer && layerState.layer.getDeclutter()
@@ -18450,2937 +20968,6 @@ class CompositeMapRenderer extends MapRenderer {
     );
   }
 }
-class GroupEvent extends BaseEvent {
-  /**
-   * @param {GroupEventType} type The event type.
-   * @param {BaseLayer} layer The layer.
-   */
-  constructor(type, layer) {
-    super(type);
-    this.layer = layer;
-  }
-}
-const Property = {
-  LAYERS: "layers"
-};
-class LayerGroup extends BaseLayer {
-  /**
-   * @param {Options} [options] Layer options.
-   */
-  constructor(options) {
-    options = options || {};
-    const baseOptions = (
-      /** @type {Options} */
-      Object.assign({}, options)
-    );
-    delete baseOptions.layers;
-    let layers = options.layers;
-    super(baseOptions);
-    this.on;
-    this.once;
-    this.un;
-    this.layersListenerKeys_ = [];
-    this.listenerKeys_ = {};
-    this.addChangeListener(Property.LAYERS, this.handleLayersChanged_);
-    if (layers) {
-      if (Array.isArray(layers)) {
-        layers = new Collection(layers.slice(), { unique: true });
-      } else {
-        assert(
-          typeof /** @type {?} */
-          layers.getArray === "function",
-          "Expected `layers` to be an array or a `Collection`"
-        );
-      }
-    } else {
-      layers = new Collection(void 0, { unique: true });
-    }
-    this.setLayers(layers);
-  }
-  /**
-   * @private
-   */
-  handleLayerChange_() {
-    this.changed();
-  }
-  /**
-   * @private
-   */
-  handleLayersChanged_() {
-    this.layersListenerKeys_.forEach(unlistenByKey);
-    this.layersListenerKeys_.length = 0;
-    const layers = this.getLayers();
-    this.layersListenerKeys_.push(
-      listen(layers, CollectionEventType.ADD, this.handleLayersAdd_, this),
-      listen(
-        layers,
-        CollectionEventType.REMOVE,
-        this.handleLayersRemove_,
-        this
-      )
-    );
-    for (const id in this.listenerKeys_) {
-      this.listenerKeys_[id].forEach(unlistenByKey);
-    }
-    clear$1(this.listenerKeys_);
-    const layersArray = layers.getArray();
-    for (let i = 0, ii = layersArray.length; i < ii; i++) {
-      const layer = layersArray[i];
-      this.registerLayerListeners_(layer);
-      this.dispatchEvent(new GroupEvent("addlayer", layer));
-    }
-    this.changed();
-  }
-  /**
-   * @param {BaseLayer} layer The layer.
-   */
-  registerLayerListeners_(layer) {
-    const listenerKeys = [
-      listen(
-        layer,
-        ObjectEventType.PROPERTYCHANGE,
-        this.handleLayerChange_,
-        this
-      ),
-      listen(layer, EventType.CHANGE, this.handleLayerChange_, this)
-    ];
-    if (layer instanceof LayerGroup) {
-      listenerKeys.push(
-        listen(layer, "addlayer", this.handleLayerGroupAdd_, this),
-        listen(layer, "removelayer", this.handleLayerGroupRemove_, this)
-      );
-    }
-    this.listenerKeys_[getUid(layer)] = listenerKeys;
-  }
-  /**
-   * @param {GroupEvent} event The layer group event.
-   */
-  handleLayerGroupAdd_(event) {
-    this.dispatchEvent(new GroupEvent("addlayer", event.layer));
-  }
-  /**
-   * @param {GroupEvent} event The layer group event.
-   */
-  handleLayerGroupRemove_(event) {
-    this.dispatchEvent(new GroupEvent("removelayer", event.layer));
-  }
-  /**
-   * @param {import("../Collection.js").CollectionEvent<import("./Base.js").default>} collectionEvent CollectionEvent.
-   * @private
-   */
-  handleLayersAdd_(collectionEvent) {
-    const layer = collectionEvent.element;
-    this.registerLayerListeners_(layer);
-    this.dispatchEvent(new GroupEvent("addlayer", layer));
-    this.changed();
-  }
-  /**
-   * @param {import("../Collection.js").CollectionEvent<import("./Base.js").default>} collectionEvent CollectionEvent.
-   * @private
-   */
-  handleLayersRemove_(collectionEvent) {
-    const layer = collectionEvent.element;
-    const key = getUid(layer);
-    this.listenerKeys_[key].forEach(unlistenByKey);
-    delete this.listenerKeys_[key];
-    this.dispatchEvent(new GroupEvent("removelayer", layer));
-    this.changed();
-  }
-  /**
-   * Returns the {@link module:ol/Collection~Collection collection} of {@link module:ol/layer/Layer~Layer layers}
-   * in this group.
-   * @return {!Collection<import("./Base.js").default>} Collection of
-   *   {@link module:ol/layer/Base~BaseLayer layers} that are part of this group.
-   * @observable
-   * @api
-   */
-  getLayers() {
-    return (
-      /** @type {!Collection<import("./Base.js").default>} */
-      this.get(Property.LAYERS)
-    );
-  }
-  /**
-   * Set the {@link module:ol/Collection~Collection collection} of {@link module:ol/layer/Layer~Layer layers}
-   * in this group.
-   * @param {!Collection<import("./Base.js").default>} layers Collection of
-   *   {@link module:ol/layer/Base~BaseLayer layers} that are part of this group.
-   * @observable
-   * @api
-   */
-  setLayers(layers) {
-    const collection = this.getLayers();
-    if (collection) {
-      const currentLayers = collection.getArray();
-      for (let i = 0, ii = currentLayers.length; i < ii; ++i) {
-        this.dispatchEvent(new GroupEvent("removelayer", currentLayers[i]));
-      }
-    }
-    this.set(Property.LAYERS, layers);
-  }
-  /**
-   * @param {Array<import("./Layer.js").default>} [array] Array of layers (to be modified in place).
-   * @return {Array<import("./Layer.js").default>} Array of layers.
-   * @override
-   */
-  getLayersArray(array) {
-    array = array !== void 0 ? array : [];
-    this.getLayers().forEach(function(layer) {
-      layer.getLayersArray(array);
-    });
-    return array;
-  }
-  /**
-   * Get the layer states list and use this groups z-index as the default
-   * for all layers in this and nested groups, if it is unset at this point.
-   * If dest is not provided and this group's z-index is undefined
-   * 0 is used a the default z-index.
-   * @param {Array<import("./Layer.js").State>} [dest] Optional list
-   * of layer states (to be modified in place).
-   * @return {Array<import("./Layer.js").State>} List of layer states.
-   * @override
-   */
-  getLayerStatesArray(dest) {
-    const states = dest !== void 0 ? dest : [];
-    const pos = states.length;
-    this.getLayers().forEach(function(layer) {
-      layer.getLayerStatesArray(states);
-    });
-    const ownLayerState = this.getLayerState();
-    let defaultZIndex = ownLayerState.zIndex;
-    if (!dest && ownLayerState.zIndex === void 0) {
-      defaultZIndex = 0;
-    }
-    for (let i = pos, ii = states.length; i < ii; i++) {
-      const layerState = states[i];
-      layerState.opacity *= ownLayerState.opacity;
-      layerState.visible = layerState.visible && ownLayerState.visible;
-      layerState.maxResolution = Math.min(
-        layerState.maxResolution,
-        ownLayerState.maxResolution
-      );
-      layerState.minResolution = Math.max(
-        layerState.minResolution,
-        ownLayerState.minResolution
-      );
-      layerState.minZoom = Math.max(layerState.minZoom, ownLayerState.minZoom);
-      layerState.maxZoom = Math.min(layerState.maxZoom, ownLayerState.maxZoom);
-      if (ownLayerState.extent !== void 0) {
-        if (layerState.extent !== void 0) {
-          layerState.extent = getIntersection(
-            layerState.extent,
-            ownLayerState.extent
-          );
-        } else {
-          layerState.extent = ownLayerState.extent;
-        }
-      }
-      if (layerState.zIndex === void 0) {
-        layerState.zIndex = defaultZIndex;
-      }
-    }
-    return states;
-  }
-  /**
-   * @return {import("../source/Source.js").State} Source state.
-   * @override
-   */
-  getSourceState() {
-    return "ready";
-  }
-}
-class MapEvent extends BaseEvent {
-  /**
-   * @param {string} type Event type.
-   * @param {import("./Map.js").default} map Map.
-   * @param {?import("./Map.js").FrameState} [frameState] Frame state.
-   */
-  constructor(type, map2, frameState) {
-    super(type);
-    this.map = map2;
-    this.frameState = frameState !== void 0 ? frameState : null;
-  }
-}
-class MapBrowserEvent extends MapEvent {
-  /**
-   * @param {string} type Event type.
-   * @param {import("./Map.js").default} map Map.
-   * @param {EVENT} originalEvent Original event.
-   * @param {boolean} [dragging] Is the map currently being dragged?
-   * @param {import("./Map.js").FrameState} [frameState] Frame state.
-   * @param {Array<PointerEvent>} [activePointers] Active pointers.
-   */
-  constructor(type, map2, originalEvent, dragging, frameState, activePointers) {
-    super(type, map2, frameState);
-    this.originalEvent = originalEvent;
-    this.pixel_ = null;
-    this.coordinate_ = null;
-    this.dragging = dragging !== void 0 ? dragging : false;
-    this.activePointers = activePointers;
-  }
-  /**
-   * The map pixel relative to the viewport corresponding to the original event.
-   * @type {import("./pixel.js").Pixel}
-   * @api
-   */
-  get pixel() {
-    if (!this.pixel_) {
-      this.pixel_ = this.map.getEventPixel(this.originalEvent);
-    }
-    return this.pixel_;
-  }
-  set pixel(pixel) {
-    this.pixel_ = pixel;
-  }
-  /**
-   * The coordinate corresponding to the original browser event.  This will be in the user
-   * projection if one is set.  Otherwise it will be in the view projection.
-   * @type {import("./coordinate.js").Coordinate}
-   * @api
-   */
-  get coordinate() {
-    if (!this.coordinate_) {
-      this.coordinate_ = this.map.getCoordinateFromPixel(this.pixel);
-    }
-    return this.coordinate_;
-  }
-  set coordinate(coordinate) {
-    this.coordinate_ = coordinate;
-  }
-  /**
-   * Prevents the default browser action.
-   * See https://developer.mozilla.org/en-US/docs/Web/API/event.preventDefault.
-   * @api
-   * @override
-   */
-  preventDefault() {
-    super.preventDefault();
-    if ("preventDefault" in this.originalEvent) {
-      this.originalEvent.preventDefault();
-    }
-  }
-  /**
-   * Prevents further propagation of the current event.
-   * See https://developer.mozilla.org/en-US/docs/Web/API/event.stopPropagation.
-   * @api
-   * @override
-   */
-  stopPropagation() {
-    super.stopPropagation();
-    if ("stopPropagation" in this.originalEvent) {
-      this.originalEvent.stopPropagation();
-    }
-  }
-}
-const MapBrowserEventType = {
-  /**
-   * A true single click with no dragging and no double click. Note that this
-   * event is delayed by 250 ms to ensure that it is not a double click.
-   * @event module:ol/MapBrowserEvent~MapBrowserEvent#singleclick
-   * @api
-   */
-  SINGLECLICK: "singleclick",
-  /**
-   * A click with no dragging. A double click will fire two of this.
-   * @event module:ol/MapBrowserEvent~MapBrowserEvent#click
-   * @api
-   */
-  CLICK: EventType.CLICK,
-  /**
-   * A true double click, with no dragging.
-   * @event module:ol/MapBrowserEvent~MapBrowserEvent#dblclick
-   * @api
-   */
-  DBLCLICK: EventType.DBLCLICK,
-  /**
-   * Triggered when a pointer is dragged.
-   * @event module:ol/MapBrowserEvent~MapBrowserEvent#pointerdrag
-   * @api
-   */
-  POINTERDRAG: "pointerdrag",
-  /**
-   * Triggered when a pointer is moved. Note that on touch devices this is
-   * triggered when the map is panned, so is not the same as mousemove.
-   * @event module:ol/MapBrowserEvent~MapBrowserEvent#pointermove
-   * @api
-   */
-  POINTERMOVE: "pointermove",
-  POINTERDOWN: "pointerdown",
-  POINTERUP: "pointerup",
-  POINTEROVER: "pointerover",
-  POINTEROUT: "pointerout",
-  POINTERENTER: "pointerenter",
-  POINTERLEAVE: "pointerleave",
-  POINTERCANCEL: "pointercancel"
-};
-const PointerEventType = {
-  POINTERMOVE: "pointermove",
-  POINTERDOWN: "pointerdown",
-  POINTERUP: "pointerup",
-  POINTEROVER: "pointerover",
-  POINTEROUT: "pointerout",
-  POINTERENTER: "pointerenter",
-  POINTERLEAVE: "pointerleave",
-  POINTERCANCEL: "pointercancel"
-};
-class MapBrowserEventHandler extends Target {
-  /**
-   * @param {import("./Map.js").default} map The map with the viewport to listen to events on.
-   * @param {number} [moveTolerance] The minimal distance the pointer must travel to trigger a move.
-   */
-  constructor(map2, moveTolerance) {
-    super(map2);
-    this.map_ = map2;
-    this.clickTimeoutId_;
-    this.emulateClicks_ = false;
-    this.dragging_ = false;
-    this.dragListenerKeys_ = [];
-    this.moveTolerance_ = moveTolerance === void 0 ? 1 : moveTolerance;
-    this.down_ = null;
-    const element = this.map_.getViewport();
-    this.activePointers_ = [];
-    this.trackedTouches_ = {};
-    this.element_ = element;
-    this.pointerdownListenerKey_ = listen(
-      element,
-      PointerEventType.POINTERDOWN,
-      this.handlePointerDown_,
-      this
-    );
-    this.originalPointerMoveEvent_;
-    this.relayedListenerKey_ = listen(
-      element,
-      PointerEventType.POINTERMOVE,
-      this.relayMoveEvent_,
-      this
-    );
-    this.boundHandleTouchMove_ = this.handleTouchMove_.bind(this);
-    this.element_.addEventListener(
-      EventType.TOUCHMOVE,
-      this.boundHandleTouchMove_,
-      PASSIVE_EVENT_LISTENERS ? { passive: false } : false
-    );
-  }
-  /**
-   * @param {PointerEvent} pointerEvent Pointer
-   * event.
-   * @private
-   */
-  emulateClick_(pointerEvent) {
-    let newEvent = new MapBrowserEvent(
-      MapBrowserEventType.CLICK,
-      this.map_,
-      pointerEvent
-    );
-    this.dispatchEvent(newEvent);
-    if (this.clickTimeoutId_ !== void 0) {
-      clearTimeout(this.clickTimeoutId_);
-      this.clickTimeoutId_ = void 0;
-      newEvent = new MapBrowserEvent(
-        MapBrowserEventType.DBLCLICK,
-        this.map_,
-        pointerEvent
-      );
-      this.dispatchEvent(newEvent);
-    } else {
-      this.clickTimeoutId_ = setTimeout(() => {
-        this.clickTimeoutId_ = void 0;
-        const newEvent2 = new MapBrowserEvent(
-          MapBrowserEventType.SINGLECLICK,
-          this.map_,
-          pointerEvent
-        );
-        this.dispatchEvent(newEvent2);
-      }, 250);
-    }
-  }
-  /**
-   * Keeps track on how many pointers are currently active.
-   *
-   * @param {PointerEvent} pointerEvent Pointer
-   * event.
-   * @private
-   */
-  updateActivePointers_(pointerEvent) {
-    const event = pointerEvent;
-    const id = event.pointerId;
-    if (event.type == MapBrowserEventType.POINTERUP || event.type == MapBrowserEventType.POINTERCANCEL) {
-      delete this.trackedTouches_[id];
-      for (const pointerId in this.trackedTouches_) {
-        if (this.trackedTouches_[pointerId].target !== event.target) {
-          delete this.trackedTouches_[pointerId];
-          break;
-        }
-      }
-    } else if (event.type == MapBrowserEventType.POINTERDOWN || event.type == MapBrowserEventType.POINTERMOVE) {
-      this.trackedTouches_[id] = event;
-    }
-    this.activePointers_ = Object.values(this.trackedTouches_);
-  }
-  /**
-   * @param {PointerEvent} pointerEvent Pointer
-   * event.
-   * @private
-   */
-  handlePointerUp_(pointerEvent) {
-    this.updateActivePointers_(pointerEvent);
-    const newEvent = new MapBrowserEvent(
-      MapBrowserEventType.POINTERUP,
-      this.map_,
-      pointerEvent,
-      void 0,
-      void 0,
-      this.activePointers_
-    );
-    this.dispatchEvent(newEvent);
-    if (this.emulateClicks_ && !newEvent.defaultPrevented && !this.dragging_ && this.isMouseActionButton_(pointerEvent)) {
-      this.emulateClick_(this.down_);
-    }
-    if (this.activePointers_.length === 0) {
-      this.dragListenerKeys_.forEach(unlistenByKey);
-      this.dragListenerKeys_.length = 0;
-      this.dragging_ = false;
-      this.down_ = null;
-    }
-  }
-  /**
-   * @param {PointerEvent} pointerEvent Pointer
-   * event.
-   * @return {boolean} If the left mouse button was pressed.
-   * @private
-   */
-  isMouseActionButton_(pointerEvent) {
-    return pointerEvent.button === 0;
-  }
-  /**
-   * @param {PointerEvent} pointerEvent Pointer
-   * event.
-   * @private
-   */
-  handlePointerDown_(pointerEvent) {
-    this.emulateClicks_ = this.activePointers_.length === 0;
-    this.updateActivePointers_(pointerEvent);
-    const newEvent = new MapBrowserEvent(
-      MapBrowserEventType.POINTERDOWN,
-      this.map_,
-      pointerEvent,
-      void 0,
-      void 0,
-      this.activePointers_
-    );
-    this.dispatchEvent(newEvent);
-    this.down_ = new PointerEvent(pointerEvent.type, pointerEvent);
-    Object.defineProperty(this.down_, "target", {
-      writable: false,
-      value: pointerEvent.target
-    });
-    if (this.dragListenerKeys_.length === 0) {
-      const doc = this.map_.getOwnerDocument();
-      this.dragListenerKeys_.push(
-        listen(
-          doc,
-          MapBrowserEventType.POINTERMOVE,
-          this.handlePointerMove_,
-          this
-        ),
-        listen(doc, MapBrowserEventType.POINTERUP, this.handlePointerUp_, this),
-        /* Note that the listener for `pointercancel is set up on
-         * `pointerEventHandler_` and not `documentPointerEventHandler_` like
-         * the `pointerup` and `pointermove` listeners.
-         *
-         * The reason for this is the following: `TouchSource.vacuumTouches_()`
-         * issues `pointercancel` events, when there was no `touchend` for a
-         * `touchstart`. Now, let's say a first `touchstart` is registered on
-         * `pointerEventHandler_`. The `documentPointerEventHandler_` is set up.
-         * But `documentPointerEventHandler_` doesn't know about the first
-         * `touchstart`. If there is no `touchend` for the `touchstart`, we can
-         * only receive a `touchcancel` from `pointerEventHandler_`, because it is
-         * only registered there.
-         */
-        listen(
-          this.element_,
-          MapBrowserEventType.POINTERCANCEL,
-          this.handlePointerUp_,
-          this
-        )
-      );
-      if (this.element_.getRootNode && this.element_.getRootNode() !== doc) {
-        this.dragListenerKeys_.push(
-          listen(
-            this.element_.getRootNode(),
-            MapBrowserEventType.POINTERUP,
-            this.handlePointerUp_,
-            this
-          )
-        );
-      }
-    }
-  }
-  /**
-   * @param {PointerEvent} pointerEvent Pointer
-   * event.
-   * @private
-   */
-  handlePointerMove_(pointerEvent) {
-    if (this.isMoving_(pointerEvent)) {
-      this.updateActivePointers_(pointerEvent);
-      this.dragging_ = true;
-      const newEvent = new MapBrowserEvent(
-        MapBrowserEventType.POINTERDRAG,
-        this.map_,
-        pointerEvent,
-        this.dragging_,
-        void 0,
-        this.activePointers_
-      );
-      this.dispatchEvent(newEvent);
-    }
-  }
-  /**
-   * Wrap and relay a pointermove event.
-   * @param {PointerEvent} pointerEvent Pointer
-   * event.
-   * @private
-   */
-  relayMoveEvent_(pointerEvent) {
-    this.originalPointerMoveEvent_ = pointerEvent;
-    const dragging = !!(this.down_ && this.isMoving_(pointerEvent));
-    this.dispatchEvent(
-      new MapBrowserEvent(
-        MapBrowserEventType.POINTERMOVE,
-        this.map_,
-        pointerEvent,
-        dragging
-      )
-    );
-  }
-  /**
-   * Flexible handling of a `touch-action: none` css equivalent: because calling
-   * `preventDefault()` on a `pointermove` event does not stop native page scrolling
-   * and zooming, we also listen for `touchmove` and call `preventDefault()` on it
-   * when an interaction (currently `DragPan` handles the event.
-   * @param {TouchEvent} event Event.
-   * @private
-   */
-  handleTouchMove_(event) {
-    const originalEvent = this.originalPointerMoveEvent_;
-    if ((!originalEvent || originalEvent.defaultPrevented) && (typeof event.cancelable !== "boolean" || event.cancelable === true)) {
-      event.preventDefault();
-    }
-  }
-  /**
-   * @param {PointerEvent} pointerEvent Pointer
-   * event.
-   * @return {boolean} Is moving.
-   * @private
-   */
-  isMoving_(pointerEvent) {
-    return this.dragging_ || Math.abs(pointerEvent.clientX - this.down_.clientX) > this.moveTolerance_ || Math.abs(pointerEvent.clientY - this.down_.clientY) > this.moveTolerance_;
-  }
-  /**
-   * Clean up.
-   * @override
-   */
-  disposeInternal() {
-    if (this.relayedListenerKey_) {
-      unlistenByKey(this.relayedListenerKey_);
-      this.relayedListenerKey_ = null;
-    }
-    this.element_.removeEventListener(
-      EventType.TOUCHMOVE,
-      this.boundHandleTouchMove_
-    );
-    if (this.pointerdownListenerKey_) {
-      unlistenByKey(this.pointerdownListenerKey_);
-      this.pointerdownListenerKey_ = null;
-    }
-    this.dragListenerKeys_.forEach(unlistenByKey);
-    this.dragListenerKeys_.length = 0;
-    this.element_ = null;
-    super.disposeInternal();
-  }
-}
-const MapEventType = {
-  /**
-   * Triggered after a map frame is rendered.
-   * @event module:ol/MapEvent~MapEvent#postrender
-   * @api
-   */
-  POSTRENDER: "postrender",
-  /**
-   * Triggered when the map starts moving.
-   * @event module:ol/MapEvent~MapEvent#movestart
-   * @api
-   */
-  MOVESTART: "movestart",
-  /**
-   * Triggered after the map is moved.
-   * @event module:ol/MapEvent~MapEvent#moveend
-   * @api
-   */
-  MOVEEND: "moveend",
-  /**
-   * Triggered when loading of additional map data (tiles, images, features) starts.
-   * @event module:ol/MapEvent~MapEvent#loadstart
-   * @api
-   */
-  LOADSTART: "loadstart",
-  /**
-   * Triggered when loading of additional map data has completed.
-   * @event module:ol/MapEvent~MapEvent#loadend
-   * @api
-   */
-  LOADEND: "loadend"
-};
-const MapProperty = {
-  LAYERGROUP: "layergroup",
-  SIZE: "size",
-  TARGET: "target",
-  VIEW: "view"
-};
-const DROP = Infinity;
-class PriorityQueue {
-  /**
-   * @param {function(T): number} priorityFunction Priority function.
-   * @param {function(T): string} keyFunction Key function.
-   */
-  constructor(priorityFunction, keyFunction) {
-    this.priorityFunction_ = priorityFunction;
-    this.keyFunction_ = keyFunction;
-    this.elements_ = [];
-    this.priorities_ = [];
-    this.queuedElements_ = {};
-  }
-  /**
-   * FIXME empty description for jsdoc
-   */
-  clear() {
-    this.elements_.length = 0;
-    this.priorities_.length = 0;
-    clear$1(this.queuedElements_);
-  }
-  /**
-   * Remove and return the highest-priority element. O(log N).
-   * @return {T} Element.
-   */
-  dequeue() {
-    const elements = this.elements_;
-    const priorities = this.priorities_;
-    const element = elements[0];
-    if (elements.length == 1) {
-      elements.length = 0;
-      priorities.length = 0;
-    } else {
-      elements[0] = /** @type {T} */
-      elements.pop();
-      priorities[0] = /** @type {number} */
-      priorities.pop();
-      this.siftUp_(0);
-    }
-    const elementKey = this.keyFunction_(element);
-    delete this.queuedElements_[elementKey];
-    return element;
-  }
-  /**
-   * Enqueue an element. O(log N).
-   * @param {T} element Element.
-   * @return {boolean} The element was added to the queue.
-   */
-  enqueue(element) {
-    assert(
-      !(this.keyFunction_(element) in this.queuedElements_),
-      "Tried to enqueue an `element` that was already added to the queue"
-    );
-    const priority = this.priorityFunction_(element);
-    if (priority != DROP) {
-      this.elements_.push(element);
-      this.priorities_.push(priority);
-      this.queuedElements_[this.keyFunction_(element)] = true;
-      this.siftDown_(0, this.elements_.length - 1);
-      return true;
-    }
-    return false;
-  }
-  /**
-   * @return {number} Count.
-   */
-  getCount() {
-    return this.elements_.length;
-  }
-  /**
-   * Gets the index of the left child of the node at the given index.
-   * @param {number} index The index of the node to get the left child for.
-   * @return {number} The index of the left child.
-   * @private
-   */
-  getLeftChildIndex_(index) {
-    return index * 2 + 1;
-  }
-  /**
-   * Gets the index of the right child of the node at the given index.
-   * @param {number} index The index of the node to get the right child for.
-   * @return {number} The index of the right child.
-   * @private
-   */
-  getRightChildIndex_(index) {
-    return index * 2 + 2;
-  }
-  /**
-   * Gets the index of the parent of the node at the given index.
-   * @param {number} index The index of the node to get the parent for.
-   * @return {number} The index of the parent.
-   * @private
-   */
-  getParentIndex_(index) {
-    return index - 1 >> 1;
-  }
-  /**
-   * Make this a heap. O(N).
-   * @private
-   */
-  heapify_() {
-    let i;
-    for (i = (this.elements_.length >> 1) - 1; i >= 0; i--) {
-      this.siftUp_(i);
-    }
-  }
-  /**
-   * @return {boolean} Is empty.
-   */
-  isEmpty() {
-    return this.elements_.length === 0;
-  }
-  /**
-   * @param {string} key Key.
-   * @return {boolean} Is key queued.
-   */
-  isKeyQueued(key) {
-    return key in this.queuedElements_;
-  }
-  /**
-   * @param {T} element Element.
-   * @return {boolean} Is queued.
-   */
-  isQueued(element) {
-    return this.isKeyQueued(this.keyFunction_(element));
-  }
-  /**
-   * @param {number} index The index of the node to move down.
-   * @private
-   */
-  siftUp_(index) {
-    const elements = this.elements_;
-    const priorities = this.priorities_;
-    const count = elements.length;
-    const element = elements[index];
-    const priority = priorities[index];
-    const startIndex = index;
-    while (index < count >> 1) {
-      const lIndex = this.getLeftChildIndex_(index);
-      const rIndex = this.getRightChildIndex_(index);
-      const smallerChildIndex = rIndex < count && priorities[rIndex] < priorities[lIndex] ? rIndex : lIndex;
-      elements[index] = elements[smallerChildIndex];
-      priorities[index] = priorities[smallerChildIndex];
-      index = smallerChildIndex;
-    }
-    elements[index] = element;
-    priorities[index] = priority;
-    this.siftDown_(startIndex, index);
-  }
-  /**
-   * @param {number} startIndex The index of the root.
-   * @param {number} index The index of the node to move up.
-   * @private
-   */
-  siftDown_(startIndex, index) {
-    const elements = this.elements_;
-    const priorities = this.priorities_;
-    const element = elements[index];
-    const priority = priorities[index];
-    while (index > startIndex) {
-      const parentIndex = this.getParentIndex_(index);
-      if (priorities[parentIndex] > priority) {
-        elements[index] = elements[parentIndex];
-        priorities[index] = priorities[parentIndex];
-        index = parentIndex;
-      } else {
-        break;
-      }
-    }
-    elements[index] = element;
-    priorities[index] = priority;
-  }
-  /**
-   * FIXME empty description for jsdoc
-   */
-  reprioritize() {
-    const priorityFunction = this.priorityFunction_;
-    const elements = this.elements_;
-    const priorities = this.priorities_;
-    let index = 0;
-    const n = elements.length;
-    let element, i, priority;
-    for (i = 0; i < n; ++i) {
-      element = elements[i];
-      priority = priorityFunction(element);
-      if (priority == DROP) {
-        delete this.queuedElements_[this.keyFunction_(element)];
-      } else {
-        priorities[index] = priority;
-        elements[index++] = element;
-      }
-    }
-    elements.length = index;
-    priorities.length = index;
-    this.heapify_();
-  }
-}
-const TileState = {
-  IDLE: 0,
-  LOADING: 1,
-  LOADED: 2,
-  /**
-   * Indicates that tile loading failed
-   * @type {number}
-   */
-  ERROR: 3,
-  EMPTY: 4
-};
-class TileQueue extends PriorityQueue {
-  /**
-   * @param {PriorityFunction} tilePriorityFunction Tile priority function.
-   * @param {function(): ?} tileChangeCallback Function called on each tile change event.
-   */
-  constructor(tilePriorityFunction, tileChangeCallback) {
-    super(
-      /**
-       * @param {Array} element Element.
-       * @return {number} Priority.
-       */
-      function(element) {
-        return tilePriorityFunction.apply(null, element);
-      },
-      /**
-       * @param {Array} element Element.
-       * @return {string} Key.
-       */
-      function(element) {
-        return (
-          /** @type {import("./Tile.js").default} */
-          element[0].getKey()
-        );
-      }
-    );
-    this.boundHandleTileChange_ = this.handleTileChange.bind(this);
-    this.tileChangeCallback_ = tileChangeCallback;
-    this.tilesLoading_ = 0;
-    this.tilesLoadingKeys_ = {};
-  }
-  /**
-   * @param {Array} element Element.
-   * @return {boolean} The element was added to the queue.
-   * @override
-   */
-  enqueue(element) {
-    const added = super.enqueue(element);
-    if (added) {
-      const tile = element[0];
-      tile.addEventListener(EventType.CHANGE, this.boundHandleTileChange_);
-    }
-    return added;
-  }
-  /**
-   * @return {number} Number of tiles loading.
-   */
-  getTilesLoading() {
-    return this.tilesLoading_;
-  }
-  /**
-   * @param {import("./events/Event.js").default} event Event.
-   * @protected
-   */
-  handleTileChange(event) {
-    const tile = (
-      /** @type {import("./Tile.js").default} */
-      event.target
-    );
-    const state = tile.getState();
-    if (state === TileState.LOADED || state === TileState.ERROR || state === TileState.EMPTY) {
-      if (state !== TileState.ERROR) {
-        tile.removeEventListener(EventType.CHANGE, this.boundHandleTileChange_);
-      }
-      const tileKey = tile.getKey();
-      if (tileKey in this.tilesLoadingKeys_) {
-        delete this.tilesLoadingKeys_[tileKey];
-        --this.tilesLoading_;
-      }
-      this.tileChangeCallback_();
-    }
-  }
-  /**
-   * @param {number} maxTotalLoading Maximum number tiles to load simultaneously.
-   * @param {number} maxNewLoads Maximum number of new tiles to load.
-   */
-  loadMoreTiles(maxTotalLoading, maxNewLoads) {
-    let newLoads = 0;
-    while (this.tilesLoading_ < maxTotalLoading && newLoads < maxNewLoads && this.getCount() > 0) {
-      const tile = this.dequeue()[0];
-      const tileKey = tile.getKey();
-      const state = tile.getState();
-      if (state === TileState.IDLE && !(tileKey in this.tilesLoadingKeys_)) {
-        this.tilesLoadingKeys_[tileKey] = true;
-        ++this.tilesLoading_;
-        ++newLoads;
-        tile.load();
-      }
-    }
-  }
-}
-function getTilePriority(frameState, tile, tileSourceKey, tileCenter, tileResolution) {
-  if (!frameState || !(tileSourceKey in frameState.wantedTiles)) {
-    return DROP;
-  }
-  if (!frameState.wantedTiles[tileSourceKey][tile.getKey()]) {
-    return DROP;
-  }
-  const center = frameState.viewState.center;
-  const deltaX = tileCenter[0] - center[0];
-  const deltaY = tileCenter[1] - center[1];
-  return 65536 * Math.log(tileResolution) + Math.sqrt(deltaX * deltaX + deltaY * deltaY) / tileResolution;
-}
-class Control extends BaseObject {
-  /**
-   * @param {Options} options Control options.
-   */
-  constructor(options) {
-    super();
-    const element = options.element;
-    if (element && !options.target && !element.style.pointerEvents) {
-      element.style.pointerEvents = "auto";
-    }
-    this.element = element ? element : null;
-    this.target_ = null;
-    this.map_ = null;
-    this.listenerKeys = [];
-    if (options.render) {
-      this.render = options.render;
-    }
-    if (options.target) {
-      this.setTarget(options.target);
-    }
-  }
-  /**
-   * Clean up.
-   * @override
-   */
-  disposeInternal() {
-    var _a;
-    (_a = this.element) == null ? void 0 : _a.remove();
-    super.disposeInternal();
-  }
-  /**
-   * Get the map associated with this control.
-   * @return {import("../Map.js").default|null} Map.
-   * @api
-   */
-  getMap() {
-    return this.map_;
-  }
-  /**
-   * Remove the control from its current map and attach it to the new map.
-   * Pass `null` to just remove the control from the current map.
-   * Subclasses may set up event handlers to get notified about changes to
-   * the map here.
-   * @param {import("../Map.js").default|null} map Map.
-   * @api
-   */
-  setMap(map2) {
-    var _a;
-    if (this.map_) {
-      (_a = this.element) == null ? void 0 : _a.remove();
-    }
-    for (let i = 0, ii = this.listenerKeys.length; i < ii; ++i) {
-      unlistenByKey(this.listenerKeys[i]);
-    }
-    this.listenerKeys.length = 0;
-    this.map_ = map2;
-    if (map2) {
-      const target = this.target_ ?? map2.getOverlayContainerStopEvent();
-      if (this.element) {
-        target.appendChild(this.element);
-      }
-      if (this.render !== VOID) {
-        this.listenerKeys.push(
-          listen(map2, MapEventType.POSTRENDER, this.render, this)
-        );
-      }
-      map2.render();
-    }
-  }
-  /**
-   * Renders the control.
-   * @param {import("../MapEvent.js").default} mapEvent Map event.
-   * @api
-   */
-  render(mapEvent) {
-  }
-  /**
-   * This function is used to set a target element for the control. It has no
-   * effect if it is called after the control has been added to the map (i.e.
-   * after `setMap` is called on the control). If no `target` is set in the
-   * options passed to the control constructor and if `setTarget` is not called
-   * then the control is added to the map's overlay container.
-   * @param {HTMLElement|string} target Target.
-   * @api
-   */
-  setTarget(target) {
-    this.target_ = typeof target === "string" ? document.getElementById(target) : target;
-  }
-}
-const Control$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  default: Control
-}, Symbol.toStringTag, { value: "Module" }));
-class Attribution extends Control {
-  /**
-   * @param {Options} [options] Attribution options.
-   */
-  constructor(options) {
-    options = options ? options : {};
-    super({
-      element: document.createElement("div"),
-      render: options.render,
-      target: options.target
-    });
-    this.ulElement_ = document.createElement("ul");
-    this.collapsed_ = options.collapsed !== void 0 ? options.collapsed : true;
-    this.userCollapsed_ = this.collapsed_;
-    this.overrideCollapsible_ = options.collapsible !== void 0;
-    this.collapsible_ = options.collapsible !== void 0 ? options.collapsible : true;
-    if (!this.collapsible_) {
-      this.collapsed_ = false;
-    }
-    this.attributions_ = options.attributions;
-    const className = options.className !== void 0 ? options.className : "ol-attribution";
-    const tipLabel = options.tipLabel !== void 0 ? options.tipLabel : "Attributions";
-    const expandClassName = options.expandClassName !== void 0 ? options.expandClassName : className + "-expand";
-    const collapseLabel = options.collapseLabel !== void 0 ? options.collapseLabel : "›";
-    const collapseClassName = options.collapseClassName !== void 0 ? options.collapseClassName : className + "-collapse";
-    if (typeof collapseLabel === "string") {
-      this.collapseLabel_ = document.createElement("span");
-      this.collapseLabel_.textContent = collapseLabel;
-      this.collapseLabel_.className = collapseClassName;
-    } else {
-      this.collapseLabel_ = collapseLabel;
-    }
-    const label = options.label !== void 0 ? options.label : "i";
-    if (typeof label === "string") {
-      this.label_ = document.createElement("span");
-      this.label_.textContent = label;
-      this.label_.className = expandClassName;
-    } else {
-      this.label_ = label;
-    }
-    const activeLabel = this.collapsible_ && !this.collapsed_ ? this.collapseLabel_ : this.label_;
-    this.toggleButton_ = document.createElement("button");
-    this.toggleButton_.setAttribute("type", "button");
-    this.toggleButton_.setAttribute("aria-expanded", String(!this.collapsed_));
-    this.toggleButton_.title = tipLabel;
-    this.toggleButton_.appendChild(activeLabel);
-    this.toggleButton_.addEventListener(
-      EventType.CLICK,
-      this.handleClick_.bind(this),
-      false
-    );
-    const cssClasses = className + " " + CLASS_UNSELECTABLE + " " + CLASS_CONTROL + (this.collapsed_ && this.collapsible_ ? " " + CLASS_COLLAPSED : "") + (this.collapsible_ ? "" : " ol-uncollapsible");
-    const element = this.element;
-    element.className = cssClasses;
-    element.appendChild(this.toggleButton_);
-    element.appendChild(this.ulElement_);
-    this.renderedAttributions_ = [];
-    this.renderedVisible_ = true;
-  }
-  /**
-   * Collect a list of visible attributions and set the collapsible state.
-   * @param {import("../Map.js").FrameState} frameState Frame state.
-   * @return {Array<string>} Attributions.
-   * @private
-   */
-  collectSourceAttributions_(frameState) {
-    const layers = this.getMap().getAllLayers();
-    const visibleAttributions = new Set(
-      layers.flatMap((layer) => layer.getAttributions(frameState))
-    );
-    if (this.attributions_ !== void 0) {
-      Array.isArray(this.attributions_) ? this.attributions_.forEach((item) => visibleAttributions.add(item)) : visibleAttributions.add(this.attributions_);
-    }
-    if (!this.overrideCollapsible_) {
-      const collapsible = !layers.some(
-        (layer) => {
-          var _a;
-          return ((_a = layer.getSource()) == null ? void 0 : _a.getAttributionsCollapsible()) === false;
-        }
-      );
-      this.setCollapsible(collapsible);
-    }
-    return Array.from(visibleAttributions);
-  }
-  /**
-   * @private
-   * @param {?import("../Map.js").FrameState} frameState Frame state.
-   */
-  async updateElement_(frameState) {
-    if (!frameState) {
-      if (this.renderedVisible_) {
-        this.element.style.display = "none";
-        this.renderedVisible_ = false;
-      }
-      return;
-    }
-    const attributions = await Promise.all(
-      this.collectSourceAttributions_(frameState).map(
-        (attribution) => toPromise(() => attribution)
-      )
-    );
-    const visible = attributions.length > 0;
-    if (this.renderedVisible_ != visible) {
-      this.element.style.display = visible ? "" : "none";
-      this.renderedVisible_ = visible;
-    }
-    if (equals(attributions, this.renderedAttributions_)) {
-      return;
-    }
-    removeChildren(this.ulElement_);
-    for (let i = 0, ii = attributions.length; i < ii; ++i) {
-      const element = document.createElement("li");
-      element.innerHTML = attributions[i];
-      this.ulElement_.appendChild(element);
-    }
-    this.renderedAttributions_ = attributions;
-  }
-  /**
-   * @param {MouseEvent} event The event to handle
-   * @private
-   */
-  handleClick_(event) {
-    event.preventDefault();
-    this.handleToggle_();
-    this.userCollapsed_ = this.collapsed_;
-  }
-  /**
-   * @private
-   */
-  handleToggle_() {
-    this.element.classList.toggle(CLASS_COLLAPSED);
-    if (this.collapsed_) {
-      replaceNode(this.collapseLabel_, this.label_);
-    } else {
-      replaceNode(this.label_, this.collapseLabel_);
-    }
-    this.collapsed_ = !this.collapsed_;
-    this.toggleButton_.setAttribute("aria-expanded", String(!this.collapsed_));
-  }
-  /**
-   * Return `true` if the attribution is collapsible, `false` otherwise.
-   * @return {boolean} True if the widget is collapsible.
-   * @api
-   */
-  getCollapsible() {
-    return this.collapsible_;
-  }
-  /**
-   * Set whether the attribution should be collapsible.
-   * @param {boolean} collapsible True if the widget is collapsible.
-   * @api
-   */
-  setCollapsible(collapsible) {
-    if (this.collapsible_ === collapsible) {
-      return;
-    }
-    this.collapsible_ = collapsible;
-    this.element.classList.toggle("ol-uncollapsible");
-    if (this.userCollapsed_) {
-      this.handleToggle_();
-    }
-  }
-  /**
-   * Collapse or expand the attribution according to the passed parameter. Will
-   * not do anything if the attribution isn't collapsible or if the current
-   * collapsed state is already the one requested.
-   * @param {boolean} collapsed True if the widget is collapsed.
-   * @api
-   */
-  setCollapsed(collapsed) {
-    this.userCollapsed_ = collapsed;
-    if (!this.collapsible_ || this.collapsed_ === collapsed) {
-      return;
-    }
-    this.handleToggle_();
-  }
-  /**
-   * Return `true` when the attribution is currently collapsed or `false`
-   * otherwise.
-   * @return {boolean} True if the widget is collapsed.
-   * @api
-   */
-  getCollapsed() {
-    return this.collapsed_;
-  }
-  /**
-   * Update the attribution element.
-   * @param {import("../MapEvent.js").default} mapEvent Map event.
-   * @override
-   */
-  render(mapEvent) {
-    this.updateElement_(mapEvent.frameState);
-  }
-}
-class Rotate extends Control {
-  /**
-   * @param {Options} [options] Rotate options.
-   */
-  constructor(options) {
-    options = options ? options : {};
-    super({
-      element: document.createElement("div"),
-      render: options.render,
-      target: options.target
-    });
-    const className = options.className !== void 0 ? options.className : "ol-rotate";
-    const label = options.label !== void 0 ? options.label : "⇧";
-    const compassClassName = options.compassClassName !== void 0 ? options.compassClassName : "ol-compass";
-    this.label_ = null;
-    if (typeof label === "string") {
-      this.label_ = document.createElement("span");
-      this.label_.className = compassClassName;
-      this.label_.textContent = label;
-    } else {
-      this.label_ = label;
-      this.label_.classList.add(compassClassName);
-    }
-    const tipLabel = options.tipLabel ? options.tipLabel : "Reset rotation";
-    const button = document.createElement("button");
-    button.className = className + "-reset";
-    button.setAttribute("type", "button");
-    button.title = tipLabel;
-    button.appendChild(this.label_);
-    button.addEventListener(
-      EventType.CLICK,
-      this.handleClick_.bind(this),
-      false
-    );
-    const cssClasses = className + " " + CLASS_UNSELECTABLE + " " + CLASS_CONTROL;
-    const element = this.element;
-    element.className = cssClasses;
-    element.appendChild(button);
-    this.callResetNorth_ = options.resetNorth ? options.resetNorth : void 0;
-    this.duration_ = options.duration !== void 0 ? options.duration : 250;
-    this.autoHide_ = options.autoHide !== void 0 ? options.autoHide : true;
-    this.rotation_ = void 0;
-    if (this.autoHide_) {
-      this.element.classList.add(CLASS_HIDDEN);
-    }
-  }
-  /**
-   * @param {MouseEvent} event The event to handle
-   * @private
-   */
-  handleClick_(event) {
-    event.preventDefault();
-    if (this.callResetNorth_ !== void 0) {
-      this.callResetNorth_();
-    } else {
-      this.resetNorth_();
-    }
-  }
-  /**
-   * @private
-   */
-  resetNorth_() {
-    const map2 = this.getMap();
-    const view = map2.getView();
-    if (!view) {
-      return;
-    }
-    const rotation = view.getRotation();
-    if (rotation !== void 0) {
-      if (this.duration_ > 0 && rotation % (2 * Math.PI) !== 0) {
-        view.animate({
-          rotation: 0,
-          duration: this.duration_,
-          easing: easeOut
-        });
-      } else {
-        view.setRotation(0);
-      }
-    }
-  }
-  /**
-   * Update the rotate control element.
-   * @param {import("../MapEvent.js").default} mapEvent Map event.
-   * @override
-   */
-  render(mapEvent) {
-    const frameState = mapEvent.frameState;
-    if (!frameState) {
-      return;
-    }
-    const rotation = frameState.viewState.rotation;
-    if (rotation != this.rotation_) {
-      const transform2 = "rotate(" + rotation + "rad)";
-      if (this.autoHide_) {
-        const contains2 = this.element.classList.contains(CLASS_HIDDEN);
-        if (!contains2 && rotation === 0) {
-          this.element.classList.add(CLASS_HIDDEN);
-        } else if (contains2 && rotation !== 0) {
-          this.element.classList.remove(CLASS_HIDDEN);
-        }
-      }
-      this.label_.style.transform = transform2;
-    }
-    this.rotation_ = rotation;
-  }
-}
-class Zoom extends Control {
-  /**
-   * @param {Options} [options] Zoom options.
-   */
-  constructor(options) {
-    options = options ? options : {};
-    super({
-      element: document.createElement("div"),
-      target: options.target
-    });
-    const className = options.className !== void 0 ? options.className : "ol-zoom";
-    const delta = options.delta !== void 0 ? options.delta : 1;
-    const zoomInClassName = options.zoomInClassName !== void 0 ? options.zoomInClassName : className + "-in";
-    const zoomOutClassName = options.zoomOutClassName !== void 0 ? options.zoomOutClassName : className + "-out";
-    const zoomInLabel = options.zoomInLabel !== void 0 ? options.zoomInLabel : "+";
-    const zoomOutLabel = options.zoomOutLabel !== void 0 ? options.zoomOutLabel : "–";
-    const zoomInTipLabel = options.zoomInTipLabel !== void 0 ? options.zoomInTipLabel : "Zoom in";
-    const zoomOutTipLabel = options.zoomOutTipLabel !== void 0 ? options.zoomOutTipLabel : "Zoom out";
-    const inElement = document.createElement("button");
-    inElement.className = zoomInClassName;
-    inElement.setAttribute("type", "button");
-    inElement.title = zoomInTipLabel;
-    inElement.appendChild(
-      typeof zoomInLabel === "string" ? document.createTextNode(zoomInLabel) : zoomInLabel
-    );
-    inElement.addEventListener(
-      EventType.CLICK,
-      this.handleClick_.bind(this, delta),
-      false
-    );
-    const outElement = document.createElement("button");
-    outElement.className = zoomOutClassName;
-    outElement.setAttribute("type", "button");
-    outElement.title = zoomOutTipLabel;
-    outElement.appendChild(
-      typeof zoomOutLabel === "string" ? document.createTextNode(zoomOutLabel) : zoomOutLabel
-    );
-    outElement.addEventListener(
-      EventType.CLICK,
-      this.handleClick_.bind(this, -delta),
-      false
-    );
-    const cssClasses = className + " " + CLASS_UNSELECTABLE + " " + CLASS_CONTROL;
-    const element = this.element;
-    element.className = cssClasses;
-    element.appendChild(inElement);
-    element.appendChild(outElement);
-    this.duration_ = options.duration !== void 0 ? options.duration : 250;
-  }
-  /**
-   * @param {number} delta Zoom delta.
-   * @param {MouseEvent} event The event to handle
-   * @private
-   */
-  handleClick_(delta, event) {
-    event.preventDefault();
-    this.zoomByDelta_(delta);
-  }
-  /**
-   * @param {number} delta Zoom delta.
-   * @private
-   */
-  zoomByDelta_(delta) {
-    const map2 = this.getMap();
-    const view = map2.getView();
-    if (!view) {
-      return;
-    }
-    const currentZoom = view.getZoom();
-    if (currentZoom !== void 0) {
-      const newZoom = view.getConstrainedZoom(currentZoom + delta);
-      if (this.duration_ > 0) {
-        if (view.getAnimating()) {
-          view.cancelAnimations();
-        }
-        view.animate({
-          zoom: newZoom,
-          duration: this.duration_,
-          easing: easeOut
-        });
-      } else {
-        view.setZoom(newZoom);
-      }
-    }
-  }
-}
-function defaults$1(options) {
-  options = options ? options : {};
-  const controls = new Collection();
-  const zoomControl = options.zoom !== void 0 ? options.zoom : true;
-  if (zoomControl) {
-    controls.push(new Zoom(options.zoomOptions));
-  }
-  const rotateControl = options.rotate !== void 0 ? options.rotate : true;
-  if (rotateControl) {
-    controls.push(new Rotate(options.rotateOptions));
-  }
-  const attributionControl = options.attribution !== void 0 ? options.attribution : true;
-  if (attributionControl) {
-    controls.push(new Attribution(options.attributionOptions));
-  }
-  return controls;
-}
-const InteractionProperty = {
-  ACTIVE: "active"
-};
-class Interaction extends BaseObject {
-  /**
-   * @param {InteractionOptions} [options] Options.
-   */
-  constructor(options) {
-    super();
-    this.on;
-    this.once;
-    this.un;
-    if (options && options.handleEvent) {
-      this.handleEvent = options.handleEvent;
-    }
-    this.map_ = null;
-    this.setActive(true);
-  }
-  /**
-   * Return whether the interaction is currently active.
-   * @return {boolean} `true` if the interaction is active, `false` otherwise.
-   * @observable
-   * @api
-   */
-  getActive() {
-    return (
-      /** @type {boolean} */
-      this.get(InteractionProperty.ACTIVE)
-    );
-  }
-  /**
-   * Get the map associated with this interaction.
-   * @return {import("../Map.js").default|null} Map.
-   * @api
-   */
-  getMap() {
-    return this.map_;
-  }
-  /**
-   * Handles the {@link module:ol/MapBrowserEvent~MapBrowserEvent map browser event}.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Map browser event.
-   * @return {boolean} `false` to stop event propagation.
-   * @api
-   */
-  handleEvent(mapBrowserEvent) {
-    return true;
-  }
-  /**
-   * Activate or deactivate the interaction.
-   * @param {boolean} active Active.
-   * @observable
-   * @api
-   */
-  setActive(active) {
-    this.set(InteractionProperty.ACTIVE, active);
-  }
-  /**
-   * Remove the interaction from its current map and attach it to the new map.
-   * Subclasses may set up event handlers to get notified about changes to
-   * the map here.
-   * @param {import("../Map.js").default|null} map Map.
-   */
-  setMap(map2) {
-    this.map_ = map2;
-  }
-}
-function pan(view, delta, duration) {
-  const currentCenter = view.getCenterInternal();
-  if (currentCenter) {
-    const center = [currentCenter[0] + delta[0], currentCenter[1] + delta[1]];
-    view.animateInternal({
-      duration: duration !== void 0 ? duration : 250,
-      easing: linear,
-      center: view.getConstrainedCenter(center)
-    });
-  }
-}
-function zoomByDelta(view, delta, anchor, duration) {
-  const currentZoom = view.getZoom();
-  if (currentZoom === void 0) {
-    return;
-  }
-  const newZoom = view.getConstrainedZoom(currentZoom + delta);
-  const newResolution = view.getResolutionForZoom(newZoom);
-  if (view.getAnimating()) {
-    view.cancelAnimations();
-  }
-  view.animate({
-    resolution: newResolution,
-    anchor,
-    duration: duration !== void 0 ? duration : 250,
-    easing: easeOut
-  });
-}
-class DoubleClickZoom extends Interaction {
-  /**
-   * @param {Options} [options] Options.
-   */
-  constructor(options) {
-    super();
-    options = options ? options : {};
-    this.delta_ = options.delta ? options.delta : 1;
-    this.duration_ = options.duration !== void 0 ? options.duration : 250;
-  }
-  /**
-   * Handles the {@link module:ol/MapBrowserEvent~MapBrowserEvent map browser event} (if it was a
-   * doubleclick) and eventually zooms the map.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Map browser event.
-   * @return {boolean} `false` to stop event propagation.
-   * @override
-   */
-  handleEvent(mapBrowserEvent) {
-    let stopEvent = false;
-    if (mapBrowserEvent.type == MapBrowserEventType.DBLCLICK) {
-      const browserEvent = (
-        /** @type {MouseEvent} */
-        mapBrowserEvent.originalEvent
-      );
-      const map2 = mapBrowserEvent.map;
-      const anchor = mapBrowserEvent.coordinate;
-      const delta = browserEvent.shiftKey ? -this.delta_ : this.delta_;
-      const view = map2.getView();
-      zoomByDelta(view, delta, anchor, this.duration_);
-      browserEvent.preventDefault();
-      stopEvent = true;
-    }
-    return !stopEvent;
-  }
-}
-class PointerInteraction extends Interaction {
-  /**
-   * @param {Options} [options] Options.
-   */
-  constructor(options) {
-    options = options ? options : {};
-    super(
-      /** @type {import("./Interaction.js").InteractionOptions} */
-      options
-    );
-    if (options.handleDownEvent) {
-      this.handleDownEvent = options.handleDownEvent;
-    }
-    if (options.handleDragEvent) {
-      this.handleDragEvent = options.handleDragEvent;
-    }
-    if (options.handleMoveEvent) {
-      this.handleMoveEvent = options.handleMoveEvent;
-    }
-    if (options.handleUpEvent) {
-      this.handleUpEvent = options.handleUpEvent;
-    }
-    if (options.stopDown) {
-      this.stopDown = options.stopDown;
-    }
-    this.handlingDownUpSequence = false;
-    this.targetPointers = [];
-  }
-  /**
-   * Returns the current number of pointers involved in the interaction,
-   * e.g. `2` when two fingers are used.
-   * @return {number} The number of pointers.
-   * @api
-   */
-  getPointerCount() {
-    return this.targetPointers.length;
-  }
-  /**
-   * Handle pointer down events.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
-   * @return {boolean} If the event was consumed.
-   * @protected
-   */
-  handleDownEvent(mapBrowserEvent) {
-    return false;
-  }
-  /**
-   * Handle pointer drag events.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
-   * @protected
-   */
-  handleDragEvent(mapBrowserEvent) {
-  }
-  /**
-   * Handles the {@link module:ol/MapBrowserEvent~MapBrowserEvent map browser event} and may call into
-   * other functions, if event sequences like e.g. 'drag' or 'down-up' etc. are
-   * detected.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Map browser event.
-   * @return {boolean} `false` to stop event propagation.
-   * @api
-   * @override
-   */
-  handleEvent(mapBrowserEvent) {
-    if (!mapBrowserEvent.originalEvent) {
-      return true;
-    }
-    let stopEvent = false;
-    this.updateTrackedPointers_(mapBrowserEvent);
-    if (this.handlingDownUpSequence) {
-      if (mapBrowserEvent.type == MapBrowserEventType.POINTERDRAG) {
-        this.handleDragEvent(mapBrowserEvent);
-        mapBrowserEvent.originalEvent.preventDefault();
-      } else if (mapBrowserEvent.type == MapBrowserEventType.POINTERUP) {
-        const handledUp = this.handleUpEvent(mapBrowserEvent);
-        this.handlingDownUpSequence = handledUp && this.targetPointers.length > 0;
-      }
-    } else {
-      if (mapBrowserEvent.type == MapBrowserEventType.POINTERDOWN) {
-        const handled = this.handleDownEvent(mapBrowserEvent);
-        this.handlingDownUpSequence = handled;
-        stopEvent = this.stopDown(handled);
-      } else if (mapBrowserEvent.type == MapBrowserEventType.POINTERMOVE) {
-        this.handleMoveEvent(mapBrowserEvent);
-      }
-    }
-    return !stopEvent;
-  }
-  /**
-   * Handle pointer move events.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
-   * @protected
-   */
-  handleMoveEvent(mapBrowserEvent) {
-  }
-  /**
-   * Handle pointer up events.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
-   * @return {boolean} If the event was consumed.
-   * @protected
-   */
-  handleUpEvent(mapBrowserEvent) {
-    return false;
-  }
-  /**
-   * This function is used to determine if "down" events should be propagated
-   * to other interactions or should be stopped.
-   * @param {boolean} handled Was the event handled by the interaction?
-   * @return {boolean} Should the `down` event be stopped?
-   */
-  stopDown(handled) {
-    return handled;
-  }
-  /**
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
-   * @private
-   */
-  updateTrackedPointers_(mapBrowserEvent) {
-    if (mapBrowserEvent.activePointers) {
-      this.targetPointers = mapBrowserEvent.activePointers;
-    }
-  }
-}
-function centroid(pointerEvents) {
-  const length = pointerEvents.length;
-  let clientX = 0;
-  let clientY = 0;
-  for (let i = 0; i < length; i++) {
-    clientX += pointerEvents[i].clientX;
-    clientY += pointerEvents[i].clientY;
-  }
-  return { clientX: clientX / length, clientY: clientY / length };
-}
-function all$1(var_args) {
-  const conditions = arguments;
-  return function(event) {
-    let pass = true;
-    for (let i = 0, ii = conditions.length; i < ii; ++i) {
-      pass = pass && conditions[i](event);
-      if (!pass) {
-        break;
-      }
-    }
-    return pass;
-  };
-}
-const altShiftKeysOnly = function(mapBrowserEvent) {
-  const originalEvent = (
-    /** @type {KeyboardEvent|MouseEvent|TouchEvent} */
-    mapBrowserEvent.originalEvent
-  );
-  return originalEvent.altKey && !(originalEvent.metaKey || originalEvent.ctrlKey) && originalEvent.shiftKey;
-};
-const focus = function(event) {
-  const targetElement = event.map.getTargetElement();
-  const rootNode = targetElement.getRootNode();
-  const activeElement = event.map.getOwnerDocument().activeElement;
-  return rootNode instanceof ShadowRoot ? rootNode.host.contains(activeElement) : targetElement.contains(activeElement);
-};
-const focusWithTabindex = function(event) {
-  const targetElement = event.map.getTargetElement();
-  const rootNode = targetElement.getRootNode();
-  const tabIndexCandidate = rootNode instanceof ShadowRoot ? rootNode.host : targetElement;
-  return tabIndexCandidate.hasAttribute("tabindex") ? focus(event) : true;
-};
-const always = TRUE;
-const mouseActionButton = function(mapBrowserEvent) {
-  const originalEvent = (
-    /** @type {MouseEvent} */
-    mapBrowserEvent.originalEvent
-  );
-  return originalEvent.button == 0 && !(WEBKIT && MAC && originalEvent.ctrlKey);
-};
-const noModifierKeys = function(mapBrowserEvent) {
-  const originalEvent = (
-    /** @type {KeyboardEvent|MouseEvent|TouchEvent} */
-    mapBrowserEvent.originalEvent
-  );
-  return !originalEvent.altKey && !(originalEvent.metaKey || originalEvent.ctrlKey) && !originalEvent.shiftKey;
-};
-const platformModifierKey = function(mapBrowserEvent) {
-  const originalEvent = (
-    /** @type {KeyboardEvent|MouseEvent|TouchEvent} */
-    mapBrowserEvent.originalEvent
-  );
-  return MAC ? originalEvent.metaKey : originalEvent.ctrlKey;
-};
-const shiftKeyOnly = function(mapBrowserEvent) {
-  const originalEvent = (
-    /** @type {KeyboardEvent|MouseEvent|TouchEvent} */
-    mapBrowserEvent.originalEvent
-  );
-  return !originalEvent.altKey && !(originalEvent.metaKey || originalEvent.ctrlKey) && originalEvent.shiftKey;
-};
-const targetNotEditable = function(mapBrowserEvent) {
-  const originalEvent = (
-    /** @type {KeyboardEvent|MouseEvent|TouchEvent} */
-    mapBrowserEvent.originalEvent
-  );
-  const tagName = (
-    /** @type {Element} */
-    originalEvent.target.tagName
-  );
-  return tagName !== "INPUT" && tagName !== "SELECT" && tagName !== "TEXTAREA" && // `isContentEditable` is only available on `HTMLElement`, but it may also be a
-  // different type like `SVGElement`.
-  // @ts-ignore
-  !originalEvent.target.isContentEditable;
-};
-const mouseOnly = function(mapBrowserEvent) {
-  const pointerEvent = (
-    /** @type {import("../MapBrowserEvent").default} */
-    mapBrowserEvent.originalEvent
-  );
-  assert(
-    pointerEvent !== void 0,
-    "mapBrowserEvent must originate from a pointer event"
-  );
-  return pointerEvent.pointerType == "mouse";
-};
-const primaryAction = function(mapBrowserEvent) {
-  const pointerEvent = (
-    /** @type {import("../MapBrowserEvent").default} */
-    mapBrowserEvent.originalEvent
-  );
-  assert(
-    pointerEvent !== void 0,
-    "mapBrowserEvent must originate from a pointer event"
-  );
-  return pointerEvent.isPrimary && pointerEvent.button === 0;
-};
-class DragPan extends PointerInteraction {
-  /**
-   * @param {Options} [options] Options.
-   */
-  constructor(options) {
-    super({
-      stopDown: FALSE
-    });
-    options = options ? options : {};
-    this.kinetic_ = options.kinetic;
-    this.lastCentroid = null;
-    this.lastPointersCount_;
-    this.panning_ = false;
-    const condition = options.condition ? options.condition : all$1(noModifierKeys, primaryAction);
-    this.condition_ = options.onFocusOnly ? all$1(focusWithTabindex, condition) : condition;
-    this.noKinetic_ = false;
-  }
-  /**
-   * Handle pointer drag events.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
-   * @override
-   */
-  handleDragEvent(mapBrowserEvent) {
-    const map2 = mapBrowserEvent.map;
-    if (!this.panning_) {
-      this.panning_ = true;
-      map2.getView().beginInteraction();
-    }
-    const targetPointers = this.targetPointers;
-    const centroid$1 = map2.getEventPixel(centroid(targetPointers));
-    if (targetPointers.length == this.lastPointersCount_) {
-      if (this.kinetic_) {
-        this.kinetic_.update(centroid$1[0], centroid$1[1]);
-      }
-      if (this.lastCentroid) {
-        const delta = [
-          this.lastCentroid[0] - centroid$1[0],
-          centroid$1[1] - this.lastCentroid[1]
-        ];
-        const map3 = mapBrowserEvent.map;
-        const view = map3.getView();
-        scale$3(delta, view.getResolution());
-        rotate$1(delta, view.getRotation());
-        view.adjustCenterInternal(delta);
-      }
-    } else if (this.kinetic_) {
-      this.kinetic_.begin();
-    }
-    this.lastCentroid = centroid$1;
-    this.lastPointersCount_ = targetPointers.length;
-    mapBrowserEvent.originalEvent.preventDefault();
-  }
-  /**
-   * Handle pointer up events.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
-   * @return {boolean} If the event was consumed.
-   * @override
-   */
-  handleUpEvent(mapBrowserEvent) {
-    const map2 = mapBrowserEvent.map;
-    const view = map2.getView();
-    if (this.targetPointers.length === 0) {
-      if (!this.noKinetic_ && this.kinetic_ && this.kinetic_.end()) {
-        const distance = this.kinetic_.getDistance();
-        const angle = this.kinetic_.getAngle();
-        const center = view.getCenterInternal();
-        const centerpx = map2.getPixelFromCoordinateInternal(center);
-        const dest = map2.getCoordinateFromPixelInternal([
-          centerpx[0] - distance * Math.cos(angle),
-          centerpx[1] - distance * Math.sin(angle)
-        ]);
-        view.animateInternal({
-          center: view.getConstrainedCenter(dest),
-          duration: 500,
-          easing: easeOut
-        });
-      }
-      if (this.panning_) {
-        this.panning_ = false;
-        view.endInteraction();
-      }
-      return false;
-    }
-    if (this.kinetic_) {
-      this.kinetic_.begin();
-    }
-    this.lastCentroid = null;
-    return true;
-  }
-  /**
-   * Handle pointer down events.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
-   * @return {boolean} If the event was consumed.
-   * @override
-   */
-  handleDownEvent(mapBrowserEvent) {
-    if (this.targetPointers.length > 0 && this.condition_(mapBrowserEvent)) {
-      const map2 = mapBrowserEvent.map;
-      const view = map2.getView();
-      this.lastCentroid = null;
-      if (view.getAnimating()) {
-        view.cancelAnimations();
-      }
-      if (this.kinetic_) {
-        this.kinetic_.begin();
-      }
-      this.noKinetic_ = this.targetPointers.length > 1;
-      return true;
-    }
-    return false;
-  }
-}
-class DragRotate extends PointerInteraction {
-  /**
-   * @param {Options} [options] Options.
-   */
-  constructor(options) {
-    options = options ? options : {};
-    super({
-      stopDown: FALSE
-    });
-    this.condition_ = options.condition ? options.condition : altShiftKeysOnly;
-    this.lastAngle_ = void 0;
-    this.duration_ = options.duration !== void 0 ? options.duration : 250;
-  }
-  /**
-   * Handle pointer drag events.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
-   * @override
-   */
-  handleDragEvent(mapBrowserEvent) {
-    if (!mouseOnly(mapBrowserEvent)) {
-      return;
-    }
-    const map2 = mapBrowserEvent.map;
-    const view = map2.getView();
-    if (view.getConstraints().rotation === disable) {
-      return;
-    }
-    const size = map2.getSize();
-    const offset2 = mapBrowserEvent.pixel;
-    const theta = Math.atan2(size[1] / 2 - offset2[1], offset2[0] - size[0] / 2);
-    if (this.lastAngle_ !== void 0) {
-      const delta = theta - this.lastAngle_;
-      view.adjustRotationInternal(-delta);
-    }
-    this.lastAngle_ = theta;
-  }
-  /**
-   * Handle pointer up events.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
-   * @return {boolean} If the event was consumed.
-   * @override
-   */
-  handleUpEvent(mapBrowserEvent) {
-    if (!mouseOnly(mapBrowserEvent)) {
-      return true;
-    }
-    const map2 = mapBrowserEvent.map;
-    const view = map2.getView();
-    view.endInteraction(this.duration_);
-    return false;
-  }
-  /**
-   * Handle pointer down events.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
-   * @return {boolean} If the event was consumed.
-   * @override
-   */
-  handleDownEvent(mapBrowserEvent) {
-    if (!mouseOnly(mapBrowserEvent)) {
-      return false;
-    }
-    if (mouseActionButton(mapBrowserEvent) && this.condition_(mapBrowserEvent)) {
-      const map2 = mapBrowserEvent.map;
-      map2.getView().beginInteraction();
-      this.lastAngle_ = void 0;
-      return true;
-    }
-    return false;
-  }
-}
-class RenderBox extends Disposable {
-  /**
-   * @param {string} className CSS class name.
-   */
-  constructor(className) {
-    super();
-    this.geometry_ = null;
-    this.element_ = document.createElement("div");
-    this.element_.style.position = "absolute";
-    this.element_.style.pointerEvents = "auto";
-    this.element_.className = "ol-box " + className;
-    this.map_ = null;
-    this.startPixel_ = null;
-    this.endPixel_ = null;
-  }
-  /**
-   * Clean up.
-   * @override
-   */
-  disposeInternal() {
-    this.setMap(null);
-  }
-  /**
-   * @private
-   */
-  render_() {
-    const startPixel = this.startPixel_;
-    const endPixel = this.endPixel_;
-    const px = "px";
-    const style = this.element_.style;
-    style.left = Math.min(startPixel[0], endPixel[0]) + px;
-    style.top = Math.min(startPixel[1], endPixel[1]) + px;
-    style.width = Math.abs(endPixel[0] - startPixel[0]) + px;
-    style.height = Math.abs(endPixel[1] - startPixel[1]) + px;
-  }
-  /**
-   * @param {import("../Map.js").default|null} map Map.
-   */
-  setMap(map2) {
-    if (this.map_) {
-      this.map_.getOverlayContainer().removeChild(this.element_);
-      const style = this.element_.style;
-      style.left = "inherit";
-      style.top = "inherit";
-      style.width = "inherit";
-      style.height = "inherit";
-    }
-    this.map_ = map2;
-    if (this.map_) {
-      this.map_.getOverlayContainer().appendChild(this.element_);
-    }
-  }
-  /**
-   * @param {import("../pixel.js").Pixel} startPixel Start pixel.
-   * @param {import("../pixel.js").Pixel} endPixel End pixel.
-   */
-  setPixels(startPixel, endPixel) {
-    this.startPixel_ = startPixel;
-    this.endPixel_ = endPixel;
-    this.createOrUpdateGeometry();
-    this.render_();
-  }
-  /**
-   * Creates or updates the cached geometry.
-   */
-  createOrUpdateGeometry() {
-    if (!this.map_) {
-      return;
-    }
-    const startPixel = this.startPixel_;
-    const endPixel = this.endPixel_;
-    const pixels = [
-      startPixel,
-      [startPixel[0], endPixel[1]],
-      endPixel,
-      [endPixel[0], startPixel[1]]
-    ];
-    const coordinates2 = pixels.map(
-      this.map_.getCoordinateFromPixelInternal,
-      this.map_
-    );
-    coordinates2[4] = coordinates2[0].slice();
-    if (!this.geometry_) {
-      this.geometry_ = new Polygon([coordinates2]);
-    } else {
-      this.geometry_.setCoordinates([coordinates2]);
-    }
-  }
-  /**
-   * @return {import("../geom/Polygon.js").default} Geometry.
-   */
-  getGeometry() {
-    return this.geometry_;
-  }
-}
-const DragBoxEventType = {
-  /**
-   * Triggered upon drag box start.
-   * @event DragBoxEvent#boxstart
-   * @api
-   */
-  BOXSTART: "boxstart",
-  /**
-   * Triggered on drag when box is active.
-   * @event DragBoxEvent#boxdrag
-   * @api
-   */
-  BOXDRAG: "boxdrag",
-  /**
-   * Triggered upon drag box end.
-   * @event DragBoxEvent#boxend
-   * @api
-   */
-  BOXEND: "boxend",
-  /**
-   * Triggered upon drag box canceled.
-   * @event DragBoxEvent#boxcancel
-   * @api
-   */
-  BOXCANCEL: "boxcancel"
-};
-class DragBoxEvent extends BaseEvent {
-  /**
-   * @param {string} type The event type.
-   * @param {import("../coordinate.js").Coordinate} coordinate The event coordinate.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Originating event.
-   */
-  constructor(type, coordinate, mapBrowserEvent) {
-    super(type);
-    this.coordinate = coordinate;
-    this.mapBrowserEvent = mapBrowserEvent;
-  }
-}
-class DragBox extends PointerInteraction {
-  /**
-   * @param {Options} [options] Options.
-   */
-  constructor(options) {
-    super();
-    this.on;
-    this.once;
-    this.un;
-    options = options ?? {};
-    this.box_ = new RenderBox(options.className || "ol-dragbox");
-    this.minArea_ = options.minArea ?? 64;
-    if (options.onBoxEnd) {
-      this.onBoxEnd = options.onBoxEnd;
-    }
-    this.startPixel_ = null;
-    this.condition_ = options.condition ?? mouseActionButton;
-    this.boxEndCondition_ = options.boxEndCondition ?? this.defaultBoxEndCondition;
-  }
-  /**
-   * The default condition for determining whether the boxend event
-   * should fire.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent The originating MapBrowserEvent
-   *     leading to the box end.
-   * @param {import("../pixel.js").Pixel} startPixel The starting pixel of the box.
-   * @param {import("../pixel.js").Pixel} endPixel The end pixel of the box.
-   * @return {boolean} Whether or not the boxend condition should be fired.
-   */
-  defaultBoxEndCondition(mapBrowserEvent, startPixel, endPixel) {
-    const width = endPixel[0] - startPixel[0];
-    const height = endPixel[1] - startPixel[1];
-    return width * width + height * height >= this.minArea_;
-  }
-  /**
-   * Returns geometry of last drawn box.
-   * @return {import("../geom/Polygon.js").default} Geometry.
-   * @api
-   */
-  getGeometry() {
-    return this.box_.getGeometry();
-  }
-  /**
-   * Handle pointer drag events.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
-   * @override
-   */
-  handleDragEvent(mapBrowserEvent) {
-    if (!this.startPixel_) {
-      return;
-    }
-    this.box_.setPixels(this.startPixel_, mapBrowserEvent.pixel);
-    this.dispatchEvent(
-      new DragBoxEvent(
-        DragBoxEventType.BOXDRAG,
-        mapBrowserEvent.coordinate,
-        mapBrowserEvent
-      )
-    );
-  }
-  /**
-   * Handle pointer up events.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
-   * @return {boolean} If the event was consumed.
-   * @override
-   */
-  handleUpEvent(mapBrowserEvent) {
-    if (!this.startPixel_) {
-      return false;
-    }
-    const completeBox = this.boxEndCondition_(
-      mapBrowserEvent,
-      this.startPixel_,
-      mapBrowserEvent.pixel
-    );
-    if (completeBox) {
-      this.onBoxEnd(mapBrowserEvent);
-    }
-    this.dispatchEvent(
-      new DragBoxEvent(
-        completeBox ? DragBoxEventType.BOXEND : DragBoxEventType.BOXCANCEL,
-        mapBrowserEvent.coordinate,
-        mapBrowserEvent
-      )
-    );
-    this.box_.setMap(null);
-    this.startPixel_ = null;
-    return false;
-  }
-  /**
-   * Handle pointer down events.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
-   * @return {boolean} If the event was consumed.
-   * @override
-   */
-  handleDownEvent(mapBrowserEvent) {
-    if (this.condition_(mapBrowserEvent)) {
-      this.startPixel_ = mapBrowserEvent.pixel;
-      this.box_.setMap(mapBrowserEvent.map);
-      this.box_.setPixels(this.startPixel_, this.startPixel_);
-      this.dispatchEvent(
-        new DragBoxEvent(
-          DragBoxEventType.BOXSTART,
-          mapBrowserEvent.coordinate,
-          mapBrowserEvent
-        )
-      );
-      return true;
-    }
-    return false;
-  }
-  /**
-   * Function to execute just before `onboxend` is fired
-   * @param {import("../MapBrowserEvent.js").default} event Event.
-   */
-  onBoxEnd(event) {
-  }
-  /**
-   * Activate or deactivate the interaction.
-   * @param {boolean} active Active.
-   * @observable
-   * @api
-   * @override
-   */
-  setActive(active) {
-    if (!active) {
-      this.box_.setMap(null);
-      if (this.startPixel_) {
-        this.dispatchEvent(
-          new DragBoxEvent(DragBoxEventType.BOXCANCEL, this.startPixel_, null)
-        );
-        this.startPixel_ = null;
-      }
-    }
-    super.setActive(active);
-  }
-  /**
-   * @param {import("../Map.js").default|null} map Map.
-   * @override
-   */
-  setMap(map2) {
-    const oldMap = this.getMap();
-    if (oldMap) {
-      this.box_.setMap(null);
-      if (this.startPixel_) {
-        this.dispatchEvent(
-          new DragBoxEvent(DragBoxEventType.BOXCANCEL, this.startPixel_, null)
-        );
-        this.startPixel_ = null;
-      }
-    }
-    super.setMap(map2);
-  }
-}
-class DragZoom extends DragBox {
-  /**
-   * @param {Options} [options] Options.
-   */
-  constructor(options) {
-    options = options ? options : {};
-    const condition = options.condition ? options.condition : shiftKeyOnly;
-    super({
-      condition,
-      className: options.className || "ol-dragzoom",
-      minArea: options.minArea
-    });
-    this.duration_ = options.duration !== void 0 ? options.duration : 200;
-    this.out_ = options.out !== void 0 ? options.out : false;
-  }
-  /**
-   * Function to execute just before `onboxend` is fired
-   * @param {import("../MapBrowserEvent.js").default} event Event.
-   * @override
-   */
-  onBoxEnd(event) {
-    const map2 = this.getMap();
-    const view = (
-      /** @type {!import("../View.js").default} */
-      map2.getView()
-    );
-    let geometry = this.getGeometry();
-    if (this.out_) {
-      const rotatedExtent = view.rotatedExtentForGeometry(geometry);
-      const resolution = view.getResolutionForExtentInternal(rotatedExtent);
-      const factor = view.getResolution() / resolution;
-      geometry = geometry.clone();
-      geometry.scale(factor * factor);
-    }
-    view.fitInternal(geometry, {
-      duration: this.duration_,
-      easing: easeOut
-    });
-  }
-}
-const Key = {
-  LEFT: "ArrowLeft",
-  UP: "ArrowUp",
-  RIGHT: "ArrowRight",
-  DOWN: "ArrowDown"
-};
-class KeyboardPan extends Interaction {
-  /**
-   * @param {Options} [options] Options.
-   */
-  constructor(options) {
-    super();
-    options = options || {};
-    this.defaultCondition_ = function(mapBrowserEvent) {
-      return noModifierKeys(mapBrowserEvent) && targetNotEditable(mapBrowserEvent);
-    };
-    this.condition_ = options.condition !== void 0 ? options.condition : this.defaultCondition_;
-    this.duration_ = options.duration !== void 0 ? options.duration : 100;
-    this.pixelDelta_ = options.pixelDelta !== void 0 ? options.pixelDelta : 128;
-  }
-  /**
-   * Handles the {@link module:ol/MapBrowserEvent~MapBrowserEvent map browser event} if it was a
-   * `KeyEvent`, and decides the direction to pan to (if an arrow key was
-   * pressed).
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Map browser event.
-   * @return {boolean} `false` to stop event propagation.
-   * @override
-   */
-  handleEvent(mapBrowserEvent) {
-    let stopEvent = false;
-    if (mapBrowserEvent.type == EventType.KEYDOWN) {
-      const keyEvent = (
-        /** @type {KeyboardEvent} */
-        mapBrowserEvent.originalEvent
-      );
-      const key = keyEvent.key;
-      if (this.condition_(mapBrowserEvent) && (key == Key.DOWN || key == Key.LEFT || key == Key.RIGHT || key == Key.UP)) {
-        const map2 = mapBrowserEvent.map;
-        const view = map2.getView();
-        const mapUnitsDelta = view.getResolution() * this.pixelDelta_;
-        let deltaX = 0, deltaY = 0;
-        if (key == Key.DOWN) {
-          deltaY = -mapUnitsDelta;
-        } else if (key == Key.LEFT) {
-          deltaX = -mapUnitsDelta;
-        } else if (key == Key.RIGHT) {
-          deltaX = mapUnitsDelta;
-        } else {
-          deltaY = mapUnitsDelta;
-        }
-        const delta = [deltaX, deltaY];
-        rotate$1(delta, view.getRotation());
-        pan(view, delta, this.duration_);
-        keyEvent.preventDefault();
-        stopEvent = true;
-      }
-    }
-    return !stopEvent;
-  }
-}
-class KeyboardZoom extends Interaction {
-  /**
-   * @param {Options} [options] Options.
-   */
-  constructor(options) {
-    super();
-    options = options ? options : {};
-    this.condition_ = options.condition ? options.condition : function(mapBrowserEvent) {
-      return !platformModifierKey(mapBrowserEvent) && targetNotEditable(mapBrowserEvent);
-    };
-    this.delta_ = options.delta ? options.delta : 1;
-    this.duration_ = options.duration !== void 0 ? options.duration : 100;
-  }
-  /**
-   * Handles the {@link module:ol/MapBrowserEvent~MapBrowserEvent map browser event} if it was a
-   * `KeyEvent`, and decides whether to zoom in or out (depending on whether the
-   * key pressed was '+' or '-').
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Map browser event.
-   * @return {boolean} `false` to stop event propagation.
-   * @override
-   */
-  handleEvent(mapBrowserEvent) {
-    let stopEvent = false;
-    if (mapBrowserEvent.type == EventType.KEYDOWN || mapBrowserEvent.type == EventType.KEYPRESS) {
-      const keyEvent = (
-        /** @type {KeyboardEvent} */
-        mapBrowserEvent.originalEvent
-      );
-      const key = keyEvent.key;
-      if (this.condition_(mapBrowserEvent) && (key === "+" || key === "-")) {
-        const map2 = mapBrowserEvent.map;
-        const delta = key === "+" ? this.delta_ : -this.delta_;
-        const view = map2.getView();
-        zoomByDelta(view, delta, void 0, this.duration_);
-        keyEvent.preventDefault();
-        stopEvent = true;
-      }
-    }
-    return !stopEvent;
-  }
-}
-class Kinetic {
-  /**
-   * @param {number} decay Rate of decay (must be negative).
-   * @param {number} minVelocity Minimum velocity (pixels/millisecond).
-   * @param {number} delay Delay to consider to calculate the kinetic
-   *     initial values (milliseconds).
-   */
-  constructor(decay, minVelocity, delay) {
-    this.decay_ = decay;
-    this.minVelocity_ = minVelocity;
-    this.delay_ = delay;
-    this.points_ = [];
-    this.angle_ = 0;
-    this.initialVelocity_ = 0;
-  }
-  /**
-   * FIXME empty description for jsdoc
-   */
-  begin() {
-    this.points_.length = 0;
-    this.angle_ = 0;
-    this.initialVelocity_ = 0;
-  }
-  /**
-   * @param {number} x X.
-   * @param {number} y Y.
-   */
-  update(x2, y2) {
-    this.points_.push(x2, y2, Date.now());
-  }
-  /**
-   * @return {boolean} Whether we should do kinetic animation.
-   */
-  end() {
-    if (this.points_.length < 6) {
-      return false;
-    }
-    const delay = Date.now() - this.delay_;
-    const lastIndex = this.points_.length - 3;
-    if (this.points_[lastIndex + 2] < delay) {
-      return false;
-    }
-    let firstIndex = lastIndex - 3;
-    while (firstIndex > 0 && this.points_[firstIndex + 2] > delay) {
-      firstIndex -= 3;
-    }
-    const duration = this.points_[lastIndex + 2] - this.points_[firstIndex + 2];
-    if (duration < 1e3 / 60) {
-      return false;
-    }
-    const dx = this.points_[lastIndex] - this.points_[firstIndex];
-    const dy = this.points_[lastIndex + 1] - this.points_[firstIndex + 1];
-    this.angle_ = Math.atan2(dy, dx);
-    this.initialVelocity_ = Math.sqrt(dx * dx + dy * dy) / duration;
-    return this.initialVelocity_ > this.minVelocity_;
-  }
-  /**
-   * @return {number} Total distance travelled (pixels).
-   */
-  getDistance() {
-    return (this.minVelocity_ - this.initialVelocity_) / this.decay_;
-  }
-  /**
-   * @return {number} Angle of the kinetic panning animation (radians).
-   */
-  getAngle() {
-    return this.angle_;
-  }
-}
-class MouseWheelZoom extends Interaction {
-  /**
-   * @param {Options} [options] Options.
-   */
-  constructor(options) {
-    options = options ? options : {};
-    super(
-      /** @type {import("./Interaction.js").InteractionOptions} */
-      options
-    );
-    this.totalDelta_ = 0;
-    this.lastDelta_ = 0;
-    this.maxDelta_ = options.maxDelta !== void 0 ? options.maxDelta : 1;
-    this.duration_ = options.duration !== void 0 ? options.duration : 250;
-    this.timeout_ = options.timeout !== void 0 ? options.timeout : 80;
-    this.useAnchor_ = options.useAnchor !== void 0 ? options.useAnchor : true;
-    this.constrainResolution_ = options.constrainResolution !== void 0 ? options.constrainResolution : false;
-    const condition = options.condition ? options.condition : always;
-    this.condition_ = options.onFocusOnly ? all$1(focusWithTabindex, condition) : condition;
-    this.lastAnchor_ = null;
-    this.startTime_ = void 0;
-    this.timeoutId_;
-    this.mode_ = void 0;
-    this.trackpadEventGap_ = 400;
-    this.trackpadTimeoutId_;
-    this.deltaPerZoom_ = 300;
-  }
-  /**
-   * @private
-   */
-  endInteraction_() {
-    this.trackpadTimeoutId_ = void 0;
-    const map2 = this.getMap();
-    if (!map2) {
-      return;
-    }
-    const view = map2.getView();
-    view.endInteraction(
-      void 0,
-      this.lastDelta_ ? this.lastDelta_ > 0 ? 1 : -1 : 0,
-      this.lastAnchor_ ? map2.getCoordinateFromPixel(this.lastAnchor_) : null
-    );
-  }
-  /**
-   * Handles the {@link module:ol/MapBrowserEvent~MapBrowserEvent map browser event} (if it was a mousewheel-event) and eventually
-   * zooms the map.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Map browser event.
-   * @return {boolean} `false` to stop event propagation.
-   * @override
-   */
-  handleEvent(mapBrowserEvent) {
-    if (!this.condition_(mapBrowserEvent)) {
-      return true;
-    }
-    const type = mapBrowserEvent.type;
-    if (type !== EventType.WHEEL) {
-      return true;
-    }
-    const map2 = mapBrowserEvent.map;
-    const wheelEvent = (
-      /** @type {WheelEvent} */
-      mapBrowserEvent.originalEvent
-    );
-    wheelEvent.preventDefault();
-    if (this.useAnchor_) {
-      this.lastAnchor_ = mapBrowserEvent.pixel;
-    }
-    let delta;
-    if (mapBrowserEvent.type == EventType.WHEEL) {
-      delta = wheelEvent.deltaY;
-      if (FIREFOX && wheelEvent.deltaMode === WheelEvent.DOM_DELTA_PIXEL) {
-        delta /= DEVICE_PIXEL_RATIO;
-      }
-      if (wheelEvent.deltaMode === WheelEvent.DOM_DELTA_LINE) {
-        delta *= 40;
-      }
-    }
-    if (delta === 0) {
-      return false;
-    }
-    this.lastDelta_ = delta;
-    const now = Date.now();
-    if (this.startTime_ === void 0) {
-      this.startTime_ = now;
-    }
-    if (!this.mode_ || now - this.startTime_ > this.trackpadEventGap_) {
-      this.mode_ = Math.abs(delta) < 4 ? "trackpad" : "wheel";
-    }
-    const view = map2.getView();
-    if (this.mode_ === "trackpad" && !(view.getConstrainResolution() || this.constrainResolution_)) {
-      if (this.trackpadTimeoutId_) {
-        clearTimeout(this.trackpadTimeoutId_);
-      } else {
-        if (view.getAnimating()) {
-          view.cancelAnimations();
-        }
-        view.beginInteraction();
-      }
-      this.trackpadTimeoutId_ = setTimeout(
-        this.endInteraction_.bind(this),
-        this.timeout_
-      );
-      view.adjustZoom(
-        -delta / this.deltaPerZoom_,
-        this.lastAnchor_ ? map2.getCoordinateFromPixel(this.lastAnchor_) : null
-      );
-      this.startTime_ = now;
-      return false;
-    }
-    this.totalDelta_ += delta;
-    const timeLeft = Math.max(this.timeout_ - (now - this.startTime_), 0);
-    clearTimeout(this.timeoutId_);
-    this.timeoutId_ = setTimeout(
-      this.handleWheelZoom_.bind(this, map2),
-      timeLeft
-    );
-    return false;
-  }
-  /**
-   * @private
-   * @param {import("../Map.js").default} map Map.
-   */
-  handleWheelZoom_(map2) {
-    const view = map2.getView();
-    if (view.getAnimating()) {
-      view.cancelAnimations();
-    }
-    let delta = -clamp(
-      this.totalDelta_,
-      -this.maxDelta_ * this.deltaPerZoom_,
-      this.maxDelta_ * this.deltaPerZoom_
-    ) / this.deltaPerZoom_;
-    if (view.getConstrainResolution() || this.constrainResolution_) {
-      delta = delta ? delta > 0 ? 1 : -1 : 0;
-    }
-    zoomByDelta(
-      view,
-      delta,
-      this.lastAnchor_ ? map2.getCoordinateFromPixel(this.lastAnchor_) : null,
-      this.duration_
-    );
-    this.mode_ = void 0;
-    this.totalDelta_ = 0;
-    this.lastAnchor_ = null;
-    this.startTime_ = void 0;
-    this.timeoutId_ = void 0;
-  }
-  /**
-   * Enable or disable using the mouse's location as an anchor when zooming
-   * @param {boolean} useAnchor true to zoom to the mouse's location, false
-   * to zoom to the center of the map
-   * @api
-   */
-  setMouseAnchor(useAnchor) {
-    this.useAnchor_ = useAnchor;
-    if (!useAnchor) {
-      this.lastAnchor_ = null;
-    }
-  }
-}
-class PinchRotate extends PointerInteraction {
-  /**
-   * @param {Options} [options] Options.
-   */
-  constructor(options) {
-    options = options ? options : {};
-    const pointerOptions = (
-      /** @type {import("./Pointer.js").Options} */
-      options
-    );
-    if (!pointerOptions.stopDown) {
-      pointerOptions.stopDown = FALSE;
-    }
-    super(pointerOptions);
-    this.anchor_ = null;
-    this.lastAngle_ = void 0;
-    this.rotating_ = false;
-    this.rotationDelta_ = 0;
-    this.threshold_ = options.threshold !== void 0 ? options.threshold : 0.3;
-    this.duration_ = options.duration !== void 0 ? options.duration : 250;
-  }
-  /**
-   * Handle pointer drag events.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
-   * @override
-   */
-  handleDragEvent(mapBrowserEvent) {
-    let rotationDelta = 0;
-    const touch0 = this.targetPointers[0];
-    const touch1 = this.targetPointers[1];
-    const angle = Math.atan2(
-      touch1.clientY - touch0.clientY,
-      touch1.clientX - touch0.clientX
-    );
-    if (this.lastAngle_ !== void 0) {
-      const delta = angle - this.lastAngle_;
-      this.rotationDelta_ += delta;
-      if (!this.rotating_ && Math.abs(this.rotationDelta_) > this.threshold_) {
-        this.rotating_ = true;
-      }
-      rotationDelta = delta;
-    }
-    this.lastAngle_ = angle;
-    const map2 = mapBrowserEvent.map;
-    const view = map2.getView();
-    if (view.getConstraints().rotation === disable) {
-      return;
-    }
-    this.anchor_ = map2.getCoordinateFromPixelInternal(
-      map2.getEventPixel(centroid(this.targetPointers))
-    );
-    if (this.rotating_) {
-      map2.render();
-      view.adjustRotationInternal(rotationDelta, this.anchor_);
-    }
-  }
-  /**
-   * Handle pointer up events.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
-   * @return {boolean} If the event was consumed.
-   * @override
-   */
-  handleUpEvent(mapBrowserEvent) {
-    if (this.targetPointers.length < 2) {
-      const map2 = mapBrowserEvent.map;
-      const view = map2.getView();
-      view.endInteraction(this.duration_);
-      return false;
-    }
-    return true;
-  }
-  /**
-   * Handle pointer down events.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
-   * @return {boolean} If the event was consumed.
-   * @override
-   */
-  handleDownEvent(mapBrowserEvent) {
-    if (this.targetPointers.length >= 2) {
-      const map2 = mapBrowserEvent.map;
-      this.anchor_ = null;
-      this.lastAngle_ = void 0;
-      this.rotating_ = false;
-      this.rotationDelta_ = 0;
-      if (!this.handlingDownUpSequence) {
-        map2.getView().beginInteraction();
-      }
-      return true;
-    }
-    return false;
-  }
-}
-class PinchZoom extends PointerInteraction {
-  /**
-   * @param {Options} [options] Options.
-   */
-  constructor(options) {
-    options = options ? options : {};
-    const pointerOptions = (
-      /** @type {import("./Pointer.js").Options} */
-      options
-    );
-    if (!pointerOptions.stopDown) {
-      pointerOptions.stopDown = FALSE;
-    }
-    super(pointerOptions);
-    this.anchor_ = null;
-    this.duration_ = options.duration !== void 0 ? options.duration : 400;
-    this.lastDistance_ = void 0;
-    this.lastScaleDelta_ = 1;
-  }
-  /**
-   * Handle pointer drag events.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
-   * @override
-   */
-  handleDragEvent(mapBrowserEvent) {
-    let scaleDelta = 1;
-    const touch0 = this.targetPointers[0];
-    const touch1 = this.targetPointers[1];
-    const dx = touch0.clientX - touch1.clientX;
-    const dy = touch0.clientY - touch1.clientY;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    if (this.lastDistance_ !== void 0) {
-      scaleDelta = this.lastDistance_ / distance;
-    }
-    this.lastDistance_ = distance;
-    const map2 = mapBrowserEvent.map;
-    const view = map2.getView();
-    if (scaleDelta != 1) {
-      this.lastScaleDelta_ = scaleDelta;
-    }
-    this.anchor_ = map2.getCoordinateFromPixelInternal(
-      map2.getEventPixel(centroid(this.targetPointers))
-    );
-    map2.render();
-    view.adjustResolutionInternal(scaleDelta, this.anchor_);
-  }
-  /**
-   * Handle pointer up events.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
-   * @return {boolean} If the event was consumed.
-   * @override
-   */
-  handleUpEvent(mapBrowserEvent) {
-    if (this.targetPointers.length < 2) {
-      const map2 = mapBrowserEvent.map;
-      const view = map2.getView();
-      const direction = this.lastScaleDelta_ > 1 ? 1 : -1;
-      view.endInteraction(this.duration_, direction);
-      return false;
-    }
-    return true;
-  }
-  /**
-   * Handle pointer down events.
-   * @param {import("../MapBrowserEvent.js").default} mapBrowserEvent Event.
-   * @return {boolean} If the event was consumed.
-   * @override
-   */
-  handleDownEvent(mapBrowserEvent) {
-    if (this.targetPointers.length >= 2) {
-      const map2 = mapBrowserEvent.map;
-      this.anchor_ = null;
-      this.lastDistance_ = void 0;
-      this.lastScaleDelta_ = 1;
-      if (!this.handlingDownUpSequence) {
-        map2.getView().beginInteraction();
-      }
-      return true;
-    }
-    return false;
-  }
-}
-function defaults(options) {
-  options = options ? options : {};
-  const interactions = new Collection();
-  const kinetic = new Kinetic(-5e-3, 0.05, 100);
-  const altShiftDragRotate = options.altShiftDragRotate !== void 0 ? options.altShiftDragRotate : true;
-  if (altShiftDragRotate) {
-    interactions.push(new DragRotate());
-  }
-  const doubleClickZoom = options.doubleClickZoom !== void 0 ? options.doubleClickZoom : true;
-  if (doubleClickZoom) {
-    interactions.push(
-      new DoubleClickZoom({
-        delta: options.zoomDelta,
-        duration: options.zoomDuration
-      })
-    );
-  }
-  const dragPan = options.dragPan !== void 0 ? options.dragPan : true;
-  if (dragPan) {
-    interactions.push(
-      new DragPan({
-        onFocusOnly: options.onFocusOnly,
-        kinetic
-      })
-    );
-  }
-  const pinchRotate = options.pinchRotate !== void 0 ? options.pinchRotate : true;
-  if (pinchRotate) {
-    interactions.push(new PinchRotate());
-  }
-  const pinchZoom = options.pinchZoom !== void 0 ? options.pinchZoom : true;
-  if (pinchZoom) {
-    interactions.push(
-      new PinchZoom({
-        duration: options.zoomDuration
-      })
-    );
-  }
-  const keyboard = options.keyboard !== void 0 ? options.keyboard : true;
-  if (keyboard) {
-    interactions.push(new KeyboardPan());
-    interactions.push(
-      new KeyboardZoom({
-        delta: options.zoomDelta,
-        duration: options.zoomDuration
-      })
-    );
-  }
-  const mouseWheelZoom = options.mouseWheelZoom !== void 0 ? options.mouseWheelZoom : true;
-  if (mouseWheelZoom) {
-    interactions.push(
-      new MouseWheelZoom({
-        onFocusOnly: options.onFocusOnly,
-        duration: options.zoomDuration
-      })
-    );
-  }
-  const shiftDragZoom = options.shiftDragZoom !== void 0 ? options.shiftDragZoom : true;
-  if (shiftDragZoom) {
-    interactions.push(
-      new DragZoom({
-        duration: options.zoomDuration
-      })
-    );
-  }
-  return interactions;
-}
 function removeLayerMapProperty(layer) {
   if (layer instanceof Layer) {
     layer.setMapInternal(null);
@@ -21421,8 +21008,8 @@ let Map$1 = class Map2 extends BaseObject {
     this.postRenderTimeoutHandle_;
     this.animationDelayKey_;
     this.animationDelay_ = this.animationDelay_.bind(this);
-    this.coordinateToPixelTransform_ = create$1();
-    this.pixelToCoordinateTransform_ = create$1();
+    this.coordinateToPixelTransform_ = create();
+    this.pixelToCoordinateTransform_ = create();
     this.frameIndex_ = 0;
     this.frameState_ = null;
     this.previousExtent_ = null;
@@ -21634,6 +21221,9 @@ let Map$1 = class Map2 extends BaseObject {
    * Detect features that intersect a pixel on the viewport, and execute a
    * callback with each intersecting feature. Layers included in the detection can
    * be configured through the `layerFilter` option in `options`.
+   * For polygons without a fill, only the stroke will be used for hit detection.
+   * Polygons must have a fill style applied to ensure that pixels inside a polygon are detected.
+   * The fill can be transparent.
    * @param {import("./pixel.js").Pixel} pixel Pixel.
    * @param {function(import("./Feature.js").FeatureLike, import("./layer/Layer.js").default<import("./source/Source").default>, import("./geom/SimpleGeometry.js").default): T} callback Feature callback. The callback will be
    *     called with two arguments. The first argument is one
@@ -21670,6 +21260,9 @@ let Map$1 = class Map2 extends BaseObject {
   }
   /**
    * Get all features that intersect a pixel on the viewport.
+   * For polygons without a fill, only the stroke will be used for hit detection.
+   * Polygons must have a fill style applied to ensure that pixels inside a polygon are detected.
+   * The fill can be transparent.
    * @param {import("./pixel.js").Pixel} pixel Pixel.
    * @param {AtPixelOptions} [options] Optional options.
    * @return {Array<import("./Feature.js").FeatureLike>} The detected features or
@@ -21709,6 +21302,9 @@ let Map$1 = class Map2 extends BaseObject {
   /**
    * Detect if features intersect a pixel on the viewport. Layers included in the
    * detection can be configured through the `layerFilter` option.
+   * For polygons without a fill, only the stroke will be used for hit detection.
+   * Polygons must have a fill style applied to ensure that pixels inside a polygon are detected.
+   * The fill can be transparent.
    * @param {import("./pixel.js").Pixel} pixel Pixel.
    * @param {AtPixelOptions} [options] Optional options.
    * @return {boolean} Is there a feature at the given pixel?
@@ -22039,7 +21635,7 @@ let Map$1 = class Map2 extends BaseObject {
     );
   }
   /**
-   * @param {UIEvent} browserEvent Browser event.
+   * @param {PointerEvent|KeyboardEvent|WheelEvent} browserEvent Browser event.
    * @param {string} [type] Type.
    */
   handleBrowserEvent(browserEvent, type) {
@@ -22054,10 +21650,7 @@ let Map$1 = class Map2 extends BaseObject {
     if (!this.frameState_) {
       return;
     }
-    const originalEvent = (
-      /** @type {PointerEvent} */
-      mapBrowserEvent.originalEvent
-    );
+    const originalEvent = mapBrowserEvent.originalEvent;
     const eventType = originalEvent.type;
     if (eventType === PointerEventType.POINTERDOWN || eventType === EventType.WHEEL || eventType === EventType.KEYDOWN) {
       const doc = this.getOwnerDocument();
@@ -22343,7 +21936,10 @@ let Map$1 = class Map2 extends BaseObject {
    * Redraws all text after new fonts have loaded
    */
   redrawText() {
-    const layerStates = this.getLayerGroup().getLayerStatesArray();
+    if (!this.frameState_) {
+      return;
+    }
+    const layerStates = this.frameState_.layerStatesArray;
     for (let i = 0, ii = layerStates.length; i < ii; ++i) {
       const layer = layerStates[i].layer;
       if (layer.hasRenderer()) {
@@ -22469,7 +22065,7 @@ let Map$1 = class Map2 extends BaseObject {
         frameState.postRenderFunctions
       );
       if (previousFrameState) {
-        const moveStart = !this.previousExtent_ || !isEmpty(this.previousExtent_) && !equals$2(frameState.extent, this.previousExtent_);
+        const moveStart = !this.previousExtent_ || !isEmpty$1(this.previousExtent_) && !equals$2(frameState.extent, this.previousExtent_);
         if (moveStart) {
           this.dispatchEvent(
             new MapEvent(MapEventType.MOVESTART, this, previousFrameState)
@@ -22531,7 +22127,7 @@ let Map$1 = class Map2 extends BaseObject {
   }
   /**
    * Set the view for this map.
-   * @param {View|Promise<import("./View.js").ViewOptions>} view The view that controls this map.
+   * @param {View|Promise<import("./View.js").ViewOptions>|null} view The view that controls this map.
    * It is also possible to pass a promise that resolves to options for constructing a view.  This
    * alternative allows view properties to be resolved by sources or other components that load
    * view-related metadata.
@@ -22655,1247 +22251,6 @@ function createOptionsInternal(options) {
     overlays,
     values
   };
-}
-class Tile extends Target {
-  /**
-   * @param {import("./tilecoord.js").TileCoord} tileCoord Tile coordinate.
-   * @param {import("./TileState.js").default} state State.
-   * @param {Options} [options] Tile options.
-   */
-  constructor(tileCoord, state, options) {
-    super();
-    options = options ? options : {};
-    this.tileCoord = tileCoord;
-    this.state = state;
-    this.key = "";
-    this.transition_ = options.transition === void 0 ? 250 : options.transition;
-    this.transitionStarts_ = {};
-    this.interpolate = !!options.interpolate;
-  }
-  /**
-   * @protected
-   */
-  changed() {
-    this.dispatchEvent(EventType.CHANGE);
-  }
-  /**
-   * Called by the tile cache when the tile is removed from the cache due to expiry
-   */
-  release() {
-    if (this.state === TileState.ERROR) {
-      this.setState(TileState.EMPTY);
-    }
-  }
-  /**
-   * @return {string} Key.
-   */
-  getKey() {
-    return this.key + "/" + this.tileCoord;
-  }
-  /**
-   * Get the tile coordinate for this tile.
-   * @return {import("./tilecoord.js").TileCoord} The tile coordinate.
-   * @api
-   */
-  getTileCoord() {
-    return this.tileCoord;
-  }
-  /**
-   * @return {import("./TileState.js").default} State.
-   */
-  getState() {
-    return this.state;
-  }
-  /**
-   * Sets the state of this tile. If you write your own {@link module:ol/Tile~LoadFunction tileLoadFunction} ,
-   * it is important to set the state correctly to {@link module:ol/TileState~ERROR}
-   * when the tile cannot be loaded. Otherwise the tile cannot be removed from
-   * the tile queue and will block other requests.
-   * @param {import("./TileState.js").default} state State.
-   * @api
-   */
-  setState(state) {
-    if (this.state !== TileState.ERROR && this.state > state) {
-      throw new Error("Tile load sequence violation");
-    }
-    this.state = state;
-    this.changed();
-  }
-  /**
-   * Load the image or retry if loading previously failed.
-   * Loading is taken care of by the tile queue, and calling this method is
-   * only needed for preloading or for reloading in case of an error.
-   * @abstract
-   * @api
-   */
-  load() {
-    abstract();
-  }
-  /**
-   * Get the alpha value for rendering.
-   * @param {string} id An id for the renderer.
-   * @param {number} time The render frame time.
-   * @return {number} A number between 0 and 1.
-   */
-  getAlpha(id, time) {
-    if (!this.transition_) {
-      return 1;
-    }
-    let start2 = this.transitionStarts_[id];
-    if (!start2) {
-      start2 = time;
-      this.transitionStarts_[id] = start2;
-    } else if (start2 === -1) {
-      return 1;
-    }
-    const delta = time - start2 + 1e3 / 60;
-    if (delta >= this.transition_) {
-      return 1;
-    }
-    return easeIn(delta / this.transition_);
-  }
-  /**
-   * Determine if a tile is in an alpha transition.  A tile is considered in
-   * transition if tile.getAlpha() has not yet been called or has been called
-   * and returned 1.
-   * @param {string} id An id for the renderer.
-   * @return {boolean} The tile is in transition.
-   */
-  inTransition(id) {
-    if (!this.transition_) {
-      return false;
-    }
-    return this.transitionStarts_[id] !== -1;
-  }
-  /**
-   * Mark a transition as complete.
-   * @param {string} id An id for the renderer.
-   */
-  endTransition(id) {
-    if (this.transition_) {
-      this.transitionStarts_[id] = -1;
-    }
-  }
-  /**
-   * @override
-   */
-  disposeInternal() {
-    this.release();
-    super.disposeInternal();
-  }
-}
-class ImageTile extends Tile {
-  /**
-   * @param {import("./tilecoord.js").TileCoord} tileCoord Tile coordinate.
-   * @param {import("./TileState.js").default} state State.
-   * @param {string} src Image source URI.
-   * @param {?string} crossOrigin Cross origin.
-   * @param {import("./Tile.js").LoadFunction} tileLoadFunction Tile load function.
-   * @param {import("./Tile.js").Options} [options] Tile options.
-   */
-  constructor(tileCoord, state, src, crossOrigin, tileLoadFunction, options) {
-    super(tileCoord, state, options);
-    this.crossOrigin_ = crossOrigin;
-    this.src_ = src;
-    this.key = src;
-    this.image_ = new Image();
-    if (crossOrigin !== null) {
-      this.image_.crossOrigin = crossOrigin;
-    }
-    this.unlisten_ = null;
-    this.tileLoadFunction_ = tileLoadFunction;
-  }
-  /**
-   * Get the HTML image element for this tile (may be a Canvas, Image, or Video).
-   * @return {HTMLCanvasElement|HTMLImageElement|HTMLVideoElement} Image.
-   * @api
-   */
-  getImage() {
-    return this.image_;
-  }
-  /**
-   * Sets an HTML image element for this tile (may be a Canvas or preloaded Image).
-   * @param {HTMLCanvasElement|HTMLImageElement} element Element.
-   */
-  setImage(element) {
-    this.image_ = element;
-    this.state = TileState.LOADED;
-    this.unlistenImage_();
-    this.changed();
-  }
-  /**
-   * Tracks loading or read errors.
-   *
-   * @private
-   */
-  handleImageError_() {
-    this.state = TileState.ERROR;
-    this.unlistenImage_();
-    this.image_ = getBlankImage();
-    this.changed();
-  }
-  /**
-   * Tracks successful image load.
-   *
-   * @private
-   */
-  handleImageLoad_() {
-    const image = (
-      /** @type {HTMLImageElement} */
-      this.image_
-    );
-    if (image.naturalWidth && image.naturalHeight) {
-      this.state = TileState.LOADED;
-    } else {
-      this.state = TileState.EMPTY;
-    }
-    this.unlistenImage_();
-    this.changed();
-  }
-  /**
-   * Load the image or retry if loading previously failed.
-   * Loading is taken care of by the tile queue, and calling this method is
-   * only needed for preloading or for reloading in case of an error.
-   *
-   * To retry loading tiles on failed requests, use a custom `tileLoadFunction`
-   * that checks for error status codes and reloads only when the status code is
-   * 408, 429, 500, 502, 503 and 504, and only when not too many retries have been
-   * made already:
-   *
-   * ```js
-   * const retryCodes = [408, 429, 500, 502, 503, 504];
-   * const retries = {};
-   * source.setTileLoadFunction((tile, src) => {
-   *   const image = tile.getImage();
-   *   fetch(src)
-   *     .then((response) => {
-   *       if (retryCodes.includes(response.status)) {
-   *         retries[src] = (retries[src] || 0) + 1;
-   *         if (retries[src] <= 3) {
-   *           setTimeout(() => tile.load(), retries[src] * 1000);
-   *         }
-   *         return Promise.reject();
-   *       }
-   *       return response.blob();
-   *     })
-   *     .then((blob) => {
-   *       const imageUrl = URL.createObjectURL(blob);
-   *       image.src = imageUrl;
-   *       setTimeout(() => URL.revokeObjectURL(imageUrl), 5000);
-   *     })
-   *     .catch(() => tile.setState(3)); // error
-   * });
-   * ```
-   * @api
-   * @override
-   */
-  load() {
-    if (this.state == TileState.ERROR) {
-      this.state = TileState.IDLE;
-      this.image_ = new Image();
-      if (this.crossOrigin_ !== null) {
-        this.image_.crossOrigin = this.crossOrigin_;
-      }
-    }
-    if (this.state == TileState.IDLE) {
-      this.state = TileState.LOADING;
-      this.changed();
-      this.tileLoadFunction_(this, this.src_);
-      this.unlisten_ = listenImage(
-        this.image_,
-        this.handleImageLoad_.bind(this),
-        this.handleImageError_.bind(this)
-      );
-    }
-  }
-  /**
-   * Discards event handlers which listen for load completion or errors.
-   *
-   * @private
-   */
-  unlistenImage_() {
-    if (this.unlisten_) {
-      this.unlisten_();
-      this.unlisten_ = null;
-    }
-  }
-  /**
-   * @override
-   */
-  disposeInternal() {
-    this.unlistenImage_();
-    this.image_ = null;
-    super.disposeInternal();
-  }
-}
-function getBlankImage() {
-  const ctx = createCanvasContext2D(1, 1);
-  ctx.fillStyle = "rgba(0,0,0,0)";
-  ctx.fillRect(0, 0, 1, 1);
-  return ctx.canvas;
-}
-const ERROR_THRESHOLD = 0.5;
-const MAX_SUBDIVISION = 10;
-const MAX_TRIANGLE_WIDTH = 0.25;
-class Triangulation {
-  /**
-   * @param {import("../proj/Projection.js").default} sourceProj Source projection.
-   * @param {import("../proj/Projection.js").default} targetProj Target projection.
-   * @param {import("../extent.js").Extent} targetExtent Target extent to triangulate.
-   * @param {import("../extent.js").Extent} maxSourceExtent Maximal source extent that can be used.
-   * @param {number} errorThreshold Acceptable error (in source units).
-   * @param {?number} destinationResolution The (optional) resolution of the destination.
-   * @param {import("../transform.js").Transform} [sourceMatrix] Source transform matrix.
-   */
-  constructor(sourceProj, targetProj, targetExtent, maxSourceExtent, errorThreshold, destinationResolution, sourceMatrix) {
-    this.sourceProj_ = sourceProj;
-    this.targetProj_ = targetProj;
-    let transformInvCache = {};
-    const transformInv = sourceMatrix ? createTransformFromCoordinateTransform(
-      (input) => apply(
-        sourceMatrix,
-        transform(input, this.targetProj_, this.sourceProj_)
-      )
-    ) : getTransform(this.targetProj_, this.sourceProj_);
-    this.transformInv_ = function(c) {
-      const key = c[0] + "/" + c[1];
-      if (!transformInvCache[key]) {
-        transformInvCache[key] = transformInv(c);
-      }
-      return transformInvCache[key];
-    };
-    this.maxSourceExtent_ = maxSourceExtent;
-    this.errorThresholdSquared_ = errorThreshold * errorThreshold;
-    this.triangles_ = [];
-    this.wrapsXInSource_ = false;
-    this.canWrapXInSource_ = this.sourceProj_.canWrapX() && !!maxSourceExtent && !!this.sourceProj_.getExtent() && getWidth(maxSourceExtent) >= getWidth(this.sourceProj_.getExtent());
-    this.sourceWorldWidth_ = this.sourceProj_.getExtent() ? getWidth(this.sourceProj_.getExtent()) : null;
-    this.targetWorldWidth_ = this.targetProj_.getExtent() ? getWidth(this.targetProj_.getExtent()) : null;
-    const destinationTopLeft = getTopLeft(targetExtent);
-    const destinationTopRight = getTopRight(targetExtent);
-    const destinationBottomRight = getBottomRight(targetExtent);
-    const destinationBottomLeft = getBottomLeft(targetExtent);
-    const sourceTopLeft = this.transformInv_(destinationTopLeft);
-    const sourceTopRight = this.transformInv_(destinationTopRight);
-    const sourceBottomRight = this.transformInv_(destinationBottomRight);
-    const sourceBottomLeft = this.transformInv_(destinationBottomLeft);
-    const maxSubdivision = MAX_SUBDIVISION + (destinationResolution ? Math.max(
-      0,
-      Math.ceil(
-        Math.log2(
-          getArea(targetExtent) / (destinationResolution * destinationResolution * 256 * 256)
-        )
-      )
-    ) : 0);
-    this.addQuad_(
-      destinationTopLeft,
-      destinationTopRight,
-      destinationBottomRight,
-      destinationBottomLeft,
-      sourceTopLeft,
-      sourceTopRight,
-      sourceBottomRight,
-      sourceBottomLeft,
-      maxSubdivision
-    );
-    if (this.wrapsXInSource_) {
-      let leftBound = Infinity;
-      this.triangles_.forEach(function(triangle, i, arr) {
-        leftBound = Math.min(
-          leftBound,
-          triangle.source[0][0],
-          triangle.source[1][0],
-          triangle.source[2][0]
-        );
-      });
-      this.triangles_.forEach((triangle) => {
-        if (Math.max(
-          triangle.source[0][0],
-          triangle.source[1][0],
-          triangle.source[2][0]
-        ) - leftBound > this.sourceWorldWidth_ / 2) {
-          const newTriangle = [
-            [triangle.source[0][0], triangle.source[0][1]],
-            [triangle.source[1][0], triangle.source[1][1]],
-            [triangle.source[2][0], triangle.source[2][1]]
-          ];
-          if (newTriangle[0][0] - leftBound > this.sourceWorldWidth_ / 2) {
-            newTriangle[0][0] -= this.sourceWorldWidth_;
-          }
-          if (newTriangle[1][0] - leftBound > this.sourceWorldWidth_ / 2) {
-            newTriangle[1][0] -= this.sourceWorldWidth_;
-          }
-          if (newTriangle[2][0] - leftBound > this.sourceWorldWidth_ / 2) {
-            newTriangle[2][0] -= this.sourceWorldWidth_;
-          }
-          const minX = Math.min(
-            newTriangle[0][0],
-            newTriangle[1][0],
-            newTriangle[2][0]
-          );
-          const maxX = Math.max(
-            newTriangle[0][0],
-            newTriangle[1][0],
-            newTriangle[2][0]
-          );
-          if (maxX - minX < this.sourceWorldWidth_ / 2) {
-            triangle.source = newTriangle;
-          }
-        }
-      });
-    }
-    transformInvCache = {};
-  }
-  /**
-   * Adds triangle to the triangulation.
-   * @param {import("../coordinate.js").Coordinate} a The target a coordinate.
-   * @param {import("../coordinate.js").Coordinate} b The target b coordinate.
-   * @param {import("../coordinate.js").Coordinate} c The target c coordinate.
-   * @param {import("../coordinate.js").Coordinate} aSrc The source a coordinate.
-   * @param {import("../coordinate.js").Coordinate} bSrc The source b coordinate.
-   * @param {import("../coordinate.js").Coordinate} cSrc The source c coordinate.
-   * @private
-   */
-  addTriangle_(a2, b2, c, aSrc, bSrc, cSrc) {
-    this.triangles_.push({
-      source: [aSrc, bSrc, cSrc],
-      target: [a2, b2, c]
-    });
-  }
-  /**
-   * Adds quad (points in clock-wise order) to the triangulation
-   * (and reprojects the vertices) if valid.
-   * Performs quad subdivision if needed to increase precision.
-   *
-   * @param {import("../coordinate.js").Coordinate} a The target a coordinate.
-   * @param {import("../coordinate.js").Coordinate} b The target b coordinate.
-   * @param {import("../coordinate.js").Coordinate} c The target c coordinate.
-   * @param {import("../coordinate.js").Coordinate} d The target d coordinate.
-   * @param {import("../coordinate.js").Coordinate} aSrc The source a coordinate.
-   * @param {import("../coordinate.js").Coordinate} bSrc The source b coordinate.
-   * @param {import("../coordinate.js").Coordinate} cSrc The source c coordinate.
-   * @param {import("../coordinate.js").Coordinate} dSrc The source d coordinate.
-   * @param {number} maxSubdivision Maximal allowed subdivision of the quad.
-   * @private
-   */
-  addQuad_(a2, b2, c, d2, aSrc, bSrc, cSrc, dSrc, maxSubdivision) {
-    const sourceQuadExtent = boundingExtent([aSrc, bSrc, cSrc, dSrc]);
-    const sourceCoverageX = this.sourceWorldWidth_ ? getWidth(sourceQuadExtent) / this.sourceWorldWidth_ : null;
-    const sourceWorldWidth = (
-      /** @type {number} */
-      this.sourceWorldWidth_
-    );
-    const wrapsX = this.sourceProj_.canWrapX() && sourceCoverageX > 0.5 && sourceCoverageX < 1;
-    let needsSubdivision = false;
-    if (maxSubdivision > 0) {
-      if (this.targetProj_.isGlobal() && this.targetWorldWidth_) {
-        const targetQuadExtent = boundingExtent([a2, b2, c, d2]);
-        const targetCoverageX = getWidth(targetQuadExtent) / this.targetWorldWidth_;
-        needsSubdivision = targetCoverageX > MAX_TRIANGLE_WIDTH || needsSubdivision;
-      }
-      if (!wrapsX && this.sourceProj_.isGlobal() && sourceCoverageX) {
-        needsSubdivision = sourceCoverageX > MAX_TRIANGLE_WIDTH || needsSubdivision;
-      }
-    }
-    if (!needsSubdivision && this.maxSourceExtent_) {
-      if (isFinite(sourceQuadExtent[0]) && isFinite(sourceQuadExtent[1]) && isFinite(sourceQuadExtent[2]) && isFinite(sourceQuadExtent[3])) {
-        if (!intersects$1(sourceQuadExtent, this.maxSourceExtent_)) {
-          return;
-        }
-      }
-    }
-    let isNotFinite = 0;
-    if (!needsSubdivision) {
-      if (!isFinite(aSrc[0]) || !isFinite(aSrc[1]) || !isFinite(bSrc[0]) || !isFinite(bSrc[1]) || !isFinite(cSrc[0]) || !isFinite(cSrc[1]) || !isFinite(dSrc[0]) || !isFinite(dSrc[1])) {
-        if (maxSubdivision > 0) {
-          needsSubdivision = true;
-        } else {
-          isNotFinite = (!isFinite(aSrc[0]) || !isFinite(aSrc[1]) ? 8 : 0) + (!isFinite(bSrc[0]) || !isFinite(bSrc[1]) ? 4 : 0) + (!isFinite(cSrc[0]) || !isFinite(cSrc[1]) ? 2 : 0) + (!isFinite(dSrc[0]) || !isFinite(dSrc[1]) ? 1 : 0);
-          if (isNotFinite != 1 && isNotFinite != 2 && isNotFinite != 4 && isNotFinite != 8) {
-            return;
-          }
-        }
-      }
-    }
-    if (maxSubdivision > 0) {
-      if (!needsSubdivision) {
-        const center = [(a2[0] + c[0]) / 2, (a2[1] + c[1]) / 2];
-        const centerSrc = this.transformInv_(center);
-        let dx;
-        if (wrapsX) {
-          const centerSrcEstimX = (modulo(aSrc[0], sourceWorldWidth) + modulo(cSrc[0], sourceWorldWidth)) / 2;
-          dx = centerSrcEstimX - modulo(centerSrc[0], sourceWorldWidth);
-        } else {
-          dx = (aSrc[0] + cSrc[0]) / 2 - centerSrc[0];
-        }
-        const dy = (aSrc[1] + cSrc[1]) / 2 - centerSrc[1];
-        const centerSrcErrorSquared = dx * dx + dy * dy;
-        needsSubdivision = centerSrcErrorSquared > this.errorThresholdSquared_;
-      }
-      if (needsSubdivision) {
-        if (Math.abs(a2[0] - c[0]) <= Math.abs(a2[1] - c[1])) {
-          const bc = [(b2[0] + c[0]) / 2, (b2[1] + c[1]) / 2];
-          const bcSrc = this.transformInv_(bc);
-          const da = [(d2[0] + a2[0]) / 2, (d2[1] + a2[1]) / 2];
-          const daSrc = this.transformInv_(da);
-          this.addQuad_(
-            a2,
-            b2,
-            bc,
-            da,
-            aSrc,
-            bSrc,
-            bcSrc,
-            daSrc,
-            maxSubdivision - 1
-          );
-          this.addQuad_(
-            da,
-            bc,
-            c,
-            d2,
-            daSrc,
-            bcSrc,
-            cSrc,
-            dSrc,
-            maxSubdivision - 1
-          );
-        } else {
-          const ab = [(a2[0] + b2[0]) / 2, (a2[1] + b2[1]) / 2];
-          const abSrc = this.transformInv_(ab);
-          const cd = [(c[0] + d2[0]) / 2, (c[1] + d2[1]) / 2];
-          const cdSrc = this.transformInv_(cd);
-          this.addQuad_(
-            a2,
-            ab,
-            cd,
-            d2,
-            aSrc,
-            abSrc,
-            cdSrc,
-            dSrc,
-            maxSubdivision - 1
-          );
-          this.addQuad_(
-            ab,
-            b2,
-            c,
-            cd,
-            abSrc,
-            bSrc,
-            cSrc,
-            cdSrc,
-            maxSubdivision - 1
-          );
-        }
-        return;
-      }
-    }
-    if (wrapsX) {
-      if (!this.canWrapXInSource_) {
-        return;
-      }
-      this.wrapsXInSource_ = true;
-    }
-    if ((isNotFinite & 11) == 0) {
-      this.addTriangle_(a2, c, d2, aSrc, cSrc, dSrc);
-    }
-    if ((isNotFinite & 14) == 0) {
-      this.addTriangle_(a2, c, b2, aSrc, cSrc, bSrc);
-    }
-    if (isNotFinite) {
-      if ((isNotFinite & 13) == 0) {
-        this.addTriangle_(b2, d2, a2, bSrc, dSrc, aSrc);
-      }
-      if ((isNotFinite & 7) == 0) {
-        this.addTriangle_(b2, d2, c, bSrc, dSrc, cSrc);
-      }
-    }
-  }
-  /**
-   * Calculates extent of the `source` coordinates from all the triangles.
-   *
-   * @return {import("../extent.js").Extent} Calculated extent.
-   */
-  calculateSourceExtent() {
-    const extent = createEmpty();
-    this.triangles_.forEach(function(triangle, i, arr) {
-      const src = triangle.source;
-      extendCoordinate(extent, src[0]);
-      extendCoordinate(extent, src[1]);
-      extendCoordinate(extent, src[2]);
-    });
-    return extent;
-  }
-  /**
-   * @return {Array<Triangle>} Array of the calculated triangles.
-   */
-  getTriangles() {
-    return this.triangles_;
-  }
-}
-let brokenDiagonalRendering_;
-const canvasPool$1 = [];
-function drawTestTriangle(ctx, u1, v1, u2, v2) {
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(u1, v1);
-  ctx.lineTo(u2, v2);
-  ctx.closePath();
-  ctx.save();
-  ctx.clip();
-  ctx.fillRect(0, 0, Math.max(u1, u2) + 1, Math.max(v1, v2));
-  ctx.restore();
-}
-function verifyBrokenDiagonalRendering(data, offset2) {
-  return Math.abs(data[offset2 * 4] - 210) > 2 || Math.abs(data[offset2 * 4 + 3] - 0.75 * 255) > 2;
-}
-function isBrokenDiagonalRendering() {
-  if (brokenDiagonalRendering_ === void 0) {
-    const ctx = createCanvasContext2D(6, 6, canvasPool$1);
-    ctx.globalCompositeOperation = "lighter";
-    ctx.fillStyle = "rgba(210, 0, 0, 0.75)";
-    drawTestTriangle(ctx, 4, 5, 4, 0);
-    drawTestTriangle(ctx, 4, 5, 0, 5);
-    const data = ctx.getImageData(0, 0, 3, 3).data;
-    brokenDiagonalRendering_ = verifyBrokenDiagonalRendering(data, 0) || verifyBrokenDiagonalRendering(data, 4) || verifyBrokenDiagonalRendering(data, 8);
-    releaseCanvas(ctx);
-    canvasPool$1.push(ctx.canvas);
-  }
-  return brokenDiagonalRendering_;
-}
-function calculateSourceResolution(sourceProj, targetProj, targetCenter, targetResolution) {
-  const sourceCenter = transform(targetCenter, targetProj, sourceProj);
-  let sourceResolution = getPointResolution(
-    targetProj,
-    targetResolution,
-    targetCenter
-  );
-  const targetMetersPerUnit = targetProj.getMetersPerUnit();
-  if (targetMetersPerUnit !== void 0) {
-    sourceResolution *= targetMetersPerUnit;
-  }
-  const sourceMetersPerUnit = sourceProj.getMetersPerUnit();
-  if (sourceMetersPerUnit !== void 0) {
-    sourceResolution /= sourceMetersPerUnit;
-  }
-  const sourceExtent = sourceProj.getExtent();
-  if (!sourceExtent || containsCoordinate(sourceExtent, sourceCenter)) {
-    const compensationFactor = getPointResolution(sourceProj, sourceResolution, sourceCenter) / sourceResolution;
-    if (isFinite(compensationFactor) && compensationFactor > 0) {
-      sourceResolution /= compensationFactor;
-    }
-  }
-  return sourceResolution;
-}
-function calculateSourceExtentResolution(sourceProj, targetProj, targetExtent, targetResolution) {
-  const targetCenter = getCenter(targetExtent);
-  let sourceResolution = calculateSourceResolution(
-    sourceProj,
-    targetProj,
-    targetCenter,
-    targetResolution
-  );
-  if (!isFinite(sourceResolution) || sourceResolution <= 0) {
-    forEachCorner(targetExtent, function(corner) {
-      sourceResolution = calculateSourceResolution(
-        sourceProj,
-        targetProj,
-        corner,
-        targetResolution
-      );
-      return isFinite(sourceResolution) && sourceResolution > 0;
-    });
-  }
-  return sourceResolution;
-}
-function render$1(width, height, pixelRatio, sourceResolution, sourceExtent, targetResolution, targetExtent, triangulation, sources, gutter, renderEdges, interpolate, drawSingle, clipExtent) {
-  const context = createCanvasContext2D(
-    Math.round(pixelRatio * width),
-    Math.round(pixelRatio * height),
-    canvasPool$1
-  );
-  if (!interpolate) {
-    context.imageSmoothingEnabled = false;
-  }
-  if (sources.length === 0) {
-    return context.canvas;
-  }
-  context.scale(pixelRatio, pixelRatio);
-  function pixelRound(value) {
-    return Math.round(value * pixelRatio) / pixelRatio;
-  }
-  context.globalCompositeOperation = "lighter";
-  const sourceDataExtent = createEmpty();
-  sources.forEach(function(src, i, arr) {
-    extend$2(sourceDataExtent, src.extent);
-  });
-  let stitchContext;
-  const stitchScale = pixelRatio / sourceResolution;
-  const inverseScale = (interpolate ? 1 : 1 + Math.pow(2, -24)) / stitchScale;
-  {
-    stitchContext = createCanvasContext2D(
-      Math.round(getWidth(sourceDataExtent) * stitchScale),
-      Math.round(getHeight(sourceDataExtent) * stitchScale),
-      canvasPool$1
-    );
-    if (!interpolate) {
-      stitchContext.imageSmoothingEnabled = false;
-    }
-    if (sourceExtent && clipExtent) {
-      const xPos = (sourceExtent[0] - sourceDataExtent[0]) * stitchScale;
-      const yPos = -(sourceExtent[3] - sourceDataExtent[3]) * stitchScale;
-      const width2 = getWidth(sourceExtent) * stitchScale;
-      const height2 = getHeight(sourceExtent) * stitchScale;
-      stitchContext.rect(xPos, yPos, width2, height2);
-      stitchContext.clip();
-    }
-    sources.forEach(function(src, i, arr) {
-      if (src.image.width > 0 && src.image.height > 0) {
-        if (src.clipExtent) {
-          stitchContext.save();
-          const xPos2 = (src.clipExtent[0] - sourceDataExtent[0]) * stitchScale;
-          const yPos2 = -(src.clipExtent[3] - sourceDataExtent[3]) * stitchScale;
-          const width2 = getWidth(src.clipExtent) * stitchScale;
-          const height2 = getHeight(src.clipExtent) * stitchScale;
-          stitchContext.rect(
-            interpolate ? xPos2 : Math.round(xPos2),
-            interpolate ? yPos2 : Math.round(yPos2),
-            interpolate ? width2 : Math.round(xPos2 + width2) - Math.round(xPos2),
-            interpolate ? height2 : Math.round(yPos2 + height2) - Math.round(yPos2)
-          );
-          stitchContext.clip();
-        }
-        const xPos = (src.extent[0] - sourceDataExtent[0]) * stitchScale;
-        const yPos = -(src.extent[3] - sourceDataExtent[3]) * stitchScale;
-        const srcWidth = getWidth(src.extent) * stitchScale;
-        const srcHeight = getHeight(src.extent) * stitchScale;
-        stitchContext.drawImage(
-          src.image,
-          gutter,
-          gutter,
-          src.image.width - 2 * gutter,
-          src.image.height - 2 * gutter,
-          interpolate ? xPos : Math.round(xPos),
-          interpolate ? yPos : Math.round(yPos),
-          interpolate ? srcWidth : Math.round(xPos + srcWidth) - Math.round(xPos),
-          interpolate ? srcHeight : Math.round(yPos + srcHeight) - Math.round(yPos)
-        );
-        if (src.clipExtent) {
-          stitchContext.restore();
-        }
-      }
-    });
-  }
-  const targetTopLeft = getTopLeft(targetExtent);
-  triangulation.getTriangles().forEach(function(triangle, i, arr) {
-    const source2 = triangle.source;
-    const target = triangle.target;
-    let x0 = source2[0][0], y0 = source2[0][1];
-    let x1 = source2[1][0], y1 = source2[1][1];
-    let x2 = source2[2][0], y2 = source2[2][1];
-    const u0 = pixelRound((target[0][0] - targetTopLeft[0]) / targetResolution);
-    const v0 = pixelRound(
-      -(target[0][1] - targetTopLeft[1]) / targetResolution
-    );
-    const u1 = pixelRound((target[1][0] - targetTopLeft[0]) / targetResolution);
-    const v1 = pixelRound(
-      -(target[1][1] - targetTopLeft[1]) / targetResolution
-    );
-    const u2 = pixelRound((target[2][0] - targetTopLeft[0]) / targetResolution);
-    const v2 = pixelRound(
-      -(target[2][1] - targetTopLeft[1]) / targetResolution
-    );
-    const sourceNumericalShiftX = x0;
-    const sourceNumericalShiftY = y0;
-    x0 = 0;
-    y0 = 0;
-    x1 -= sourceNumericalShiftX;
-    y1 -= sourceNumericalShiftY;
-    x2 -= sourceNumericalShiftX;
-    y2 -= sourceNumericalShiftY;
-    const augmentedMatrix = [
-      [x1, y1, 0, 0, u1 - u0],
-      [x2, y2, 0, 0, u2 - u0],
-      [0, 0, x1, y1, v1 - v0],
-      [0, 0, x2, y2, v2 - v0]
-    ];
-    const affineCoefs = solveLinearSystem(augmentedMatrix);
-    if (!affineCoefs) {
-      return;
-    }
-    context.save();
-    context.beginPath();
-    if (isBrokenDiagonalRendering() || !interpolate) {
-      context.moveTo(u1, v1);
-      const steps = 4;
-      const ud = u0 - u1;
-      const vd = v0 - v1;
-      for (let step = 0; step < steps; step++) {
-        context.lineTo(
-          u1 + pixelRound((step + 1) * ud / steps),
-          v1 + pixelRound(step * vd / (steps - 1))
-        );
-        if (step != steps - 1) {
-          context.lineTo(
-            u1 + pixelRound((step + 1) * ud / steps),
-            v1 + pixelRound((step + 1) * vd / (steps - 1))
-          );
-        }
-      }
-      context.lineTo(u2, v2);
-    } else {
-      context.moveTo(u1, v1);
-      context.lineTo(u0, v0);
-      context.lineTo(u2, v2);
-    }
-    context.clip();
-    context.transform(
-      affineCoefs[0],
-      affineCoefs[2],
-      affineCoefs[1],
-      affineCoefs[3],
-      u0,
-      v0
-    );
-    context.translate(
-      sourceDataExtent[0] - sourceNumericalShiftX,
-      sourceDataExtent[3] - sourceNumericalShiftY
-    );
-    let image;
-    if (stitchContext) {
-      image = stitchContext.canvas;
-      context.scale(inverseScale, -inverseScale);
-    } else {
-      const source3 = sources[0];
-      const extent = source3.extent;
-      image = source3.image;
-      context.scale(
-        getWidth(extent) / image.width,
-        -getHeight(extent) / image.height
-      );
-    }
-    context.drawImage(image, 0, 0);
-    context.restore();
-  });
-  if (stitchContext) {
-    releaseCanvas(stitchContext);
-    canvasPool$1.push(stitchContext.canvas);
-  }
-  if (renderEdges) {
-    context.save();
-    context.globalCompositeOperation = "source-over";
-    context.strokeStyle = "black";
-    context.lineWidth = 1;
-    triangulation.getTriangles().forEach(function(triangle, i, arr) {
-      const target = triangle.target;
-      const u0 = (target[0][0] - targetTopLeft[0]) / targetResolution;
-      const v0 = -(target[0][1] - targetTopLeft[1]) / targetResolution;
-      const u1 = (target[1][0] - targetTopLeft[0]) / targetResolution;
-      const v1 = -(target[1][1] - targetTopLeft[1]) / targetResolution;
-      const u2 = (target[2][0] - targetTopLeft[0]) / targetResolution;
-      const v2 = -(target[2][1] - targetTopLeft[1]) / targetResolution;
-      context.beginPath();
-      context.moveTo(u1, v1);
-      context.lineTo(u0, v0);
-      context.lineTo(u2, v2);
-      context.closePath();
-      context.stroke();
-    });
-    context.restore();
-  }
-  return context.canvas;
-}
-class ReprojTile extends Tile {
-  /**
-   * @param {import("../proj/Projection.js").default} sourceProj Source projection.
-   * @param {import("../tilegrid/TileGrid.js").default} sourceTileGrid Source tile grid.
-   * @param {import("../proj/Projection.js").default} targetProj Target projection.
-   * @param {import("../tilegrid/TileGrid.js").default} targetTileGrid Target tile grid.
-   * @param {import("../tilecoord.js").TileCoord} tileCoord Coordinate of the tile.
-   * @param {import("../tilecoord.js").TileCoord} wrappedTileCoord Coordinate of the tile wrapped in X.
-   * @param {number} pixelRatio Pixel ratio.
-   * @param {number} gutter Gutter of the source tiles.
-   * @param {FunctionType} getTileFunction
-   *     Function returning source tiles (z, x, y, pixelRatio).
-   * @param {number} [errorThreshold] Acceptable reprojection error (in px).
-   * @param {boolean} [renderEdges] Render reprojection edges.
-   * @param {import("../Tile.js").Options} [options] Tile options.
-   */
-  constructor(sourceProj, sourceTileGrid, targetProj, targetTileGrid, tileCoord, wrappedTileCoord, pixelRatio, gutter, getTileFunction, errorThreshold, renderEdges, options) {
-    super(tileCoord, TileState.IDLE, options);
-    this.renderEdges_ = renderEdges !== void 0 ? renderEdges : false;
-    this.pixelRatio_ = pixelRatio;
-    this.gutter_ = gutter;
-    this.canvas_ = null;
-    this.sourceTileGrid_ = sourceTileGrid;
-    this.targetTileGrid_ = targetTileGrid;
-    this.wrappedTileCoord_ = wrappedTileCoord ? wrappedTileCoord : tileCoord;
-    this.sourceTiles_ = [];
-    this.sourcesListenerKeys_ = null;
-    this.sourceZ_ = 0;
-    this.clipExtent_ = sourceProj.canWrapX() ? sourceProj.getExtent() : void 0;
-    const targetExtent = targetTileGrid.getTileCoordExtent(
-      this.wrappedTileCoord_
-    );
-    const maxTargetExtent = this.targetTileGrid_.getExtent();
-    let maxSourceExtent = this.sourceTileGrid_.getExtent();
-    const limitedTargetExtent = maxTargetExtent ? getIntersection(targetExtent, maxTargetExtent) : targetExtent;
-    if (getArea(limitedTargetExtent) === 0) {
-      this.state = TileState.EMPTY;
-      return;
-    }
-    const sourceProjExtent = sourceProj.getExtent();
-    if (sourceProjExtent) {
-      if (!maxSourceExtent) {
-        maxSourceExtent = sourceProjExtent;
-      } else {
-        maxSourceExtent = getIntersection(maxSourceExtent, sourceProjExtent);
-      }
-    }
-    const targetResolution = targetTileGrid.getResolution(
-      this.wrappedTileCoord_[0]
-    );
-    const sourceResolution = calculateSourceExtentResolution(
-      sourceProj,
-      targetProj,
-      limitedTargetExtent,
-      targetResolution
-    );
-    if (!isFinite(sourceResolution) || sourceResolution <= 0) {
-      this.state = TileState.EMPTY;
-      return;
-    }
-    const errorThresholdInPixels = errorThreshold !== void 0 ? errorThreshold : ERROR_THRESHOLD;
-    this.triangulation_ = new Triangulation(
-      sourceProj,
-      targetProj,
-      limitedTargetExtent,
-      maxSourceExtent,
-      sourceResolution * errorThresholdInPixels,
-      targetResolution
-    );
-    if (this.triangulation_.getTriangles().length === 0) {
-      this.state = TileState.EMPTY;
-      return;
-    }
-    this.sourceZ_ = sourceTileGrid.getZForResolution(sourceResolution);
-    let sourceExtent = this.triangulation_.calculateSourceExtent();
-    if (maxSourceExtent) {
-      if (sourceProj.canWrapX()) {
-        sourceExtent[1] = clamp(
-          sourceExtent[1],
-          maxSourceExtent[1],
-          maxSourceExtent[3]
-        );
-        sourceExtent[3] = clamp(
-          sourceExtent[3],
-          maxSourceExtent[1],
-          maxSourceExtent[3]
-        );
-      } else {
-        sourceExtent = getIntersection(sourceExtent, maxSourceExtent);
-      }
-    }
-    if (!getArea(sourceExtent)) {
-      this.state = TileState.EMPTY;
-    } else {
-      let worldWidth = 0;
-      let worldsAway = 0;
-      if (sourceProj.canWrapX()) {
-        worldWidth = getWidth(sourceProjExtent);
-        worldsAway = Math.floor(
-          (sourceExtent[0] - sourceProjExtent[0]) / worldWidth
-        );
-      }
-      const sourceExtents = wrapAndSliceX(
-        sourceExtent.slice(),
-        sourceProj,
-        true
-      );
-      sourceExtents.forEach((extent) => {
-        const sourceRange = sourceTileGrid.getTileRangeForExtentAndZ(
-          extent,
-          this.sourceZ_
-        );
-        for (let srcX = sourceRange.minX; srcX <= sourceRange.maxX; srcX++) {
-          for (let srcY = sourceRange.minY; srcY <= sourceRange.maxY; srcY++) {
-            const tile = getTileFunction(this.sourceZ_, srcX, srcY, pixelRatio);
-            if (tile) {
-              const offset2 = worldsAway * worldWidth;
-              this.sourceTiles_.push({ tile, offset: offset2 });
-            }
-          }
-        }
-        ++worldsAway;
-      });
-      if (this.sourceTiles_.length === 0) {
-        this.state = TileState.EMPTY;
-      }
-    }
-  }
-  /**
-   * Get the HTML Canvas element for this tile.
-   * @return {HTMLCanvasElement} Canvas.
-   */
-  getImage() {
-    return this.canvas_;
-  }
-  /**
-   * @private
-   */
-  reproject_() {
-    const sources = [];
-    this.sourceTiles_.forEach((source2) => {
-      var _a;
-      const tile = source2.tile;
-      if (tile && tile.getState() == TileState.LOADED) {
-        const extent = this.sourceTileGrid_.getTileCoordExtent(tile.tileCoord);
-        extent[0] += source2.offset;
-        extent[2] += source2.offset;
-        const clipExtent = (_a = this.clipExtent_) == null ? void 0 : _a.slice();
-        if (clipExtent) {
-          clipExtent[0] += source2.offset;
-          clipExtent[2] += source2.offset;
-        }
-        sources.push({
-          extent,
-          clipExtent,
-          image: tile.getImage()
-        });
-      }
-    });
-    this.sourceTiles_.length = 0;
-    if (sources.length === 0) {
-      this.state = TileState.ERROR;
-    } else {
-      const z2 = this.wrappedTileCoord_[0];
-      const size = this.targetTileGrid_.getTileSize(z2);
-      const width = typeof size === "number" ? size : size[0];
-      const height = typeof size === "number" ? size : size[1];
-      const targetResolution = this.targetTileGrid_.getResolution(z2);
-      const sourceResolution = this.sourceTileGrid_.getResolution(
-        this.sourceZ_
-      );
-      const targetExtent = this.targetTileGrid_.getTileCoordExtent(
-        this.wrappedTileCoord_
-      );
-      this.canvas_ = render$1(
-        width,
-        height,
-        this.pixelRatio_,
-        sourceResolution,
-        this.sourceTileGrid_.getExtent(),
-        targetResolution,
-        targetExtent,
-        this.triangulation_,
-        sources,
-        this.gutter_,
-        this.renderEdges_,
-        this.interpolate
-      );
-      this.state = TileState.LOADED;
-    }
-    this.changed();
-  }
-  /**
-   * Load not yet loaded URI.
-   * @override
-   */
-  load() {
-    if (this.state == TileState.IDLE) {
-      this.state = TileState.LOADING;
-      this.changed();
-      let leftToLoad = 0;
-      this.sourcesListenerKeys_ = [];
-      this.sourceTiles_.forEach(({ tile }) => {
-        const state = tile.getState();
-        if (state == TileState.IDLE || state == TileState.LOADING) {
-          leftToLoad++;
-          const sourceListenKey = listen(tile, EventType.CHANGE, (e) => {
-            const state2 = tile.getState();
-            if (state2 == TileState.LOADED || state2 == TileState.ERROR || state2 == TileState.EMPTY) {
-              unlistenByKey(sourceListenKey);
-              leftToLoad--;
-              if (leftToLoad === 0) {
-                this.unlistenSources_();
-                this.reproject_();
-              }
-            }
-          });
-          this.sourcesListenerKeys_.push(sourceListenKey);
-        }
-      });
-      if (leftToLoad === 0) {
-        setTimeout(this.reproject_.bind(this), 0);
-      } else {
-        this.sourceTiles_.forEach(function({ tile }, i, arr) {
-          const state = tile.getState();
-          if (state == TileState.IDLE) {
-            tile.load();
-          }
-        });
-      }
-    }
-  }
-  /**
-   * @private
-   */
-  unlistenSources_() {
-    this.sourcesListenerKeys_.forEach(unlistenByKey);
-    this.sourcesListenerKeys_ = null;
-  }
-  /**
-   * Remove from the cache due to expiry
-   * @override
-   */
-  release() {
-    if (this.canvas_) {
-      releaseCanvas(this.canvas_.getContext("2d"));
-      canvasPool$1.push(this.canvas_);
-      this.canvas_ = null;
-    }
-    super.release();
-  }
-}
-const TileEventType = {
-  /**
-   * Triggered when a tile starts loading.
-   * @event module:ol/source/Tile.TileSourceEvent#tileloadstart
-   * @api
-   */
-  TILELOADSTART: "tileloadstart",
-  /**
-   * Triggered when a tile finishes loading, either when its data is loaded,
-   * or when loading was aborted because the tile is no longer needed.
-   * @event module:ol/source/Tile.TileSourceEvent#tileloadend
-   * @api
-   */
-  TILELOADEND: "tileloadend",
-  /**
-   * Triggered if tile loading results in an error. Note that this is not the
-   * right place to re-fetch tiles. See {@link module:ol/ImageTile~ImageTile#load}
-   * for details.
-   * @event module:ol/source/Tile.TileSourceEvent#tileloaderror
-   * @api
-   */
-  TILELOADERROR: "tileloaderror"
-};
-class Source extends BaseObject {
-  /**
-   * @param {Options} options Source options.
-   */
-  constructor(options) {
-    super();
-    this.projection = get$1(options.projection);
-    this.attributions_ = adaptAttributions(options.attributions);
-    this.attributionsCollapsible_ = options.attributionsCollapsible ?? true;
-    this.loading = false;
-    this.state_ = options.state !== void 0 ? options.state : "ready";
-    this.wrapX_ = options.wrapX !== void 0 ? options.wrapX : false;
-    this.interpolate_ = !!options.interpolate;
-    this.viewResolver = null;
-    this.viewRejector = null;
-    const self2 = this;
-    this.viewPromise_ = new Promise(function(resolve, reject) {
-      self2.viewResolver = resolve;
-      self2.viewRejector = reject;
-    });
-  }
-  /**
-   * Get the attribution function for the source.
-   * @return {?Attribution} Attribution function.
-   * @api
-   */
-  getAttributions() {
-    return this.attributions_;
-  }
-  /**
-   * @return {boolean} Attributions are collapsible.
-   * @api
-   */
-  getAttributionsCollapsible() {
-    return this.attributionsCollapsible_;
-  }
-  /**
-   * Get the projection of the source.
-   * @return {import("../proj/Projection.js").default|null} Projection.
-   * @api
-   */
-  getProjection() {
-    return this.projection;
-  }
-  /**
-   * @param {import("../proj/Projection").default} [projection] Projection.
-   * @return {Array<number>|null} Resolutions.
-   */
-  getResolutions(projection) {
-    return null;
-  }
-  /**
-   * @return {Promise<import("../View.js").ViewOptions>} A promise for view-related properties.
-   */
-  getView() {
-    return this.viewPromise_;
-  }
-  /**
-   * Get the state of the source, see {@link import("./Source.js").State} for possible states.
-   * @return {import("./Source.js").State} State.
-   * @api
-   */
-  getState() {
-    return this.state_;
-  }
-  /**
-   * @return {boolean|undefined} Wrap X.
-   */
-  getWrapX() {
-    return this.wrapX_;
-  }
-  /**
-   * @return {boolean} Use linear interpolation when resampling.
-   */
-  getInterpolate() {
-    return this.interpolate_;
-  }
-  /**
-   * Refreshes the source. The source will be cleared, and data from the server will be reloaded.
-   * @api
-   */
-  refresh() {
-    this.changed();
-  }
-  /**
-   * Set the attributions of the source.
-   * @param {AttributionLike|undefined} attributions Attributions.
-   *     Can be passed as `string`, `Array<string>`, {@link module:ol/source/Source~Attribution},
-   *     or `undefined`.
-   * @api
-   */
-  setAttributions(attributions) {
-    this.attributions_ = adaptAttributions(attributions);
-    this.changed();
-  }
-  /**
-   * Set the state of the source.
-   * @param {import("./Source.js").State} state State.
-   */
-  setState(state) {
-    this.state_ = state;
-    this.changed();
-  }
-}
-function adaptAttributions(attributionLike) {
-  if (!attributionLike) {
-    return null;
-  }
-  if (typeof attributionLike === "function") {
-    return attributionLike;
-  }
-  if (!Array.isArray(attributionLike)) {
-    attributionLike = [attributionLike];
-  }
-  return (frameState) => attributionLike;
 }
 class TileRange {
   /**
@@ -24040,7 +22395,7 @@ class TileGrid {
          * @param {number} b Second resolution
          * @return {number} Comparison result
          */
-        (a2, b2) => b2 - a2
+        (a3, b3) => b3 - a3
       ),
       "`resolutions` must be sorted in descending order"
     );
@@ -24587,6 +22942,1306 @@ function extentFromProjection(projection) {
   }
   return extent;
 }
+class Tile extends Target {
+  /**
+   * @param {import("./tilecoord.js").TileCoord} tileCoord Tile coordinate.
+   * @param {import("./TileState.js").default} state State.
+   * @param {Options} [options] Tile options.
+   */
+  constructor(tileCoord, state, options) {
+    super();
+    options = options ? options : {};
+    this.tileCoord = tileCoord;
+    this.state = state;
+    this.key = "";
+    this.transition_ = options.transition === void 0 ? 250 : options.transition;
+    this.transitionStarts_ = {};
+    this.interpolate = !!options.interpolate;
+  }
+  /**
+   * @protected
+   */
+  changed() {
+    this.dispatchEvent(EventType.CHANGE);
+  }
+  /**
+   * Called by the tile cache when the tile is removed from the cache due to expiry
+   */
+  release() {
+    this.setState(TileState.EMPTY);
+  }
+  /**
+   * @return {string} Key.
+   */
+  getKey() {
+    return this.key + "/" + this.tileCoord;
+  }
+  /**
+   * Get the tile coordinate for this tile.
+   * @return {import("./tilecoord.js").TileCoord} The tile coordinate.
+   * @api
+   */
+  getTileCoord() {
+    return this.tileCoord;
+  }
+  /**
+   * @return {import("./TileState.js").default} State.
+   */
+  getState() {
+    return this.state;
+  }
+  /**
+   * Sets the state of this tile. If you write your own {@link module:ol/Tile~LoadFunction tileLoadFunction} ,
+   * it is important to set the state correctly to {@link module:ol/TileState~ERROR}
+   * when the tile cannot be loaded. Otherwise the tile cannot be removed from
+   * the tile queue and will block other requests.
+   * @param {import("./TileState.js").default} state State.
+   * @api
+   */
+  setState(state) {
+    if (this.state === TileState.EMPTY) {
+      return;
+    }
+    if (this.state !== TileState.ERROR && this.state > state) {
+      throw new Error("Tile load sequence violation");
+    }
+    this.state = state;
+    this.changed();
+  }
+  /**
+   * Load the image or retry if loading previously failed.
+   * Loading is taken care of by the tile queue, and calling this method is
+   * only needed for preloading or for reloading in case of an error.
+   * @abstract
+   * @api
+   */
+  load() {
+    abstract();
+  }
+  /**
+   * Get the alpha value for rendering.
+   * @param {string} id An id for the renderer.
+   * @param {number} time The render frame time.
+   * @return {number} A number between 0 and 1.
+   */
+  getAlpha(id, time) {
+    if (!this.transition_) {
+      return 1;
+    }
+    let start2 = this.transitionStarts_[id];
+    if (!start2) {
+      start2 = time;
+      this.transitionStarts_[id] = start2;
+    } else if (start2 === -1) {
+      return 1;
+    }
+    const delta = time - start2 + 1e3 / 60;
+    if (delta >= this.transition_) {
+      return 1;
+    }
+    return easeIn(delta / this.transition_);
+  }
+  /**
+   * Determine if a tile is in an alpha transition.  A tile is considered in
+   * transition if tile.getAlpha() has not yet been called or has been called
+   * and returned 1.
+   * @param {string} id An id for the renderer.
+   * @return {boolean} The tile is in transition.
+   */
+  inTransition(id) {
+    if (!this.transition_) {
+      return false;
+    }
+    return this.transitionStarts_[id] !== -1;
+  }
+  /**
+   * Mark a transition as complete.
+   * @param {string} id An id for the renderer.
+   */
+  endTransition(id) {
+    if (this.transition_) {
+      this.transitionStarts_[id] = -1;
+    }
+  }
+  /**
+   * @override
+   */
+  disposeInternal() {
+    this.release();
+    super.disposeInternal();
+  }
+}
+class ImageTile extends Tile {
+  /**
+   * @param {import("./tilecoord.js").TileCoord} tileCoord Tile coordinate.
+   * @param {import("./TileState.js").default} state State.
+   * @param {string} src Image source URI.
+   * @param {?string} crossOrigin Cross origin.
+   * @param {import("./Tile.js").LoadFunction} tileLoadFunction Tile load function.
+   * @param {import("./Tile.js").Options} [options] Tile options.
+   */
+  constructor(tileCoord, state, src, crossOrigin, tileLoadFunction, options) {
+    super(tileCoord, state, options);
+    this.crossOrigin_ = crossOrigin;
+    this.src_ = src;
+    this.key = src;
+    this.image_ = new Image();
+    if (crossOrigin !== null) {
+      this.image_.crossOrigin = crossOrigin;
+    }
+    this.unlisten_ = null;
+    this.tileLoadFunction_ = tileLoadFunction;
+  }
+  /**
+   * Get the HTML image element for this tile (may be a Canvas, Image, or Video).
+   * @return {HTMLCanvasElement|HTMLImageElement|HTMLVideoElement} Image.
+   * @api
+   */
+  getImage() {
+    return this.image_;
+  }
+  /**
+   * Sets an HTML image element for this tile (may be a Canvas or preloaded Image).
+   * @param {HTMLCanvasElement|HTMLImageElement} element Element.
+   */
+  setImage(element) {
+    this.image_ = element;
+    this.state = TileState.LOADED;
+    this.unlistenImage_();
+    this.changed();
+  }
+  /**
+   * Tracks loading or read errors.
+   *
+   * @private
+   */
+  handleImageError_() {
+    this.state = TileState.ERROR;
+    this.unlistenImage_();
+    this.image_ = getBlankImage();
+    this.changed();
+  }
+  /**
+   * Tracks successful image load.
+   *
+   * @private
+   */
+  handleImageLoad_() {
+    const image = (
+      /** @type {HTMLImageElement} */
+      this.image_
+    );
+    if (image.naturalWidth && image.naturalHeight) {
+      this.state = TileState.LOADED;
+    } else {
+      this.state = TileState.EMPTY;
+    }
+    this.unlistenImage_();
+    this.changed();
+  }
+  /**
+   * Load the image or retry if loading previously failed.
+   * Loading is taken care of by the tile queue, and calling this method is
+   * only needed for preloading or for reloading in case of an error.
+   *
+   * To retry loading tiles on failed requests, use a custom `tileLoadFunction`
+   * that checks for error status codes and reloads only when the status code is
+   * 408, 429, 500, 502, 503 and 504, and only when not too many retries have been
+   * made already:
+   *
+   * ```js
+   * const retryCodes = [408, 429, 500, 502, 503, 504];
+   * const retries = {};
+   * source.setTileLoadFunction((tile, src) => {
+   *   const image = tile.getImage();
+   *   fetch(src)
+   *     .then((response) => {
+   *       if (retryCodes.includes(response.status)) {
+   *         retries[src] = (retries[src] || 0) + 1;
+   *         if (retries[src] <= 3) {
+   *           setTimeout(() => tile.load(), retries[src] * 1000);
+   *         }
+   *         return Promise.reject();
+   *       }
+   *       return response.blob();
+   *     })
+   *     .then((blob) => {
+   *       const imageUrl = URL.createObjectURL(blob);
+   *       image.src = imageUrl;
+   *       setTimeout(() => URL.revokeObjectURL(imageUrl), 5000);
+   *     })
+   *     .catch(() => tile.setState(3)); // error
+   * });
+   * ```
+   * @api
+   * @override
+   */
+  load() {
+    if (this.state == TileState.ERROR) {
+      this.state = TileState.IDLE;
+      this.image_ = new Image();
+      if (this.crossOrigin_ !== null) {
+        this.image_.crossOrigin = this.crossOrigin_;
+      }
+    }
+    if (this.state == TileState.IDLE) {
+      this.state = TileState.LOADING;
+      this.changed();
+      this.tileLoadFunction_(this, this.src_);
+      this.unlisten_ = listenImage(
+        this.image_,
+        this.handleImageLoad_.bind(this),
+        this.handleImageError_.bind(this)
+      );
+    }
+  }
+  /**
+   * Discards event handlers which listen for load completion or errors.
+   *
+   * @private
+   */
+  unlistenImage_() {
+    if (this.unlisten_) {
+      this.unlisten_();
+      this.unlisten_ = null;
+    }
+  }
+  /**
+   * @override
+   */
+  disposeInternal() {
+    this.unlistenImage_();
+    this.image_ = null;
+    super.disposeInternal();
+  }
+}
+function getBlankImage() {
+  const ctx = createCanvasContext2D(1, 1);
+  ctx.fillStyle = "rgba(0,0,0,0)";
+  ctx.fillRect(0, 0, 1, 1);
+  return ctx.canvas;
+}
+let brokenDiagonalRendering_;
+const canvasPool$1 = [];
+function drawTestTriangle(ctx, u1, v1, u2, v2) {
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(u1, v1);
+  ctx.lineTo(u2, v2);
+  ctx.closePath();
+  ctx.save();
+  ctx.clip();
+  ctx.fillRect(0, 0, Math.max(u1, u2) + 1, Math.max(v1, v2));
+  ctx.restore();
+}
+function verifyBrokenDiagonalRendering(data, offset2) {
+  return Math.abs(data[offset2 * 4] - 210) > 2 || Math.abs(data[offset2 * 4 + 3] - 0.75 * 255) > 2;
+}
+function isBrokenDiagonalRendering() {
+  if (brokenDiagonalRendering_ === void 0) {
+    const ctx = createCanvasContext2D(6, 6, canvasPool$1);
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = "rgba(210, 0, 0, 0.75)";
+    drawTestTriangle(ctx, 4, 5, 4, 0);
+    drawTestTriangle(ctx, 4, 5, 0, 5);
+    const data = ctx.getImageData(0, 0, 3, 3).data;
+    brokenDiagonalRendering_ = verifyBrokenDiagonalRendering(data, 0) || verifyBrokenDiagonalRendering(data, 4) || verifyBrokenDiagonalRendering(data, 8);
+    releaseCanvas(ctx);
+    canvasPool$1.push(ctx.canvas);
+  }
+  return brokenDiagonalRendering_;
+}
+function calculateSourceResolution(sourceProj, targetProj, targetCenter, targetResolution) {
+  const sourceCenter = transform(targetCenter, targetProj, sourceProj);
+  let sourceResolution = getPointResolution(
+    targetProj,
+    targetResolution,
+    targetCenter
+  );
+  const targetMetersPerUnit = targetProj.getMetersPerUnit();
+  if (targetMetersPerUnit !== void 0) {
+    sourceResolution *= targetMetersPerUnit;
+  }
+  const sourceMetersPerUnit = sourceProj.getMetersPerUnit();
+  if (sourceMetersPerUnit !== void 0) {
+    sourceResolution /= sourceMetersPerUnit;
+  }
+  const sourceExtent = sourceProj.getExtent();
+  if (!sourceExtent || containsCoordinate(sourceExtent, sourceCenter)) {
+    const compensationFactor = getPointResolution(sourceProj, sourceResolution, sourceCenter) / sourceResolution;
+    if (isFinite(compensationFactor) && compensationFactor > 0) {
+      sourceResolution /= compensationFactor;
+    }
+  }
+  return sourceResolution;
+}
+function calculateSourceExtentResolution(sourceProj, targetProj, targetExtent, targetResolution) {
+  const targetCenter = getCenter(targetExtent);
+  let sourceResolution = calculateSourceResolution(
+    sourceProj,
+    targetProj,
+    targetCenter,
+    targetResolution
+  );
+  if (!isFinite(sourceResolution) || sourceResolution <= 0) {
+    forEachCorner(targetExtent, function(corner) {
+      sourceResolution = calculateSourceResolution(
+        sourceProj,
+        targetProj,
+        corner,
+        targetResolution
+      );
+      return isFinite(sourceResolution) && sourceResolution > 0;
+    });
+  }
+  return sourceResolution;
+}
+function render(width, height, pixelRatio, sourceResolution, sourceExtent, targetResolution, targetExtent, triangulation, sources, gutter, renderEdges, interpolate, drawSingle, clipExtent) {
+  const context = createCanvasContext2D(
+    Math.round(pixelRatio * width),
+    Math.round(pixelRatio * height),
+    canvasPool$1
+  );
+  if (!interpolate) {
+    context.imageSmoothingEnabled = false;
+  }
+  if (sources.length === 0) {
+    return context.canvas;
+  }
+  context.scale(pixelRatio, pixelRatio);
+  function pixelRound(value) {
+    return Math.round(value * pixelRatio) / pixelRatio;
+  }
+  context.globalCompositeOperation = "lighter";
+  const sourceDataExtent = createEmpty();
+  sources.forEach(function(src, i, arr) {
+    extend$2(sourceDataExtent, src.extent);
+  });
+  let stitchContext;
+  const stitchScale = pixelRatio / sourceResolution;
+  const inverseScale = (interpolate ? 1 : 1 + Math.pow(2, -24)) / stitchScale;
+  {
+    stitchContext = createCanvasContext2D(
+      Math.round(getWidth(sourceDataExtent) * stitchScale),
+      Math.round(getHeight(sourceDataExtent) * stitchScale),
+      canvasPool$1
+    );
+    if (!interpolate) {
+      stitchContext.imageSmoothingEnabled = false;
+    }
+    sources.forEach(function(src, i, arr) {
+      if (src.image.width > 0 && src.image.height > 0) {
+        if (src.clipExtent) {
+          stitchContext.save();
+          const xPos2 = (src.clipExtent[0] - sourceDataExtent[0]) * stitchScale;
+          const yPos2 = -(src.clipExtent[3] - sourceDataExtent[3]) * stitchScale;
+          const width2 = getWidth(src.clipExtent) * stitchScale;
+          const height2 = getHeight(src.clipExtent) * stitchScale;
+          stitchContext.rect(
+            interpolate ? xPos2 : Math.round(xPos2),
+            interpolate ? yPos2 : Math.round(yPos2),
+            interpolate ? width2 : Math.round(xPos2 + width2) - Math.round(xPos2),
+            interpolate ? height2 : Math.round(yPos2 + height2) - Math.round(yPos2)
+          );
+          stitchContext.clip();
+        }
+        const xPos = (src.extent[0] - sourceDataExtent[0]) * stitchScale;
+        const yPos = -(src.extent[3] - sourceDataExtent[3]) * stitchScale;
+        const srcWidth = getWidth(src.extent) * stitchScale;
+        const srcHeight = getHeight(src.extent) * stitchScale;
+        stitchContext.drawImage(
+          src.image,
+          gutter,
+          gutter,
+          src.image.width - 2 * gutter,
+          src.image.height - 2 * gutter,
+          interpolate ? xPos : Math.round(xPos),
+          interpolate ? yPos : Math.round(yPos),
+          interpolate ? srcWidth : Math.round(xPos + srcWidth) - Math.round(xPos),
+          interpolate ? srcHeight : Math.round(yPos + srcHeight) - Math.round(yPos)
+        );
+        if (src.clipExtent) {
+          stitchContext.restore();
+        }
+      }
+    });
+  }
+  const targetTopLeft = getTopLeft(targetExtent);
+  triangulation.getTriangles().forEach(function(triangle, i, arr) {
+    const source2 = triangle.source;
+    const target = triangle.target;
+    let x0 = source2[0][0], y0 = source2[0][1];
+    let x1 = source2[1][0], y1 = source2[1][1];
+    let x2 = source2[2][0], y2 = source2[2][1];
+    const u0 = pixelRound((target[0][0] - targetTopLeft[0]) / targetResolution);
+    const v0 = pixelRound(
+      -(target[0][1] - targetTopLeft[1]) / targetResolution
+    );
+    const u1 = pixelRound((target[1][0] - targetTopLeft[0]) / targetResolution);
+    const v1 = pixelRound(
+      -(target[1][1] - targetTopLeft[1]) / targetResolution
+    );
+    const u2 = pixelRound((target[2][0] - targetTopLeft[0]) / targetResolution);
+    const v2 = pixelRound(
+      -(target[2][1] - targetTopLeft[1]) / targetResolution
+    );
+    const sourceNumericalShiftX = x0;
+    const sourceNumericalShiftY = y0;
+    x0 = 0;
+    y0 = 0;
+    x1 -= sourceNumericalShiftX;
+    y1 -= sourceNumericalShiftY;
+    x2 -= sourceNumericalShiftX;
+    y2 -= sourceNumericalShiftY;
+    const augmentedMatrix = [
+      [x1, y1, 0, 0, u1 - u0],
+      [x2, y2, 0, 0, u2 - u0],
+      [0, 0, x1, y1, v1 - v0],
+      [0, 0, x2, y2, v2 - v0]
+    ];
+    const affineCoefs = solveLinearSystem(augmentedMatrix);
+    if (!affineCoefs) {
+      return;
+    }
+    context.save();
+    context.beginPath();
+    if (isBrokenDiagonalRendering() || !interpolate) {
+      context.moveTo(u1, v1);
+      const steps = 4;
+      const ud = u0 - u1;
+      const vd = v0 - v1;
+      for (let step = 0; step < steps; step++) {
+        context.lineTo(
+          u1 + pixelRound((step + 1) * ud / steps),
+          v1 + pixelRound(step * vd / (steps - 1))
+        );
+        if (step != steps - 1) {
+          context.lineTo(
+            u1 + pixelRound((step + 1) * ud / steps),
+            v1 + pixelRound((step + 1) * vd / (steps - 1))
+          );
+        }
+      }
+      context.lineTo(u2, v2);
+    } else {
+      context.moveTo(u1, v1);
+      context.lineTo(u0, v0);
+      context.lineTo(u2, v2);
+    }
+    context.clip();
+    context.transform(
+      affineCoefs[0],
+      affineCoefs[2],
+      affineCoefs[1],
+      affineCoefs[3],
+      u0,
+      v0
+    );
+    context.translate(
+      sourceDataExtent[0] - sourceNumericalShiftX,
+      sourceDataExtent[3] - sourceNumericalShiftY
+    );
+    let image;
+    if (stitchContext) {
+      image = stitchContext.canvas;
+      context.scale(inverseScale, -inverseScale);
+    } else {
+      const source3 = sources[0];
+      const extent = source3.extent;
+      image = source3.image;
+      context.scale(
+        getWidth(extent) / image.width,
+        -getHeight(extent) / image.height
+      );
+    }
+    context.drawImage(image, 0, 0);
+    context.restore();
+  });
+  if (stitchContext) {
+    releaseCanvas(stitchContext);
+    canvasPool$1.push(stitchContext.canvas);
+  }
+  if (renderEdges) {
+    context.save();
+    context.globalCompositeOperation = "source-over";
+    context.strokeStyle = "black";
+    context.lineWidth = 1;
+    triangulation.getTriangles().forEach(function(triangle, i, arr) {
+      const target = triangle.target;
+      const u0 = (target[0][0] - targetTopLeft[0]) / targetResolution;
+      const v0 = -(target[0][1] - targetTopLeft[1]) / targetResolution;
+      const u1 = (target[1][0] - targetTopLeft[0]) / targetResolution;
+      const v1 = -(target[1][1] - targetTopLeft[1]) / targetResolution;
+      const u2 = (target[2][0] - targetTopLeft[0]) / targetResolution;
+      const v2 = -(target[2][1] - targetTopLeft[1]) / targetResolution;
+      context.beginPath();
+      context.moveTo(u1, v1);
+      context.lineTo(u0, v0);
+      context.lineTo(u2, v2);
+      context.closePath();
+      context.stroke();
+    });
+    context.restore();
+  }
+  return context.canvas;
+}
+const MAX_SUBDIVISION = 10;
+const MAX_TRIANGLE_WIDTH = 0.25;
+class Triangulation {
+  /**
+   * @param {import("../proj/Projection.js").default} sourceProj Source projection.
+   * @param {import("../proj/Projection.js").default} targetProj Target projection.
+   * @param {import("../extent.js").Extent} targetExtent Target extent to triangulate.
+   * @param {import("../extent.js").Extent} maxSourceExtent Maximal source extent that can be used.
+   * @param {number} errorThreshold Acceptable error (in source units).
+   * @param {?number} destinationResolution The (optional) resolution of the destination.
+   * @param {import("../transform.js").Transform} [sourceMatrix] Source transform matrix.
+   */
+  constructor(sourceProj, targetProj, targetExtent, maxSourceExtent, errorThreshold, destinationResolution, sourceMatrix) {
+    this.sourceProj_ = sourceProj;
+    this.targetProj_ = targetProj;
+    let transformInvCache = {};
+    const transformInv = sourceMatrix ? createTransformFromCoordinateTransform(
+      (input) => apply(
+        sourceMatrix,
+        transform(input, this.targetProj_, this.sourceProj_)
+      )
+    ) : getTransform(this.targetProj_, this.sourceProj_);
+    this.transformInv_ = function(c) {
+      const key = c[0] + "/" + c[1];
+      if (!transformInvCache[key]) {
+        transformInvCache[key] = transformInv(c);
+      }
+      return transformInvCache[key];
+    };
+    this.maxSourceExtent_ = maxSourceExtent;
+    this.errorThresholdSquared_ = errorThreshold * errorThreshold;
+    this.triangles_ = [];
+    this.wrapsXInSource_ = false;
+    this.canWrapXInSource_ = this.sourceProj_.canWrapX() && !!maxSourceExtent && !!this.sourceProj_.getExtent() && getWidth(maxSourceExtent) >= getWidth(this.sourceProj_.getExtent());
+    this.sourceWorldWidth_ = this.sourceProj_.getExtent() ? getWidth(this.sourceProj_.getExtent()) : null;
+    this.targetWorldWidth_ = this.targetProj_.getExtent() ? getWidth(this.targetProj_.getExtent()) : null;
+    const destinationTopLeft = getTopLeft(targetExtent);
+    const destinationTopRight = getTopRight(targetExtent);
+    const destinationBottomRight = getBottomRight(targetExtent);
+    const destinationBottomLeft = getBottomLeft(targetExtent);
+    const sourceTopLeft = this.transformInv_(destinationTopLeft);
+    const sourceTopRight = this.transformInv_(destinationTopRight);
+    const sourceBottomRight = this.transformInv_(destinationBottomRight);
+    const sourceBottomLeft = this.transformInv_(destinationBottomLeft);
+    const maxSubdivision = MAX_SUBDIVISION + (destinationResolution ? Math.max(
+      0,
+      Math.ceil(
+        Math.log2(
+          getArea(targetExtent) / (destinationResolution * destinationResolution * 256 * 256)
+        )
+      )
+    ) : 0);
+    this.addQuad_(
+      destinationTopLeft,
+      destinationTopRight,
+      destinationBottomRight,
+      destinationBottomLeft,
+      sourceTopLeft,
+      sourceTopRight,
+      sourceBottomRight,
+      sourceBottomLeft,
+      maxSubdivision
+    );
+    if (this.wrapsXInSource_) {
+      let leftBound = Infinity;
+      this.triangles_.forEach(function(triangle, i, arr) {
+        leftBound = Math.min(
+          leftBound,
+          triangle.source[0][0],
+          triangle.source[1][0],
+          triangle.source[2][0]
+        );
+      });
+      this.triangles_.forEach((triangle) => {
+        if (Math.max(
+          triangle.source[0][0],
+          triangle.source[1][0],
+          triangle.source[2][0]
+        ) - leftBound > this.sourceWorldWidth_ / 2) {
+          const newTriangle = [
+            [triangle.source[0][0], triangle.source[0][1]],
+            [triangle.source[1][0], triangle.source[1][1]],
+            [triangle.source[2][0], triangle.source[2][1]]
+          ];
+          if (newTriangle[0][0] - leftBound > this.sourceWorldWidth_ / 2) {
+            newTriangle[0][0] -= this.sourceWorldWidth_;
+          }
+          if (newTriangle[1][0] - leftBound > this.sourceWorldWidth_ / 2) {
+            newTriangle[1][0] -= this.sourceWorldWidth_;
+          }
+          if (newTriangle[2][0] - leftBound > this.sourceWorldWidth_ / 2) {
+            newTriangle[2][0] -= this.sourceWorldWidth_;
+          }
+          const minX = Math.min(
+            newTriangle[0][0],
+            newTriangle[1][0],
+            newTriangle[2][0]
+          );
+          const maxX = Math.max(
+            newTriangle[0][0],
+            newTriangle[1][0],
+            newTriangle[2][0]
+          );
+          if (maxX - minX < this.sourceWorldWidth_ / 2) {
+            triangle.source = newTriangle;
+          }
+        }
+      });
+    }
+    transformInvCache = {};
+  }
+  /**
+   * Adds triangle to the triangulation.
+   * @param {import("../coordinate.js").Coordinate} a The target a coordinate.
+   * @param {import("../coordinate.js").Coordinate} b The target b coordinate.
+   * @param {import("../coordinate.js").Coordinate} c The target c coordinate.
+   * @param {import("../coordinate.js").Coordinate} aSrc The source a coordinate.
+   * @param {import("../coordinate.js").Coordinate} bSrc The source b coordinate.
+   * @param {import("../coordinate.js").Coordinate} cSrc The source c coordinate.
+   * @private
+   */
+  addTriangle_(a3, b3, c, aSrc, bSrc, cSrc) {
+    this.triangles_.push({
+      source: [aSrc, bSrc, cSrc],
+      target: [a3, b3, c]
+    });
+  }
+  /**
+   * Adds quad (points in clock-wise order) to the triangulation
+   * (and reprojects the vertices) if valid.
+   * Performs quad subdivision if needed to increase precision.
+   *
+   * @param {import("../coordinate.js").Coordinate} a The target a coordinate.
+   * @param {import("../coordinate.js").Coordinate} b The target b coordinate.
+   * @param {import("../coordinate.js").Coordinate} c The target c coordinate.
+   * @param {import("../coordinate.js").Coordinate} d The target d coordinate.
+   * @param {import("../coordinate.js").Coordinate} aSrc The source a coordinate.
+   * @param {import("../coordinate.js").Coordinate} bSrc The source b coordinate.
+   * @param {import("../coordinate.js").Coordinate} cSrc The source c coordinate.
+   * @param {import("../coordinate.js").Coordinate} dSrc The source d coordinate.
+   * @param {number} maxSubdivision Maximal allowed subdivision of the quad.
+   * @private
+   */
+  addQuad_(a3, b3, c, d2, aSrc, bSrc, cSrc, dSrc, maxSubdivision) {
+    const sourceQuadExtent = boundingExtent([aSrc, bSrc, cSrc, dSrc]);
+    const sourceCoverageX = this.sourceWorldWidth_ ? getWidth(sourceQuadExtent) / this.sourceWorldWidth_ : null;
+    const sourceWorldWidth = (
+      /** @type {number} */
+      this.sourceWorldWidth_
+    );
+    const wrapsX = this.sourceProj_.canWrapX() && sourceCoverageX > 0.5 && sourceCoverageX < 1;
+    let needsSubdivision = false;
+    if (maxSubdivision > 0) {
+      if (this.targetProj_.isGlobal() && this.targetWorldWidth_) {
+        const targetQuadExtent = boundingExtent([a3, b3, c, d2]);
+        const targetCoverageX = getWidth(targetQuadExtent) / this.targetWorldWidth_;
+        needsSubdivision = targetCoverageX > MAX_TRIANGLE_WIDTH || needsSubdivision;
+      }
+      if (!wrapsX && this.sourceProj_.isGlobal() && sourceCoverageX) {
+        needsSubdivision = sourceCoverageX > MAX_TRIANGLE_WIDTH || needsSubdivision;
+      }
+    }
+    if (!needsSubdivision && this.maxSourceExtent_) {
+      if (isFinite(sourceQuadExtent[0]) && isFinite(sourceQuadExtent[1]) && isFinite(sourceQuadExtent[2]) && isFinite(sourceQuadExtent[3])) {
+        if (!intersects$1(sourceQuadExtent, this.maxSourceExtent_)) {
+          return;
+        }
+      }
+    }
+    let isNotFinite = 0;
+    if (!needsSubdivision) {
+      if (!isFinite(aSrc[0]) || !isFinite(aSrc[1]) || !isFinite(bSrc[0]) || !isFinite(bSrc[1]) || !isFinite(cSrc[0]) || !isFinite(cSrc[1]) || !isFinite(dSrc[0]) || !isFinite(dSrc[1])) {
+        if (maxSubdivision > 0) {
+          needsSubdivision = true;
+        } else {
+          isNotFinite = (!isFinite(aSrc[0]) || !isFinite(aSrc[1]) ? 8 : 0) + (!isFinite(bSrc[0]) || !isFinite(bSrc[1]) ? 4 : 0) + (!isFinite(cSrc[0]) || !isFinite(cSrc[1]) ? 2 : 0) + (!isFinite(dSrc[0]) || !isFinite(dSrc[1]) ? 1 : 0);
+          if (isNotFinite != 1 && isNotFinite != 2 && isNotFinite != 4 && isNotFinite != 8) {
+            return;
+          }
+        }
+      }
+    }
+    if (maxSubdivision > 0) {
+      if (!needsSubdivision) {
+        const center = [(a3[0] + c[0]) / 2, (a3[1] + c[1]) / 2];
+        const centerSrc = this.transformInv_(center);
+        let dx;
+        if (wrapsX) {
+          const centerSrcEstimX = (modulo(aSrc[0], sourceWorldWidth) + modulo(cSrc[0], sourceWorldWidth)) / 2;
+          dx = centerSrcEstimX - modulo(centerSrc[0], sourceWorldWidth);
+        } else {
+          dx = (aSrc[0] + cSrc[0]) / 2 - centerSrc[0];
+        }
+        const dy = (aSrc[1] + cSrc[1]) / 2 - centerSrc[1];
+        const centerSrcErrorSquared = dx * dx + dy * dy;
+        needsSubdivision = centerSrcErrorSquared > this.errorThresholdSquared_;
+      }
+      if (needsSubdivision) {
+        if (Math.abs(a3[0] - c[0]) <= Math.abs(a3[1] - c[1])) {
+          const bc = [(b3[0] + c[0]) / 2, (b3[1] + c[1]) / 2];
+          const bcSrc = this.transformInv_(bc);
+          const da = [(d2[0] + a3[0]) / 2, (d2[1] + a3[1]) / 2];
+          const daSrc = this.transformInv_(da);
+          this.addQuad_(
+            a3,
+            b3,
+            bc,
+            da,
+            aSrc,
+            bSrc,
+            bcSrc,
+            daSrc,
+            maxSubdivision - 1
+          );
+          this.addQuad_(
+            da,
+            bc,
+            c,
+            d2,
+            daSrc,
+            bcSrc,
+            cSrc,
+            dSrc,
+            maxSubdivision - 1
+          );
+        } else {
+          const ab = [(a3[0] + b3[0]) / 2, (a3[1] + b3[1]) / 2];
+          const abSrc = this.transformInv_(ab);
+          const cd = [(c[0] + d2[0]) / 2, (c[1] + d2[1]) / 2];
+          const cdSrc = this.transformInv_(cd);
+          this.addQuad_(
+            a3,
+            ab,
+            cd,
+            d2,
+            aSrc,
+            abSrc,
+            cdSrc,
+            dSrc,
+            maxSubdivision - 1
+          );
+          this.addQuad_(
+            ab,
+            b3,
+            c,
+            cd,
+            abSrc,
+            bSrc,
+            cSrc,
+            cdSrc,
+            maxSubdivision - 1
+          );
+        }
+        return;
+      }
+    }
+    if (wrapsX) {
+      if (!this.canWrapXInSource_) {
+        return;
+      }
+      this.wrapsXInSource_ = true;
+    }
+    if ((isNotFinite & 11) == 0) {
+      this.addTriangle_(a3, c, d2, aSrc, cSrc, dSrc);
+    }
+    if ((isNotFinite & 14) == 0) {
+      this.addTriangle_(a3, c, b3, aSrc, cSrc, bSrc);
+    }
+    if (isNotFinite) {
+      if ((isNotFinite & 13) == 0) {
+        this.addTriangle_(b3, d2, a3, bSrc, dSrc, aSrc);
+      }
+      if ((isNotFinite & 7) == 0) {
+        this.addTriangle_(b3, d2, c, bSrc, dSrc, cSrc);
+      }
+    }
+  }
+  /**
+   * Calculates extent of the `source` coordinates from all the triangles.
+   *
+   * @return {import("../extent.js").Extent} Calculated extent.
+   */
+  calculateSourceExtent() {
+    const extent = createEmpty();
+    this.triangles_.forEach(function(triangle, i, arr) {
+      const src = triangle.source;
+      extendCoordinate(extent, src[0]);
+      extendCoordinate(extent, src[1]);
+      extendCoordinate(extent, src[2]);
+    });
+    return extent;
+  }
+  /**
+   * @return {Array<Triangle>} Array of the calculated triangles.
+   */
+  getTriangles() {
+    return this.triangles_;
+  }
+}
+const ERROR_THRESHOLD = 0.5;
+class ReprojTile extends Tile {
+  /**
+   * @param {import("../proj/Projection.js").default} sourceProj Source projection.
+   * @param {import("../tilegrid/TileGrid.js").default} sourceTileGrid Source tile grid.
+   * @param {import("../proj/Projection.js").default} targetProj Target projection.
+   * @param {import("../tilegrid/TileGrid.js").default} targetTileGrid Target tile grid.
+   * @param {import("../tilecoord.js").TileCoord} tileCoord Coordinate of the tile.
+   * @param {import("../tilecoord.js").TileCoord} wrappedTileCoord Coordinate of the tile wrapped in X.
+   * @param {number} pixelRatio Pixel ratio.
+   * @param {number} gutter Gutter of the source tiles.
+   * @param {FunctionType} getTileFunction
+   *     Function returning source tiles (z, x, y, pixelRatio).
+   * @param {number} [errorThreshold] Acceptable reprojection error (in px).
+   * @param {boolean} [renderEdges] Render reprojection edges.
+   * @param {import("../Tile.js").Options} [options] Tile options.
+   */
+  constructor(sourceProj, sourceTileGrid, targetProj, targetTileGrid, tileCoord, wrappedTileCoord, pixelRatio, gutter, getTileFunction, errorThreshold, renderEdges, options) {
+    super(tileCoord, TileState.IDLE, options);
+    this.renderEdges_ = renderEdges !== void 0 ? renderEdges : false;
+    this.pixelRatio_ = pixelRatio;
+    this.gutter_ = gutter;
+    this.canvas_ = null;
+    this.sourceTileGrid_ = sourceTileGrid;
+    this.targetTileGrid_ = targetTileGrid;
+    this.wrappedTileCoord_ = wrappedTileCoord ? wrappedTileCoord : tileCoord;
+    this.sourceTiles_ = [];
+    this.sourcesListenerKeys_ = null;
+    this.sourceZ_ = 0;
+    this.clipExtent_ = sourceProj.canWrapX() ? sourceProj.getExtent() : void 0;
+    const targetExtent = targetTileGrid.getTileCoordExtent(
+      this.wrappedTileCoord_
+    );
+    const maxTargetExtent = this.targetTileGrid_.getExtent();
+    let maxSourceExtent = this.sourceTileGrid_.getExtent();
+    const limitedTargetExtent = maxTargetExtent ? getIntersection(targetExtent, maxTargetExtent) : targetExtent;
+    if (getArea(limitedTargetExtent) === 0) {
+      this.state = TileState.EMPTY;
+      return;
+    }
+    const sourceProjExtent = sourceProj.getExtent();
+    if (sourceProjExtent) {
+      if (!maxSourceExtent) {
+        maxSourceExtent = sourceProjExtent;
+      } else {
+        maxSourceExtent = getIntersection(maxSourceExtent, sourceProjExtent);
+      }
+    }
+    const targetResolution = targetTileGrid.getResolution(
+      this.wrappedTileCoord_[0]
+    );
+    const sourceResolution = calculateSourceExtentResolution(
+      sourceProj,
+      targetProj,
+      limitedTargetExtent,
+      targetResolution
+    );
+    if (!isFinite(sourceResolution) || sourceResolution <= 0) {
+      this.state = TileState.EMPTY;
+      return;
+    }
+    const errorThresholdInPixels = errorThreshold !== void 0 ? errorThreshold : ERROR_THRESHOLD;
+    this.triangulation_ = new Triangulation(
+      sourceProj,
+      targetProj,
+      limitedTargetExtent,
+      maxSourceExtent,
+      sourceResolution * errorThresholdInPixels,
+      targetResolution
+    );
+    if (this.triangulation_.getTriangles().length === 0) {
+      this.state = TileState.EMPTY;
+      return;
+    }
+    this.sourceZ_ = sourceTileGrid.getZForResolution(sourceResolution);
+    let sourceExtent = this.triangulation_.calculateSourceExtent();
+    if (maxSourceExtent) {
+      if (sourceProj.canWrapX()) {
+        sourceExtent[1] = clamp(
+          sourceExtent[1],
+          maxSourceExtent[1],
+          maxSourceExtent[3]
+        );
+        sourceExtent[3] = clamp(
+          sourceExtent[3],
+          maxSourceExtent[1],
+          maxSourceExtent[3]
+        );
+      } else {
+        sourceExtent = getIntersection(sourceExtent, maxSourceExtent);
+      }
+    }
+    if (!getArea(sourceExtent)) {
+      this.state = TileState.EMPTY;
+    } else {
+      let worldWidth = 0;
+      let worldsAway = 0;
+      if (sourceProj.canWrapX()) {
+        worldWidth = getWidth(sourceProjExtent);
+        worldsAway = Math.floor(
+          (sourceExtent[0] - sourceProjExtent[0]) / worldWidth
+        );
+      }
+      const sourceExtents = wrapAndSliceX(
+        sourceExtent.slice(),
+        sourceProj,
+        true
+      );
+      sourceExtents.forEach((extent) => {
+        const sourceRange = sourceTileGrid.getTileRangeForExtentAndZ(
+          extent,
+          this.sourceZ_
+        );
+        for (let srcX = sourceRange.minX; srcX <= sourceRange.maxX; srcX++) {
+          for (let srcY = sourceRange.minY; srcY <= sourceRange.maxY; srcY++) {
+            const tile = getTileFunction(this.sourceZ_, srcX, srcY, pixelRatio);
+            if (tile) {
+              const offset2 = worldsAway * worldWidth;
+              this.sourceTiles_.push({ tile, offset: offset2 });
+            }
+          }
+        }
+        ++worldsAway;
+      });
+      if (this.sourceTiles_.length === 0) {
+        this.state = TileState.EMPTY;
+      }
+    }
+  }
+  /**
+   * Get the HTML Canvas element for this tile.
+   * @return {HTMLCanvasElement} Canvas.
+   */
+  getImage() {
+    return this.canvas_;
+  }
+  /**
+   * @private
+   */
+  reproject_() {
+    const sources = [];
+    this.sourceTiles_.forEach((source2) => {
+      const tile = source2.tile;
+      if (tile && tile.getState() == TileState.LOADED) {
+        const extent = this.sourceTileGrid_.getTileCoordExtent(tile.tileCoord);
+        extent[0] += source2.offset;
+        extent[2] += source2.offset;
+        const clipExtent = this.clipExtent_?.slice();
+        if (clipExtent) {
+          clipExtent[0] += source2.offset;
+          clipExtent[2] += source2.offset;
+        }
+        sources.push({
+          extent,
+          clipExtent,
+          image: tile.getImage()
+        });
+      }
+    });
+    this.sourceTiles_.length = 0;
+    if (sources.length === 0) {
+      this.state = TileState.ERROR;
+    } else {
+      const z2 = this.wrappedTileCoord_[0];
+      const size = this.targetTileGrid_.getTileSize(z2);
+      const width = typeof size === "number" ? size : size[0];
+      const height = typeof size === "number" ? size : size[1];
+      const targetResolution = this.targetTileGrid_.getResolution(z2);
+      const sourceResolution = this.sourceTileGrid_.getResolution(
+        this.sourceZ_
+      );
+      const targetExtent = this.targetTileGrid_.getTileCoordExtent(
+        this.wrappedTileCoord_
+      );
+      this.canvas_ = render(
+        width,
+        height,
+        this.pixelRatio_,
+        sourceResolution,
+        this.sourceTileGrid_.getExtent(),
+        targetResolution,
+        targetExtent,
+        this.triangulation_,
+        sources,
+        this.gutter_,
+        this.renderEdges_,
+        this.interpolate
+      );
+      this.state = TileState.LOADED;
+    }
+    this.changed();
+  }
+  /**
+   * Load not yet loaded URI.
+   * @override
+   */
+  load() {
+    if (this.state == TileState.IDLE) {
+      this.state = TileState.LOADING;
+      this.changed();
+      let leftToLoad = 0;
+      this.sourcesListenerKeys_ = [];
+      this.sourceTiles_.forEach(({ tile }) => {
+        const state = tile.getState();
+        if (state == TileState.IDLE || state == TileState.LOADING) {
+          leftToLoad++;
+          const sourceListenKey = listen(tile, EventType.CHANGE, (e) => {
+            const state2 = tile.getState();
+            if (state2 == TileState.LOADED || state2 == TileState.ERROR || state2 == TileState.EMPTY) {
+              unlistenByKey(sourceListenKey);
+              leftToLoad--;
+              if (leftToLoad === 0) {
+                this.unlistenSources_();
+                this.reproject_();
+              }
+            }
+          });
+          this.sourcesListenerKeys_.push(sourceListenKey);
+        }
+      });
+      if (leftToLoad === 0) {
+        setTimeout(this.reproject_.bind(this), 0);
+      } else {
+        this.sourceTiles_.forEach(function({ tile }, i, arr) {
+          const state = tile.getState();
+          if (state == TileState.IDLE) {
+            tile.load();
+          }
+        });
+      }
+    }
+  }
+  /**
+   * @private
+   */
+  unlistenSources_() {
+    this.sourcesListenerKeys_.forEach(unlistenByKey);
+    this.sourcesListenerKeys_ = null;
+  }
+  /**
+   * Remove from the cache due to expiry
+   * @override
+   */
+  release() {
+    if (this.canvas_) {
+      releaseCanvas(this.canvas_.getContext("2d"));
+      canvasPool$1.push(this.canvas_);
+      this.canvas_ = null;
+    }
+    super.release();
+  }
+}
+const zRegEx = /\{z\}/g;
+const xRegEx = /\{x\}/g;
+const yRegEx = /\{y\}/g;
+const dashYRegEx = /\{-y\}/g;
+function renderXYZTemplate(template, z2, x2, y2, maxY) {
+  return template.replace(zRegEx, z2.toString()).replace(xRegEx, x2.toString()).replace(yRegEx, y2.toString()).replace(dashYRegEx, function() {
+    if (maxY === void 0) {
+      throw new Error(
+        "If the URL template has a {-y} placeholder, the grid extent must be known"
+      );
+    }
+    return (maxY - y2).toString();
+  });
+}
+function expandUrl(url) {
+  const urls = [];
+  let match = /\{([a-z])-([a-z])\}/.exec(url);
+  if (match) {
+    const startCharCode = match[1].charCodeAt(0);
+    const stopCharCode = match[2].charCodeAt(0);
+    let charCode;
+    for (charCode = startCharCode; charCode <= stopCharCode; ++charCode) {
+      urls.push(url.replace(match[0], String.fromCharCode(charCode)));
+    }
+    return urls;
+  }
+  match = /\{(\d+)-(\d+)\}/.exec(url);
+  if (match) {
+    const stop = parseInt(match[2], 10);
+    for (let i = parseInt(match[1], 10); i <= stop; i++) {
+      urls.push(url.replace(match[0], i.toString()));
+    }
+    return urls;
+  }
+  urls.push(url);
+  return urls;
+}
+function createFromTemplate(template, tileGrid) {
+  return (
+    /**
+     * @param {import("./tilecoord.js").TileCoord} tileCoord Tile Coordinate.
+     * @param {number} pixelRatio Pixel ratio.
+     * @param {import("./proj/Projection.js").default} projection Projection.
+     * @return {string|undefined} Tile URL.
+     */
+    function(tileCoord, pixelRatio, projection) {
+      if (!tileCoord) {
+        return void 0;
+      }
+      let maxY;
+      const z2 = tileCoord[0];
+      if (tileGrid) {
+        const range = tileGrid.getFullTileRange(z2);
+        if (range) {
+          maxY = range.getHeight() - 1;
+        }
+      }
+      return renderXYZTemplate(template, z2, tileCoord[1], tileCoord[2], maxY);
+    }
+  );
+}
+function createFromTemplates(templates, tileGrid) {
+  const len = templates.length;
+  const tileUrlFunctions = new Array(len);
+  for (let i = 0; i < len; ++i) {
+    tileUrlFunctions[i] = createFromTemplate(templates[i], tileGrid);
+  }
+  return createFromTileUrlFunctions(tileUrlFunctions);
+}
+function createFromTileUrlFunctions(tileUrlFunctions) {
+  if (tileUrlFunctions.length === 1) {
+    return tileUrlFunctions[0];
+  }
+  return (
+    /**
+     * @param {import("./tilecoord.js").TileCoord} tileCoord Tile Coordinate.
+     * @param {number} pixelRatio Pixel ratio.
+     * @param {import("./proj/Projection.js").default} projection Projection.
+     * @return {string|undefined} Tile URL.
+     */
+    function(tileCoord, pixelRatio, projection) {
+      if (!tileCoord) {
+        return void 0;
+      }
+      const h = hash(tileCoord);
+      const index = modulo(h, tileUrlFunctions.length);
+      return tileUrlFunctions[index](tileCoord, pixelRatio, projection);
+    }
+  );
+}
+class Source extends BaseObject {
+  /**
+   * @param {Options} options Source options.
+   */
+  constructor(options) {
+    super();
+    this.projection = get$1(options.projection);
+    this.attributions_ = adaptAttributions(options.attributions);
+    this.attributionsCollapsible_ = options.attributionsCollapsible ?? true;
+    this.loading = false;
+    this.state_ = options.state !== void 0 ? options.state : "ready";
+    this.wrapX_ = options.wrapX !== void 0 ? options.wrapX : false;
+    this.interpolate_ = !!options.interpolate;
+    this.viewResolver = null;
+    this.viewRejector = null;
+    const self2 = this;
+    this.viewPromise_ = new Promise(function(resolve, reject) {
+      self2.viewResolver = resolve;
+      self2.viewRejector = reject;
+    });
+  }
+  /**
+   * Get the attribution function for the source.
+   * @return {?Attribution} Attribution function.
+   * @api
+   */
+  getAttributions() {
+    return this.attributions_;
+  }
+  /**
+   * @return {boolean} Attributions are collapsible.
+   * @api
+   */
+  getAttributionsCollapsible() {
+    return this.attributionsCollapsible_;
+  }
+  /**
+   * Get the projection of the source.
+   * @return {import("../proj/Projection.js").default|null} Projection.
+   * @api
+   */
+  getProjection() {
+    return this.projection;
+  }
+  /**
+   * @param {import("../proj/Projection").default} [projection] Projection.
+   * @return {Array<number>|null} Resolutions.
+   */
+  getResolutions(projection) {
+    return null;
+  }
+  /**
+   * @return {Promise<import("../View.js").ViewOptions>} A promise for view-related properties.
+   */
+  getView() {
+    return this.viewPromise_;
+  }
+  /**
+   * Get the state of the source, see {@link import("./Source.js").State} for possible states.
+   * @return {import("./Source.js").State} State.
+   * @api
+   */
+  getState() {
+    return this.state_;
+  }
+  /**
+   * @return {boolean|undefined} Wrap X.
+   */
+  getWrapX() {
+    return this.wrapX_;
+  }
+  /**
+   * @return {boolean} Use linear interpolation when resampling.
+   */
+  getInterpolate() {
+    return this.interpolate_;
+  }
+  /**
+   * Refreshes the source. The source will be cleared, and data from the server will be reloaded.
+   * @api
+   */
+  refresh() {
+    this.changed();
+  }
+  /**
+   * Set the attributions of the source.
+   * @param {AttributionLike|undefined} attributions Attributions.
+   *     Can be passed as `string`, `Array<string>`, {@link module:ol/source/Source~Attribution},
+   *     or `undefined`.
+   * @api
+   */
+  setAttributions(attributions) {
+    this.attributions_ = adaptAttributions(attributions);
+    this.changed();
+  }
+  /**
+   * Set the state of the source.
+   * @param {import("./Source.js").State} state State.
+   */
+  setState(state) {
+    this.state_ = state;
+    this.changed();
+  }
+}
+function adaptAttributions(attributionLike) {
+  if (!attributionLike) {
+    return null;
+  }
+  if (typeof attributionLike === "function") {
+    return attributionLike;
+  }
+  if (!Array.isArray(attributionLike)) {
+    attributionLike = [attributionLike];
+  }
+  return (frameState) => attributionLike;
+}
 class TileSource extends Source {
   /**
    * @param {Options} options SourceTile source options.
@@ -24707,7 +24362,7 @@ class TileSource extends Source {
     if (tilePixelRatio == 1) {
       return tileSize;
     }
-    return scale$1(tileSize, tilePixelRatio, this.tmpSize);
+    return scale(tileSize, tilePixelRatio, this.tmpSize);
   }
   /**
    * Returns a tile coordinate wrapped around the x-axis. When the tile coordinate
@@ -24750,96 +24405,29 @@ class TileSourceEvent extends BaseEvent {
     this.tile = tile;
   }
 }
-const zRegEx = /\{z\}/g;
-const xRegEx = /\{x\}/g;
-const yRegEx = /\{y\}/g;
-const dashYRegEx = /\{-y\}/g;
-function renderXYZTemplate(template, z2, x2, y2, maxY) {
-  return template.replace(zRegEx, z2.toString()).replace(xRegEx, x2.toString()).replace(yRegEx, y2.toString()).replace(dashYRegEx, function() {
-    if (maxY === void 0) {
-      throw new Error(
-        "If the URL template has a {-y} placeholder, the grid extent must be known"
-      );
-    }
-    return (maxY - y2).toString();
-  });
-}
-function expandUrl(url) {
-  const urls = [];
-  let match = /\{([a-z])-([a-z])\}/.exec(url);
-  if (match) {
-    const startCharCode = match[1].charCodeAt(0);
-    const stopCharCode = match[2].charCodeAt(0);
-    let charCode;
-    for (charCode = startCharCode; charCode <= stopCharCode; ++charCode) {
-      urls.push(url.replace(match[0], String.fromCharCode(charCode)));
-    }
-    return urls;
-  }
-  match = /\{(\d+)-(\d+)\}/.exec(url);
-  if (match) {
-    const stop = parseInt(match[2], 10);
-    for (let i = parseInt(match[1], 10); i <= stop; i++) {
-      urls.push(url.replace(match[0], i.toString()));
-    }
-    return urls;
-  }
-  urls.push(url);
-  return urls;
-}
-function createFromTemplate(template, tileGrid) {
-  return (
-    /**
-     * @param {import("./tilecoord.js").TileCoord} tileCoord Tile Coordinate.
-     * @param {number} pixelRatio Pixel ratio.
-     * @param {import("./proj/Projection.js").default} projection Projection.
-     * @return {string|undefined} Tile URL.
-     */
-    function(tileCoord, pixelRatio, projection) {
-      if (!tileCoord) {
-        return void 0;
-      }
-      let maxY;
-      const z2 = tileCoord[0];
-      if (tileGrid) {
-        const range = tileGrid.getFullTileRange(z2);
-        if (range) {
-          maxY = range.getHeight() - 1;
-        }
-      }
-      return renderXYZTemplate(template, z2, tileCoord[1], tileCoord[2], maxY);
-    }
-  );
-}
-function createFromTemplates(templates, tileGrid) {
-  const len = templates.length;
-  const tileUrlFunctions = new Array(len);
-  for (let i = 0; i < len; ++i) {
-    tileUrlFunctions[i] = createFromTemplate(templates[i], tileGrid);
-  }
-  return createFromTileUrlFunctions(tileUrlFunctions);
-}
-function createFromTileUrlFunctions(tileUrlFunctions) {
-  if (tileUrlFunctions.length === 1) {
-    return tileUrlFunctions[0];
-  }
-  return (
-    /**
-     * @param {import("./tilecoord.js").TileCoord} tileCoord Tile Coordinate.
-     * @param {number} pixelRatio Pixel ratio.
-     * @param {import("./proj/Projection.js").default} projection Projection.
-     * @return {string|undefined} Tile URL.
-     */
-    function(tileCoord, pixelRatio, projection) {
-      if (!tileCoord) {
-        return void 0;
-      }
-      const h = hash(tileCoord);
-      const index = modulo(h, tileUrlFunctions.length);
-      return tileUrlFunctions[index](tileCoord, pixelRatio, projection);
-    }
-  );
-}
+const TileEventType = {
+  /**
+   * Triggered when a tile starts loading.
+   * @event module:ol/source/Tile.TileSourceEvent#tileloadstart
+   * @api
+   */
+  TILELOADSTART: "tileloadstart",
+  /**
+   * Triggered when a tile finishes loading, either when its data is loaded,
+   * or when loading was aborted because the tile is no longer needed.
+   * @event module:ol/source/Tile.TileSourceEvent#tileloadend
+   * @api
+   */
+  TILELOADEND: "tileloadend",
+  /**
+   * Triggered if tile loading results in an error. Note that this is not the
+   * right place to re-fetch tiles. See {@link module:ol/ImageTile~ImageTile#load}
+   * for details.
+   * @event module:ol/source/Tile.TileSourceEvent#tileloaderror
+   * @api
+   */
+  TILELOADERROR: "tileloaderror"
+};
 class UrlTile extends TileSource {
   /**
    * @param {Options} options Image tile options.
@@ -25020,7 +24608,7 @@ class TileImage extends UrlTile {
    * @override
    */
   getGutterForProjection(projection) {
-    if (this.getProjection() && projection && !equivalent(this.getProjection(), projection)) {
+    if (this.getProjection() && projection && !equivalent$1(this.getProjection(), projection)) {
       return 0;
     }
     return this.getGutter();
@@ -25050,7 +24638,7 @@ class TileImage extends UrlTile {
    */
   getTileGridForProjection(projection) {
     const thisProj = this.getProjection();
-    if (this.tileGrid && (!thisProj || equivalent(thisProj, projection))) {
+    if (this.tileGrid && (!thisProj || equivalent$1(thisProj, projection))) {
       return this.tileGrid;
     }
     const projKey = getUid(projection);
@@ -25099,7 +24687,7 @@ class TileImage extends UrlTile {
    */
   getTile(z2, x2, y2, pixelRatio, projection) {
     const sourceProjection = this.getProjection();
-    if (!sourceProjection || !projection || equivalent(sourceProjection, projection)) {
+    if (!sourceProjection || !projection || equivalent$1(sourceProjection, projection)) {
       return this.getTileInternal(
         z2,
         x2,
@@ -25256,657 +24844,10 @@ class OSM extends XYZ {
     });
   }
 }
-const TileProperty = {
-  PRELOAD: "preload",
-  USE_INTERIM_TILES_ON_ERROR: "useInterimTilesOnError"
-};
-class BaseTileLayer extends Layer {
-  /**
-   * @param {Options<TileSourceType>} [options] Tile layer options.
-   */
-  constructor(options) {
-    options = options ? options : {};
-    const baseOptions = Object.assign({}, options);
-    const cacheSize2 = options.cacheSize;
-    delete options.cacheSize;
-    delete baseOptions.preload;
-    delete baseOptions.useInterimTilesOnError;
-    super(baseOptions);
-    this.on;
-    this.once;
-    this.un;
-    this.cacheSize_ = cacheSize2;
-    this.setPreload(options.preload !== void 0 ? options.preload : 0);
-    this.setUseInterimTilesOnError(
-      options.useInterimTilesOnError !== void 0 ? options.useInterimTilesOnError : true
-    );
-  }
-  /**
-   * @return {number|undefined} The suggested cache size
-   * @protected
-   */
-  getCacheSize() {
-    return this.cacheSize_;
-  }
-  /**
-   * Return the level as number to which we will preload tiles up to.
-   * @return {number} The level to preload tiles up to.
-   * @observable
-   * @api
-   */
-  getPreload() {
-    return (
-      /** @type {number} */
-      this.get(TileProperty.PRELOAD)
-    );
-  }
-  /**
-   * Set the level as number to which we will preload tiles up to.
-   * @param {number} preload The level to preload tiles up to.
-   * @observable
-   * @api
-   */
-  setPreload(preload) {
-    this.set(TileProperty.PRELOAD, preload);
-  }
-  /**
-   * Deprecated.  Whether we use interim tiles on error.
-   * @return {boolean} Use interim tiles on error.
-   * @observable
-   * @api
-   */
-  getUseInterimTilesOnError() {
-    return (
-      /** @type {boolean} */
-      this.get(TileProperty.USE_INTERIM_TILES_ON_ERROR)
-    );
-  }
-  /**
-   * Deprecated.  Set whether we use interim tiles on error.
-   * @param {boolean} useInterimTilesOnError Use interim tiles on error.
-   * @observable
-   * @api
-   */
-  setUseInterimTilesOnError(useInterimTilesOnError) {
-    this.set(TileProperty.USE_INTERIM_TILES_ON_ERROR, useInterimTilesOnError);
-  }
-  /**
-   * Get data for a pixel location.  The return type depends on the source data.  For image tiles,
-   * a four element RGBA array will be returned.  For data tiles, the array length will match the
-   * number of bands in the dataset.  For requests outside the layer extent, `null` will be returned.
-   * Data for a image tiles can only be retrieved if the source's `crossOrigin` property is set.
-   *
-   * ```js
-   * // display layer data on every pointer move
-   * map.on('pointermove', (event) => {
-   *   console.log(layer.getData(event.pixel));
-   * });
-   * ```
-   * @param {import("../pixel").Pixel} pixel Pixel.
-   * @return {Uint8ClampedArray|Uint8Array|Float32Array|DataView|null} Pixel data.
-   * @api
-   * @override
-   */
-  getData(pixel) {
-    return super.getData(pixel);
-  }
-}
-const maxStaleKeys = 5;
-class LayerRenderer extends Observable {
-  /**
-   * @param {LayerType} layer Layer.
-   */
-  constructor(layer) {
-    super();
-    this.ready = true;
-    this.boundHandleImageChange_ = this.handleImageChange_.bind(this);
-    this.layer_ = layer;
-    this.staleKeys_ = new Array();
-    this.maxStaleKeys = maxStaleKeys;
-  }
-  /**
-   * @return {Array<string>} Get the list of stale keys.
-   */
-  getStaleKeys() {
-    return this.staleKeys_;
-  }
-  /**
-   * @param {string} key The new stale key.
-   */
-  prependStaleKey(key) {
-    this.staleKeys_.unshift(key);
-    if (this.staleKeys_.length > this.maxStaleKeys) {
-      this.staleKeys_.length = this.maxStaleKeys;
-    }
-  }
-  /**
-   * Asynchronous layer level hit detection.
-   * @param {import("../pixel.js").Pixel} pixel Pixel.
-   * @return {Promise<Array<import("../Feature").FeatureLike>>} Promise that resolves with
-   * an array of features.
-   */
-  getFeatures(pixel) {
-    return abstract();
-  }
-  /**
-   * @param {import("../pixel.js").Pixel} pixel Pixel.
-   * @return {Uint8ClampedArray|Uint8Array|Float32Array|DataView|null} Pixel data.
-   */
-  getData(pixel) {
-    return null;
-  }
-  /**
-   * Determine whether render should be called.
-   * @abstract
-   * @param {import("../Map.js").FrameState} frameState Frame state.
-   * @return {boolean} Layer is ready to be rendered.
-   */
-  prepareFrame(frameState) {
-    return abstract();
-  }
-  /**
-   * Render the layer.
-   * @abstract
-   * @param {import("../Map.js").FrameState} frameState Frame state.
-   * @param {HTMLElement|null} target Target that may be used to render content to.
-   * @return {HTMLElement|null} The rendered element.
-   */
-  renderFrame(frameState, target) {
-    return abstract();
-  }
-  /**
-   * @abstract
-   * @param {import("../coordinate.js").Coordinate} coordinate Coordinate.
-   * @param {import("../Map.js").FrameState} frameState Frame state.
-   * @param {number} hitTolerance Hit tolerance in pixels.
-   * @param {import("./vector.js").FeatureCallback<T>} callback Feature callback.
-   * @param {Array<import("./Map.js").HitMatch<T>>} matches The hit detected matches with tolerance.
-   * @return {T|undefined} Callback result.
-   * @template T
-   */
-  forEachFeatureAtCoordinate(coordinate, frameState, hitTolerance, callback, matches) {
-    return void 0;
-  }
-  /**
-   * @return {LayerType} Layer.
-   */
-  getLayer() {
-    return this.layer_;
-  }
-  /**
-   * Perform action necessary to get the layer rendered after new fonts have loaded
-   * @abstract
-   */
-  handleFontsChanged() {
-  }
-  /**
-   * Handle changes in image state.
-   * @param {import("../events/Event.js").default} event Image change event.
-   * @private
-   */
-  handleImageChange_(event) {
-    const image = (
-      /** @type {import("../Image.js").default} */
-      event.target
-    );
-    if (image.getState() === ImageState.LOADED || image.getState() === ImageState.ERROR) {
-      this.renderIfReadyAndVisible();
-    }
-  }
-  /**
-   * Load the image if not already loaded, and register the image change
-   * listener if needed.
-   * @param {import("../Image.js").default} image Image.
-   * @return {boolean} `true` if the image is already loaded, `false` otherwise.
-   * @protected
-   */
-  loadImage(image) {
-    let imageState = image.getState();
-    if (imageState != ImageState.LOADED && imageState != ImageState.ERROR) {
-      image.addEventListener(EventType.CHANGE, this.boundHandleImageChange_);
-    }
-    if (imageState == ImageState.IDLE) {
-      image.load();
-      imageState = image.getState();
-    }
-    return imageState == ImageState.LOADED;
-  }
-  /**
-   * @protected
-   */
-  renderIfReadyAndVisible() {
-    const layer = this.getLayer();
-    if (layer && layer.getVisible() && layer.getSourceState() === "ready") {
-      layer.changed();
-    }
-  }
-  /**
-   * @param {import("../Map.js").FrameState} frameState Frame state.
-   */
-  renderDeferred(frameState) {
-  }
-  /**
-   * Clean up.
-   * @override
-   */
-  disposeInternal() {
-    delete this.layer_;
-    super.disposeInternal();
-  }
-}
-class ZIndexContext {
-  constructor() {
-    /**
-     * @private
-     * @param {...*} args Args.
-     * @return {ZIndexContext} This.
-     */
-    __publicField(this, "pushMethodArgs_", (...args) => {
-      this.instructions_[this.zIndex + this.offset_].push(args);
-      return this;
-    });
-    this.instructions_ = [];
-    this.zIndex = 0;
-    this.offset_ = 0;
-    this.context_ = /** @type {ZIndexContextProxy} */
-    new Proxy(getSharedCanvasContext2D(), {
-      get: (target, property) => {
-        if (typeof /** @type {*} */
-        getSharedCanvasContext2D()[property] !== "function") {
-          return void 0;
-        }
-        if (!this.instructions_[this.zIndex + this.offset_]) {
-          this.instructions_[this.zIndex + this.offset_] = [];
-        }
-        this.instructions_[this.zIndex + this.offset_].push(property);
-        return this.pushMethodArgs_;
-      },
-      set: (target, property, value) => {
-        if (!this.instructions_[this.zIndex + this.offset_]) {
-          this.instructions_[this.zIndex + this.offset_] = [];
-        }
-        this.instructions_[this.zIndex + this.offset_].push(property, value);
-        return true;
-      }
-    });
-  }
-  /**
-   * Push a function that renders to the context directly.
-   * @param {function(CanvasRenderingContext2D): void} render Function.
-   */
-  pushFunction(render2) {
-    this.instructions_[this.zIndex + this.offset_].push(render2);
-  }
-  /**
-   * Get a proxy for CanvasRenderingContext2D which does not support getting state
-   * (e.g. `context.globalAlpha`, which will return `undefined`). To set state, if it relies on a
-   * previous state (e.g. `context.globalAlpha = context.globalAlpha / 2`), set a function,
-   * e.g. `context.globalAlpha = (context) => context.globalAlpha / 2`.
-   * @return {ZIndexContextProxy} Context.
-   */
-  getContext() {
-    return this.context_;
-  }
-  /**
-   * @param {CanvasRenderingContext2D} context Context.
-   */
-  draw(context) {
-    this.instructions_.forEach((instructionsAtIndex) => {
-      for (let i = 0, ii = instructionsAtIndex.length; i < ii; ++i) {
-        const property = instructionsAtIndex[i];
-        if (typeof property === "function") {
-          property(context);
-          continue;
-        }
-        const instructionAtIndex = instructionsAtIndex[++i];
-        if (typeof /** @type {*} */
-        context[property] === "function") {
-          context[property](...instructionAtIndex);
-        } else {
-          if (typeof instructionAtIndex === "function") {
-            context[property] = instructionAtIndex(context);
-            continue;
-          }
-          context[property] = instructionAtIndex;
-        }
-      }
-    });
-  }
-  clear() {
-    this.instructions_.length = 0;
-    this.zIndex = 0;
-    this.offset_ = 0;
-  }
-  /**
-   * Offsets the zIndex by the highest current zIndex. Useful for rendering multiple worlds or tiles, to
-   * avoid conflicting context.clip() or context.save()/restore() calls.
-   */
-  offset() {
-    this.offset_ = this.instructions_.length;
-    this.zIndex = 0;
-  }
-}
-const canvasPool = [];
-let pixelContext = null;
-function createPixelContext() {
-  pixelContext = createCanvasContext2D(1, 1, void 0, {
-    willReadFrequently: true
-  });
-}
-class CanvasLayerRenderer extends LayerRenderer {
-  /**
-   * @param {LayerType} layer Layer.
-   */
-  constructor(layer) {
-    super(layer);
-    this.container = null;
-    this.renderedResolution;
-    this.tempTransform = create$1();
-    this.pixelTransform = create$1();
-    this.inversePixelTransform = create$1();
-    this.context = null;
-    this.deferredContext_ = null;
-    this.containerReused = false;
-    this.frameState = null;
-  }
-  /**
-   * @param {import('../../DataTile.js').ImageLike} image Image.
-   * @param {number} col The column index.
-   * @param {number} row The row index.
-   * @return {Uint8ClampedArray|null} The image data.
-   */
-  getImageData(image, col, row) {
-    if (!pixelContext) {
-      createPixelContext();
-    }
-    pixelContext.clearRect(0, 0, 1, 1);
-    let data;
-    try {
-      pixelContext.drawImage(image, col, row, 1, 1, 0, 0, 1, 1);
-      data = pixelContext.getImageData(0, 0, 1, 1).data;
-    } catch (err) {
-      pixelContext = null;
-      return null;
-    }
-    return data;
-  }
-  /**
-   * @param {import('../../Map.js').FrameState} frameState Frame state.
-   * @return {string} Background color.
-   */
-  getBackground(frameState) {
-    const layer = this.getLayer();
-    let background = layer.getBackground();
-    if (typeof background === "function") {
-      background = background(frameState.viewState.resolution);
-    }
-    return background || void 0;
-  }
-  /**
-   * Get a rendering container from an existing target, if compatible.
-   * @param {HTMLElement} target Potential render target.
-   * @param {string} transform CSS Transform.
-   * @param {string} [backgroundColor] Background color.
-   */
-  useContainer(target, transform2, backgroundColor) {
-    const layerClassName = this.getLayer().getClassName();
-    let container, context;
-    if (target && target.className === layerClassName && (!backgroundColor || target && target.style.backgroundColor && equals(
-      asArray(target.style.backgroundColor),
-      asArray(backgroundColor)
-    ))) {
-      const canvas = target.firstElementChild;
-      if (canvas instanceof HTMLCanvasElement) {
-        context = canvas.getContext("2d");
-      }
-    }
-    if (context && context.canvas.style.transform === transform2) {
-      this.container = target;
-      this.context = context;
-      this.containerReused = true;
-    } else if (this.containerReused) {
-      this.container = null;
-      this.context = null;
-      this.containerReused = false;
-    } else if (this.container) {
-      this.container.style.backgroundColor = null;
-    }
-    if (!this.container) {
-      container = document.createElement("div");
-      container.className = layerClassName;
-      let style = container.style;
-      style.position = "absolute";
-      style.width = "100%";
-      style.height = "100%";
-      context = createCanvasContext2D();
-      const canvas = context.canvas;
-      container.appendChild(canvas);
-      style = canvas.style;
-      style.position = "absolute";
-      style.left = "0";
-      style.transformOrigin = "top left";
-      this.container = container;
-      this.context = context;
-    }
-    if (!this.containerReused && backgroundColor && !this.container.style.backgroundColor) {
-      this.container.style.backgroundColor = backgroundColor;
-    }
-  }
-  /**
-   * @param {CanvasRenderingContext2D} context Context.
-   * @param {import("../../Map.js").FrameState} frameState Frame state.
-   * @param {import("../../extent.js").Extent} extent Clip extent.
-   * @protected
-   */
-  clipUnrotated(context, frameState, extent) {
-    const topLeft = getTopLeft(extent);
-    const topRight = getTopRight(extent);
-    const bottomRight = getBottomRight(extent);
-    const bottomLeft = getBottomLeft(extent);
-    apply(frameState.coordinateToPixelTransform, topLeft);
-    apply(frameState.coordinateToPixelTransform, topRight);
-    apply(frameState.coordinateToPixelTransform, bottomRight);
-    apply(frameState.coordinateToPixelTransform, bottomLeft);
-    const inverted = this.inversePixelTransform;
-    apply(inverted, topLeft);
-    apply(inverted, topRight);
-    apply(inverted, bottomRight);
-    apply(inverted, bottomLeft);
-    context.save();
-    context.beginPath();
-    context.moveTo(Math.round(topLeft[0]), Math.round(topLeft[1]));
-    context.lineTo(Math.round(topRight[0]), Math.round(topRight[1]));
-    context.lineTo(Math.round(bottomRight[0]), Math.round(bottomRight[1]));
-    context.lineTo(Math.round(bottomLeft[0]), Math.round(bottomLeft[1]));
-    context.clip();
-  }
-  /**
-   * @param {import("../../Map.js").FrameState} frameState Frame state.
-   * @param {HTMLElement} target Target that may be used to render content to.
-   * @protected
-   */
-  prepareContainer(frameState, target) {
-    const extent = frameState.extent;
-    const resolution = frameState.viewState.resolution;
-    const rotation = frameState.viewState.rotation;
-    const pixelRatio = frameState.pixelRatio;
-    const width = Math.round(getWidth(extent) / resolution * pixelRatio);
-    const height = Math.round(getHeight(extent) / resolution * pixelRatio);
-    compose(
-      this.pixelTransform,
-      frameState.size[0] / 2,
-      frameState.size[1] / 2,
-      1 / pixelRatio,
-      1 / pixelRatio,
-      rotation,
-      -width / 2,
-      -height / 2
-    );
-    makeInverse(this.inversePixelTransform, this.pixelTransform);
-    const canvasTransform = toString$1(this.pixelTransform);
-    this.useContainer(target, canvasTransform, this.getBackground(frameState));
-    if (!this.containerReused) {
-      const canvas = this.context.canvas;
-      if (canvas.width != width || canvas.height != height) {
-        canvas.width = width;
-        canvas.height = height;
-      } else {
-        this.context.clearRect(0, 0, width, height);
-      }
-      if (canvasTransform !== canvas.style.transform) {
-        canvas.style.transform = canvasTransform;
-      }
-    }
-  }
-  /**
-   * @param {import("../../render/EventType.js").default} type Event type.
-   * @param {CanvasRenderingContext2D} context Context.
-   * @param {import("../../Map.js").FrameState} frameState Frame state.
-   * @private
-   */
-  dispatchRenderEvent_(type, context, frameState) {
-    const layer = this.getLayer();
-    if (layer.hasListener(type)) {
-      const event = new RenderEvent(
-        type,
-        this.inversePixelTransform,
-        frameState,
-        context
-      );
-      layer.dispatchEvent(event);
-    }
-  }
-  /**
-   * @param {CanvasRenderingContext2D} context Context.
-   * @param {import("../../Map.js").FrameState} frameState Frame state.
-   * @protected
-   */
-  preRender(context, frameState) {
-    this.frameState = frameState;
-    if (frameState.declutter) {
-      return;
-    }
-    this.dispatchRenderEvent_(RenderEventType.PRERENDER, context, frameState);
-  }
-  /**
-   * @param {CanvasRenderingContext2D} context Context.
-   * @param {import("../../Map.js").FrameState} frameState Frame state.
-   * @protected
-   */
-  postRender(context, frameState) {
-    if (frameState.declutter) {
-      return;
-    }
-    this.dispatchRenderEvent_(RenderEventType.POSTRENDER, context, frameState);
-  }
-  /**
-   * @param {import("../../Map.js").FrameState} frameState Frame state.
-   */
-  renderDeferredInternal(frameState) {
-  }
-  /**
-   * @param {import("../../Map.js").FrameState} frameState Frame state.
-   * @return {import('../../render/canvas/ZIndexContext.js').ZIndexContextProxy} Context.
-   */
-  getRenderContext(frameState) {
-    if (frameState.declutter && !this.deferredContext_) {
-      this.deferredContext_ = new ZIndexContext();
-    }
-    return frameState.declutter ? this.deferredContext_.getContext() : this.context;
-  }
-  /**
-   * @param {import("../../Map.js").FrameState} frameState Frame state.
-   * @override
-   */
-  renderDeferred(frameState) {
-    if (!frameState.declutter) {
-      return;
-    }
-    this.dispatchRenderEvent_(
-      RenderEventType.PRERENDER,
-      this.context,
-      frameState
-    );
-    if (frameState.declutter && this.deferredContext_) {
-      this.deferredContext_.draw(this.context);
-      this.deferredContext_.clear();
-    }
-    this.renderDeferredInternal(frameState);
-    this.dispatchRenderEvent_(
-      RenderEventType.POSTRENDER,
-      this.context,
-      frameState
-    );
-  }
-  /**
-   * Creates a transform for rendering to an element that will be rotated after rendering.
-   * @param {import("../../coordinate.js").Coordinate} center Center.
-   * @param {number} resolution Resolution.
-   * @param {number} rotation Rotation.
-   * @param {number} pixelRatio Pixel ratio.
-   * @param {number} width Width of the rendered element (in pixels).
-   * @param {number} height Height of the rendered element (in pixels).
-   * @param {number} offsetX Offset on the x-axis in view coordinates.
-   * @protected
-   * @return {!import("../../transform.js").Transform} Transform.
-   */
-  getRenderTransform(center, resolution, rotation, pixelRatio, width, height, offsetX) {
-    const dx1 = width / 2;
-    const dy1 = height / 2;
-    const sx = pixelRatio / resolution;
-    const sy = -sx;
-    const dx2 = -center[0] + offsetX;
-    const dy2 = -center[1];
-    return compose(
-      this.tempTransform,
-      dx1,
-      dy1,
-      sx,
-      sy,
-      -rotation,
-      dx2,
-      dy2
-    );
-  }
-  /**
-   * Clean up.
-   * @override
-   */
-  disposeInternal() {
-    delete this.frameState;
-    super.disposeInternal();
-  }
-}
 function asImageLike(data) {
   return data instanceof Image || data instanceof HTMLCanvasElement || data instanceof HTMLVideoElement || data instanceof ImageBitmap ? data : null;
 }
-function asArrayLike(data) {
-  return data instanceof Uint8Array || data instanceof Uint8ClampedArray || data instanceof Float32Array || data instanceof DataView ? data : null;
-}
 const disposedError = new Error("disposed");
-let sharedContext = null;
-function toArray(image) {
-  if (!sharedContext) {
-    sharedContext = createCanvasContext2D(
-      image.width,
-      image.height,
-      void 0,
-      { willReadFrequently: true }
-    );
-  }
-  const canvas = sharedContext.canvas;
-  const width = image.width;
-  if (canvas.width !== width) {
-    canvas.width = width;
-  }
-  const height = image.height;
-  if (canvas.height !== height) {
-    canvas.height = height;
-  }
-  sharedContext.clearRect(0, 0, width, height);
-  sharedContext.drawImage(image, 0, 0);
-  return sharedContext.getImageData(0, 0, width, height).data;
-}
 const defaultSize = [256, 256];
 class DataTile extends Tile {
   /**
@@ -26163,8 +25104,7 @@ class LRUCache {
    * @return {T|undefined} Value.
    */
   peek(key) {
-    var _a;
-    return (_a = this.entries_[key]) == null ? void 0 : _a.value_;
+    return this.entries_[key]?.value_;
   }
   /**
    * @return {T} value Value.
@@ -26224,972 +25164,540 @@ class LRUCache {
     this.highWaterMark = size;
   }
 }
-function create() {
-  return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-}
-function orthographic(left2, right2, bottom2, top2, near, far, out) {
-  out = out ?? create();
-  const lr = 1 / (left2 - right2), bt = 1 / (bottom2 - top2), nf = 1 / (near - far);
-  out[0] = -2 * lr;
-  out[1] = 0;
-  out[2] = 0;
-  out[3] = 0;
-  out[4] = 0;
-  out[5] = -2 * bt;
-  out[6] = 0;
-  out[7] = 0;
-  out[8] = 0;
-  out[9] = 0;
-  out[10] = 2 * nf;
-  out[11] = 0;
-  out[12] = (left2 + right2) * lr;
-  out[13] = (top2 + bottom2) * bt;
-  out[14] = (far + near) * nf;
-  out[15] = 1;
-  return out;
-}
-function scale(m, x2, y2, z2, out) {
-  out = out ?? create();
-  out[0] = m[0] * x2;
-  out[1] = m[1] * x2;
-  out[2] = m[2] * x2;
-  out[3] = m[3] * x2;
-  out[4] = m[4] * y2;
-  out[5] = m[5] * y2;
-  out[6] = m[6] * y2;
-  out[7] = m[7] * y2;
-  out[8] = m[8] * z2;
-  out[9] = m[9] * z2;
-  out[10] = m[10] * z2;
-  out[11] = m[11] * z2;
-  out[12] = m[12];
-  out[13] = m[13];
-  out[14] = m[14];
-  out[15] = m[15];
-  return out;
-}
-function translate(m, x2, y2, z2, out) {
-  out = out ?? create();
-  let a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23;
-  if (m === out) {
-    out[12] = m[0] * x2 + m[4] * y2 + m[8] * z2 + m[12];
-    out[13] = m[1] * x2 + m[5] * y2 + m[9] * z2 + m[13];
-    out[14] = m[2] * x2 + m[6] * y2 + m[10] * z2 + m[14];
-    out[15] = m[3] * x2 + m[7] * y2 + m[11] * z2 + m[15];
-  } else {
-    a00 = m[0];
-    a01 = m[1];
-    a02 = m[2];
-    a03 = m[3];
-    a10 = m[4];
-    a11 = m[5];
-    a12 = m[6];
-    a13 = m[7];
-    a20 = m[8];
-    a21 = m[9];
-    a22 = m[10];
-    a23 = m[11];
-    out[0] = a00;
-    out[1] = a01;
-    out[2] = a02;
-    out[3] = a03;
-    out[4] = a10;
-    out[5] = a11;
-    out[6] = a12;
-    out[7] = a13;
-    out[8] = a20;
-    out[9] = a21;
-    out[10] = a22;
-    out[11] = a23;
-    out[12] = a00 * x2 + a10 * y2 + a20 * z2 + m[12];
-    out[13] = a01 * x2 + a11 * y2 + a21 * z2 + m[13];
-    out[14] = a02 * x2 + a12 * y2 + a22 * z2 + m[14];
-    out[15] = a03 * x2 + a13 * y2 + a23 * z2 + m[15];
-  }
-  return out;
-}
-function translation(x2, y2, z2, out) {
-  out = out ?? create();
-  out[0] = 1;
-  out[1] = 0;
-  out[2] = 0;
-  out[3] = 0;
-  out[4] = 0;
-  out[5] = 1;
-  out[6] = 0;
-  out[7] = 0;
-  out[8] = 0;
-  out[9] = 0;
-  out[10] = 1;
-  out[11] = 0;
-  out[12] = x2;
-  out[13] = y2;
-  out[14] = z2;
-  out[15] = 1;
-  return out;
-}
-const VERTEX_SHADER = `
-  attribute vec4 a_position;
-  attribute vec4 a_texcoord;
-
-  uniform mat4 u_matrix;
-  uniform mat4 u_textureMatrix;
-
-  varying vec2 v_texcoord;
-
-  void main() {
-    gl_Position = u_matrix * a_position;
-    vec2 texcoord = (u_textureMatrix * a_texcoord).xy;
-    v_texcoord = texcoord;
-  }
-`;
-const FRAGMENT_SHADER = `
-  precision mediump float;
-
-  varying vec2 v_texcoord;
-
-  uniform sampler2D u_texture;
-
-  void main() {
-    if (
-      v_texcoord.x < 0.0 ||
-      v_texcoord.y < 0.0 ||
-      v_texcoord.x > 1.0 ||
-      v_texcoord.y > 1.0
-    ) {
-      discard;
-    }
-    gl_FragColor = texture2D(u_texture, v_texcoord);
-  }
-`;
-class Canvas {
-  /**
-   * @param {WebGLRenderingContext} gl Context to render in.
-   */
-  constructor(gl) {
-    this.gl_ = gl;
-    this.program_ = createProgram(gl, FRAGMENT_SHADER, VERTEX_SHADER);
-    this.positionLocation = gl.getAttribLocation(this.program_, "a_position");
-    this.texcoordLocation = gl.getAttribLocation(this.program_, "a_texcoord");
-    this.matrixLocation = gl.getUniformLocation(this.program_, "u_matrix");
-    this.textureMatrixLocation = gl.getUniformLocation(
-      this.program_,
-      "u_textureMatrix"
-    );
-    this.textureLocation = gl.getUniformLocation(this.program_, "u_texture");
-    this.positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
-    this.positions = [0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1];
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array(this.positions),
-      gl.STATIC_DRAW
-    );
-    this.texcoordBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.texcoordBuffer);
-    this.texcoords = [0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1];
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array(this.texcoords),
-      gl.STATIC_DRAW
-    );
-  }
-  /**
-   * 2dContext drawImage call implemented in webgl.
-   * Unlike images, textures do not have a width and height associated
-   * with them so we'll pass in the width and height of the texture.
-   *
-   * @param {WebGLTexture} tex Image to draw.
-   * @param {number} texWidth Image width.
-   * @param {number} texHeight Image height.
-   * @param {number} srcX Top-left x-point to read src image.
-   * @param {number} srcY Top-left y-point to read src image.
-   * @param {number} [srcWidth] Width of source to read.
-   * @param {number} [srcHeight] Height of source to read.
-   * @param {number} [dstX] Top-left x-point of destination.
-   * @param {number} [dstY] Top-left y-point of destination.
-   * @param {number} [dstWidth] Width of written image in destination.
-   * @param {number} [dstHeight] Height of written image in destination.
-   * @param {number} [width] Width of canvas.
-   * @param {number} [height] Height of canvas.
-   */
-  drawImage(tex, texWidth, texHeight, srcX, srcY, srcWidth, srcHeight, dstX, dstY, dstWidth, dstHeight, width, height) {
-    const gl = this.gl_;
-    if (dstX === void 0) {
-      dstX = srcX;
-    }
-    if (dstY === void 0) {
-      dstY = srcY;
-    }
-    if (srcWidth === void 0) {
-      srcWidth = texWidth;
-    }
-    if (srcHeight === void 0) {
-      srcHeight = texHeight;
-    }
-    if (dstWidth === void 0) {
-      dstWidth = srcWidth;
-    }
-    if (dstHeight === void 0) {
-      dstHeight = srcHeight;
-    }
-    if (width === void 0) {
-      width = gl.canvas.width;
-    }
-    if (height === void 0) {
-      height = gl.canvas.height;
-    }
-    gl.bindTexture(gl.TEXTURE_2D, tex);
-    gl.useProgram(this.program_);
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
-    gl.enableVertexAttribArray(this.positionLocation);
-    gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.texcoordBuffer);
-    gl.enableVertexAttribArray(this.texcoordLocation);
-    gl.vertexAttribPointer(this.texcoordLocation, 2, gl.FLOAT, false, 0, 0);
-    let matrix = orthographic(0, width, 0, height, -1, 1);
-    matrix = translate(matrix, dstX, dstY, 0);
-    matrix = scale(matrix, dstWidth, dstHeight, 1);
-    gl.uniformMatrix4fv(this.matrixLocation, false, matrix);
-    let texMatrix = translation(srcX / texWidth, srcY / texHeight, 0);
-    texMatrix = scale(
-      texMatrix,
-      srcWidth / texWidth,
-      srcHeight / texHeight,
-      1
-    );
-    gl.uniformMatrix4fv(this.textureMatrixLocation, false, texMatrix);
-    gl.uniform1i(this.textureLocation, 0);
-    gl.drawArrays(gl.TRIANGLES, 0, this.positions.length / 2);
-  }
-}
-function createShader(gl, type, source2) {
-  const shader = gl.createShader(type);
-  if (shader === null) {
-    throw new Error("Shader compilation failed");
-  }
-  gl.shaderSource(shader, source2);
-  gl.compileShader(shader);
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    const log = gl.getShaderInfoLog(shader);
-    if (log === null) {
-      throw new Error("Shader info log creation failed");
-    }
-    throw new Error(log);
-  }
-  return shader;
-}
-function createProgram(gl, fragmentSource, vertexSource) {
-  const program = gl.createProgram();
-  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexSource);
-  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
-  if (program === null) {
-    throw new Error("Program creation failed");
-  }
-  gl.attachShader(program, vertexShader);
-  gl.attachShader(program, fragmentShader);
-  gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    const log = gl.getProgramInfoLog(program);
-    if (log === null) {
-      throw new Error("Program info log creation failed");
-    }
-    throw new Error();
-  }
-  return program;
-}
-const EDGE_VERTEX_SHADER = `
-  attribute vec4 a_position;
-
-  uniform mat4 u_matrix;
-
-  void main() {
-     gl_Position = u_matrix * a_position;
-  }
-`;
-const EDGE_FRAGMENT_SHADER = `
-  precision mediump float;
-
-  uniform vec4 u_val;
-  void main() {
-     gl_FragColor = u_val;
-  }
-`;
-const TRIANGLE_VERTEX_SHADER = `
-  attribute vec4 a_position;
-  attribute vec2 a_texcoord;
-
-  varying vec2 v_texcoord;
-
-  uniform mat4 u_matrix;
-
-  void main() {
-     gl_Position = u_matrix * a_position;
-     v_texcoord = a_texcoord;
-  }
-`;
-const TRIANGLE_FRAGMENT_SHADER = `
-  precision mediump float;
-
-  varying vec2 v_texcoord;
-
-  uniform sampler2D u_texture;
-
-  void main() {
-    if (v_texcoord.x < 0.0 || v_texcoord.x > 1.0 || v_texcoord.y < 0.0 || v_texcoord.y > 1.0) {
-      discard;
-    }
-    gl_FragColor = texture2D(u_texture, v_texcoord);
-  }
-`;
-function createCanvasContextWebGL(width, height, canvasPool2, settings) {
-  let canvas;
-  if (canvasPool2 && canvasPool2.length) {
-    canvas = /** @type {HTMLCanvasElement} */
-    canvasPool2.shift();
-  } else if (WORKER_OFFSCREEN_CANVAS) {
-    canvas = new OffscreenCanvas(width || 300, height || 300);
-  } else {
-    canvas = document.createElement("canvas");
-  }
-  if (width) {
-    canvas.width = width;
-  }
-  if (height) {
-    canvas.height = height;
-  }
-  return (
-    /** @type {WebGLRenderingContext} */
-    canvas.getContext("webgl", settings)
-  );
-}
-function releaseGLCanvas(gl) {
-  const canvas = gl.canvas;
-  canvas.width = 1;
-  canvas.height = 1;
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
-}
-const canvasGLPool = [];
-function render(gl, width_, height_, pixelRatio, sourceResolution, targetResolution, targetExtent, triangulation, sources, gutter, dataType, renderEdges, interpolate, drawSingle) {
-  const width = Math.round(pixelRatio * width_);
-  const height = Math.round(pixelRatio * height_);
-  gl.canvas.width = width;
-  gl.canvas.height = height;
-  let resultFrameBuffer;
-  let resultTexture;
-  {
-    resultTexture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, resultTexture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    if (interpolate) {
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    } else {
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    }
-    gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      gl.RGBA,
-      width,
-      height,
-      0,
-      gl.RGBA,
-      dataType,
-      null
-    );
-    resultFrameBuffer = gl.createFramebuffer();
-    gl.bindFramebuffer(gl.FRAMEBUFFER, resultFrameBuffer);
-    gl.framebufferTexture2D(
-      gl.FRAMEBUFFER,
-      gl.COLOR_ATTACHMENT0,
-      gl.TEXTURE_2D,
-      resultTexture,
-      0
-    );
-  }
-  if (resultFrameBuffer === null) {
-    throw new Error("Could not create framebuffer");
-  }
-  if (resultTexture === null) {
-    throw new Error("Could not create texture");
-  }
-  if (sources.length === 0) {
-    return {
-      width,
-      height,
-      framebuffer: resultFrameBuffer,
-      texture: resultTexture
-    };
-  }
-  const sourceDataExtent = createEmpty();
-  sources.forEach(function(src, i, arr) {
-    extend$2(sourceDataExtent, src.extent);
-  });
-  let stitchTexture;
-  let stitchWidth;
-  let stitchHeight;
-  const stitchScale = 1 / sourceResolution;
-  {
-    stitchTexture = gl.createTexture();
-    if (resultTexture === null) {
-      throw new Error("Could not create texture");
-    }
-    stitchWidth = Math.round(getWidth(sourceDataExtent) * stitchScale);
-    stitchHeight = Math.round(getHeight(sourceDataExtent) * stitchScale);
-    const maxTexSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
-    const largeSide = Math.max(stitchWidth, stitchHeight);
-    const scaleFactor = largeSide > maxTexSize ? maxTexSize / largeSide : 1;
-    const stitchWidthFixed = Math.round(stitchWidth * scaleFactor);
-    const stitchHeightFixed = Math.round(stitchHeight * scaleFactor);
-    gl.bindTexture(gl.TEXTURE_2D, stitchTexture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    if (interpolate) {
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    } else {
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    }
-    gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      gl.RGBA,
-      stitchWidthFixed,
-      stitchHeightFixed,
-      0,
-      gl.RGBA,
-      dataType,
-      null
-    );
-    const fb = gl.createFramebuffer();
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
-    gl.framebufferTexture2D(
-      gl.FRAMEBUFFER,
-      gl.COLOR_ATTACHMENT0,
-      gl.TEXTURE_2D,
-      stitchTexture,
-      0
-    );
-    const webGLCanvas = new Canvas(gl);
-    sources.forEach(function(src, i, arr) {
-      const xPos = (src.extent[0] - sourceDataExtent[0]) * stitchScale * scaleFactor;
-      const yPos = -(src.extent[3] - sourceDataExtent[3]) * stitchScale * scaleFactor;
-      const srcWidth = getWidth(src.extent) * stitchScale * scaleFactor;
-      const srcHeight = getHeight(src.extent) * stitchScale * scaleFactor;
-      gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
-      gl.viewport(0, 0, stitchWidthFixed, stitchHeightFixed);
-      if (src.clipExtent) {
-        const xPos2 = (src.clipExtent[0] - sourceDataExtent[0]) * stitchScale * scaleFactor;
-        const yPos2 = -(src.clipExtent[3] - sourceDataExtent[3]) * stitchScale * scaleFactor;
-        const width2 = getWidth(src.clipExtent) * stitchScale * scaleFactor;
-        const height2 = getHeight(src.clipExtent) * stitchScale * scaleFactor;
-        gl.enable(gl.SCISSOR_TEST);
-        gl.scissor(
-          interpolate ? xPos2 : Math.round(xPos2),
-          interpolate ? yPos2 : Math.round(yPos2),
-          interpolate ? width2 : Math.round(xPos2 + width2) - Math.round(xPos2),
-          interpolate ? height2 : Math.round(yPos2 + height2) - Math.round(yPos2)
-        );
-      }
-      webGLCanvas.drawImage(
-        src.texture,
-        src.width,
-        src.height,
-        gutter,
-        gutter,
-        src.width - 2 * gutter,
-        src.height - 2 * gutter,
-        interpolate ? xPos : Math.round(xPos),
-        interpolate ? yPos : Math.round(yPos),
-        interpolate ? srcWidth : Math.round(xPos + srcWidth) - Math.round(xPos),
-        interpolate ? srcHeight : Math.round(yPos + srcHeight) - Math.round(yPos),
-        stitchWidthFixed,
-        stitchHeightFixed
-      );
-      gl.disable(gl.SCISSOR_TEST);
-    });
-    gl.deleteFramebuffer(fb);
-  }
-  const targetTopLeft = getTopLeft(targetExtent);
-  const sourceTopLeft = getTopLeft(sourceDataExtent);
-  const getUVs = (target) => {
-    const u0 = (target[0][0] - targetTopLeft[0]) / targetResolution * pixelRatio;
-    const v0 = -(target[0][1] - targetTopLeft[1]) / targetResolution * pixelRatio;
-    const u1 = (target[1][0] - targetTopLeft[0]) / targetResolution * pixelRatio;
-    const v1 = -(target[1][1] - targetTopLeft[1]) / targetResolution * pixelRatio;
-    const u2 = (target[2][0] - targetTopLeft[0]) / targetResolution * pixelRatio;
-    const v2 = -(target[2][1] - targetTopLeft[1]) / targetResolution * pixelRatio;
-    return { u1, v1, u0, v0, u2, v2 };
-  };
-  gl.bindFramebuffer(gl.FRAMEBUFFER, resultFrameBuffer);
-  gl.viewport(0, 0, width, height);
-  {
-    const vertices = [];
-    const texcoords = [];
-    const triProgram = createProgram(
-      gl,
-      TRIANGLE_FRAGMENT_SHADER,
-      TRIANGLE_VERTEX_SHADER
-    );
-    gl.useProgram(triProgram);
-    const textureLocation = gl.getUniformLocation(triProgram, "u_texture");
-    gl.bindTexture(gl.TEXTURE_2D, stitchTexture);
-    gl.uniform1i(textureLocation, 0);
-    triangulation.getTriangles().forEach(function(triangle, i, arr) {
-      const source2 = triangle.source;
-      const target = triangle.target;
-      const { u1, v1, u0, v0, u2, v2 } = getUVs(target);
-      const su0 = (source2[0][0] - sourceTopLeft[0]) / sourceResolution / stitchWidth;
-      const sv0 = -(source2[0][1] - sourceTopLeft[1]) / sourceResolution / stitchHeight;
-      const su1 = (source2[1][0] - sourceTopLeft[0]) / sourceResolution / stitchWidth;
-      const sv1 = -(source2[1][1] - sourceTopLeft[1]) / sourceResolution / stitchHeight;
-      const su2 = (source2[2][0] - sourceTopLeft[0]) / sourceResolution / stitchWidth;
-      const sv2 = -(source2[2][1] - sourceTopLeft[1]) / sourceResolution / stitchHeight;
-      vertices.push(u1, v1, u0, v0, u2, v2);
-      texcoords.push(su1, sv1, su0, sv0, su2, sv2);
-    });
-    const matrix = orthographic(0, width, height, 0, -1, 1);
-    const matrixLocation = gl.getUniformLocation(triProgram, "u_matrix");
-    gl.uniformMatrix4fv(matrixLocation, false, matrix);
-    const positionLocation = gl.getAttribLocation(triProgram, "a_position");
-    const positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(positionLocation);
-    const texcoordLocation = gl.getAttribLocation(triProgram, "a_texcoord");
-    const texcoordBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, texcoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texcoords), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(texcoordLocation, 2, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(texcoordLocation);
-    gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2);
-  }
-  if (renderEdges) {
-    const edgeProgram = createProgram(
-      gl,
-      EDGE_FRAGMENT_SHADER,
-      EDGE_VERTEX_SHADER
-    );
-    gl.useProgram(edgeProgram);
-    const matrix = orthographic(0, width, height, 0, -1, 1);
-    const matrixLocation = gl.getUniformLocation(edgeProgram, "u_matrix");
-    gl.uniformMatrix4fv(matrixLocation, false, matrix);
-    const burnval = Array.isArray(renderEdges) ? renderEdges : [0, 0, 0, 255];
-    const burnvalLocation = gl.getUniformLocation(edgeProgram, "u_val");
-    {
-      gl.uniform4fv(burnvalLocation, burnval);
-    }
-    const positionLocation = gl.getAttribLocation(edgeProgram, "a_position");
-    const positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(positionLocation);
-    const lines = triangulation.getTriangles().reduce(function(lines2, triangle) {
-      const target = triangle.target;
-      const { u1, v1, u0, v0, u2, v2 } = getUVs(target);
-      return lines2.concat([u1, v1, u0, v0, u0, v0, u2, v2, u2, v2, u1, v1]);
-    }, []);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lines), gl.STATIC_DRAW);
-    gl.drawArrays(gl.LINES, 0, lines.length / 2);
-  }
-  return {
-    width,
-    height,
-    framebuffer: resultFrameBuffer,
-    texture: resultTexture
-  };
-}
-class ReprojDataTile extends DataTile {
-  /**
-   * @param {Options} options Tile options.
-   */
-  constructor(options) {
-    super({
-      tileCoord: options.tileCoord,
-      loader: () => Promise.resolve(new Uint8ClampedArray(4)),
-      interpolate: options.interpolate,
-      transition: options.transition
-    });
-    this.renderEdges_ = options.renderEdges !== void 0 ? options.renderEdges : false;
-    this.pixelRatio_ = options.pixelRatio;
-    this.gutter_ = options.gutter;
-    this.reprojData_ = null;
-    this.reprojError_ = null;
-    this.reprojSize_ = void 0;
-    this.sourceTileGrid_ = options.sourceTileGrid;
-    this.targetTileGrid_ = options.targetTileGrid;
-    this.wrappedTileCoord_ = options.wrappedTileCoord || options.tileCoord;
-    this.sourceTiles_ = [];
-    this.sourcesListenerKeys_ = null;
-    this.sourceZ_ = 0;
-    const sourceProj = options.sourceProj;
-    const sourceProjExtent = sourceProj.getExtent();
-    const sourceTileGridExtent = options.sourceTileGrid.getExtent();
-    this.clipExtent_ = sourceProj.canWrapX() ? sourceTileGridExtent ? getIntersection(sourceProjExtent, sourceTileGridExtent) : sourceProjExtent : sourceTileGridExtent;
-    const targetExtent = this.targetTileGrid_.getTileCoordExtent(
-      this.wrappedTileCoord_
-    );
-    const maxTargetExtent = this.targetTileGrid_.getExtent();
-    let maxSourceExtent = this.sourceTileGrid_.getExtent();
-    const limitedTargetExtent = maxTargetExtent ? getIntersection(targetExtent, maxTargetExtent) : targetExtent;
-    if (getArea(limitedTargetExtent) === 0) {
-      this.state = TileState.EMPTY;
-      return;
-    }
-    if (sourceProjExtent) {
-      if (!maxSourceExtent) {
-        maxSourceExtent = sourceProjExtent;
-      } else {
-        maxSourceExtent = getIntersection(maxSourceExtent, sourceProjExtent);
-      }
-    }
-    const targetResolution = this.targetTileGrid_.getResolution(
-      this.wrappedTileCoord_[0]
-    );
-    const targetProj = options.targetProj;
-    const sourceResolution = calculateSourceExtentResolution(
-      sourceProj,
-      targetProj,
-      limitedTargetExtent,
-      targetResolution
-    );
-    if (!isFinite(sourceResolution) || sourceResolution <= 0) {
-      this.state = TileState.EMPTY;
-      return;
-    }
-    const errorThresholdInPixels = options.errorThreshold !== void 0 ? options.errorThreshold : ERROR_THRESHOLD;
-    this.triangulation_ = new Triangulation(
-      sourceProj,
-      targetProj,
-      limitedTargetExtent,
-      maxSourceExtent,
-      sourceResolution * errorThresholdInPixels,
-      targetResolution,
-      options.transformMatrix
-    );
-    if (this.triangulation_.getTriangles().length === 0) {
-      this.state = TileState.EMPTY;
-      return;
-    }
-    this.sourceZ_ = this.sourceTileGrid_.getZForResolution(sourceResolution);
-    let sourceExtent = this.triangulation_.calculateSourceExtent();
-    if (maxSourceExtent) {
-      if (sourceProj.canWrapX()) {
-        sourceExtent[1] = clamp(
-          sourceExtent[1],
-          maxSourceExtent[1],
-          maxSourceExtent[3]
-        );
-        sourceExtent[3] = clamp(
-          sourceExtent[3],
-          maxSourceExtent[1],
-          maxSourceExtent[3]
-        );
-      } else {
-        sourceExtent = getIntersection(sourceExtent, maxSourceExtent);
-      }
-    }
-    if (!getArea(sourceExtent)) {
-      this.state = TileState.EMPTY;
-    } else {
-      let worldWidth = 0;
-      let worldsAway = 0;
-      if (sourceProj.canWrapX()) {
-        worldWidth = getWidth(sourceProjExtent);
-        worldsAway = Math.floor(
-          (sourceExtent[0] - sourceProjExtent[0]) / worldWidth
-        );
-      }
-      const sourceExtents = wrapAndSliceX(
-        sourceExtent.slice(),
-        sourceProj,
-        true
-      );
-      sourceExtents.forEach((extent) => {
-        const sourceRange = this.sourceTileGrid_.getTileRangeForExtentAndZ(
-          extent,
-          this.sourceZ_
-        );
-        const getTile = options.getTileFunction;
-        for (let srcX = sourceRange.minX; srcX <= sourceRange.maxX; srcX++) {
-          for (let srcY = sourceRange.minY; srcY <= sourceRange.maxY; srcY++) {
-            const tile = getTile(this.sourceZ_, srcX, srcY, this.pixelRatio_);
-            if (tile) {
-              const offset2 = worldsAway * worldWidth;
-              this.sourceTiles_.push({ tile, offset: offset2 });
-            }
-          }
+class ZIndexContext {
+  constructor() {
+    this.instructions_ = [];
+    this.zIndex = 0;
+    this.offset_ = 0;
+    this.context_ = /** @type {ZIndexContextProxy} */
+    new Proxy(getSharedCanvasContext2D(), {
+      get: (target, property) => {
+        if (typeof /** @type {*} */
+        getSharedCanvasContext2D()[property] !== "function") {
+          return void 0;
         }
-        ++worldsAway;
-      });
-      if (this.sourceTiles_.length === 0) {
-        this.state = TileState.EMPTY;
+        this.push_(property);
+        return this.pushMethodArgs_;
+      },
+      set: (target, property, value) => {
+        this.push_(property, value);
+        return true;
       }
+    });
+  }
+  /**
+   * @param {...*} args Arguments to push to the instructions array.
+   * @private
+   */
+  push_(...args) {
+    const instructions = this.instructions_;
+    const index = this.zIndex + this.offset_;
+    if (!instructions[index]) {
+      instructions[index] = [];
     }
-  }
-  /**
-   * Get the tile size.
-   * @return {import('../size.js').Size} Tile size.
-   * @override
-   */
-  getSize() {
-    return this.reprojSize_;
-  }
-  /**
-   * Get the data for the tile.
-   * @return {import("../DataTile.js").Data} Tile data.
-   * @override
-   */
-  getData() {
-    return this.reprojData_;
-  }
-  /**
-   * Get any loading error.
-   * @return {Error} Loading error.
-   * @override
-   */
-  getError() {
-    return this.reprojError_;
+    instructions[index].push(...args);
   }
   /**
    * @private
+   * @param {...*} args Args.
+   * @return {ZIndexContext} This.
    */
-  reproject_() {
-    const dataSources = [];
-    let imageLike = false;
-    this.sourceTiles_.forEach((source2) => {
-      var _a;
-      const tile = source2.tile;
-      if (!tile || tile.getState() !== TileState.LOADED) {
-        return;
-      }
-      const size2 = tile.getSize();
-      const gutter = this.gutter_;
-      let tileData;
-      const arrayData = asArrayLike(tile.getData());
-      if (arrayData) {
-        tileData = arrayData;
-      } else {
-        imageLike = true;
-        tileData = toArray(asImageLike(tile.getData()));
-      }
-      const pixelSize = [size2[0] + 2 * gutter, size2[1] + 2 * gutter];
-      const isFloat = tileData instanceof Float32Array;
-      const pixelCount = pixelSize[0] * pixelSize[1];
-      const DataType = isFloat ? Float32Array : Uint8ClampedArray;
-      const tileDataR = new DataType(tileData.buffer);
-      const bytesPerElement = DataType.BYTES_PER_ELEMENT;
-      const bytesPerPixel = bytesPerElement * tileDataR.length / pixelCount;
-      const bytesPerRow = tileDataR.byteLength / pixelSize[1];
-      const bandCount2 = Math.floor(
-        bytesPerRow / bytesPerElement / pixelSize[0]
-      );
-      const extent = this.sourceTileGrid_.getTileCoordExtent(tile.tileCoord);
-      extent[0] += source2.offset;
-      extent[2] += source2.offset;
-      const clipExtent = (_a = this.clipExtent_) == null ? void 0 : _a.slice();
-      if (clipExtent) {
-        clipExtent[0] += source2.offset;
-        clipExtent[2] += source2.offset;
-      }
-      dataSources.push({
-        extent,
-        clipExtent,
-        data: tileDataR,
-        dataType: DataType,
-        bytesPerPixel,
-        pixelSize,
-        bandCount: bandCount2
-      });
-    });
-    this.sourceTiles_.length = 0;
-    if (dataSources.length === 0) {
-      this.state = TileState.ERROR;
-      this.changed();
-      return;
-    }
-    const z2 = this.wrappedTileCoord_[0];
-    const size = this.targetTileGrid_.getTileSize(z2);
-    const targetWidth = typeof size === "number" ? size : size[0];
-    const targetHeight = typeof size === "number" ? size : size[1];
-    const outWidth = targetWidth * this.pixelRatio_;
-    const outHeight = targetHeight * this.pixelRatio_;
-    const targetResolution = this.targetTileGrid_.getResolution(z2);
-    const sourceResolution = this.sourceTileGrid_.getResolution(this.sourceZ_);
-    const targetExtent = this.targetTileGrid_.getTileCoordExtent(
-      this.wrappedTileCoord_
-    );
-    const bandCount = dataSources[0].bandCount;
-    const dataR = new dataSources[0].dataType(bandCount * outWidth * outHeight);
-    const gl = createCanvasContextWebGL(outWidth, outHeight, canvasGLPool, {
-      premultipliedAlpha: false,
-      antialias: false
-    });
-    let willInterpolate;
-    const format = gl.RGBA;
-    let textureType;
-    if (dataSources[0].dataType == Float32Array) {
-      textureType = gl.FLOAT;
-      gl.getExtension("WEBGL_color_buffer_float");
-      gl.getExtension("OES_texture_float");
-      gl.getExtension("EXT_float_blend");
-      const extension = gl.getExtension("OES_texture_float_linear");
-      const canInterpolate = extension !== null;
-      willInterpolate = canInterpolate && this.interpolate;
-    } else {
-      textureType = gl.UNSIGNED_BYTE;
-      willInterpolate = this.interpolate;
-    }
-    const BANDS_PR_REPROJ = 4;
-    const reprojs = Math.ceil(bandCount / BANDS_PR_REPROJ);
-    for (let reproj = reprojs - 1; reproj >= 0; --reproj) {
-      const sources = [];
-      for (let i = 0, len = dataSources.length; i < len; ++i) {
-        const dataSource = dataSources[i];
-        const pixelSize = dataSource.pixelSize;
-        const width2 = pixelSize[0];
-        const height2 = pixelSize[1];
-        const data2 = new dataSource.dataType(BANDS_PR_REPROJ * width2 * height2);
-        const dataS = dataSource.data;
-        let offset3 = reproj * BANDS_PR_REPROJ;
-        for (let j = 0, len2 = data2.length; j < len2; j += BANDS_PR_REPROJ) {
-          data2[j] = dataS[offset3];
-          data2[j + 1] = dataS[offset3 + 1];
-          data2[j + 2] = dataS[offset3 + 2];
-          data2[j + 3] = dataS[offset3 + 3];
-          offset3 += bandCount;
+  pushMethodArgs_ = (...args) => {
+    this.push_(args);
+    return this;
+  };
+  /**
+   * Push a function that renders to the context directly.
+   * @param {function(CanvasRenderingContext2D): void} render Function.
+   */
+  pushFunction(render2) {
+    this.push_(render2);
+  }
+  /**
+   * Get a proxy for CanvasRenderingContext2D which does not support getting state
+   * (e.g. `context.globalAlpha`, which will return `undefined`). To set state, if it relies on a
+   * previous state (e.g. `context.globalAlpha = context.globalAlpha / 2`), set a function,
+   * e.g. `context.globalAlpha = (context) => context.globalAlpha / 2`.
+   * @return {ZIndexContextProxy} Context.
+   */
+  getContext() {
+    return this.context_;
+  }
+  /**
+   * @param {CanvasRenderingContext2D} context Context.
+   */
+  draw(context) {
+    this.instructions_.forEach((instructionsAtIndex) => {
+      for (let i = 0, ii = instructionsAtIndex.length; i < ii; ++i) {
+        const property = instructionsAtIndex[i];
+        if (typeof property === "function") {
+          property(context);
+          continue;
         }
-        const texture = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        if (willInterpolate) {
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        const instructionAtIndex = instructionsAtIndex[++i];
+        if (typeof /** @type {*} */
+        context[property] === "function") {
+          context[property](...instructionAtIndex);
         } else {
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        }
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texImage2D(
-          gl.TEXTURE_2D,
-          0,
-          format,
-          width2,
-          height2,
-          0,
-          format,
-          textureType,
-          data2
-        );
-        sources.push({
-          extent: dataSource.extent,
-          clipExtent: dataSource.clipExtent,
-          texture,
-          width: width2,
-          height: height2
-        });
-      }
-      const { framebuffer, width, height } = render(
-        gl,
-        targetWidth,
-        targetHeight,
-        this.pixelRatio_,
-        sourceResolution,
-        targetResolution,
-        targetExtent,
-        this.triangulation_,
-        sources,
-        this.gutter_,
-        textureType,
-        this.renderEdges_,
-        willInterpolate
-      );
-      const rows = width;
-      const cols = height * BANDS_PR_REPROJ;
-      const data = new dataSources[0].dataType(rows * cols);
-      gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
-      gl.readPixels(0, 0, width, height, gl.RGBA, textureType, data);
-      let offset2 = reproj * BANDS_PR_REPROJ;
-      for (let i = 0, len = data.length; i < len; i += BANDS_PR_REPROJ) {
-        const flipY = (rows - 1 - (i / cols | 0)) * cols + i % cols;
-        dataR[offset2] = data[flipY];
-        dataR[offset2 + 1] = data[flipY + 1];
-        dataR[offset2 + 2] = data[flipY + 2];
-        dataR[offset2 + 3] = data[flipY + 3];
-        offset2 += bandCount;
-      }
-    }
-    releaseGLCanvas(gl);
-    canvasGLPool.push(gl.canvas);
-    if (imageLike) {
-      const context = createCanvasContext2D(targetWidth, targetHeight);
-      const imageData = new ImageData(dataR, targetWidth);
-      context.putImageData(imageData, 0, 0);
-      this.reprojData_ = context.canvas;
-    } else {
-      this.reprojData_ = dataR;
-    }
-    this.reprojSize_ = [Math.round(outWidth), Math.round(outHeight)];
-    this.state = TileState.LOADED;
-    this.changed();
-  }
-  /**
-   * Load not yet loaded URI.
-   * @override
-   */
-  load() {
-    if (this.state !== TileState.IDLE && this.state !== TileState.ERROR) {
-      return;
-    }
-    this.state = TileState.LOADING;
-    this.changed();
-    let leftToLoad = 0;
-    this.sourcesListenerKeys_ = [];
-    this.sourceTiles_.forEach(({ tile }) => {
-      const state = tile.getState();
-      if (state !== TileState.IDLE && state !== TileState.LOADING) {
-        return;
-      }
-      leftToLoad++;
-      const sourceListenKey = listen(tile, EventType.CHANGE, () => {
-        const state2 = tile.getState();
-        if (state2 == TileState.LOADED || state2 == TileState.ERROR || state2 == TileState.EMPTY) {
-          unlistenByKey(sourceListenKey);
-          leftToLoad--;
-          if (leftToLoad === 0) {
-            this.unlistenSources_();
-            this.reproject_();
+          if (typeof instructionAtIndex === "function") {
+            context[property] = instructionAtIndex(context);
+            continue;
           }
+          context[property] = instructionAtIndex;
         }
-      });
-      this.sourcesListenerKeys_.push(sourceListenKey);
+      }
     });
-    if (leftToLoad === 0) {
-      setTimeout(this.reproject_.bind(this), 0);
-    } else {
-      this.sourceTiles_.forEach(function({ tile }) {
-        const state = tile.getState();
-        if (state == TileState.IDLE) {
-          tile.load();
-        }
-      });
-    }
+  }
+  clear() {
+    this.instructions_.length = 0;
+    this.zIndex = 0;
+    this.offset_ = 0;
   }
   /**
-   * @private
+   * Offsets the zIndex by the highest current zIndex. Useful for rendering multiple worlds or tiles, to
+   * avoid conflicting context.clip() or context.save()/restore() calls.
    */
-  unlistenSources_() {
-    this.sourcesListenerKeys_.forEach(unlistenByKey);
-    this.sourcesListenerKeys_ = null;
+  offset() {
+    this.offset_ = this.instructions_.length;
+    this.zIndex = 0;
   }
 }
-function getCacheKey(sourceKey, z2, x2, y2) {
-  return `${sourceKey},${getKeyZXY(z2, x2, y2)}`;
+const maxStaleKeys = 5;
+class LayerRenderer extends Observable {
+  /**
+   * @param {LayerType} layer Layer.
+   */
+  constructor(layer) {
+    super();
+    this.ready = true;
+    this.boundHandleImageChange_ = this.handleImageChange_.bind(this);
+    this.layer_ = layer;
+    this.staleKeys_ = new Array();
+    this.maxStaleKeys = maxStaleKeys;
+  }
+  /**
+   * @return {Array<string>} Get the list of stale keys.
+   */
+  getStaleKeys() {
+    return this.staleKeys_;
+  }
+  /**
+   * @param {string} key The new stale key.
+   */
+  prependStaleKey(key) {
+    this.staleKeys_.unshift(key);
+    if (this.staleKeys_.length > this.maxStaleKeys) {
+      this.staleKeys_.length = this.maxStaleKeys;
+    }
+  }
+  /**
+   * Asynchronous layer level hit detection.
+   * @param {import("../pixel.js").Pixel} pixel Pixel.
+   * @return {Promise<Array<import("../Feature").FeatureLike>>} Promise that resolves with
+   * an array of features.
+   */
+  getFeatures(pixel) {
+    return abstract();
+  }
+  /**
+   * @param {import("../pixel.js").Pixel} pixel Pixel.
+   * @return {Uint8ClampedArray|Uint8Array|Float32Array|DataView|null} Pixel data.
+   */
+  getData(pixel) {
+    return null;
+  }
+  /**
+   * Determine whether render should be called.
+   * @abstract
+   * @param {import("../Map.js").FrameState} frameState Frame state.
+   * @return {boolean} Layer is ready to be rendered.
+   */
+  prepareFrame(frameState) {
+    return abstract();
+  }
+  /**
+   * Render the layer.
+   * @abstract
+   * @param {import("../Map.js").FrameState} frameState Frame state.
+   * @param {HTMLElement|null} target Target that may be used to render content to.
+   * @return {HTMLElement} The rendered element.
+   */
+  renderFrame(frameState, target) {
+    return abstract();
+  }
+  /**
+   * @abstract
+   * @param {import("../coordinate.js").Coordinate} coordinate Coordinate.
+   * @param {import("../Map.js").FrameState} frameState Frame state.
+   * @param {number} hitTolerance Hit tolerance in pixels.
+   * @param {import("./vector.js").FeatureCallback<T>} callback Feature callback.
+   * @param {Array<import("./Map.js").HitMatch<T>>} matches The hit detected matches with tolerance.
+   * @return {T|undefined} Callback result.
+   * @template T
+   */
+  forEachFeatureAtCoordinate(coordinate, frameState, hitTolerance, callback, matches) {
+    return void 0;
+  }
+  /**
+   * @return {LayerType} Layer.
+   */
+  getLayer() {
+    return this.layer_;
+  }
+  /**
+   * Perform action necessary to get the layer rendered after new fonts have loaded
+   * @abstract
+   */
+  handleFontsChanged() {
+  }
+  /**
+   * Handle changes in image state.
+   * @param {import("../events/Event.js").default} event Image change event.
+   * @private
+   */
+  handleImageChange_(event) {
+    const image = (
+      /** @type {import("../Image.js").default} */
+      event.target
+    );
+    if (image.getState() === ImageState.LOADED || image.getState() === ImageState.ERROR) {
+      this.renderIfReadyAndVisible();
+    }
+  }
+  /**
+   * Load the image if not already loaded, and register the image change
+   * listener if needed.
+   * @param {import("../Image.js").default} image Image.
+   * @return {boolean} `true` if the image is already loaded, `false` otherwise.
+   * @protected
+   */
+  loadImage(image) {
+    let imageState = image.getState();
+    if (imageState != ImageState.LOADED && imageState != ImageState.ERROR) {
+      image.addEventListener(EventType.CHANGE, this.boundHandleImageChange_);
+    }
+    if (imageState == ImageState.IDLE) {
+      image.load();
+      imageState = image.getState();
+    }
+    return imageState == ImageState.LOADED;
+  }
+  /**
+   * @protected
+   */
+  renderIfReadyAndVisible() {
+    const layer = this.getLayer();
+    if (layer && layer.getVisible() && layer.getSourceState() === "ready") {
+      layer.changed();
+    }
+  }
+  /**
+   * @param {import("../Map.js").FrameState} frameState Frame state.
+   */
+  renderDeferred(frameState) {
+  }
+  /**
+   * Clean up.
+   * @override
+   */
+  disposeInternal() {
+    delete this.layer_;
+    super.disposeInternal();
+  }
+}
+const canvasPool = [];
+let pixelContext = null;
+function createPixelContext() {
+  pixelContext = createCanvasContext2D(1, 1, void 0, {
+    willReadFrequently: true
+  });
+}
+class CanvasLayerRenderer extends LayerRenderer {
+  /**
+   * @param {LayerType} layer Layer.
+   */
+  constructor(layer) {
+    super(layer);
+    this.container = null;
+    this.renderedResolution;
+    this.tempTransform = create();
+    this.pixelTransform = create();
+    this.inversePixelTransform = create();
+    this.context = null;
+    this.deferredContext_ = null;
+    this.containerReused = false;
+    this.frameState = null;
+  }
+  /**
+   * @param {import('../../DataTile.js').ImageLike} image Image.
+   * @param {number} col The column index.
+   * @param {number} row The row index.
+   * @return {Uint8ClampedArray|null} The image data.
+   */
+  getImageData(image, col, row) {
+    if (!pixelContext) {
+      createPixelContext();
+    }
+    pixelContext.clearRect(0, 0, 1, 1);
+    let data;
+    try {
+      pixelContext.drawImage(image, col, row, 1, 1, 0, 0, 1, 1);
+      data = pixelContext.getImageData(0, 0, 1, 1).data;
+    } catch {
+      pixelContext = null;
+      return null;
+    }
+    return data;
+  }
+  /**
+   * @param {import('../../Map.js').FrameState} frameState Frame state.
+   * @return {string} Background color.
+   */
+  getBackground(frameState) {
+    const layer = this.getLayer();
+    let background = layer.getBackground();
+    if (typeof background === "function") {
+      background = background(frameState.viewState.resolution);
+    }
+    return background || void 0;
+  }
+  /**
+   * Get a rendering container from an existing target, if compatible.
+   * @param {HTMLElement} target Potential render target.
+   * @param {string} transform CSS transform matrix.
+   * @param {string} [backgroundColor] Background color.
+   */
+  useContainer(target, transform2, backgroundColor) {
+    const layerClassName = this.getLayer().getClassName();
+    let container, context;
+    if (target && target.className === layerClassName && (!backgroundColor || target && target.style.backgroundColor && equals(
+      asArray(target.style.backgroundColor),
+      asArray(backgroundColor)
+    ))) {
+      const canvas = target.firstElementChild;
+      if (canvas instanceof HTMLCanvasElement) {
+        context = canvas.getContext("2d");
+      }
+    }
+    if (context && equivalent(context.canvas.style.transform, transform2)) {
+      this.container = target;
+      this.context = context;
+      this.containerReused = true;
+    } else if (this.containerReused) {
+      this.container = null;
+      this.context = null;
+      this.containerReused = false;
+    } else if (this.container) {
+      this.container.style.backgroundColor = null;
+    }
+    if (!this.container) {
+      container = document.createElement("div");
+      container.className = layerClassName;
+      let style = container.style;
+      style.position = "absolute";
+      style.width = "100%";
+      style.height = "100%";
+      context = createCanvasContext2D();
+      const canvas = context.canvas;
+      container.appendChild(canvas);
+      style = canvas.style;
+      style.position = "absolute";
+      style.left = "0";
+      style.transformOrigin = "top left";
+      this.container = container;
+      this.context = context;
+    }
+    if (!this.containerReused && backgroundColor && !this.container.style.backgroundColor) {
+      this.container.style.backgroundColor = backgroundColor;
+    }
+  }
+  /**
+   * @param {CanvasRenderingContext2D} context Context.
+   * @param {import("../../Map.js").FrameState} frameState Frame state.
+   * @param {import("../../extent.js").Extent} extent Clip extent.
+   * @protected
+   */
+  clipUnrotated(context, frameState, extent) {
+    const topLeft = getTopLeft(extent);
+    const topRight = getTopRight(extent);
+    const bottomRight = getBottomRight(extent);
+    const bottomLeft = getBottomLeft(extent);
+    apply(frameState.coordinateToPixelTransform, topLeft);
+    apply(frameState.coordinateToPixelTransform, topRight);
+    apply(frameState.coordinateToPixelTransform, bottomRight);
+    apply(frameState.coordinateToPixelTransform, bottomLeft);
+    const inverted = this.inversePixelTransform;
+    apply(inverted, topLeft);
+    apply(inverted, topRight);
+    apply(inverted, bottomRight);
+    apply(inverted, bottomLeft);
+    context.save();
+    context.beginPath();
+    context.moveTo(Math.round(topLeft[0]), Math.round(topLeft[1]));
+    context.lineTo(Math.round(topRight[0]), Math.round(topRight[1]));
+    context.lineTo(Math.round(bottomRight[0]), Math.round(bottomRight[1]));
+    context.lineTo(Math.round(bottomLeft[0]), Math.round(bottomLeft[1]));
+    context.clip();
+  }
+  /**
+   * @param {import("../../Map.js").FrameState} frameState Frame state.
+   * @param {HTMLElement} target Target that may be used to render content to.
+   * @protected
+   */
+  prepareContainer(frameState, target) {
+    const extent = frameState.extent;
+    const resolution = frameState.viewState.resolution;
+    const rotation = frameState.viewState.rotation;
+    const pixelRatio = frameState.pixelRatio;
+    const width = Math.round(getWidth(extent) / resolution * pixelRatio);
+    const height = Math.round(getHeight(extent) / resolution * pixelRatio);
+    compose(
+      this.pixelTransform,
+      frameState.size[0] / 2,
+      frameState.size[1] / 2,
+      1 / pixelRatio,
+      1 / pixelRatio,
+      rotation,
+      -width / 2,
+      -height / 2
+    );
+    makeInverse(this.inversePixelTransform, this.pixelTransform);
+    const canvasTransform = toString$1(this.pixelTransform);
+    this.useContainer(target, canvasTransform, this.getBackground(frameState));
+    if (!this.containerReused) {
+      const canvas = this.context.canvas;
+      if (canvas.width != width || canvas.height != height) {
+        canvas.width = width;
+        canvas.height = height;
+      } else {
+        this.context.clearRect(0, 0, width, height);
+      }
+      if (canvasTransform !== canvas.style.transform) {
+        canvas.style.transform = canvasTransform;
+      }
+    }
+  }
+  /**
+   * @param {import("../../render/EventType.js").default} type Event type.
+   * @param {CanvasRenderingContext2D} context Context.
+   * @param {import("../../Map.js").FrameState} frameState Frame state.
+   * @private
+   */
+  dispatchRenderEvent_(type, context, frameState) {
+    const layer = this.getLayer();
+    if (layer.hasListener(type)) {
+      const event = new RenderEvent(
+        type,
+        this.inversePixelTransform,
+        frameState,
+        context
+      );
+      layer.dispatchEvent(event);
+    }
+  }
+  /**
+   * @param {CanvasRenderingContext2D} context Context.
+   * @param {import("../../Map.js").FrameState} frameState Frame state.
+   * @protected
+   */
+  preRender(context, frameState) {
+    this.frameState = frameState;
+    if (frameState.declutter) {
+      return;
+    }
+    this.dispatchRenderEvent_(RenderEventType.PRERENDER, context, frameState);
+  }
+  /**
+   * @param {CanvasRenderingContext2D} context Context.
+   * @param {import("../../Map.js").FrameState} frameState Frame state.
+   * @protected
+   */
+  postRender(context, frameState) {
+    if (frameState.declutter) {
+      return;
+    }
+    this.dispatchRenderEvent_(RenderEventType.POSTRENDER, context, frameState);
+  }
+  /**
+   * @param {import("../../Map.js").FrameState} frameState Frame state.
+   */
+  renderDeferredInternal(frameState) {
+  }
+  /**
+   * @param {import("../../Map.js").FrameState} frameState Frame state.
+   * @return {import('../../render/canvas/ZIndexContext.js').ZIndexContextProxy} Context.
+   */
+  getRenderContext(frameState) {
+    if (frameState.declutter && !this.deferredContext_) {
+      this.deferredContext_ = new ZIndexContext();
+    }
+    return frameState.declutter ? this.deferredContext_.getContext() : this.context;
+  }
+  /**
+   * @param {import("../../Map.js").FrameState} frameState Frame state.
+   * @override
+   */
+  renderDeferred(frameState) {
+    if (!frameState.declutter) {
+      return;
+    }
+    this.dispatchRenderEvent_(
+      RenderEventType.PRERENDER,
+      this.context,
+      frameState
+    );
+    if (frameState.declutter && this.deferredContext_) {
+      this.deferredContext_.draw(this.context);
+      this.deferredContext_.clear();
+    }
+    this.renderDeferredInternal(frameState);
+    this.dispatchRenderEvent_(
+      RenderEventType.POSTRENDER,
+      this.context,
+      frameState
+    );
+  }
+  /**
+   * Creates a transform for rendering to an element that will be rotated after rendering.
+   * @param {import("../../coordinate.js").Coordinate} center Center.
+   * @param {number} resolution Resolution.
+   * @param {number} rotation Rotation.
+   * @param {number} pixelRatio Pixel ratio.
+   * @param {number} width Width of the rendered element (in pixels).
+   * @param {number} height Height of the rendered element (in pixels).
+   * @param {number} offsetX Offset on the x-axis in view coordinates.
+   * @protected
+   * @return {!import("../../transform.js").Transform} Transform.
+   */
+  getRenderTransform(center, resolution, rotation, pixelRatio, width, height, offsetX) {
+    const dx1 = width / 2;
+    const dy1 = height / 2;
+    const sx = pixelRatio / resolution;
+    const sy = -sx;
+    const dx2 = -center[0] + offsetX;
+    const dy2 = -center[1];
+    return compose(
+      this.tempTransform,
+      dx1,
+      dy1,
+      sx,
+      sy,
+      -rotation,
+      dx2,
+      dy2
+    );
+  }
+  /**
+   * Clean up.
+   * @override
+   */
+  disposeInternal() {
+    delete this.frameState;
+    super.disposeInternal();
+  }
+}
+function getCacheKey(source2, sourceKey, z2, x2, y2) {
+  return `${getUid(source2)},${sourceKey},${getKeyZXY(z2, x2, y2)}`;
 }
 function addTileToLookup(tilesByZ, tile, z2) {
   if (!(z2 in tilesByZ)) {
@@ -27243,7 +25751,6 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
     this.renderedExtent_ = null;
     this.renderedPixelRatio;
     this.renderedProjection = null;
-    this.renderedRevision;
     this.renderedTiles = [];
     this.renderedSourceKey_;
     this.renderedSourceRevision_;
@@ -27274,7 +25781,7 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
     const tileCache = this.tileCache_;
     const tileLayer = this.getLayer();
     const tileSource = tileLayer.getSource();
-    const cacheKey = getCacheKey(tileSource.getKey(), z2, x2, y2);
+    const cacheKey = getCacheKey(tileSource, tileSource.getKey(), z2, x2, y2);
     let tile;
     if (tileCache.containsKey(cacheKey)) {
       tile = tileCache.get(cacheKey);
@@ -27384,10 +25891,10 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
       return false;
     }
     const sourceRevision = source2.getRevision();
-    if (!this.renderedRevision_) {
-      this.renderedRevision_ = sourceRevision;
-    } else if (this.renderedRevision_ !== sourceRevision) {
-      this.renderedRevision_ = sourceRevision;
+    if (!this.renderedSourceRevision_) {
+      this.renderedSourceRevision_ = sourceRevision;
+    } else if (this.renderedSourceRevision_ !== sourceRevision) {
+      this.renderedSourceRevision_ = sourceRevision;
       if (this.renderedSourceKey_ === source2.getKey()) {
         this.tileCache_.clear();
       }
@@ -27423,6 +25930,13 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
         tileSource.zDirection
       )
     );
+    const rotation = viewState.rotation;
+    const viewport2 = rotation ? getRotatedViewport(
+      viewState.center,
+      viewState.resolution,
+      rotation,
+      frameState.size
+    ) : void 0;
     for (let z2 = initialZ; z2 >= minZ; --z2) {
       const tileRange = tileGrid.getTileRangeForExtentAndZ(
         extent,
@@ -27432,6 +25946,9 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
       const tileResolution = tileGrid.getResolution(z2);
       for (let x2 = tileRange.minX; x2 <= tileRange.maxX; ++x2) {
         for (let y2 = tileRange.minY; y2 <= tileRange.maxY; ++y2) {
+          if (rotation && !tileGrid.tileCoordIntersectsViewport([z2, x2, y2], viewport2)) {
+            continue;
+          }
           const tile = this.getTile(z2, x2, y2, frameState);
           if (!tile) {
             continue;
@@ -27472,9 +25989,15 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
     const y2 = tileCoord[2];
     const staleKeys = this.getStaleKeys();
     for (let i = 0; i < staleKeys.length; ++i) {
-      const cacheKey = getCacheKey(staleKeys[i], z2, x2, y2);
+      const cacheKey = getCacheKey(
+        this.getLayer().getSource(),
+        staleKeys[i],
+        z2,
+        x2,
+        y2
+      );
       if (tileCache.containsKey(cacheKey)) {
-        const tile = tileCache.get(cacheKey);
+        const tile = tileCache.peek(cacheKey);
         if (tile.getState() === TileState.LOADED) {
           tile.endTransition(getUid(this));
           addTileToLookup(tilesByZ, tile, z2);
@@ -27509,10 +26032,10 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
     const sourceKey = source2.getKey();
     for (let x2 = tileRange.minX; x2 <= tileRange.maxX; ++x2) {
       for (let y2 = tileRange.minY; y2 <= tileRange.maxY; ++y2) {
-        const cacheKey = getCacheKey(sourceKey, altZ, x2, y2);
+        const cacheKey = getCacheKey(source2, sourceKey, altZ, x2, y2);
         let loaded = false;
         if (tileCache.containsKey(cacheKey)) {
-          const tile = tileCache.get(cacheKey);
+          const tile = tileCache.peek(cacheKey);
           if (tile.getState() === TileState.LOADED) {
             addTileToLookup(tilesByZ, tile, altZ);
             loaded = true;
@@ -27540,7 +26063,6 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
    * @override
    */
   renderFrame(frameState, target) {
-    let allTilesIdle = true;
     this.renderComplete = true;
     const layerState = frameState.layerStatesArray[frameState.layerIndex];
     const viewState = frameState.viewState;
@@ -27550,7 +26072,6 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
     const pixelRatio = frameState.pixelRatio;
     const tileLayer = this.getLayer();
     const tileSource = tileLayer.getSource();
-    const sourceRevision = tileSource.getRevision();
     const tileGrid = tileSource.getTileGridForProjection(projection);
     const z2 = tileGrid.getZForResolution(viewResolution, tileSource.zDirection);
     const tileResolution = tileGrid.getResolution(z2);
@@ -27612,7 +26133,7 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
     const time = frameState.time;
     for (const tile of tilesByZ[z2]) {
       const tileState = tile.getState();
-      if ((tile instanceof ReprojTile || tile instanceof ReprojDataTile) && tileState === TileState.EMPTY) {
+      if (tileState === TileState.EMPTY) {
         continue;
       }
       const tileCoord = tile.tileCoord;
@@ -27622,9 +26143,6 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
           tile.endTransition(uid);
           continue;
         }
-      }
-      if (tileState !== TileState.IDLE) {
-        allTilesIdle = false;
       }
       if (tileState !== TileState.ERROR) {
         this.renderComplete = false;
@@ -27752,7 +26270,6 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
         this.updateUsedTiles(frameState.usedTiles, tileSource, tile);
       }
     }
-    this.renderedRevision = sourceRevision;
     this.renderedResolution = tileResolution;
     this.extentChanged = !this.renderedExtent_ || !equals$2(this.renderedExtent_, canvasExtent);
     this.renderedExtent_ = canvasExtent;
@@ -27771,9 +26288,6 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
         this.tileCache_.expireCache();
       };
       frameState.postRenderFunctions.push(postRenderFunction);
-    }
-    if (!this.renderComplete && !allTilesIdle) {
-      frameState.animate = true;
     }
     return this.container;
   }
@@ -27871,6 +26385,101 @@ class CanvasTileLayerRenderer extends CanvasLayerRenderer {
       usedTiles[tileSourceKey] = {};
     }
     usedTiles[tileSourceKey][tile.getKey()] = true;
+  }
+}
+const TileProperty = {
+  PRELOAD: "preload",
+  USE_INTERIM_TILES_ON_ERROR: "useInterimTilesOnError"
+};
+class BaseTileLayer extends Layer {
+  /**
+   * @param {Options<TileSourceType>} [options] Tile layer options.
+   */
+  constructor(options) {
+    options = options ? options : {};
+    const baseOptions = Object.assign({}, options);
+    const cacheSize2 = options.cacheSize;
+    delete options.cacheSize;
+    delete baseOptions.preload;
+    delete baseOptions.useInterimTilesOnError;
+    super(baseOptions);
+    this.on;
+    this.once;
+    this.un;
+    this.cacheSize_ = cacheSize2;
+    this.setPreload(options.preload !== void 0 ? options.preload : 0);
+    this.setUseInterimTilesOnError(
+      options.useInterimTilesOnError !== void 0 ? options.useInterimTilesOnError : true
+    );
+  }
+  /**
+   * @return {number|undefined} The suggested cache size
+   * @protected
+   */
+  getCacheSize() {
+    return this.cacheSize_;
+  }
+  /**
+   * Return the level as number to which we will preload tiles up to.
+   * @return {number} The level to preload tiles up to.
+   * @observable
+   * @api
+   */
+  getPreload() {
+    return (
+      /** @type {number} */
+      this.get(TileProperty.PRELOAD)
+    );
+  }
+  /**
+   * Set the level as number to which we will preload tiles up to.
+   * @param {number} preload The level to preload tiles up to.
+   * @observable
+   * @api
+   */
+  setPreload(preload) {
+    this.set(TileProperty.PRELOAD, preload);
+  }
+  /**
+   * Deprecated.  Whether we use interim tiles on error.
+   * @return {boolean} Use interim tiles on error.
+   * @observable
+   * @api
+   */
+  getUseInterimTilesOnError() {
+    return (
+      /** @type {boolean} */
+      this.get(TileProperty.USE_INTERIM_TILES_ON_ERROR)
+    );
+  }
+  /**
+   * Deprecated.  Set whether we use interim tiles on error.
+   * @param {boolean} useInterimTilesOnError Use interim tiles on error.
+   * @observable
+   * @api
+   */
+  setUseInterimTilesOnError(useInterimTilesOnError) {
+    this.set(TileProperty.USE_INTERIM_TILES_ON_ERROR, useInterimTilesOnError);
+  }
+  /**
+   * Get data for a pixel location.  The return type depends on the source data.  For image tiles,
+   * a four element RGBA array will be returned.  For data tiles, the array length will match the
+   * number of bands in the dataset.  For requests outside the layer extent, `null` will be returned.
+   * Data for a image tiles can only be retrieved if the source's `crossOrigin` property is set.
+   *
+   * ```js
+   * // display layer data on every pointer move
+   * map.on('pointermove', (event) => {
+   *   console.log(layer.getData(event.pixel));
+   * });
+   * ```
+   * @param {import("../pixel").Pixel} pixel Pixel.
+   * @return {Uint8ClampedArray|Uint8Array|Float32Array|DataView|null} Pixel data.
+   * @api
+   * @override
+   */
+  getData(pixel) {
+    return super.getData(pixel);
   }
 }
 class TileLayer extends BaseTileLayer {
@@ -28050,7 +26659,7 @@ class CanvasImmediateRenderer extends VectorContext {
     this.textStrokeState_ = null;
     this.textState_ = null;
     this.pixelCoordinates_ = [];
-    this.tmpLocalTransform_ = create$1();
+    this.tmpLocalTransform_ = create();
   }
   /**
    * @param {Array<number>} flatCoordinates Flat coordinates.
@@ -29180,7 +27789,6 @@ const z = {
   defaultItems: true,
   items: []
 }, d = "ol-ctx-menu", r = {
-  namespace: d,
   container: `${d}-container`,
   separator: `${d}-separator`,
   submenu: `${d}-submenu`,
@@ -29222,13 +27830,12 @@ function y(n) {
   return t;
 }
 function P(n) {
-  var _a, _b;
   const t = document.importNode(n), e = n.offsetWidth;
   t.style.cssText = `position: fixed; top: 0; left: 0; overflow: auto; visibility: hidden; pointer-events: none; height: unset; max-height: unset; width: ${e}px`;
   const s = y("<span>Foo</span>"), o = y("<span>Foo</span>"), i = document.createElement("li"), l = document.createElement("li");
-  i.append(s), l.append(o), t.append(i), t.append(l), (_a = n.parentNode) == null ? void 0 : _a.append(t);
+  i.append(s), l.append(o), t.append(i), t.append(l), n.parentNode?.append(t);
   const c = t.offsetHeight / 2;
-  return (_b = n.parentNode) == null ? void 0 : _b.removeChild(t), c;
+  return n.parentNode?.removeChild(t), c;
 }
 function N({
   parentNode: n,
@@ -29409,10 +28016,9 @@ class R extends Control {
   }
   removeMenuEntry(e) {
     let s = document.getElementById(e);
-    s == null ? void 0 : s.remove(), s = null, this.menuEntries.delete(e);
+    s?.remove(), s = null, this.menuEntries.delete(e);
   }
   handleContextMenu(e) {
-    var _a;
     this.coordinate = this.map.getEventCoordinate(e), this.pixel = this.map.getEventPixel(e), this.dispatchEvent(
       new w({
         map: this.map,
@@ -29421,7 +28027,7 @@ class R extends Control {
       })
     ), !this.disabled && (this.options.eventType === L.CONTEXTMENU && (e.stopPropagation(), e.preventDefault()), setTimeout(() => {
       this.openMenu(e);
-    }), (_a = e.target) == null ? void 0 : _a.addEventListener(
+    }), e.target?.addEventListener(
       "pointerdown",
       (s) => {
         this.opened && (s.stopPropagation(), this.closeMenu());
@@ -29474,7 +28080,6 @@ class R extends Control {
     this.closeMenu();
   }
   handleEntryCallback(e) {
-    var _a;
     e.preventDefault(), e.stopPropagation();
     const s = e.currentTarget, o = this.menuEntries.get(s.id);
     if (!o) return;
@@ -29482,7 +28087,7 @@ class R extends Control {
       data: o.data,
       coordinate: this.coordinate
     };
-    this.closeMenu(), (_a = o.callback) == null ? void 0 : _a.call(o, i, this.map);
+    this.closeMenu(), o.callback?.(i, this.map);
   }
   handleAddMenuEntry(e, s) {
     this.menuEntries.set(e.id, e), this.positionContainer(), "callback" in e && typeof e.callback == "function" && s.addEventListener("click", this.entryCallbackEventListener, false);
@@ -29497,14 +28102,14 @@ function readNumber(string) {
 function writeNumber(number) {
   return to5(number).toString();
 }
-function differentNumber(a2, b2) {
-  if (isNaN(a2)) {
+function differentNumber(a3, b3) {
+  if (isNaN(a3)) {
     return false;
   }
-  return a2 !== readNumber(writeNumber(b2));
+  return a3 !== readNumber(writeNumber(b3));
 }
-function differentArray(a2, b2) {
-  return differentNumber(a2[0], b2[0]) || differentNumber(a2[1], b2[1]);
+function differentArray(a3, b3) {
+  return differentNumber(a3[0], b3[0]) || differentNumber(a3[1], b3[1]);
 }
 class Link extends Interaction {
   /**
@@ -29806,11 +28411,7 @@ class Link extends Interaction {
   }
 }
 const imgUrl = "/assets/osm_logo--g4zjBAe.png";
-const events = [
-  "fullscreenchange",
-  "webkitfullscreenchange",
-  "MSFullscreenChange"
-];
+const events = ["fullscreenchange", "webkitfullscreenchange"];
 const FullScreenEventType = {
   /**
    * Triggered after the map entered fullscreen.
@@ -30395,11 +28996,13 @@ class CanvasBuilder extends VectorContext {
   }
   /**
    * @param {import("../../style/Fill.js").default} fillStyle Fill style.
-   * @param {import("../../style/Stroke.js").default} strokeStyle Stroke style.
-   * @override
+   * @param {import('../canvas.js').FillStrokeState} [state] State.
+   * @return {import('../canvas.js').FillStrokeState} State.
    */
-  setFillStrokeStyle(fillStyle, strokeStyle) {
-    const state = this.state;
+  fillStyleToState(fillStyle, state = (
+    /** @type {import('../canvas.js').FillStrokeState} */
+    {}
+  )) {
     if (fillStyle) {
       const fillStyleColor = fillStyle.getColor();
       state.fillPatternScale = fillStyleColor && typeof fillStyleColor === "object" && "src" in fillStyleColor ? this.pixelRatio : 1;
@@ -30409,6 +29012,17 @@ class CanvasBuilder extends VectorContext {
     } else {
       state.fillStyle = void 0;
     }
+    return state;
+  }
+  /**
+   * @param {import("../../style/Stroke.js").default} strokeStyle Stroke style.
+   * @param {import("../canvas.js").FillStrokeState} state State.
+   * @return {import("../canvas.js").FillStrokeState} State.
+   */
+  strokeStyleToState(strokeStyle, state = (
+    /** @type {import('../canvas.js').FillStrokeState} */
+    {}
+  )) {
     if (strokeStyle) {
       const strokeStyleColor = strokeStyle.getColor();
       state.strokeStyle = asColorLike(
@@ -30439,6 +29053,17 @@ class CanvasBuilder extends VectorContext {
       state.lineWidth = void 0;
       state.miterLimit = void 0;
     }
+    return state;
+  }
+  /**
+   * @param {import("../../style/Fill.js").default} fillStyle Fill style.
+   * @param {import("../../style/Stroke.js").default} strokeStyle Stroke style.
+   * @override
+   */
+  setFillStrokeStyle(fillStyle, strokeStyle) {
+    const state = this.state;
+    this.fillStyleToState(fillStyle, state);
+    this.strokeStyleToState(strokeStyle, state);
   }
   /**
    * @param {import("../canvas.js").FillStrokeState} state State.
@@ -30470,7 +29095,7 @@ class CanvasBuilder extends VectorContext {
       state.lineCap,
       state.lineJoin,
       state.miterLimit,
-      this.applyPixelRatio(state.lineDash),
+      state.lineDash ? this.applyPixelRatio(state.lineDash) : null,
       state.lineDashOffset * this.pixelRatio
     ];
   }
@@ -30481,9 +29106,7 @@ class CanvasBuilder extends VectorContext {
   updateFillStyle(state, createFill) {
     const fillStyle = state.fillStyle;
     if (typeof fillStyle !== "string" || state.currentFillStyle != fillStyle) {
-      if (fillStyle !== void 0) {
-        this.instructions.push(createFill.call(this, state));
-      }
+      this.instructions.push(createFill.call(this, state));
       state.currentFillStyle = fillStyle;
     }
   }
@@ -30500,9 +29123,7 @@ class CanvasBuilder extends VectorContext {
     const lineWidth = state.lineWidth;
     const miterLimit = state.miterLimit;
     if (state.currentStrokeStyle != strokeStyle || state.currentLineCap != lineCap || lineDash != state.currentLineDash && !equals(state.currentLineDash, lineDash) || state.currentLineDashOffset != lineDashOffset || state.currentLineJoin != lineJoin || state.currentLineWidth != lineWidth || state.currentMiterLimit != miterLimit) {
-      if (strokeStyle !== void 0) {
-        applyStroke.call(this, state);
-      }
+      applyStroke.call(this, state);
       state.currentStrokeStyle = strokeStyle;
       state.currentLineCap = lineCap;
       state.currentLineDash = lineDash;
@@ -31114,13 +29735,8 @@ class CanvasPolygonBuilder extends CanvasBuilder {
    */
   setFillStrokeStyles_() {
     const state = this.state;
-    const fillStyle = state.fillStyle;
-    if (fillStyle !== void 0) {
-      this.updateFillStyle(state, this.createFill);
-    }
-    if (state.strokeStyle !== void 0) {
-      this.updateStrokeStyle(state, this.applyStroke);
-    }
+    this.updateFillStyle(state, this.createFill);
+    this.updateStrokeStyle(state, this.applyStroke);
   }
 }
 function lineChunk(chunkLength, flatCoordinates, offset2, end2, stride) {
@@ -31404,19 +30020,8 @@ class CanvasTextBuilder extends CanvasBuilder {
         });
       }
       this.saveTextStates_();
-      if (textState.backgroundFill || textState.backgroundStroke) {
-        this.setFillStrokeStyle(
-          textState.backgroundFill,
-          textState.backgroundStroke
-        );
-        if (textState.backgroundFill) {
-          this.updateFillStyle(this.state, this.createFill);
-        }
-        if (textState.backgroundStroke) {
-          this.updateStrokeStyle(this.state, this.applyStroke);
-          this.hitDetectionInstructions.push(this.createStroke(this.state));
-        }
-      }
+      const backgroundFill = textState.backgroundFill ? this.createFill(this.fillStyleToState(textState.backgroundFill)) : null;
+      const backgroundStroke = textState.backgroundStroke ? this.createStroke(this.strokeStyleToState(textState.backgroundStroke)) : null;
       this.beginGeometry(geometry, feature, index);
       let padding = textState.padding;
       if (padding != defaultPadding && (textState.scale[0] < 0 || textState.scale[1] < 0)) {
@@ -31455,8 +30060,8 @@ class CanvasTextBuilder extends CanvasBuilder {
         padding == defaultPadding ? defaultPadding : padding.map(function(p5) {
           return p5 * pixelRatio;
         }),
-        !!textState.backgroundFill,
-        !!textState.backgroundStroke,
+        backgroundFill,
+        backgroundStroke,
         this.text_,
         this.textKey_,
         this.strokeKey_,
@@ -31466,10 +30071,9 @@ class CanvasTextBuilder extends CanvasBuilder {
         geometryWidths
       ]);
       const scale2 = 1 / pixelRatio;
-      const currentFillStyle = this.state.fillStyle;
-      if (textState.backgroundFill) {
-        this.state.fillStyle = defaultFillStyle;
-        this.hitDetectionInstructions.push(this.createFill(this.state));
+      const hitDetectionBackgroundFill = backgroundFill ? backgroundFill.slice(0) : null;
+      if (hitDetectionBackgroundFill) {
+        hitDetectionBackgroundFill[1] = defaultFillStyle;
       }
       this.hitDetectionInstructions.push([
         Instruction.DRAW_IMAGE,
@@ -31489,8 +30093,8 @@ class CanvasTextBuilder extends CanvasBuilder {
         this.declutterMode_,
         this.declutterImageWithText_,
         padding,
-        !!textState.backgroundFill,
-        !!textState.backgroundStroke,
+        hitDetectionBackgroundFill,
+        backgroundStroke,
         this.text_,
         this.textKey_,
         this.strokeKey_,
@@ -31499,10 +30103,6 @@ class CanvasTextBuilder extends CanvasBuilder {
         this.textOffsetY_,
         geometryWidths
       ]);
-      if (textState.backgroundFill) {
-        this.state.fillStyle = currentFillStyle;
-        this.hitDetectionInstructions.push(this.createFill(this.state));
-      }
       this.endGeometry(feature);
     }
   }
@@ -31748,6 +30348,19 @@ class BuilderGroup {
     return replay;
   }
 }
+function lineStringLength(flatCoordinates, offset2, end2, stride) {
+  let x1 = flatCoordinates[offset2];
+  let y1 = flatCoordinates[offset2 + 1];
+  let length = 0;
+  for (let i = offset2 + stride; i < end2; i += stride) {
+    const x2 = flatCoordinates[i];
+    const y2 = flatCoordinates[i + 1];
+    length += Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+    x1 = x2;
+    y1 = y2;
+  }
+  return length;
+}
 function drawTextOnPath(flatCoordinates, offset2, end2, stride, text, startM, maxAngle, scale2, measureAndCacheTextWidth2, font, cache2, rotation, keepUpright = true) {
   let x2 = flatCoordinates[offset2];
   let y2 = flatCoordinates[offset2 + 1];
@@ -31846,19 +30459,6 @@ function drawTextOnPath(flatCoordinates, offset2, end2, stride, text, startM, ma
   }
   return result;
 }
-function lineStringLength(flatCoordinates, offset2, end2, stride) {
-  let x1 = flatCoordinates[offset2];
-  let y1 = flatCoordinates[offset2 + 1];
-  let length = 0;
-  for (let i = offset2 + stride; i < end2; i += stride) {
-    const x2 = flatCoordinates[i];
-    const y2 = flatCoordinates[i + 1];
-    length += Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-    x1 = x2;
-    y1 = y2;
-  }
-  return length;
-}
 const tmpExtent = createEmpty();
 const p1 = [];
 const p2 = [];
@@ -31887,6 +30487,12 @@ function createTextChunks(acc, line, i) {
   acc.push(line, "");
   return acc;
 }
+function richTextToPlainText(result, part, index) {
+  if (index % 2 === 0) {
+    result += part;
+  }
+  return result;
+}
 class Executor {
   /**
    * @param {number} resolution Resolution.
@@ -31903,7 +30509,7 @@ class Executor {
     this.instructions = instructions.instructions;
     this.coordinates = instructions.coordinates;
     this.coordinateCache_ = {};
-    this.renderedTransform_ = create$1();
+    this.renderedTransform_ = create();
     this.hitDetectionInstructions = instructions.hitDetectionInstructions;
     this.pixelCoordinates_ = null;
     this.viewRotation_ = 0;
@@ -32043,6 +30649,8 @@ class Executor {
     if (fillInstruction2) {
       this.alignAndScaleFill_ = /** @type {number} */
       fillInstruction2[2];
+      context.fillStyle = /** @type {string} */
+      fillInstruction2[1];
       this.fill_(context);
     }
     if (strokeInstruction2) {
@@ -32098,7 +30706,7 @@ class Executor {
     let transform2;
     if (rotation !== 0) {
       transform2 = compose(
-        create$1(),
+        create(),
         centerX,
         centerY,
         1,
@@ -32224,6 +30832,9 @@ class Executor {
   setStrokeStyle_(context, instruction) {
     context.strokeStyle = /** @type {import("../../colorlike.js").ColorLike} */
     instruction[1];
+    if (!instruction[1]) {
+      return;
+    }
     context.lineWidth = /** @type {number} */
     instruction[2];
     context.lineCap = /** @type {CanvasLineCap} */
@@ -32307,8 +30918,6 @@ class Executor {
     let anchorX, anchorY, declutterMode, prevX, prevY, roundX, roundY, image, text, textKey, strokeKey, fillKey;
     let pendingFill = 0;
     let pendingStroke = 0;
-    let lastFillInstruction = null;
-    let lastStrokeInstruction = null;
     const coordinateCache = this.coordinateCache_;
     const viewRotation = this.viewRotation_;
     const viewRotationFromTransform = Math.round(Math.atan2(-transform2[1], transform2[0]) * 1e12) / 1e12;
@@ -32498,18 +31107,18 @@ class Executor {
             geometryWidths = /** @type {number} */
             instruction[25];
           }
-          let padding, backgroundFill, backgroundStroke;
+          let padding, backgroundFillInstruction, backgroundStrokeInstruction;
           if (instruction.length > 17) {
             padding = /** @type {Array<number>} */
             instruction[16];
-            backgroundFill = /** @type {boolean} */
+            backgroundFillInstruction = /** @type {Array<*>} */
             instruction[17];
-            backgroundStroke = /** @type {boolean} */
+            backgroundStrokeInstruction = /** @type {Array<*>} */
             instruction[18];
           } else {
             padding = defaultPadding;
-            backgroundFill = false;
-            backgroundStroke = false;
+            backgroundFillInstruction = null;
+            backgroundStrokeInstruction = null;
           }
           if (rotateWithView && viewRotationFromTransform) {
             rotation += viewRotation;
@@ -32536,7 +31145,7 @@ class Executor {
               scale2,
               snapToPixel,
               padding,
-              backgroundFill || backgroundStroke,
+              !!backgroundFillInstruction || !!backgroundStrokeInstruction,
               feature
             );
             const args = [
@@ -32545,14 +31154,8 @@ class Executor {
               image,
               dimensions,
               opacity,
-              backgroundFill ? (
-                /** @type {Array<*>} */
-                lastFillInstruction
-              ) : null,
-              backgroundStroke ? (
-                /** @type {Array<*>} */
-                lastStrokeInstruction
-              ) : null
+              backgroundFillInstruction,
+              backgroundStrokeInstruction
             ];
             if (declutterTree) {
               let imageArgs, imageDeclutterMode, imageDeclutterBox;
@@ -32635,8 +31238,11 @@ class Executor {
             /** @type {number} */
             instruction[10]
           );
-          text = /** @type {string} */
+          text = /** @type {string|Array<string>} */
           instruction[11];
+          if (Array.isArray(text)) {
+            text = text.reduce(richTextToPlainText, "");
+          }
           textKey = /** @type {string} */
           instruction[12];
           const pixelRatioScale = [
@@ -32825,7 +31431,6 @@ class Executor {
           ++i;
           break;
         case Instruction.SET_FILL_STYLE:
-          lastFillInstruction = instruction;
           this.alignAndScaleFill_ = instruction[2];
           if (pendingFill) {
             this.fill_(context);
@@ -32839,7 +31444,6 @@ class Executor {
           ++i;
           break;
         case Instruction.SET_STROKE_STYLE:
-          lastStrokeInstruction = instruction;
           if (pendingStroke) {
             context.stroke();
             pendingStroke = 0;
@@ -32950,7 +31554,7 @@ class ExecutorGroup {
     this.renderBuffer_ = renderBuffer;
     this.executorsByZIndex_ = {};
     this.hitDetectionContext_ = null;
-    this.hitDetectionTransform_ = create$1();
+    this.hitDetectionTransform_ = create();
     this.renderedContext_ = null;
     this.deferredZIndexContexts_ = {};
     this.createExecutors_(allInstructions, deferredRendering);
@@ -33036,9 +31640,7 @@ class ExecutorGroup {
     if (newContext) {
       this.hitDetectionContext_ = createCanvasContext2D(
         contextSize,
-        contextSize,
-        void 0,
-        { willReadFrequently: true }
+        contextSize
       );
     }
     const context = this.hitDetectionContext_;
@@ -33130,7 +31732,7 @@ class ExecutorGroup {
    * @return {boolean} Is empty.
    */
   isEmpty() {
-    return isEmpty$1(this.executorsByZIndex_);
+    return isEmpty(this.executorsByZIndex_);
   }
   /**
    * @param {CanvasRenderingContext2D} targetContext Context.
@@ -33188,7 +31790,7 @@ class ExecutorGroup {
           }
           if (zIndexContext) {
             zIndexContext.offset();
-            const index = zs[i] * maxBuilderTypes + j;
+            const index = zs[i] * maxBuilderTypes + ALL.indexOf(builderType);
             if (!this.deferredZIndexContexts_[index]) {
               this.deferredZIndexContexts_[index] = [];
             }
@@ -33391,8 +31993,8 @@ function hitDetect(pixel, features, imageData) {
     const index = (clamp(x2, 0, imageData.width - 1) + clamp(y2, 0, imageData.height - 1) * imageData.width) * 4;
     const r2 = imageData.data[index];
     const g = imageData.data[index + 1];
-    const b2 = imageData.data[index + 2];
-    const i = b2 + 256 * (g + 256 * r2);
+    const b3 = imageData.data[index + 2];
+    const i = b3 + 256 * (g + 256 * r2);
     const indexFactor = Math.floor((256 * 256 * 256 - 1) / features.length);
     if (i && i % indexFactor === 0) {
       resultFeatures.push(features[i / indexFactor - 1]);
@@ -33494,7 +32096,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
    * @private
    */
   resetDrawContext_() {
-    if (this.opacity_ !== 1) {
+    if (this.opacity_ !== 1 && this.targetContext_) {
       const alpha = this.targetContext_.globalAlpha;
       this.targetContext_.globalAlpha = this.opacity_;
       this.targetContext_.drawImage(this.context.canvas, 0, 0);
@@ -33534,7 +32136,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
    * Render the layer.
    * @param {import("../../Map.js").FrameState} frameState Frame state.
    * @param {HTMLElement|null} target Target that may be used to render content to.
-   * @return {HTMLElement|null} The rendered element.
+   * @return {HTMLElement} The rendered element.
    * @override
    */
   renderFrame(frameState, target) {
@@ -33548,7 +32150,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
     if (!render2) {
       const hasRenderListeners = this.getLayer().hasListener(RenderEventType.PRERENDER) || this.getLayer().hasListener(RenderEventType.POSTRENDER);
       if (!hasRenderListeners) {
-        return null;
+        return this.container;
       }
     }
     this.setDrawContext_();
@@ -33727,7 +32329,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
       rotation,
       hitTolerance,
       featureCallback,
-      declutter ? frameState.declutter[declutter].all().map((item) => item.value) : null
+      declutter ? frameState.declutter?.[declutter]?.all().map((item) => item.value) : null
     );
   }
   /**
@@ -33967,171 +32569,83 @@ const Vector$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProp
   __proto__: null,
   default: VectorLayer
 }, Symbol.toStringTag, { value: "Module" }));
-class RBush2 {
-  /**
-   * @param {number} [maxEntries] Max entries.
-   */
-  constructor(maxEntries) {
-    this.rbush_ = new RBush$1(maxEntries);
-    this.items_ = {};
+let withCredentials = false;
+function loadFeaturesXhr(url, format, extent, resolution, projection, success, failure) {
+  const xhr2 = new XMLHttpRequest();
+  xhr2.open(
+    "GET",
+    typeof url === "function" ? url(extent, resolution, projection) : url,
+    true
+  );
+  if (format.getType() == "arraybuffer") {
+    xhr2.responseType = "arraybuffer";
   }
-  /**
-   * Insert a value into the RBush.
-   * @param {import("../extent.js").Extent} extent Extent.
-   * @param {T} value Value.
-   */
-  insert(extent, value) {
-    const item = {
-      minX: extent[0],
-      minY: extent[1],
-      maxX: extent[2],
-      maxY: extent[3],
-      value
-    };
-    this.rbush_.insert(item);
-    this.items_[getUid(value)] = item;
-  }
-  /**
-   * Bulk-insert values into the RBush.
-   * @param {Array<import("../extent.js").Extent>} extents Extents.
-   * @param {Array<T>} values Values.
-   */
-  load(extents, values) {
-    const items = new Array(values.length);
-    for (let i = 0, l = values.length; i < l; i++) {
-      const extent = extents[i];
-      const value = values[i];
-      const item = {
-        minX: extent[0],
-        minY: extent[1],
-        maxX: extent[2],
-        maxY: extent[3],
-        value
-      };
-      items[i] = item;
-      this.items_[getUid(value)] = item;
-    }
-    this.rbush_.load(items);
-  }
-  /**
-   * Remove a value from the RBush.
-   * @param {T} value Value.
-   * @return {boolean} Removed.
-   */
-  remove(value) {
-    const uid = getUid(value);
-    const item = this.items_[uid];
-    delete this.items_[uid];
-    return this.rbush_.remove(item) !== null;
-  }
-  /**
-   * Update the extent of a value in the RBush.
-   * @param {import("../extent.js").Extent} extent Extent.
-   * @param {T} value Value.
-   */
-  update(extent, value) {
-    const item = this.items_[getUid(value)];
-    const bbox = [item.minX, item.minY, item.maxX, item.maxY];
-    if (!equals$2(bbox, extent)) {
-      this.remove(value);
-      this.insert(extent, value);
-    }
-  }
-  /**
-   * Return all values in the RBush.
-   * @return {Array<T>} All.
-   */
-  getAll() {
-    const items = this.rbush_.all();
-    return items.map(function(item) {
-      return item.value;
-    });
-  }
-  /**
-   * Return all values in the given extent.
-   * @param {import("../extent.js").Extent} extent Extent.
-   * @return {Array<T>} All in extent.
-   */
-  getInExtent(extent) {
-    const bbox = {
-      minX: extent[0],
-      minY: extent[1],
-      maxX: extent[2],
-      maxY: extent[3]
-    };
-    const items = this.rbush_.search(bbox);
-    return items.map(function(item) {
-      return item.value;
-    });
-  }
-  /**
-   * Calls a callback function with each value in the tree.
-   * If the callback returns a truthy value, this value is returned without
-   * checking the rest of the tree.
-   * @param {function(T): R} callback Callback.
-   * @return {R|undefined} Callback return value.
-   * @template R
-   */
-  forEach(callback) {
-    return this.forEach_(this.getAll(), callback);
-  }
-  /**
-   * Calls a callback function with each value in the provided extent.
-   * @param {import("../extent.js").Extent} extent Extent.
-   * @param {function(T): R} callback Callback.
-   * @return {R|undefined} Callback return value.
-   * @template R
-   */
-  forEachInExtent(extent, callback) {
-    return this.forEach_(this.getInExtent(extent), callback);
-  }
-  /**
-   * @param {Array<T>} values Values.
-   * @param {function(T): R} callback Callback.
-   * @return {R|undefined} Callback return value.
-   * @template R
-   * @private
-   */
-  forEach_(values, callback) {
-    let result;
-    for (let i = 0, l = values.length; i < l; i++) {
-      result = callback(values[i]);
-      if (result) {
-        return result;
+  xhr2.withCredentials = withCredentials;
+  xhr2.onload = function(event) {
+    if (!xhr2.status || xhr2.status >= 200 && xhr2.status < 300) {
+      const type = format.getType();
+      try {
+        let source2;
+        if (type == "text" || type == "json") {
+          source2 = xhr2.responseText;
+        } else if (type == "xml") {
+          source2 = xhr2.responseXML || xhr2.responseText;
+        } else if (type == "arraybuffer") {
+          source2 = /** @type {ArrayBuffer} */
+          xhr2.response;
+        }
+        if (source2) {
+          success(
+            /** @type {Array<FeatureType>} */
+            format.readFeatures(source2, {
+              extent,
+              featureProjection: projection
+            }),
+            format.readProjection(source2)
+          );
+        } else {
+          failure();
+        }
+      } catch {
+        failure();
       }
+    } else {
+      failure();
     }
-    return result;
-  }
-  /**
-   * @return {boolean} Is empty.
-   */
-  isEmpty() {
-    return isEmpty$1(this.items_);
-  }
-  /**
-   * Remove all values from the RBush.
-   */
-  clear() {
-    this.rbush_.clear();
-    this.items_ = {};
-  }
-  /**
-   * @param {import("../extent.js").Extent} [extent] Extent.
-   * @return {import("../extent.js").Extent} Extent.
-   */
-  getExtent(extent) {
-    const data = this.rbush_.toJSON();
-    return createOrUpdate$2(data.minX, data.minY, data.maxX, data.maxY, extent);
-  }
-  /**
-   * @param {RBush<T>} rbush R-Tree.
-   */
-  concat(rbush) {
-    this.rbush_.load(rbush.rbush_.all());
-    for (const i in rbush.items_) {
-      this.items_[i] = rbush.items_[i];
-    }
-  }
+  };
+  xhr2.onerror = failure;
+  xhr2.send();
+}
+function xhr(url, format) {
+  return function(extent, resolution, projection, success, failure) {
+    loadFeaturesXhr(
+      url,
+      format,
+      extent,
+      resolution,
+      projection,
+      /**
+       * @param {Array<FeatureType>} features The loaded features.
+       * @param {import("./proj/Projection.js").default} dataProjection Data
+       * projection.
+       */
+      (features, dataProjection) => {
+        this.addFeatures(features);
+        if (success !== void 0) {
+          success(features);
+        }
+      },
+      () => {
+        this.changed();
+        if (failure !== void 0) {
+          failure();
+        }
+      }
+    );
+  };
+}
+function all(extent, resolution) {
+  return [[-Infinity, -Infinity, Infinity, Infinity]];
 }
 class Feature extends BaseObject {
   /**
@@ -34346,6 +32860,22 @@ const Feature$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePro
   createStyleFunction,
   default: Feature
 }, Symbol.toStringTag, { value: "Module" }));
+function linearRingss(flatCoordinates, offset2, endss, stride) {
+  const flatCenters = [];
+  let extent = createEmpty();
+  for (let i = 0, ii = endss.length; i < ii; ++i) {
+    const ends = endss[i];
+    extent = createOrUpdateFromFlatCoordinates(
+      flatCoordinates,
+      offset2,
+      ends[0],
+      stride
+    );
+    flatCenters.push((extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2);
+    offset2 = ends[ends.length - 1];
+  }
+  return flatCenters;
+}
 function interpolatePoint(flatCoordinates, offset2, end2, stride, fraction, dest, dimension) {
   let o, t;
   const n = (end2 - offset2) / stride;
@@ -34383,23 +32913,7 @@ function interpolatePoint(flatCoordinates, offset2, end2, stride, fraction, dest
   }
   return dest;
 }
-function linearRingss(flatCoordinates, offset2, endss, stride) {
-  const flatCenters = [];
-  let extent = createEmpty();
-  for (let i = 0, ii = endss.length; i < ii; ++i) {
-    const ends = endss[i];
-    extent = createOrUpdateFromFlatCoordinates(
-      flatCoordinates,
-      offset2,
-      ends[0],
-      stride
-    );
-    flatCenters.push((extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2);
-    offset2 = ends[ends.length - 1];
-  }
-  return flatCenters;
-}
-const tmpTransform = create$1();
+const tmpTransform = create();
 class RenderFeature {
   /**
    * @param {Type} type Geometry type.
@@ -34640,11 +33154,10 @@ class RenderFeature {
    * @return {RenderFeature} A cloned render feature.
    */
   clone() {
-    var _a;
     return new RenderFeature(
       this.type_,
       this.flatCoordinates_.slice(),
-      (_a = this.ends_) == null ? void 0 : _a.slice(),
+      this.ends_?.slice(),
       this.stride_,
       Object.assign({}, this.properties_),
       this.id_
@@ -34728,6 +33241,172 @@ class RenderFeature {
   }
 }
 RenderFeature.prototype.getFlatCoordinates = RenderFeature.prototype.getOrientedFlatCoordinates;
+class RBush2 {
+  /**
+   * @param {number} [maxEntries] Max entries.
+   */
+  constructor(maxEntries) {
+    this.rbush_ = new RBush$1(maxEntries);
+    this.items_ = {};
+  }
+  /**
+   * Insert a value into the RBush.
+   * @param {import("../extent.js").Extent} extent Extent.
+   * @param {T} value Value.
+   */
+  insert(extent, value) {
+    const item = {
+      minX: extent[0],
+      minY: extent[1],
+      maxX: extent[2],
+      maxY: extent[3],
+      value
+    };
+    this.rbush_.insert(item);
+    this.items_[getUid(value)] = item;
+  }
+  /**
+   * Bulk-insert values into the RBush.
+   * @param {Array<import("../extent.js").Extent>} extents Extents.
+   * @param {Array<T>} values Values.
+   */
+  load(extents, values) {
+    const items = new Array(values.length);
+    for (let i = 0, l = values.length; i < l; i++) {
+      const extent = extents[i];
+      const value = values[i];
+      const item = {
+        minX: extent[0],
+        minY: extent[1],
+        maxX: extent[2],
+        maxY: extent[3],
+        value
+      };
+      items[i] = item;
+      this.items_[getUid(value)] = item;
+    }
+    this.rbush_.load(items);
+  }
+  /**
+   * Remove a value from the RBush.
+   * @param {T} value Value.
+   * @return {boolean} Removed.
+   */
+  remove(value) {
+    const uid = getUid(value);
+    const item = this.items_[uid];
+    delete this.items_[uid];
+    return this.rbush_.remove(item) !== null;
+  }
+  /**
+   * Update the extent of a value in the RBush.
+   * @param {import("../extent.js").Extent} extent Extent.
+   * @param {T} value Value.
+   */
+  update(extent, value) {
+    const item = this.items_[getUid(value)];
+    const bbox = [item.minX, item.minY, item.maxX, item.maxY];
+    if (!equals$2(bbox, extent)) {
+      this.remove(value);
+      this.insert(extent, value);
+    }
+  }
+  /**
+   * Return all values in the RBush.
+   * @return {Array<T>} All.
+   */
+  getAll() {
+    const items = this.rbush_.all();
+    return items.map(function(item) {
+      return item.value;
+    });
+  }
+  /**
+   * Return all values in the given extent.
+   * @param {import("../extent.js").Extent} extent Extent.
+   * @return {Array<T>} All in extent.
+   */
+  getInExtent(extent) {
+    const bbox = {
+      minX: extent[0],
+      minY: extent[1],
+      maxX: extent[2],
+      maxY: extent[3]
+    };
+    const items = this.rbush_.search(bbox);
+    return items.map(function(item) {
+      return item.value;
+    });
+  }
+  /**
+   * Calls a callback function with each value in the tree.
+   * If the callback returns a truthy value, this value is returned without
+   * checking the rest of the tree.
+   * @param {function(T): R} callback Callback.
+   * @return {R|undefined} Callback return value.
+   * @template R
+   */
+  forEach(callback) {
+    return this.forEach_(this.getAll(), callback);
+  }
+  /**
+   * Calls a callback function with each value in the provided extent.
+   * @param {import("../extent.js").Extent} extent Extent.
+   * @param {function(T): R} callback Callback.
+   * @return {R|undefined} Callback return value.
+   * @template R
+   */
+  forEachInExtent(extent, callback) {
+    return this.forEach_(this.getInExtent(extent), callback);
+  }
+  /**
+   * @param {Array<T>} values Values.
+   * @param {function(T): R} callback Callback.
+   * @return {R|undefined} Callback return value.
+   * @template R
+   * @private
+   */
+  forEach_(values, callback) {
+    let result;
+    for (let i = 0, l = values.length; i < l; i++) {
+      result = callback(values[i]);
+      if (result) {
+        return result;
+      }
+    }
+    return result;
+  }
+  /**
+   * @return {boolean} Is empty.
+   */
+  isEmpty() {
+    return isEmpty(this.items_);
+  }
+  /**
+   * Remove all values from the RBush.
+   */
+  clear() {
+    this.rbush_.clear();
+    this.items_ = {};
+  }
+  /**
+   * @param {import("../extent.js").Extent} [extent] Extent.
+   * @return {import("../extent.js").Extent} Extent.
+   */
+  getExtent(extent) {
+    const data = this.rbush_.toJSON();
+    return createOrUpdate$2(data.minX, data.minY, data.maxX, data.maxY, extent);
+  }
+  /**
+   * @param {RBush<T>} rbush R-Tree.
+   */
+  concat(rbush) {
+    this.rbush_.load(rbush.rbush_.all());
+    for (const i in rbush.items_) {
+      this.items_[i] = rbush.items_[i];
+    }
+  }
+}
 const VectorEventType = {
   /**
    * Triggered when a feature is added to the source.
@@ -34773,84 +33452,6 @@ const VectorEventType = {
    */
   FEATURESLOADERROR: "featuresloaderror"
 };
-function all(extent, resolution) {
-  return [[-Infinity, -Infinity, Infinity, Infinity]];
-}
-let withCredentials = false;
-function loadFeaturesXhr(url, format, extent, resolution, projection, success, failure) {
-  const xhr2 = new XMLHttpRequest();
-  xhr2.open(
-    "GET",
-    typeof url === "function" ? url(extent, resolution, projection) : url,
-    true
-  );
-  if (format.getType() == "arraybuffer") {
-    xhr2.responseType = "arraybuffer";
-  }
-  xhr2.withCredentials = withCredentials;
-  xhr2.onload = function(event) {
-    if (!xhr2.status || xhr2.status >= 200 && xhr2.status < 300) {
-      const type = format.getType();
-      try {
-        let source2;
-        if (type == "text" || type == "json") {
-          source2 = xhr2.responseText;
-        } else if (type == "xml") {
-          source2 = xhr2.responseXML || xhr2.responseText;
-        } else if (type == "arraybuffer") {
-          source2 = /** @type {ArrayBuffer} */
-          xhr2.response;
-        }
-        if (source2) {
-          success(
-            /** @type {Array<FeatureType>} */
-            format.readFeatures(source2, {
-              extent,
-              featureProjection: projection
-            }),
-            format.readProjection(source2)
-          );
-        } else {
-          failure();
-        }
-      } catch {
-        failure();
-      }
-    } else {
-      failure();
-    }
-  };
-  xhr2.onerror = failure;
-  xhr2.send();
-}
-function xhr(url, format) {
-  return function(extent, resolution, projection, success, failure) {
-    const source2 = (
-      /** @type {import("./source/Vector").default<FeatureType>} */
-      this
-    );
-    loadFeaturesXhr(
-      url,
-      format,
-      extent,
-      resolution,
-      projection,
-      /**
-       * @param {Array<FeatureType>} features The loaded features.
-       * @param {import("./proj/Projection.js").default} dataProjection Data
-       * projection.
-       */
-      function(features, dataProjection) {
-        source2.addFeatures(features);
-        if (success !== void 0) {
-          success(features);
-        }
-      },
-      /* FIXME handle error */
-      failure ? failure : VOID
-    );
-  };
-}
 class VectorSourceEvent extends BaseEvent {
   /**
    * @param {string} type Type.
@@ -35287,7 +33888,7 @@ class VectorSource extends Source {
       features = this.featuresCollection_.getArray().slice(0);
     } else if (this.featuresRtree_) {
       features = this.featuresRtree_.getAll();
-      if (!isEmpty$1(this.nullGeometryFeatures_)) {
+      if (!isEmpty(this.nullGeometryFeatures_)) {
         extend$1(features, Object.values(this.nullGeometryFeatures_));
       }
     }
@@ -35346,7 +33947,7 @@ class VectorSource extends Source {
    * @param {function(FeatureType):boolean} [filter] Feature filter function.
    *     The filter function will receive one argument, the {@link module:ol/Feature~Feature feature}
    *     and it should return a boolean value. By default, no filtering is made.
-   * @return {FeatureType} Closest feature.
+   * @return {FeatureType|null} Closest feature (or `null` if none found).
    * @api
    */
   getClosestFeatureToCoordinate(coordinate, filter) {
@@ -35511,7 +34112,7 @@ class VectorSource extends Source {
    */
   isEmpty() {
     if (this.featuresRtree_) {
-      return this.featuresRtree_.isEmpty() && isEmpty$1(this.nullGeometryFeatures_);
+      return this.featuresRtree_.isEmpty() && isEmpty(this.nullGeometryFeatures_);
     }
     if (this.featuresCollection_) {
       return this.featuresCollection_.getLength() === 0;
@@ -35648,7 +34249,7 @@ class VectorSource extends Source {
       }
     }
     const featureChangeKeys = this.featureChangeKeys_[featureKey];
-    featureChangeKeys == null ? void 0 : featureChangeKeys.forEach(unlistenByKey);
+    featureChangeKeys?.forEach(unlistenByKey);
     delete this.featureChangeKeys_[featureKey];
     const id = feature.getId();
     if (id !== void 0) {
@@ -35688,7 +34289,7 @@ class VectorSource extends Source {
   /**
    * Set the new loader of the source. The next render cycle will use the
    * new loader.
-   * @param {import("../featureloader.js").FeatureLoader<FeatureType>} loader The loader to set.
+   * @param {import("../featureloader.js").FeatureLoader} loader The loader to set.
    * @api
    */
   setLoader(loader) {
@@ -35721,28 +34322,33 @@ function getDefaultExportFromCjs(x2) {
   return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
 }
 function getAugmentedNamespace(n) {
-  if (n.__esModule) return n;
+  if (Object.prototype.hasOwnProperty.call(n, "__esModule")) return n;
   var f = n.default;
   if (typeof f == "function") {
-    var a2 = function a3() {
-      if (this instanceof a3) {
+    var a3 = function a4() {
+      var isInstance = false;
+      try {
+        isInstance = this instanceof a4;
+      } catch {
+      }
+      if (isInstance) {
         return Reflect.construct(f, arguments, this.constructor);
       }
       return f.apply(this, arguments);
     };
-    a2.prototype = f.prototype;
-  } else a2 = {};
-  Object.defineProperty(a2, "__esModule", { value: true });
+    a3.prototype = f.prototype;
+  } else a3 = {};
+  Object.defineProperty(a3, "__esModule", { value: true });
   Object.keys(n).forEach(function(k2) {
     var d2 = Object.getOwnPropertyDescriptor(n, k2);
-    Object.defineProperty(a2, k2, d2.get ? d2 : {
+    Object.defineProperty(a3, k2, d2.get ? d2 : {
       enumerable: true,
       get: function() {
         return n[k2];
       }
     });
   });
-  return a2;
+  return a3;
 }
 var olGeocoder$1 = { exports: {} };
 const require$$0 = /* @__PURE__ */ getAugmentedNamespace(Control$1);
@@ -35767,7 +34373,7 @@ function requireOlGeocoder() {
   (function(module, exports) {
     !function(e, t) {
       module.exports = t(require$$0, require$$1, require$$2, require$$3, require$$4, require$$5, require$$6, require$$7);
-    }(olGeocoder, function(e, t, s, r2, n, o, a2, i) {
+    }(olGeocoder, function(e, t, s, r2, n, o, a3, i) {
       function l(e2) {
         return e2 && "object" == typeof e2 && "default" in e2 ? e2 : { default: e2 };
       }
@@ -35783,8 +34389,8 @@ function requireOlGeocoder() {
           }
         }), t2.default = e2, Object.freeze(t2);
       }
-      var d2 = l(e), u = l(t), p5 = l(s), h = l(r2), g = l(n), m = l(o), y2 = l(a2), f = c(i), b2 = "gcd-container", v = "gcd-button-control", w2 = "gcd-input-query", x2 = "gcd-input-label", $ = "gcd-input-search", k2 = { namespace: "ol-geocoder", spin: "gcd-pseudo-rotate", hidden: "gcd-hidden", address: "gcd-address", country: "gcd-country", city: "gcd-city", road: "gcd-road", olControl: "ol-control", glass: { container: "gcd-gl-container", control: "gcd-gl-control", button: "gcd-gl-btn", input: "gcd-gl-input", expanded: "gcd-gl-expanded", search: "gcd-gl-search", result: "gcd-gl-result" }, inputText: { container: "gcd-txt-container", control: "gcd-txt-control", label: "gcd-txt-label", input: "gcd-txt-input", search: "gcd-txt-search", icon: "gcd-txt-glass", result: "gcd-txt-result" } }, S2 = { containerId: b2, buttonControlId: v, inputQueryId: w2, inputLabelId: x2, inputSearchId: $, cssClasses: k2 };
-      const q = Object.freeze({ __proto__: null, containerId: b2, buttonControlId: v, inputQueryId: w2, inputLabelId: x2, inputSearchId: $, cssClasses: k2, default: S2 }), L2 = "addresschosen", C2 = "nominatim", E4 = "reverse", T = "glass-button", j = "text-input", I2 = "bing", N2 = "mapquest", P6 = "opencage", A = "osm", R2 = "photon", F = "https://dev.virtualearth.net/REST/v1/Locations", _2 = "https://nominatim.openstreetmap.org/search", M5 = "https://api.opencagedata.com/geocode/v1/json?", O = "https://nominatim.openstreetmap.org/search", D = "https://photon.komoot.io/api/", V = { provider: A, label: "", placeholder: "Search for an address", featureStyle: null, targetType: T, lang: "en-US", limit: 5, keepOpen: false, preventDefault: false, preventPanning: false, preventMarker: false, defaultFlyResolution: 10, debug: false };
+      var d2 = l(e), u = l(t), p5 = l(s), h = l(r2), g = l(n), m = l(o), y2 = l(a3), f = c(i), b3 = "gcd-container", v = "gcd-button-control", w2 = "gcd-input-query", x2 = "gcd-input-label", $ = "gcd-input-search", k2 = { namespace: "ol-geocoder", spin: "gcd-pseudo-rotate", hidden: "gcd-hidden", address: "gcd-address", country: "gcd-country", city: "gcd-city", road: "gcd-road", olControl: "ol-control", glass: { container: "gcd-gl-container", control: "gcd-gl-control", button: "gcd-gl-btn", input: "gcd-gl-input", expanded: "gcd-gl-expanded", search: "gcd-gl-search", result: "gcd-gl-result" }, inputText: { container: "gcd-txt-container", control: "gcd-txt-control", label: "gcd-txt-label", input: "gcd-txt-input", search: "gcd-txt-search", icon: "gcd-txt-glass", result: "gcd-txt-result" } }, S2 = { containerId: b3, buttonControlId: v, inputQueryId: w2, inputLabelId: x2, inputSearchId: $, cssClasses: k2 };
+      const q = Object.freeze({ __proto__: null, containerId: b3, buttonControlId: v, inputQueryId: w2, inputLabelId: x2, inputSearchId: $, cssClasses: k2, default: S2 }), L2 = "addresschosen", C2 = "nominatim", E4 = "reverse", T = "glass-button", j = "text-input", I2 = "bing", N2 = "mapquest", P6 = "opencage", A = "osm", R2 = "photon", F = "https://dev.virtualearth.net/REST/v1/Locations", _2 = "https://nominatim.openstreetmap.org/search", M5 = "https://api.opencagedata.com/geocode/v1/json?", O = "https://nominatim.openstreetmap.org/search", D = "https://photon.komoot.io/api/", V = { provider: A, label: "", placeholder: "Search for an address", featureStyle: null, targetType: T, lang: "en-US", limit: 5, keepOpen: false, preventDefault: false, preventPanning: false, preventMarker: false, defaultFlyResolution: 10, debug: false };
       function B(e2, t2 = "Assertion failed") {
         if (!e2) {
           if ("undefined" != typeof Error) throw new Error(t2);
@@ -35998,9 +34604,9 @@ function requireOlGeocoder() {
           });
         }
         chosen(e2, t2, s2, r3) {
-          const n2 = this.Base.getMap(), o2 = [Number.parseFloat(e2.lon), Number.parseFloat(e2.lat)], a3 = n2.getView().getProjection(), i2 = f.transform(o2, "EPSG:4326", a3);
+          const n2 = this.Base.getMap(), o2 = [Number.parseFloat(e2.lon), Number.parseFloat(e2.lat)], a4 = n2.getView().getProjection(), i2 = f.transform(o2, "EPSG:4326", a4);
           let { bbox: l2 } = e2;
-          l2 && (l2 = f.transformExtent([parseFloat(l2[2]), parseFloat(l2[0]), parseFloat(l2[3]), parseFloat(l2[1])], "EPSG:4326", a3));
+          l2 && (l2 = f.transformExtent([parseFloat(l2[2]), parseFloat(l2[0]), parseFloat(l2[3]), parseFloat(l2[1])], "EPSG:4326", a4));
           const c2 = { formatted: t2, details: s2, original: r3 };
           if (this.clearResults(true), true === this.options.preventDefault || true === this.options.preventMarker) this.Base.dispatchEvent({ type: L2, address: c2, coordinate: i2, bbox: l2, place: e2 });
           else {

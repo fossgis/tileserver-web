@@ -20,7 +20,7 @@
   <nav class="container py-4 px-3 mx-auto">
     <div id="nav-info">Auswahlmöglichkeiten</div>
     <ul id="nav-list" class="nav-list">
-      VITE_NAVIGATION_LIST
+      <li>VITE_NAVIGATION_LIST</li>
     </ul>
   </nav>
 
@@ -39,7 +39,9 @@
     <div id="zoomlevel"></div>
     <div id="hostname"></div>
     <div id="map" class="map" tabindex="0">
-      <input id="swipe" type="range" style="width: 100%">
+      <input id="swipe" type="range" aria-label="Schieberegler zum Anpassen des Wertes" style="width: 100%"
+        aria-live="polite" aria-valuetext="Slider Wert: 50" aria-valuemin="0" aria-valuemax="100">
+
     </div>
 
     <small id="db-import-dates"></small>
