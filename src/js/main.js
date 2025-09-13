@@ -5,10 +5,9 @@ import OSM from 'ol/source/OSM';
 import TileLayer from 'ol/layer/Tile';
 import View from 'ol/View';
 import XYZ from 'ol/source/XYZ.js';
-import { fromLonLat } from 'ol/proj.js';
+import { fromLonLat, toLonLat } from 'ol/proj.js';
 import { getRenderPixel } from 'ol/render';
 import ContextMenu from 'ol-contextmenu';
-import Link from 'ol/interaction/Link.js';
 import imgUrl from '../images/osm_logo.png'
 import { FullScreen, Control, defaults as defaultControls } from 'ol/control.js';
 import VectorLayer from 'ol/layer/Vector';
@@ -16,6 +15,8 @@ import VectorSource from 'ol/source/Vector';
 import Geocoder from 'ol-geocoder';
 import 'ol-geocoder/dist/ol-geocoder.min.css';
 
+let zoom = 6;
+let center = fromLonLat([10.33649, 51.006271]);
 
 const HOSTNAME = import.meta.env.VITE_HOSTNAME || 'tile';
 const OSML10N_VERSION = import.meta.env.VITE_OSML10N_VERSION || '1.0';
@@ -34,7 +35,39 @@ const geolocatelayer = new VectorLayer({
 
 const tileUrl = folder + '{z}/{x}/{y}.png';
 
-const link = new Link();
+if (window.location.hash !== '') {
+  const hash = window.location.hash.replace('#map=', '');
+  const parts = hash.split('/');
+  if (parts.length === 3) {
+    zoom = parseFloat(parts[0]);
+    center = fromLonLat([
+      parseFloat(parts[1]),
+      parseFloat(parts[2])
+    ]);
+  }
+}
+
+const updateLink = function () {
+    if (!shouldUpdate) {
+        // do not update the URL when the view was changed in the 'popstate' handler
+        shouldUpdate = true;
+        return;
+    }
+
+    const center = toLonLat(view.getCenter());
+    const hash =
+        '#map=' +
+        view.getZoom().toFixed(2) +
+        '/' +
+        center[0].toFixed(2) +
+        '/' +
+        center[1].toFixed(2);
+    const state = {
+        zoom: view.getZoom(),
+        center: view.getCenter(),
+    };
+    window.history.pushState(state, 'map', hash);
+};
 
 sessionStorage.setItem('tileUrl', tileUrl);
 sessionStorage.setItem('hostname', HOSTNAME);
@@ -85,19 +118,22 @@ document.addEventListener("DOMContentLoaded", function () {
         updateLinks();
     });
 
-    // Popstate-Event auszulösen
     window.history.pushState = (function (f) {
-        return function pushState() {
+        return function pushState(state) {
             var ret = f.apply(this, arguments);
-            window.dispatchEvent(new Event('popstate'));
+            if (state) {
+                window.dispatchEvent(new PopStateEvent('popstate', { state }));
+            }
             return ret;
         };
     })(window.history.pushState);
 
     window.history.replaceState = (function (f) {
-        return function replaceState() {
+        return function replaceState(state) {
             var ret = f.apply(this, arguments);
-            window.dispatchEvent(new Event('popstate'));
+            if (state) {
+                window.dispatchEvent(new PopStateEvent('popstate', { state }));
+            }
             return ret;
         };
     })(window.history.replaceState);
@@ -118,9 +154,9 @@ const map = new Map({
     layers: [osm, defaultStyle, geolocatelayer],
     target: 'map',
     view: new View({
-        center: fromLonLat([10.33649, 51.006271]),
+        center: center,
         projection: 'EPSG:3857',
-        zoom: 6,
+        zoom: zoom,
         maxZoom: 20,
         minZoom: 0,
         multiWorld: true,
@@ -129,6 +165,19 @@ const map = new Map({
 });
 
 const swipe = document.getElementById('swipe');
+
+let shouldUpdate = true;
+const view = map.getView();
+map.on('moveend', updateLink);
+
+window.addEventListener('popstate', function (event) {
+    if (event.state === null) {
+        return;
+    }
+    map.getView().setCenter(event.state.center);
+    map.getView().setZoom(event.state.zoom);
+    shouldUpdate = false;
+});
 
 defaultStyle.on('prerender', function (event) {
     const ctx = event.context;
@@ -171,8 +220,6 @@ var contextmenu = new ContextMenu({
 });
 map.addControl(contextmenu);
 
-map.addInteraction(link);
-
 let currZoom = map.getView().getZoom();
 document.getElementById('zoomlevel').innerHTML = 'Zoom: ' + currZoom;
 sessionStorage.setItem("zoomlevel", currZoom);
@@ -185,7 +232,7 @@ map.on('moveend', function (e) {
     }
 });
 
-// GEocoder
+// Geocoder
 const geocoder = new Geocoder('nominatim', {
     provider: 'osm',
     lang: 'de-DE',
