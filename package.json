@@ -9,18 +9,19 @@
     "_comment_build-for-demo": "delete textimport in main.js 50-59",
     "build-for-demo": "vite build --base=/astridxtileserverdemo.github.io/",
     "serve": "vite preview",
+    "updateDeps": "npx npm-check-updates -u",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "sass": "1.89.2",
-    "vite": "^7.0.3"
+    "sass": "1.92.1",
+    "vite": "^7.1.5"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
-    "bootstrap": "^5.3.7",
+    "bootstrap": "^5.3.8",
     "ol": "10.6.1",
     "ol-contextmenu": "^5.5.0",
     "ol-geocoder": "^4.3.3",
