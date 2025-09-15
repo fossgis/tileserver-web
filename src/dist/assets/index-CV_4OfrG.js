@@ -1,7 +1,7 @@
 (function polyfill() {
   const relList = document.createElement("link").relList;
   if (relList && relList.supports && relList.supports("modulepreload")) return;
-  for (const link2 of document.querySelectorAll('link[rel="modulepreload"]')) processPreload(link2);
+  for (const link of document.querySelectorAll('link[rel="modulepreload"]')) processPreload(link);
   new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       if (mutation.type !== "childList") continue;
@@ -11,20 +11,20 @@
     childList: true,
     subtree: true
   });
-  function getFetchOpts(link2) {
+  function getFetchOpts(link) {
     const fetchOpts = {};
-    if (link2.integrity) fetchOpts.integrity = link2.integrity;
-    if (link2.referrerPolicy) fetchOpts.referrerPolicy = link2.referrerPolicy;
-    if (link2.crossOrigin === "use-credentials") fetchOpts.credentials = "include";
-    else if (link2.crossOrigin === "anonymous") fetchOpts.credentials = "omit";
+    if (link.integrity) fetchOpts.integrity = link.integrity;
+    if (link.referrerPolicy) fetchOpts.referrerPolicy = link.referrerPolicy;
+    if (link.crossOrigin === "use-credentials") fetchOpts.credentials = "include";
+    else if (link.crossOrigin === "anonymous") fetchOpts.credentials = "omit";
     else fetchOpts.credentials = "same-origin";
     return fetchOpts;
   }
-  function processPreload(link2) {
-    if (link2.ep) return;
-    link2.ep = true;
-    const fetchOpts = getFetchOpts(link2);
-    fetch(link2.href, fetchOpts);
+  function processPreload(link) {
+    if (link.ep) return;
+    link.ep = true;
+    const fetchOpts = getFetchOpts(link);
+    fetch(link.href, fetchOpts);
   }
 })();
 var top = "top";
@@ -354,10 +354,10 @@ function arrow(_ref) {
   var centerToReference = endDiff / 2 - startDiff / 2;
   var min2 = paddingObject[minProp];
   var max2 = clientSize - arrowRect[len] - paddingObject[maxProp];
-  var center = clientSize / 2 - arrowRect[len] / 2 + centerToReference;
-  var offset2 = within(min2, center, max2);
+  var center2 = clientSize / 2 - arrowRect[len] / 2 + centerToReference;
+  var offset2 = within(min2, center2, max2);
   var axisProp = axis;
-  state.modifiersData[name] = (_state$modifiersData$ = {}, _state$modifiersData$[axisProp] = offset2, _state$modifiersData$.centerOffset = offset2 - center, _state$modifiersData$);
+  state.modifiersData[name] = (_state$modifiersData$ = {}, _state$modifiersData$[axisProp] = offset2, _state$modifiersData$.centerOffset = offset2 - center2, _state$modifiersData$);
 }
 function effect$1(_ref2) {
   var state = _ref2.state, options = _ref2.options;
@@ -1420,7 +1420,7 @@ const Popper = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProper
   write
 }, Symbol.toStringTag, { value: "Module" }));
 /*!
-  * Bootstrap v5.3.7 (https://getbootstrap.com/)
+  * Bootstrap v5.3.8 (https://getbootstrap.com/)
   * Copyright 2011-2025 The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)
   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
   */
@@ -1929,7 +1929,7 @@ class Config {
     }
   }
 }
-const VERSION = "5.3.7";
+const VERSION = "5.3.8";
 class BaseComponent extends Config {
   constructor(element, config) {
     super();
@@ -2904,7 +2904,6 @@ class Dropdown extends BaseComponent {
     this._element.setAttribute("aria-expanded", "false");
     Manipulator.removeDataAttribute(this._menu, "popper");
     EventHandler.trigger(this._element, EVENT_HIDDEN$5, relatedTarget);
-    this._element.focus();
   }
   _getConfig(config) {
     config = super._getConfig(config);
@@ -5295,9 +5294,9 @@ function getCorner(extent, corner) {
   }
   return coordinate;
 }
-function getForViewAndSize(center, resolution, rotation, size, dest) {
+function getForViewAndSize(center2, resolution, rotation, size, dest) {
   const [x0, y0, x1, y1, x2, y2, x3, y3] = getRotatedViewport(
-    center,
+    center2,
     resolution,
     rotation,
     size
@@ -5310,7 +5309,7 @@ function getForViewAndSize(center, resolution, rotation, size, dest) {
     dest
   );
 }
-function getRotatedViewport(center, resolution, rotation, size) {
+function getRotatedViewport(center2, resolution, rotation, size) {
   const dx = resolution * size[0] / 2;
   const dy = resolution * size[1] / 2;
   const cosRotation = Math.cos(rotation);
@@ -5319,8 +5318,8 @@ function getRotatedViewport(center, resolution, rotation, size) {
   const xSin = dx * sinRotation;
   const yCos = dy * cosRotation;
   const ySin = dy * sinRotation;
-  const x2 = center[0];
-  const y2 = center[1];
+  const x2 = center2[0];
+  const y2 = center2[1];
   return [
     x2 - xCos + ySin,
     y2 - xSin - yCos,
@@ -5469,11 +5468,11 @@ function applyTransform(extent, transformFn, dest, stops) {
 }
 function wrapX$2(extent, projection) {
   const projectionExtent = projection.getExtent();
-  const center = getCenter(extent);
-  if (projection.canWrapX() && (center[0] < projectionExtent[0] || center[0] >= projectionExtent[2])) {
+  const center2 = getCenter(extent);
+  if (projection.canWrapX() && (center2[0] < projectionExtent[0] || center2[0] >= projectionExtent[2])) {
     const worldWidth = getWidth(projectionExtent);
     const worldsAway = Math.floor(
-      (center[0] - projectionExtent[0]) / worldWidth
+      (center2[0] - projectionExtent[0]) / worldWidth
     );
     const offset2 = worldsAway * worldWidth;
     extent[0] -= offset2;
@@ -6532,11 +6531,11 @@ function getGETParameter(key) {
   const parameterList = new URLSearchParams(address);
   return parameterList.get(key);
 }
-function long2tile(lon, zoom) {
-  return Math.floor((lon + 180) / 360 * Math.pow(2, zoom));
+function long2tile(lon, zoom2) {
+  return Math.floor((lon + 180) / 360 * Math.pow(2, zoom2));
 }
-function lat2tile(lat, zoom) {
-  return Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom));
+function lat2tile(lat, zoom2) {
+  return Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom2));
 }
 function open_tile_cb(obj) {
   let image = gent_tile_url("", sessionStorage.getItem("zoomlevel"), obj.coordinate);
@@ -6564,15 +6563,15 @@ function open_tile_cb(obj) {
   }
   bootstrapModal.show();
 }
-function gent_tile_url(suffix, zoom, coordinate) {
+function gent_tile_url(suffix, zoom2, coordinate) {
   let url = "https://" + sessionStorage.getItem("hostname") + sessionStorage.getItem("tileUrl");
   let lonlat = transform(coordinate, "EPSG:3857", "EPSG:4326");
-  zoom = sessionStorage.getItem("zoomlevel");
-  let x2 = long2tile(lonlat[0], zoom);
-  let y2 = lat2tile(lonlat[1], zoom);
+  zoom2 = sessionStorage.getItem("zoomlevel");
+  let x2 = long2tile(lonlat[0], zoom2);
+  let y2 = lat2tile(lonlat[1], zoom2);
   url = url.replace("{x}", x2);
   url = url.replace("{y}", y2);
-  url = url.replace("{z}", zoom);
+  url = url.replace("{z}", zoom2);
   if (suffix != "") {
     url = url + "/" + suffix;
   }
@@ -8253,9 +8252,9 @@ function getTilePriority(frameState, tile, tileSourceKey, tileCenter, tileResolu
   if (!frameState.wantedTiles[tileSourceKey][tile.getKey()]) {
     return DROP;
   }
-  const center = frameState.viewState.center;
-  const deltaX = tileCenter[0] - center[0];
-  const deltaY = tileCenter[1] - center[1];
+  const center2 = frameState.viewState.center;
+  const deltaX = tileCenter[0] - center2[0];
+  const deltaY = tileCenter[1] - center2[1];
   return 65536 * Math.log(tileResolution) + Math.sqrt(deltaX * deltaX + deltaY * deltaY) / tileResolution;
 }
 const ViewHint = {
@@ -8277,12 +8276,12 @@ function createExtent(extent, onlyCenter, smooth) {
      * @param {Array<number>} [centerShift] Shift between map center and viewport center.
      * @return {import("./coordinate.js").Coordinate|undefined} Center.
      */
-    function(center, resolution, size, isMoving, centerShift) {
-      if (!center) {
+    function(center2, resolution, size, isMoving, centerShift) {
+      if (!center2) {
         return void 0;
       }
       if (!resolution && !onlyCenter) {
-        return center;
+        return center2;
       }
       const viewWidth = onlyCenter ? 0 : size[0] * resolution;
       const viewHeight = onlyCenter ? 0 : size[1] * resolution;
@@ -8300,19 +8299,19 @@ function createExtent(extent, onlyCenter, smooth) {
         minY = (maxY + minY) / 2;
         maxY = minY;
       }
-      let x2 = clamp(center[0], minX, maxX);
-      let y2 = clamp(center[1], minY, maxY);
+      let x2 = clamp(center2[0], minX, maxX);
+      let y2 = clamp(center2[1], minY, maxY);
       if (isMoving && smooth && resolution) {
         const ratio = 30 * resolution;
-        x2 += -ratio * Math.log(1 + Math.max(0, minX - center[0]) / ratio) + ratio * Math.log(1 + Math.max(0, center[0] - maxX) / ratio);
-        y2 += -ratio * Math.log(1 + Math.max(0, minY - center[1]) / ratio) + ratio * Math.log(1 + Math.max(0, center[1] - maxY) / ratio);
+        x2 += -ratio * Math.log(1 + Math.max(0, minX - center2[0]) / ratio) + ratio * Math.log(1 + Math.max(0, center2[0] - maxX) / ratio);
+        y2 += -ratio * Math.log(1 + Math.max(0, minY - center2[1]) / ratio) + ratio * Math.log(1 + Math.max(0, center2[1] - maxY) / ratio);
       }
       return [x2, y2];
     }
   );
 }
-function none$1(center) {
-  return center;
+function none$1(center2) {
+  return center2;
 }
 function easeIn(t) {
   return Math.pow(t, 3);
@@ -10586,14 +10585,14 @@ class View extends BaseObject {
   set padding(padding) {
     let oldPadding = this.padding_;
     this.padding_ = padding;
-    const center = this.getCenterInternal();
-    if (center) {
+    const center2 = this.getCenterInternal();
+    if (center2) {
       const newPadding = padding || [0, 0, 0, 0];
       oldPadding = oldPadding || [0, 0, 0, 0];
       const resolution = this.getResolution();
       const offsetX = resolution / 2 * (newPadding[3] - oldPadding[3] + oldPadding[1] - newPadding[1]);
       const offsetY = resolution / 2 * (newPadding[0] - oldPadding[0] + oldPadding[2] - newPadding[2]);
-      this.setCenterInternal([center[0] + offsetX, center[1] - offsetY]);
+      this.setCenterInternal([center2[0] + offsetX, center2[1] - offsetY]);
     }
   }
   /**
@@ -10705,7 +10704,7 @@ class View extends BaseObject {
       return;
     }
     let start2 = Date.now();
-    let center = this.targetCenter_.slice();
+    let center2 = this.targetCenter_.slice();
     let resolution = this.targetResolution_;
     let rotation = this.targetRotation_;
     const series = [];
@@ -10723,9 +10722,9 @@ class View extends BaseObject {
         callback
       };
       if (options.center) {
-        animation.sourceCenter = center;
+        animation.sourceCenter = center2;
         animation.targetCenter = options.center.slice();
-        center = animation.targetCenter;
+        center2 = animation.targetCenter;
       }
       if (options.zoom !== void 0) {
         animation.sourceResolution = resolution;
@@ -10902,14 +10901,14 @@ class View extends BaseObject {
    * @return {import("./coordinate.js").Coordinate|undefined} Center for rotation and anchor.
    */
   calculateCenterRotate(rotation, anchor) {
-    let center;
+    let center2;
     const currentCenter = this.getCenterInternal();
     if (currentCenter !== void 0) {
-      center = [currentCenter[0] - anchor[0], currentCenter[1] - anchor[1]];
-      rotate$1(center, rotation - this.getRotation());
-      add$2(center, anchor);
+      center2 = [currentCenter[0] - anchor[0], currentCenter[1] - anchor[1]];
+      rotate$1(center2, rotation - this.getRotation());
+      add$2(center2, anchor);
     }
-    return center;
+    return center2;
   }
   /**
    * @param {number} resolution Target resolution.
@@ -10917,15 +10916,15 @@ class View extends BaseObject {
    * @return {import("./coordinate.js").Coordinate|undefined} Center for resolution and anchor.
    */
   calculateCenterZoom(resolution, anchor) {
-    let center;
+    let center2;
     const currentCenter = this.getCenterInternal();
     const currentResolution = this.getResolution();
     if (currentCenter !== void 0 && currentResolution !== void 0) {
       const x2 = anchor[0] - resolution * (anchor[0] - currentCenter[0]) / currentResolution;
       const y2 = anchor[1] - resolution * (anchor[1] - currentCenter[1]) / currentResolution;
-      center = [x2, y2];
+      center2 = [x2, y2];
     }
-    return center;
+    return center2;
   }
   /**
    * Returns the current viewport size.
@@ -10965,11 +10964,11 @@ class View extends BaseObject {
    * @api
    */
   getCenter() {
-    const center = this.getCenterInternal();
-    if (!center) {
-      return center;
+    const center2 = this.getCenterInternal();
+    if (!center2) {
+      return center2;
     }
-    return toUserCoordinate(center, this.getProjection());
+    return toUserCoordinate(center2, this.getProjection());
   }
   /**
    * Get the view center without transforming to user projection.
@@ -11026,11 +11025,11 @@ class View extends BaseObject {
    */
   calculateExtentInternal(size) {
     size = size || this.getViewportSizeMinusPadding_();
-    const center = (
+    const center2 = (
       /** @type {!import("./coordinate.js").Coordinate} */
       this.getCenterInternal()
     );
-    assert(center, "The view center is not defined");
+    assert(center2, "The view center is not defined");
     const resolution = (
       /** @type {!number} */
       this.getResolution()
@@ -11041,7 +11040,7 @@ class View extends BaseObject {
       this.getRotation()
     );
     assert(rotation !== void 0, "The view rotation is not defined");
-    return getForViewAndSize(center, resolution, rotation, size);
+    return getForViewAndSize(center2, resolution, rotation, size);
   }
   /**
    * Get the maximum resolution of the view.
@@ -11075,8 +11074,8 @@ class View extends BaseObject {
    * @param {number} zoom The maximum zoom level.
    * @api
    */
-  setMaxZoom(zoom) {
-    this.applyOptions_(this.getUpdatedOptions_({ maxZoom: zoom }));
+  setMaxZoom(zoom2) {
+    this.applyOptions_(this.getUpdatedOptions_({ maxZoom: zoom2 }));
   }
   /**
    * Get the minimum zoom level for the view.
@@ -11094,8 +11093,8 @@ class View extends BaseObject {
    * @param {number} zoom The minimum zoom level.
    * @api
    */
-  setMinZoom(zoom) {
-    this.applyOptions_(this.getUpdatedOptions_({ minZoom: zoom }));
+  setMinZoom(zoom2) {
+    this.applyOptions_(this.getUpdatedOptions_({ minZoom: zoom2 }));
   }
   /**
    * Set whether the view should allow intermediary zoom levels.
@@ -11241,15 +11240,15 @@ class View extends BaseObject {
     const projection = this.getProjection();
     const resolution = this.getResolution();
     const rotation = this.getRotation();
-    let center = (
+    let center2 = (
       /** @type {import("./coordinate.js").Coordinate} */
       this.getCenterInternal()
     );
     const padding = this.padding_;
     if (padding) {
       const reducedSize = this.getViewportSizeMinusPadding_();
-      center = calculateCenterOn(
-        center,
+      center2 = calculateCenterOn(
+        center2,
         this.getViewportSize_(),
         [reducedSize[0] / 2 + padding[3], reducedSize[1] / 2 + padding[0]],
         resolution,
@@ -11257,7 +11256,7 @@ class View extends BaseObject {
       );
     }
     return {
-      center: center.slice(0),
+      center: center2.slice(0),
       projection: projection !== void 0 ? projection : null,
       resolution,
       nextCenter: this.nextCenter_,
@@ -11284,12 +11283,12 @@ class View extends BaseObject {
    * @api
    */
   getZoom() {
-    let zoom;
+    let zoom2;
     const resolution = this.getResolution();
     if (resolution !== void 0) {
-      zoom = this.getZoomForResolution(resolution);
+      zoom2 = this.getZoomForResolution(resolution);
     }
-    return zoom;
+    return zoom2;
   }
   /**
    * Get the zoom level for a resolution.
@@ -11321,20 +11320,20 @@ class View extends BaseObject {
    * @return {number} The view resolution for the provided zoom level.
    * @api
    */
-  getResolutionForZoom(zoom) {
+  getResolutionForZoom(zoom2) {
     if (this.resolutions_?.length) {
       if (this.resolutions_.length === 1) {
         return this.resolutions_[0];
       }
       const baseLevel = clamp(
-        Math.floor(zoom),
+        Math.floor(zoom2),
         0,
         this.resolutions_.length - 2
       );
       const zoomFactor = this.resolutions_[baseLevel] / this.resolutions_[baseLevel + 1];
-      return this.resolutions_[baseLevel] / Math.pow(zoomFactor, clamp(zoom - baseLevel, 0, 1));
+      return this.resolutions_[baseLevel] / Math.pow(zoomFactor, clamp(zoom2 - baseLevel, 0, 1));
     }
-    return this.maxResolution_ / Math.pow(this.zoomFactor_, zoom - this.minZoom_);
+    return this.maxResolution_ / Math.pow(this.zoomFactor_, zoom2 - this.minZoom_);
   }
   /**
    * Fit the given geometry or extent based on the given map size and border.
@@ -11438,13 +11437,13 @@ class View extends BaseObject {
     centerRot[1] += (padding[0] - padding[2]) / 2 * resolution;
     const centerX = centerRot[0] * cosAngle - centerRot[1] * sinAngle;
     const centerY = centerRot[1] * cosAngle + centerRot[0] * sinAngle;
-    const center = this.getConstrainedCenter([centerX, centerY], resolution);
+    const center2 = this.getConstrainedCenter([centerX, centerY], resolution);
     const callback = options.callback ? options.callback : VOID;
     if (options.duration !== void 0) {
       this.animateInternal(
         {
           resolution,
-          center,
+          center: center2,
           duration: options.duration,
           easing: options.easing
         },
@@ -11452,7 +11451,7 @@ class View extends BaseObject {
       );
     } else {
       this.targetResolution_ = resolution;
-      this.targetCenter_ = center;
+      this.targetCenter_ = center2;
       this.applyTargetState_(false, true);
       animationCallback(callback, true);
     }
@@ -11495,21 +11494,21 @@ class View extends BaseObject {
    * @param {import("./size.js").Size} size Size.
    * @return {Array<number>|undefined} Center shift.
    */
-  calculateCenterShift(center, resolution, rotation, size) {
+  calculateCenterShift(center2, resolution, rotation, size) {
     let centerShift;
     const padding = this.padding_;
-    if (padding && center) {
+    if (padding && center2) {
       const reducedSize = this.getViewportSizeMinusPadding_(-rotation);
       const shiftedCenter = calculateCenterOn(
-        center,
+        center2,
         size,
         [reducedSize[0] / 2 + padding[3], reducedSize[1] / 2 + padding[0]],
         resolution,
         rotation
       );
       centerShift = [
-        center[0] - shiftedCenter[0],
-        center[1] - shiftedCenter[1]
+        center2[0] - shiftedCenter[0],
+        center2[1] - shiftedCenter[1]
       ];
     }
     return centerShift;
@@ -11526,10 +11525,10 @@ class View extends BaseObject {
    * @api
    */
   adjustCenter(deltaCoordinates) {
-    const center = toUserCoordinate(this.targetCenter_, this.getProjection());
+    const center2 = toUserCoordinate(this.targetCenter_, this.getProjection());
     this.setCenter([
-      center[0] + deltaCoordinates[0],
-      center[1] + deltaCoordinates[1]
+      center2[0] + deltaCoordinates[0],
+      center2[1] + deltaCoordinates[1]
     ]);
   }
   /**
@@ -11537,10 +11536,10 @@ class View extends BaseObject {
    * @param {import("./coordinate.js").Coordinate} deltaCoordinates Relative value to add.
    */
   adjustCenterInternal(deltaCoordinates) {
-    const center = this.targetCenter_;
+    const center2 = this.targetCenter_;
     this.setCenterInternal([
-      center[0] + deltaCoordinates[0],
-      center[1] + deltaCoordinates[1]
+      center2[0] + deltaCoordinates[0],
+      center2[1] + deltaCoordinates[1]
     ]);
   }
   /**
@@ -11620,17 +11619,17 @@ class View extends BaseObject {
    * @observable
    * @api
    */
-  setCenter(center) {
+  setCenter(center2) {
     this.setCenterInternal(
-      center ? fromUserCoordinate(center, this.getProjection()) : center
+      center2 ? fromUserCoordinate(center2, this.getProjection()) : center2
     );
   }
   /**
    * Set the center using the view projection (not the user projection).
    * @param {import("./coordinate.js").Coordinate|undefined} center The center of the view.
    */
-  setCenterInternal(center) {
-    this.targetCenter_ = center;
+  setCenterInternal(center2) {
+    this.targetCenter_ = center2;
     this.applyTargetState_();
   }
   /**
@@ -11668,8 +11667,8 @@ class View extends BaseObject {
    * @param {number} zoom Zoom level.
    * @api
    */
-  setZoom(zoom) {
-    this.setResolution(this.getResolutionForZoom(zoom));
+  setZoom(zoom2) {
+    this.setResolution(this.getResolutionForZoom(zoom2));
   }
   /**
    * Recompute rotation/resolution/center based on target values.
@@ -12481,20 +12480,20 @@ class Rotate extends Control {
    */
   resetNorth_() {
     const map2 = this.getMap();
-    const view = map2.getView();
-    if (!view) {
+    const view2 = map2.getView();
+    if (!view2) {
       return;
     }
-    const rotation = view.getRotation();
+    const rotation = view2.getRotation();
     if (rotation !== void 0) {
       if (this.duration_ > 0 && rotation % (2 * Math.PI) !== 0) {
-        view.animate({
+        view2.animate({
           rotation: 0,
           duration: this.duration_,
           easing: easeOut
         });
       } else {
-        view.setRotation(0);
+        view2.setRotation(0);
       }
     }
   }
@@ -12588,24 +12587,24 @@ class Zoom extends Control {
    */
   zoomByDelta_(delta) {
     const map2 = this.getMap();
-    const view = map2.getView();
-    if (!view) {
+    const view2 = map2.getView();
+    if (!view2) {
       return;
     }
-    const currentZoom = view.getZoom();
+    const currentZoom = view2.getZoom();
     if (currentZoom !== void 0) {
-      const newZoom = view.getConstrainedZoom(currentZoom + delta);
+      const newZoom = view2.getConstrainedZoom(currentZoom + delta);
       if (this.duration_ > 0) {
-        if (view.getAnimating()) {
-          view.cancelAnimations();
+        if (view2.getAnimating()) {
+          view2.cancelAnimations();
         }
-        view.animate({
+        view2.animate({
           zoom: newZoom,
           duration: this.duration_,
           easing: easeOut
         });
       } else {
-        view.setZoom(newZoom);
+        view2.setZoom(newZoom);
       }
     }
   }
@@ -12762,28 +12761,28 @@ class Interaction extends BaseObject {
     this.map_ = map2;
   }
 }
-function pan(view, delta, duration) {
-  const currentCenter = view.getCenterInternal();
+function pan(view2, delta, duration) {
+  const currentCenter = view2.getCenterInternal();
   if (currentCenter) {
-    const center = [currentCenter[0] + delta[0], currentCenter[1] + delta[1]];
-    view.animateInternal({
+    const center2 = [currentCenter[0] + delta[0], currentCenter[1] + delta[1]];
+    view2.animateInternal({
       duration: duration !== void 0 ? duration : 250,
       easing: linear,
-      center: view.getConstrainedCenter(center)
+      center: view2.getConstrainedCenter(center2)
     });
   }
 }
-function zoomByDelta(view, delta, anchor, duration) {
-  const currentZoom = view.getZoom();
+function zoomByDelta(view2, delta, anchor, duration) {
+  const currentZoom = view2.getZoom();
   if (currentZoom === void 0) {
     return;
   }
-  const newZoom = view.getConstrainedZoom(currentZoom + delta);
-  const newResolution = view.getResolutionForZoom(newZoom);
-  if (view.getAnimating()) {
-    view.cancelAnimations();
+  const newZoom = view2.getConstrainedZoom(currentZoom + delta);
+  const newResolution = view2.getResolutionForZoom(newZoom);
+  if (view2.getAnimating()) {
+    view2.cancelAnimations();
   }
-  view.animate({
+  view2.animate({
     resolution: newResolution,
     anchor,
     duration: duration !== void 0 ? duration : 250,
@@ -12817,8 +12816,8 @@ class DoubleClickZoom extends Interaction {
       const map2 = mapBrowserEvent.map;
       const anchor = mapBrowserEvent.coordinate;
       const delta = browserEvent.shiftKey ? -this.delta_ : this.delta_;
-      const view = map2.getView();
-      zoomByDelta(view, delta, anchor, this.duration_);
+      const view2 = map2.getView();
+      zoomByDelta(view2, delta, anchor, this.duration_);
       browserEvent.preventDefault();
       stopEvent = true;
     }
@@ -13065,10 +13064,10 @@ class DragPan extends PointerInteraction {
           centroid$1[1] - this.lastCentroid[1]
         ];
         const map3 = mapBrowserEvent.map;
-        const view = map3.getView();
-        scale$2(delta, view.getResolution());
-        rotate$1(delta, view.getRotation());
-        view.adjustCenterInternal(delta);
+        const view2 = map3.getView();
+        scale$2(delta, view2.getResolution());
+        rotate$1(delta, view2.getRotation());
+        view2.adjustCenterInternal(delta);
       }
     } else if (this.kinetic_) {
       this.kinetic_.begin();
@@ -13085,26 +13084,26 @@ class DragPan extends PointerInteraction {
    */
   handleUpEvent(mapBrowserEvent) {
     const map2 = mapBrowserEvent.map;
-    const view = map2.getView();
+    const view2 = map2.getView();
     if (this.targetPointers.length === 0) {
       if (!this.noKinetic_ && this.kinetic_ && this.kinetic_.end()) {
         const distance = this.kinetic_.getDistance();
         const angle = this.kinetic_.getAngle();
-        const center = view.getCenterInternal();
-        const centerpx = map2.getPixelFromCoordinateInternal(center);
+        const center2 = view2.getCenterInternal();
+        const centerpx = map2.getPixelFromCoordinateInternal(center2);
         const dest = map2.getCoordinateFromPixelInternal([
           centerpx[0] - distance * Math.cos(angle),
           centerpx[1] - distance * Math.sin(angle)
         ]);
-        view.animateInternal({
-          center: view.getConstrainedCenter(dest),
+        view2.animateInternal({
+          center: view2.getConstrainedCenter(dest),
           duration: 500,
           easing: easeOut
         });
       }
       if (this.panning_) {
         this.panning_ = false;
-        view.endInteraction();
+        view2.endInteraction();
       }
       return false;
     }
@@ -13123,10 +13122,10 @@ class DragPan extends PointerInteraction {
   handleDownEvent(mapBrowserEvent) {
     if (this.targetPointers.length > 0 && this.condition_(mapBrowserEvent)) {
       const map2 = mapBrowserEvent.map;
-      const view = map2.getView();
+      const view2 = map2.getView();
       this.lastCentroid = null;
-      if (view.getAnimating()) {
-        view.cancelAnimations();
+      if (view2.getAnimating()) {
+        view2.cancelAnimations();
       }
       if (this.kinetic_) {
         this.kinetic_.begin();
@@ -13160,8 +13159,8 @@ class DragRotate extends PointerInteraction {
       return;
     }
     const map2 = mapBrowserEvent.map;
-    const view = map2.getView();
-    if (view.getConstraints().rotation === disable) {
+    const view2 = map2.getView();
+    if (view2.getConstraints().rotation === disable) {
       return;
     }
     const size = map2.getSize();
@@ -13169,7 +13168,7 @@ class DragRotate extends PointerInteraction {
     const theta = Math.atan2(size[1] / 2 - offset2[1], offset2[0] - size[0] / 2);
     if (this.lastAngle_ !== void 0) {
       const delta = theta - this.lastAngle_;
-      view.adjustRotationInternal(-delta);
+      view2.adjustRotationInternal(-delta);
     }
     this.lastAngle_ = theta;
   }
@@ -13184,8 +13183,8 @@ class DragRotate extends PointerInteraction {
       return true;
     }
     const map2 = mapBrowserEvent.map;
-    const view = map2.getView();
-    view.endInteraction(this.duration_);
+    const view2 = map2.getView();
+    view2.endInteraction(this.duration_);
     return false;
   }
   /**
@@ -13515,19 +13514,19 @@ class DragZoom extends DragBox {
    */
   onBoxEnd(event) {
     const map2 = this.getMap();
-    const view = (
+    const view2 = (
       /** @type {!import("../View.js").default} */
       map2.getView()
     );
     let geometry = this.getGeometry();
     if (this.out_) {
-      const rotatedExtent = view.rotatedExtentForGeometry(geometry);
-      const resolution = view.getResolutionForExtentInternal(rotatedExtent);
-      const factor = view.getResolution() / resolution;
+      const rotatedExtent = view2.rotatedExtentForGeometry(geometry);
+      const resolution = view2.getResolutionForExtentInternal(rotatedExtent);
+      const factor = view2.getResolution() / resolution;
       geometry = geometry.clone();
       geometry.scale(factor * factor);
     }
-    view.fitInternal(geometry, {
+    view2.fitInternal(geometry, {
       duration: this.duration_,
       easing: easeOut
     });
@@ -13571,8 +13570,8 @@ class KeyboardPan extends Interaction {
       const key = keyEvent.key;
       if (this.condition_(mapBrowserEvent) && (key == Key.DOWN || key == Key.LEFT || key == Key.RIGHT || key == Key.UP)) {
         const map2 = mapBrowserEvent.map;
-        const view = map2.getView();
-        const mapUnitsDelta = view.getResolution() * this.pixelDelta_;
+        const view2 = map2.getView();
+        const mapUnitsDelta = view2.getResolution() * this.pixelDelta_;
         let deltaX = 0, deltaY = 0;
         if (key == Key.DOWN) {
           deltaY = -mapUnitsDelta;
@@ -13584,8 +13583,8 @@ class KeyboardPan extends Interaction {
           deltaY = mapUnitsDelta;
         }
         const delta = [deltaX, deltaY];
-        rotate$1(delta, view.getRotation());
-        pan(view, delta, this.duration_);
+        rotate$1(delta, view2.getRotation());
+        pan(view2, delta, this.duration_);
         keyEvent.preventDefault();
         stopEvent = true;
       }
@@ -13625,8 +13624,8 @@ class KeyboardZoom extends Interaction {
       if (this.condition_(mapBrowserEvent) && (key === "+" || key === "-")) {
         const map2 = mapBrowserEvent.map;
         const delta = key === "+" ? this.delta_ : -this.delta_;
-        const view = map2.getView();
-        zoomByDelta(view, delta, void 0, this.duration_);
+        const view2 = map2.getView();
+        zoomByDelta(view2, delta, void 0, this.duration_);
         keyEvent.preventDefault();
         stopEvent = true;
       }
@@ -13672,8 +13671,8 @@ class MouseWheelZoom extends Interaction {
     if (!map2) {
       return;
     }
-    const view = map2.getView();
-    view.endInteraction(
+    const view2 = map2.getView();
+    view2.endInteraction(
       void 0,
       this.lastDelta_ ? this.lastDelta_ > 0 ? 1 : -1 : 0,
       this.lastAnchor_ ? map2.getCoordinateFromPixel(this.lastAnchor_) : null
@@ -13723,21 +13722,21 @@ class MouseWheelZoom extends Interaction {
     if (!this.mode_ || now - this.startTime_ > this.trackpadEventGap_) {
       this.mode_ = Math.abs(delta) < 4 ? "trackpad" : "wheel";
     }
-    const view = map2.getView();
-    if (this.mode_ === "trackpad" && !(view.getConstrainResolution() || this.constrainResolution_)) {
+    const view2 = map2.getView();
+    if (this.mode_ === "trackpad" && !(view2.getConstrainResolution() || this.constrainResolution_)) {
       if (this.trackpadTimeoutId_) {
         clearTimeout(this.trackpadTimeoutId_);
       } else {
-        if (view.getAnimating()) {
-          view.cancelAnimations();
+        if (view2.getAnimating()) {
+          view2.cancelAnimations();
         }
-        view.beginInteraction();
+        view2.beginInteraction();
       }
       this.trackpadTimeoutId_ = setTimeout(
         this.endInteraction_.bind(this),
         this.timeout_
       );
-      view.adjustZoom(
+      view2.adjustZoom(
         -delta / this.deltaPerZoom_,
         this.lastAnchor_ ? map2.getCoordinateFromPixel(this.lastAnchor_) : null
       );
@@ -13758,20 +13757,20 @@ class MouseWheelZoom extends Interaction {
    * @param {import("../Map.js").default} map Map.
    */
   handleWheelZoom_(map2) {
-    const view = map2.getView();
-    if (view.getAnimating()) {
-      view.cancelAnimations();
+    const view2 = map2.getView();
+    if (view2.getAnimating()) {
+      view2.cancelAnimations();
     }
     let delta = -clamp(
       this.totalDelta_,
       -this.maxDelta_ * this.deltaPerZoom_,
       this.maxDelta_ * this.deltaPerZoom_
     ) / this.deltaPerZoom_;
-    if (view.getConstrainResolution() || this.constrainResolution_) {
+    if (view2.getConstrainResolution() || this.constrainResolution_) {
       delta = delta ? delta > 0 ? 1 : -1 : 0;
     }
     zoomByDelta(
-      view,
+      view2,
       delta,
       this.lastAnchor_ ? map2.getCoordinateFromPixel(this.lastAnchor_) : null,
       this.duration_
@@ -13839,8 +13838,8 @@ class PinchRotate extends PointerInteraction {
     }
     this.lastAngle_ = angle;
     const map2 = mapBrowserEvent.map;
-    const view = map2.getView();
-    if (view.getConstraints().rotation === disable) {
+    const view2 = map2.getView();
+    if (view2.getConstraints().rotation === disable) {
       return;
     }
     this.anchor_ = map2.getCoordinateFromPixelInternal(
@@ -13848,7 +13847,7 @@ class PinchRotate extends PointerInteraction {
     );
     if (this.rotating_) {
       map2.render();
-      view.adjustRotationInternal(rotationDelta, this.anchor_);
+      view2.adjustRotationInternal(rotationDelta, this.anchor_);
     }
   }
   /**
@@ -13860,8 +13859,8 @@ class PinchRotate extends PointerInteraction {
   handleUpEvent(mapBrowserEvent) {
     if (this.targetPointers.length < 2) {
       const map2 = mapBrowserEvent.map;
-      const view = map2.getView();
-      view.endInteraction(this.duration_);
+      const view2 = map2.getView();
+      view2.endInteraction(this.duration_);
       return false;
     }
     return true;
@@ -13923,7 +13922,7 @@ class PinchZoom extends PointerInteraction {
     }
     this.lastDistance_ = distance;
     const map2 = mapBrowserEvent.map;
-    const view = map2.getView();
+    const view2 = map2.getView();
     if (scaleDelta != 1) {
       this.lastScaleDelta_ = scaleDelta;
     }
@@ -13931,7 +13930,7 @@ class PinchZoom extends PointerInteraction {
       map2.getEventPixel(centroid(this.targetPointers))
     );
     map2.render();
-    view.adjustResolutionInternal(scaleDelta, this.anchor_);
+    view2.adjustResolutionInternal(scaleDelta, this.anchor_);
   }
   /**
    * Handle pointer up events.
@@ -13942,9 +13941,9 @@ class PinchZoom extends PointerInteraction {
   handleUpEvent(mapBrowserEvent) {
     if (this.targetPointers.length < 2) {
       const map2 = mapBrowserEvent.map;
-      const view = map2.getView();
+      const view2 = map2.getView();
       const direction = this.lastScaleDelta_ > 1 ? 1 : -1;
-      view.endInteraction(this.duration_, direction);
+      view2.endInteraction(this.duration_, direction);
       return false;
     }
     return true;
@@ -14767,19 +14766,19 @@ class Layer extends BaseLayer {
    * @return {boolean} The layer is visible in the map view.
    * @api
    */
-  isVisible(view) {
+  isVisible(view2) {
     let frameState;
     const map2 = this.getMapInternal();
-    if (!view && map2) {
-      view = map2.getView();
+    if (!view2 && map2) {
+      view2 = map2.getView();
     }
-    if (view instanceof View) {
+    if (view2 instanceof View) {
       frameState = {
-        viewState: view.getState(),
-        extent: view.calculateExtent()
+        viewState: view2.getState(),
+        extent: view2.calculateExtent()
       };
     } else {
-      frameState = view;
+      frameState = view2;
     }
     if (!frameState.layerStatesArray && map2) {
       frameState.layerStatesArray = map2.getLayerGroup().getLayerStatesArray();
@@ -14805,15 +14804,15 @@ class Layer extends BaseLayer {
    * @return {Array<string>} Attributions for this layer at the given view.
    * @api
    */
-  getAttributions(view) {
-    if (!this.isVisible(view)) {
+  getAttributions(view2) {
+    if (!this.isVisible(view2)) {
       return [];
     }
     const getAttributions = this.getSource()?.getAttributions();
     if (!getAttributions) {
       return [];
     }
-    const frameState = view instanceof View ? view.getViewStateAndExtent() : view;
+    const frameState = view2 instanceof View ? view2.getViewStateAndExtent() : view2;
     let attributions = getAttributions(frameState);
     if (!Array.isArray(attributions)) {
       attributions = [attributions];
@@ -14992,8 +14991,8 @@ function inView(layerState, viewState) {
   if (resolution < layerState.minResolution || resolution >= layerState.maxResolution) {
     return false;
   }
-  const zoom = viewState.zoom;
-  return zoom > layerState.minZoom && zoom <= layerState.maxZoom;
+  const zoom2 = viewState.zoom;
+  return zoom2 > layerState.minZoom && zoom2 <= layerState.maxZoom;
 }
 function quickselect(arr, k2, left2, right2, compare) {
   quickselectStep(arr, k2, left2 || 0, right2 || arr.length - 1, compare || defaultCompare);
@@ -21870,22 +21869,22 @@ let Map$1 = class Map2 extends BaseObject {
       unlistenByKey(this.viewChangeListenerKey_);
       this.viewChangeListenerKey_ = null;
     }
-    const view = this.getView();
-    if (view) {
+    const view2 = this.getView();
+    if (view2) {
       this.updateViewportSize_(this.getSize());
       this.viewPropertyListenerKey_ = listen(
-        view,
+        view2,
         ObjectEventType.PROPERTYCHANGE,
         this.handleViewPropertyChanged_,
         this
       );
       this.viewChangeListenerKey_ = listen(
-        view,
+        view2,
         EventType.CHANGE,
         this.handleViewPropertyChanged_,
         this
       );
-      view.resolveConstraints(0);
+      view2.resolveConstraints(0);
     }
     this.render();
   }
@@ -22010,14 +22009,14 @@ let Map$1 = class Map2 extends BaseObject {
    */
   renderFrame_(time) {
     const size = this.getSize();
-    const view = this.getView();
+    const view2 = this.getView();
     const previousFrameState = this.frameState_;
     let frameState = null;
-    if (size !== void 0 && hasArea(size) && view && view.isDef()) {
-      const viewHints = view.getHints(
+    if (size !== void 0 && hasArea(size) && view2 && view2.isDef()) {
+      const viewHints = view2.getHints(
         this.frameState_ ? this.frameState_.viewHints : void 0
       );
-      const viewState = view.getState();
+      const viewState = view2.getState();
       frameState = {
         animate: false,
         coordinateToPixelTransform: this.coordinateToPixelTransform_,
@@ -22134,14 +22133,14 @@ let Map$1 = class Map2 extends BaseObject {
    * @observable
    * @api
    */
-  setView(view) {
-    if (!view || view instanceof View) {
-      this.set(MapProperty.VIEW, view);
+  setView(view2) {
+    if (!view2 || view2 instanceof View) {
+      this.set(MapProperty.VIEW, view2);
       return;
     }
     this.set(MapProperty.VIEW, new View());
     const map2 = this;
-    view.then(function(viewOptions) {
+    view2.then(function(viewOptions) {
       map2.setView(new View(viewOptions));
     });
   }
@@ -22178,9 +22177,9 @@ let Map$1 = class Map2 extends BaseObject {
    * @private
    */
   updateViewportSize_(size) {
-    const view = this.getView();
-    if (view) {
-      view.setViewportSize(size);
+    const view2 = this.getView();
+    if (view2) {
+      view2.setViewportSize(size);
     }
   }
 };
@@ -22477,11 +22476,11 @@ class TileGrid {
    * @param {function(import("../tilecoord.js").TileCoord): void} callback Function called with each tile coordinate.
    * @api
    */
-  forEachTileCoord(extent, zoom, callback) {
-    const tileRange = this.getTileRangeForExtentAndZ(extent, zoom);
+  forEachTileCoord(extent, zoom2, callback) {
+    const tileRange = this.getTileRangeForExtentAndZ(extent, zoom2);
     for (let i = tileRange.minX, ii = tileRange.maxX; i <= ii; ++i) {
       for (let j = tileRange.minY, jj = tileRange.maxY; j <= jj; ++j) {
-        callback([zoom, i, j]);
+        callback([zoom2, i, j]);
       }
     }
   }
@@ -22878,15 +22877,15 @@ function getForProjection(projection) {
 }
 function wrapX(tileGrid, tileCoord, projection) {
   const z2 = tileCoord[0];
-  const center = tileGrid.getTileCoordCenter(tileCoord);
+  const center2 = tileGrid.getTileCoordCenter(tileCoord);
   const projectionExtent = extentFromProjection(projection);
-  if (!containsCoordinate(projectionExtent, center)) {
+  if (!containsCoordinate(projectionExtent, center2)) {
     const worldWidth = getWidth(projectionExtent);
     const worldsAway = Math.ceil(
-      (projectionExtent[0] - center[0]) / worldWidth
+      (projectionExtent[0] - center2[0]) / worldWidth
     );
-    center[0] += worldWidth * worldsAway;
-    return tileGrid.getTileCoordForCoordAndZ(center, z2);
+    center2[0] += worldWidth * worldsAway;
+    return tileGrid.getTileCoordForCoordAndZ(center2, z2);
   }
   return tileCoord;
 }
@@ -23669,8 +23668,8 @@ class Triangulation {
     }
     if (maxSubdivision > 0) {
       if (!needsSubdivision) {
-        const center = [(a3[0] + c[0]) / 2, (a3[1] + c[1]) / 2];
-        const centerSrc = this.transformInv_(center);
+        const center2 = [(a3[0] + c[0]) / 2, (a3[1] + c[1]) / 2];
+        const centerSrc = this.transformInv_(center2);
         let dx;
         if (wrapsX) {
           const centerSrcEstimX = (modulo(aSrc[0], sourceWorldWidth) + modulo(cSrc[0], sourceWorldWidth)) / 2;
@@ -25669,13 +25668,13 @@ class CanvasLayerRenderer extends LayerRenderer {
    * @protected
    * @return {!import("../../transform.js").Transform} Transform.
    */
-  getRenderTransform(center, resolution, rotation, pixelRatio, width, height, offsetX) {
+  getRenderTransform(center2, resolution, rotation, pixelRatio, width, height, offsetX) {
     const dx1 = width / 2;
     const dy1 = height / 2;
     const sx = pixelRatio / resolution;
     const sy = -sx;
-    const dx2 = -center[0] + offsetX;
-    const dy2 = -center[1];
+    const dx2 = -center2[0] + offsetX;
+    const dy2 = -center2[1];
     return compose(
       this.tempTransform,
       dx1,
@@ -28091,323 +28090,6 @@ class R extends Control {
   }
   handleAddMenuEntry(e, s) {
     this.menuEntries.set(e.id, e), this.positionContainer(), "callback" in e && typeof e.callback == "function" && s.addEventListener("click", this.entryCallbackEventListener, false);
-  }
-}
-function to5(number) {
-  return toFixed(number, 5);
-}
-function readNumber(string) {
-  return parseFloat(string);
-}
-function writeNumber(number) {
-  return to5(number).toString();
-}
-function differentNumber(a3, b3) {
-  if (isNaN(a3)) {
-    return false;
-  }
-  return a3 !== readNumber(writeNumber(b3));
-}
-function differentArray(a3, b3) {
-  return differentNumber(a3[0], b3[0]) || differentNumber(a3[1], b3[1]);
-}
-class Link extends Interaction {
-  /**
-   * @param {Options} [options] Link options.
-   */
-  constructor(options) {
-    super();
-    options = Object.assign(
-      {
-        animate: true,
-        params: ["x", "y", "z", "r", "l"],
-        replace: false,
-        prefix: ""
-      },
-      options || {}
-    );
-    let animationOptions;
-    if (options.animate === true) {
-      animationOptions = { duration: 250 };
-    } else if (!options.animate) {
-      animationOptions = null;
-    } else {
-      animationOptions = options.animate;
-    }
-    this.animationOptions_ = animationOptions;
-    this.params_ = options.params.reduce((acc, value) => {
-      acc[value] = true;
-      return acc;
-    }, {});
-    this.replace_ = options.replace;
-    this.prefix_ = options.prefix;
-    this.listenerKeys_ = [];
-    this.initial_ = true;
-    this.updateState_ = this.updateState_.bind(this);
-    this.trackedCallbacks_ = {};
-    this.trackedValues_ = {};
-  }
-  /**
-   * @private
-   * @param {string} name A parameter name.
-   * @return {string} A name with the prefix applied.
-   */
-  getParamName_(name) {
-    if (!this.prefix_) {
-      return name;
-    }
-    return this.prefix_ + name;
-  }
-  /**
-   * @private
-   * @param {URLSearchParams} params The search params.
-   * @param {string} name The unprefixed parameter name.
-   * @return {string|null} The parameter value.
-   */
-  get_(params, name) {
-    return params.get(this.getParamName_(name));
-  }
-  /**
-   * @private
-   * @param {URLSearchParams} params The search params.
-   * @param {string} name The unprefixed parameter name.
-   * @param {string} value The param value.
-   */
-  set_(params, name, value) {
-    if (!(name in this.params_)) {
-      return;
-    }
-    params.set(this.getParamName_(name), value);
-  }
-  /**
-   * @private
-   * @param {URLSearchParams} params The search params.
-   * @param {string} name The unprefixed parameter name.
-   */
-  delete_(params, name) {
-    if (!(name in this.params_)) {
-      return;
-    }
-    params.delete(this.getParamName_(name));
-  }
-  /**
-   * @param {import("../Map.js").default|null} map Map.
-   * @override
-   */
-  setMap(map2) {
-    const oldMap = this.getMap();
-    super.setMap(map2);
-    if (map2 === oldMap) {
-      return;
-    }
-    if (oldMap) {
-      this.unregisterListeners_(oldMap);
-    }
-    if (map2) {
-      this.initial_ = true;
-      this.updateState_();
-      this.registerListeners_(map2);
-    }
-  }
-  /**
-   * @param {import("../Map.js").default} map Map.
-   * @private
-   */
-  registerListeners_(map2) {
-    this.listenerKeys_.push(
-      listen(map2, MapEventType.MOVEEND, this.updateUrl_, this),
-      listen(map2.getLayerGroup(), EventType.CHANGE, this.updateUrl_, this),
-      listen(map2, "change:layergroup", this.handleChangeLayerGroup_, this)
-    );
-    if (!this.replace_) {
-      addEventListener("popstate", this.updateState_);
-    }
-  }
-  /**
-   * @param {import("../Map.js").default} map Map.
-   * @private
-   */
-  unregisterListeners_(map2) {
-    for (let i = 0, ii = this.listenerKeys_.length; i < ii; ++i) {
-      unlistenByKey(this.listenerKeys_[i]);
-    }
-    this.listenerKeys_.length = 0;
-    if (!this.replace_) {
-      removeEventListener("popstate", this.updateState_);
-    }
-    const url = new URL(window.location.href);
-    const params = url.searchParams;
-    this.delete_(params, "x");
-    this.delete_(params, "y");
-    this.delete_(params, "z");
-    this.delete_(params, "r");
-    this.delete_(params, "l");
-    window.history.replaceState(null, "", url);
-  }
-  /**
-   * @private
-   */
-  handleChangeLayerGroup_() {
-    const map2 = this.getMap();
-    if (!map2) {
-      return;
-    }
-    this.unregisterListeners_(map2);
-    this.registerListeners_(map2);
-    this.initial_ = true;
-    this.updateUrl_();
-  }
-  /**
-   * @private
-   */
-  updateState_() {
-    const url = new URL(window.location.href);
-    const params = url.searchParams;
-    for (const key in this.trackedCallbacks_) {
-      const value = params.get(key);
-      if (key in this.trackedCallbacks_ && value !== this.trackedValues_[key]) {
-        this.trackedValues_[key] = value;
-        this.trackedCallbacks_[key](value);
-      }
-    }
-    const map2 = this.getMap();
-    if (!map2) {
-      return;
-    }
-    const view = map2.getView();
-    if (!view) {
-      return;
-    }
-    let updateView = false;
-    const viewProperties = {};
-    const zoom = readNumber(this.get_(params, "z"));
-    if ("z" in this.params_ && differentNumber(zoom, view.getZoom())) {
-      updateView = true;
-      viewProperties.zoom = zoom;
-    }
-    const rotation = readNumber(this.get_(params, "r"));
-    if ("r" in this.params_ && differentNumber(rotation, view.getRotation())) {
-      updateView = true;
-      viewProperties.rotation = rotation;
-    }
-    const center = [
-      readNumber(this.get_(params, "x")),
-      readNumber(this.get_(params, "y"))
-    ];
-    if (("x" in this.params_ || "y" in this.params_) && differentArray(center, view.getCenter())) {
-      updateView = true;
-      viewProperties.center = center;
-    }
-    if (updateView) {
-      if (!this.initial_ && this.animationOptions_) {
-        view.animate(Object.assign(viewProperties, this.animationOptions_));
-      } else {
-        if (viewProperties.center) {
-          view.setCenter(viewProperties.center);
-        }
-        if ("zoom" in viewProperties) {
-          view.setZoom(viewProperties.zoom);
-        }
-        if ("rotation" in viewProperties) {
-          view.setRotation(viewProperties.rotation);
-        }
-      }
-    }
-    const layers = map2.getAllLayers();
-    const layersParam = this.get_(params, "l");
-    if ("l" in this.params_ && layersParam && layersParam.length === layers.length) {
-      for (let i = 0, ii = layers.length; i < ii; ++i) {
-        const value = parseInt(layersParam[i]);
-        if (!isNaN(value)) {
-          const visible = Boolean(value);
-          const layer = layers[i];
-          if (layer.getVisible() !== visible) {
-            layer.setVisible(visible);
-          }
-        }
-      }
-    }
-  }
-  /**
-   * Register a listener for a URL search parameter.  The callback will be called with a new value
-   * when the corresponding search parameter changes due to history events (e.g. browser navigation).
-   *
-   * @param {string} key The URL search parameter.
-   * @param {Callback} callback The function to call when the search parameter changes.
-   * @return {string|null} The initial value of the search parameter (or null if absent from the URL).
-   * @api
-   */
-  track(key, callback) {
-    this.trackedCallbacks_[key] = callback;
-    const url = new URL(window.location.href);
-    const params = url.searchParams;
-    const value = params.get(key);
-    this.trackedValues_[key] = value;
-    return value;
-  }
-  /**
-   * Update the URL with a new search parameter value.  If the value is null, it will be
-   * deleted from the search parameters.
-   *
-   * @param {string} key The URL search parameter.
-   * @param {string|null} value The updated value (or null to remove it from the URL).
-   * @api
-   */
-  update(key, value) {
-    const url = new URL(window.location.href);
-    const params = url.searchParams;
-    if (value === null) {
-      params.delete(key);
-    } else {
-      params.set(key, value);
-    }
-    if (key in this.trackedValues_) {
-      this.trackedValues_[key] = value;
-    }
-    this.updateHistory_(url);
-  }
-  /**
-   * @private
-   */
-  updateUrl_() {
-    const map2 = this.getMap();
-    if (!map2) {
-      return;
-    }
-    const view = map2.getView();
-    if (!view) {
-      return;
-    }
-    const center = view.getCenter();
-    const zoom = view.getZoom();
-    const rotation = view.getRotation();
-    const layers = map2.getAllLayers();
-    const visibilities = new Array(layers.length);
-    for (let i = 0, ii = layers.length; i < ii; ++i) {
-      visibilities[i] = layers[i].getVisible() ? "1" : "0";
-    }
-    const url = new URL(window.location.href);
-    const params = url.searchParams;
-    this.set_(params, "x", writeNumber(center[0]));
-    this.set_(params, "y", writeNumber(center[1]));
-    this.set_(params, "z", writeNumber(zoom));
-    this.set_(params, "r", writeNumber(rotation));
-    this.set_(params, "l", visibilities.join(""));
-    this.updateHistory_(url);
-    this.initial_ = false;
-  }
-  /**
-   * @private
-   * @param {URL} url The URL.
-   */
-  updateHistory_(url) {
-    if (url.href !== window.location.href) {
-      if (this.initial_ || this.replace_) {
-        window.history.replaceState(history.state, "", url);
-      } else {
-        window.history.pushState(null, "", url);
-      }
-    }
   }
 }
 const imgUrl = "/assets/osm_logo--g4zjBAe.png";
@@ -32038,7 +31720,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
   renderWorlds(executorGroup, frameState, declutterable) {
     const extent = frameState.extent;
     const viewState = frameState.viewState;
-    const center = viewState.center;
+    const center2 = viewState.center;
     const resolution = viewState.resolution;
     const projection = viewState.projection;
     const rotation = viewState.rotation;
@@ -32057,7 +31739,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
     let world = multiWorld ? Math.floor((extent[0] - projectionExtent[0]) / worldWidth) : 0;
     do {
       let transform2 = this.getRenderTransform(
-        center,
+        center2,
         resolution,
         0,
         pixelRatio,
@@ -32196,7 +31878,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
     return new Promise((resolve) => {
       if (this.frameState && !this.hitDetectionImageData_ && !this.animatingOrInteracting_) {
         const size = this.frameState.size.slice();
-        const center = this.renderedCenter_;
+        const center2 = this.renderedCenter_;
         const resolution = this.renderedResolution_;
         const rotation = this.renderedRotation_;
         const projection = this.renderedProjection_;
@@ -32207,7 +31889,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
         const height = size[1] * HIT_DETECT_RESOLUTION;
         transforms2.push(
           this.getRenderTransform(
-            center,
+            center2,
             resolution,
             rotation,
             HIT_DETECT_RESOLUTION,
@@ -32228,7 +31910,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
             offsetX = worldWidth * world;
             transforms2.push(
               this.getRenderTransform(
-                center,
+                center2,
                 resolution,
                 rotation,
                 HIT_DETECT_RESOLUTION,
@@ -32246,7 +31928,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
             offsetX = worldWidth * world;
             transforms2.push(
               this.getRenderTransform(
-                center,
+                center2,
                 resolution,
                 rotation,
                 HIT_DETECT_RESOLUTION,
@@ -32382,7 +32064,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
     if (vectorLayerRenderOrder === void 0) {
       vectorLayerRenderOrder = defaultOrder;
     }
-    const center = viewState.center.slice();
+    const center2 = viewState.center.slice();
     const extent = buffer(
       frameStateExtent,
       vectorLayerRenderBuffer * resolution
@@ -32395,7 +32077,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
       const gutter = Math.max(getWidth(extent) / 2, worldWidth);
       extent[0] = projectionExtent[0] - gutter;
       extent[2] = projectionExtent[2] + gutter;
-      wrapX$1(center, projection);
+      wrapX$1(center2, projection);
       const loadExtent = wrapX$2(loadExtents[0], projection);
       if (loadExtent[0] < projectionExtent[0] && loadExtent[2] < projectionExtent[2]) {
         loadExtents.push([
@@ -32418,7 +32100,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
         this.hitDetectionImageData_ = null;
         this.renderedExtent_ = renderedExtent;
       }
-      this.renderedCenter_ = center;
+      this.renderedCenter_ = center2;
       this.replayGroupChanged = false;
       return true;
     }
@@ -32500,7 +32182,7 @@ class CanvasVectorLayerRenderer extends CanvasLayerRenderer {
     this.renderedFrameDeclutter_ = !!frameState.declutter;
     this.renderedExtent_ = renderedExtent;
     this.wrappedRenderedExtent_ = extent;
-    this.renderedCenter_ = center;
+    this.renderedCenter_ = center2;
     this.renderedProjection_ = projection;
     this.renderedPixelRatio_ = pixelRatio;
     this.replayGroup_ = executorGroup;
@@ -34696,6 +34378,8 @@ function requireOlGeocoder() {
 }
 var olGeocoderExports = requireOlGeocoder();
 const Geocoder = /* @__PURE__ */ getDefaultExportFromCjs(olGeocoderExports);
+let zoom = 6;
+let center = fromLonLat([10.33649, 51.006271]);
 const HOSTNAME = "VITE_HOSTNAME";
 const OSML10N_VERSION = "VITE_OSML10N_VERSION";
 const OPENSTREETMAP_CARTO_DE_VERSION = "VITE_OPENSTREETMAP_CARTO_DE_VERSION";
@@ -34708,7 +34392,30 @@ const geolocatelayer = new VectorLayer({
   source
 });
 const tileUrl = folder + "{z}/{x}/{y}.png";
-const link = new Link();
+if (window.location.hash !== "") {
+  const hash2 = window.location.hash.replace("#map=", "");
+  const parts = hash2.split("/");
+  if (parts.length === 3) {
+    zoom = parseFloat(parts[0]);
+    center = fromLonLat([
+      parseFloat(parts[1]),
+      parseFloat(parts[2])
+    ]);
+  }
+}
+const updateLink = function() {
+  if (!shouldUpdate) {
+    shouldUpdate = true;
+    return;
+  }
+  const center2 = toLonLat(view.getCenter());
+  const hash2 = "#map=" + view.getZoom().toFixed(2) + "/" + center2[0].toFixed(2) + "/" + center2[1].toFixed(2);
+  const state = {
+    zoom: view.getZoom(),
+    center: view.getCenter()
+  };
+  window.history.pushState(state, "map", hash2);
+};
 sessionStorage.setItem("tileUrl", tileUrl);
 sessionStorage.setItem("hostname", HOSTNAME);
 sessionStorage.setItem("folder", folder);
@@ -34747,16 +34454,20 @@ document.addEventListener("DOMContentLoaded", function() {
     updateLinks();
   });
   window.history.pushState = /* @__PURE__ */ function(f) {
-    return function pushState() {
+    return function pushState(state) {
       var ret = f.apply(this, arguments);
-      window.dispatchEvent(new Event("popstate"));
+      if (state) {
+        window.dispatchEvent(new PopStateEvent("popstate", { state }));
+      }
       return ret;
     };
   }(window.history.pushState);
   window.history.replaceState = /* @__PURE__ */ function(f) {
-    return function replaceState() {
+    return function replaceState(state) {
       var ret = f.apply(this, arguments);
-      window.dispatchEvent(new Event("popstate"));
+      if (state) {
+        window.dispatchEvent(new PopStateEvent("popstate", { state }));
+      }
       return ret;
     };
   }(window.history.replaceState);
@@ -34775,9 +34486,9 @@ const map = new Map$1({
   layers: [osm, defaultStyle, geolocatelayer],
   target: "map",
   view: new View({
-    center: fromLonLat([10.33649, 51.006271]),
+    center,
     projection: "EPSG:3857",
-    zoom: 6,
+    zoom,
     maxZoom: 20,
     minZoom: 0,
     multiWorld: true,
@@ -34785,6 +34496,17 @@ const map = new Map$1({
   })
 });
 const swipe = document.getElementById("swipe");
+let shouldUpdate = true;
+const view = map.getView();
+map.on("moveend", updateLink);
+window.addEventListener("popstate", function(event) {
+  if (event.state === null) {
+    return;
+  }
+  map.getView().setCenter(event.state.center);
+  map.getView().setZoom(event.state.zoom);
+  shouldUpdate = false;
+});
 defaultStyle.on("prerender", function(event) {
   const ctx = event.context;
   const mapSize = map.getSize();
@@ -34821,7 +34543,6 @@ var contextmenu = new R({
   ]
 });
 map.addControl(contextmenu);
-map.addInteraction(link);
 let currZoom = map.getView().getZoom();
 document.getElementById("zoomlevel").innerHTML = "Zoom: " + currZoom;
 sessionStorage.setItem("zoomlevel", currZoom);

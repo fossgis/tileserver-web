@@ -804,6 +804,10 @@ legend + * {
   -webkit-appearance: textfield;
   outline-offset: -2px;
 }
+[type=search]::-webkit-search-cancel-button {
+  cursor: pointer;
+  filter: grayscale(1);
+}
 /* rtl:raw:
 [type="tel"],
 [type="url"],
@@ -7611,7 +7615,7 @@ div.ol-zoom {
   height: 30px;
 }
 .ol-control button:focus {
-  outline: 3px solid #ff6347; /* Beispiel für besseren Fokus-Status */
+  outline: 3px solid #ff6347;
 }/*!
  * ol-geocoder - v4.3.3
  * A geocoder extension compatible with OpenLayers v6.x to v9.0
