@@ -36,27 +36,28 @@ const geolocatelayer = new VectorLayer({
 const tileUrl = folder + '{z}/{x}/{y}.png';
 
 if (window.location.hash !== '') {
-  const hash = window.location.hash.replace('#map=', '');
-  const parts = hash.split('/');
-  if (parts.length === 3) {
-    zoom = parseFloat(parts[0]);
-    center = fromLonLat([
-      parseFloat(parts[1]),
-      parseFloat(parts[2])
-    ]);
-  }
+    const hash = window.location.hash.replace('#map=', '');
+    const parts = hash.split('/');
+    if (parts.length === 3) {
+        zoom = parseFloat(parts[0]);
+        center = fromLonLat([
+            parseFloat(parts[1]),
+            parseFloat(parts[2])
+        ]);
+    }
 }
 
 const updateLink = function () {
     if (!shouldUpdate) {
-        // do not update the URL when the view was changed in the 'popstate' handler
         shouldUpdate = true;
         return;
     }
 
     const center = toLonLat(view.getCenter());
-    const hash =
-        '#map=' +
+
+    const url = new URL(window.location.href);
+    url.hash =
+        'map=' +
         view.getZoom().toFixed(2) +
         '/' +
         center[0].toFixed(2) +
@@ -66,7 +67,7 @@ const updateLink = function () {
         zoom: view.getZoom(),
         center: view.getCenter(),
     };
-    window.history.pushState(state, 'map', hash);
+    window.history.pushState(state, 'map', url);
 };
 
 sessionStorage.setItem('tileUrl', tileUrl);
