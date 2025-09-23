@@ -22,7 +22,8 @@ const HOSTNAME = import.meta.env.VITE_HOSTNAME || 'tile';
 const OSML10N_VERSION = import.meta.env.VITE_OSML10N_VERSION || '1.0';
 const OPENSTREETMAP_CARTO_DE_VERSION = import.meta.env.VITE_OPENSTREETMAP_CARTO_DE_VERSION || '1.0';
 
-const folder = helper.getGETParameter('folder') !== null && helper.getGETParameter('folder') !== '' ? '/' + helper.getGETParameter('folder') + '/' : '/';
+const param = helper.getGETParameter('folder');
+const folder = !param || param === '/' ? '/' : `/${param}/`;
 
 const osm = new TileLayer({
     source: new OSM(),

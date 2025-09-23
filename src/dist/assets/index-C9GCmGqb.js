@@ -34383,7 +34383,8 @@ let center = fromLonLat([10.33649, 51.006271]);
 const HOSTNAME = "VITE_HOSTNAME";
 const OSML10N_VERSION = "VITE_OSML10N_VERSION";
 const OPENSTREETMAP_CARTO_DE_VERSION = "VITE_OPENSTREETMAP_CARTO_DE_VERSION";
-const folder = getGETParameter("folder") !== null && getGETParameter("folder") !== "" ? "/" + getGETParameter("folder") + "/" : "/";
+const param = getGETParameter("folder");
+const folder = !param || param === "/" ? "/" : `/${param}/`;
 const osm = new TileLayer({
   source: new OSM()
 });
