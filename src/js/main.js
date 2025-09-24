@@ -48,6 +48,14 @@ if (window.location.hash !== '') {
     }
 }
 
+const updateNavLinks = () => {
+    const hash = window.location.hash;
+    document.querySelectorAll("#nav-list a").forEach(a => {
+        a.href = a.href.replace(/#.*$/, ""); // evtl. alten Hash löschen
+        a.href += hash;
+    });
+};
+
 const updateLink = function () {
     if (!shouldUpdate) {
         shouldUpdate = true;
@@ -55,22 +63,18 @@ const updateLink = function () {
     }
 
     const center = toLonLat(view.getCenter());
-
     const hash =
-        'map=' +
+        '#map=' +
         view.getZoom().toFixed(2) +
         '/' +
         center[0].toFixed(5) +
         '/' +
         center[1].toFixed(5);
 
-    window.location.replace('#' + hash);
+    window.location.replace(hash);
+    history.replaceState({ zoom: view.getZoom(), center: view.getCenter() }, 'map');
 
-    const state = {
-        zoom: view.getZoom(),
-        center: view.getCenter(),
-    };
-    history.replaceState(state, 'map');
+    updateNavLinks();
 };
 
 sessionStorage.setItem('tileUrl', tileUrl);

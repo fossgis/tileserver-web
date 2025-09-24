@@ -34404,19 +34404,23 @@ if (window.location.hash !== "") {
     ]);
   }
 }
+const updateNavLinks = () => {
+  const hash2 = window.location.hash;
+  document.querySelectorAll("#nav-list a").forEach((a3) => {
+    a3.href = a3.href.replace(/#.*$/, "");
+    a3.href += hash2;
+  });
+};
 const updateLink = function() {
   if (!shouldUpdate) {
     shouldUpdate = true;
     return;
   }
   const center2 = toLonLat(view.getCenter());
-  const hash2 = "map=" + view.getZoom().toFixed(2) + "/" + center2[0].toFixed(5) + "/" + center2[1].toFixed(5);
-  window.location.replace("#" + hash2);
-  const state = {
-    zoom: view.getZoom(),
-    center: view.getCenter()
-  };
-  history.replaceState(state, "map");
+  const hash2 = "#map=" + view.getZoom().toFixed(2) + "/" + center2[0].toFixed(5) + "/" + center2[1].toFixed(5);
+  window.location.replace(hash2);
+  history.replaceState({ zoom: view.getZoom(), center: view.getCenter() }, "map");
+  updateNavLinks();
 };
 sessionStorage.setItem("tileUrl", tileUrl);
 sessionStorage.setItem("hostname", HOSTNAME);
