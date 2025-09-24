@@ -34430,6 +34430,7 @@ document.getElementById("header-h1").innerHTML = "Server: " + HOSTNAME + ", Fold
 document.getElementById("main-carto").innerHTML = OPENSTREETMAP_CARTO_DE_VERSION;
 document.getElementById("main-local").innerHTML = OSML10N_VERSION;
 document.addEventListener("DOMContentLoaded", async () => {
+  updateNavLinks();
   try {
     const response = await fetch("/textimport/importdate.txt");
     const text = await response.text();

@@ -51,7 +51,7 @@ if (window.location.hash !== '') {
 const updateNavLinks = () => {
     const hash = window.location.hash;
     document.querySelectorAll("#nav-list a").forEach(a => {
-        a.href = a.href.replace(/#.*$/, ""); // evtl. alten Hash löschen
+        a.href = a.href.replace(/#.*$/, "");
         a.href += hash;
     });
 };
@@ -89,6 +89,7 @@ document.getElementById('main-local').innerHTML = OSML10N_VERSION;
 
 
 document.addEventListener('DOMContentLoaded', async () => {
+    updateNavLinks();
     try {
         const response = await fetch('/textimport/importdate.txt');
         const text = await response.text();
