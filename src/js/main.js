@@ -56,19 +56,21 @@ const updateLink = function () {
 
     const center = toLonLat(view.getCenter());
 
-    const url = new URL(window.location.href);
-    url.hash =
+    const hash =
         'map=' +
         view.getZoom().toFixed(2) +
         '/' +
-        center[0].toFixed(2) +
+        center[0].toFixed(5) +
         '/' +
-        center[1].toFixed(2);
+        center[1].toFixed(5);
+
+    window.location.replace('#' + hash);
+
     const state = {
         zoom: view.getZoom(),
         center: view.getCenter(),
     };
-    window.history.pushState(state, 'map', url);
+    history.replaceState(state, 'map');
 };
 
 sessionStorage.setItem('tileUrl', tileUrl);

@@ -34410,13 +34410,13 @@ const updateLink = function() {
     return;
   }
   const center2 = toLonLat(view.getCenter());
-  const url = new URL(window.location.href);
-  url.hash = "map=" + view.getZoom().toFixed(2) + "/" + center2[0].toFixed(2) + "/" + center2[1].toFixed(2);
+  const hash2 = "map=" + view.getZoom().toFixed(2) + "/" + center2[0].toFixed(5) + "/" + center2[1].toFixed(5);
+  window.location.replace("#" + hash2);
   const state = {
     zoom: view.getZoom(),
     center: view.getCenter()
   };
-  window.history.pushState(state, "map", url);
+  history.replaceState(state, "map");
 };
 sessionStorage.setItem("tileUrl", tileUrl);
 sessionStorage.setItem("hostname", HOSTNAME);
