@@ -16,13 +16,13 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "sass": "1.92.1",
-    "vite": "^7.1.5"
+    "sass": "1.94.2",
+    "vite": "^7.2.6"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.8",
-    "ol": "10.6.1",
+    "ol": "10.7.0",
     "ol-contextmenu": "^5.5.0",
     "ol-geocoder": "^4.3.3",
     "vite-plugin-favicons-inject": "^2.2.0"
