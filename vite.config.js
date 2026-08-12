@@ -15,9 +15,7 @@ export default {
     port: 8080,
     hot: true
   },
-  plugins: [
-    process.env.NODE_ENV == "production" ? vitePluginFaviconsInject(path.resolve(__dirname, 'src/images/favicon.svg')) : false,
-  ],
+  plugins: [],
   build: {
     minify: false,
   }
