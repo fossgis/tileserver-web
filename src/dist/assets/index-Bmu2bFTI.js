@@ -38163,7 +38163,7 @@ sessionStorage.setItem("tileUrl", tileUrl);
 sessionStorage.setItem("hostname", HOSTNAME);
 sessionStorage.setItem("folder", folder);
 document.getElementById("logo").src = osm_logo_default;
-document.getElementById("header-h1").innerHTML = "Server: VITE_HOSTNAME, Folder: " + folder;
+document.getElementById("header-h1").innerHTML = "Server: " + HOSTNAME + ", Folder: " + folder;
 document.getElementById("main-carto").innerHTML = OPENSTREETMAP_CARTO_DE_VERSION;
 document.getElementById("main-local").innerHTML = OSML10N_VERSION;
 document.addEventListener("DOMContentLoaded", async () => {

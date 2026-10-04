@@ -1,4 +1,5 @@
 @charset "UTF-8";
+
 :root,
 :host {
   --ol-background-color: white;
@@ -353,6 +354,7 @@
 .ol-overviewmap .ol-viewport:hover {
   cursor: pointer;
 }
+
 :root,
 [data-bs-theme=light] {
   --bs-blue: #0d6efd;
