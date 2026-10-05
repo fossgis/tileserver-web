@@ -27,26 +27,6 @@ export function open_tile_cb(obj) {
     document.getElementById('modal-body-id-image').innerHTML = '<img src="' + image + '">';
     do_fetch(infotext);
 
-    let btn_dirty_status = document.createElement("button");
-    btn_dirty_status.classList.add("btn-primary");
-    btn_dirty_status.classList.add("btn");
-    btn_dirty_status.innerHTML = "Kachel aktualisieren";
-    btn_dirty_status.addEventListener("click", function () {
-        if (btn_dirty_status.innerHTML == "Kachel aktualisieren") {
-            btn_dirty_status.innerHTML = "Kachelinfo anzeigen"
-            let dirty = gent_tile_url('dirty', sessionStorage.getItem('zoomlevel'), obj.coordinate);
-            do_fetch(dirty);
-        } else {
-            btn_dirty_status.innerHTML = "Kachel aktualisieren"
-            do_fetch(infotext);
-        }
-    });
-    if (document.getElementById('modal-footer').innerHTML.indexOf("Kachel") != -1) {
-        // element is there 
-    } else {
-        document.getElementById('modal-footer').appendChild(btn_dirty_status);
-    }
-
     bootstrapModal.show();
 };
 
